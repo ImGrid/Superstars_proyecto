@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.turbo/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+
+# Documentacion interna (no es parte del codigo)
+docs/
+excel/
+regla.txt
+respuestas.txt
+CLAUDE.md
+.claude/

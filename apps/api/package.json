@@ -1,0 +1,49 @@
+{
+  "name": "api",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build": "nest build",
+    "dev": "nest start --watch",
+    "start": "nest start",
+    "start:prod": "node dist/main",
+    "lint": "eslint \"{src,test}/**/*.ts\" --fix"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11",
+    "@nestjs/config": "^4",
+    "@nestjs/core": "^11",
+    "@nestjs/jwt": "^11",
+    "@nestjs/passport": "^11",
+    "@nestjs/platform-express": "^11",
+    "@nestjs/throttler": "^6",
+    "@superstars/db": "workspace:*",
+    "@superstars/shared": "workspace:*",
+    "argon2": "^0.41",
+    "cookie-parser": "^1",
+    "drizzle-orm": "^0.45.1",
+    "helmet": "^8",
+    "nestjs-zod": "^5.1.1",
+    "passport": "^0.7",
+    "passport-jwt": "^4",
+    "pg": "^8.18.0",
+    "reflect-metadata": "^0.2",
+    "rxjs": "^7",
+    "zod": "^3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9",
+    "@nestjs/cli": "^11",
+    "@nestjs/schematics": "^11",
+    "@types/cookie-parser": "^1",
+    "@types/express": "^5",
+    "@types/node": "^22",
+    "@types/passport-jwt": "^4",
+    "@types/pg": "^8.16.0",
+    "eslint": "^9",
+    "ts-loader": "^9",
+    "tsconfig-paths": "^4",
+    "typescript": "^5",
+    "typescript-eslint": "^8"
+  }
+}
