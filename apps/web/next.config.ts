@@ -1,14 +1,19 @@
 import type { NextConfig } from "next";
 
+// Extraer host y port de la URL del API
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
+const apiOrigin = apiUrl.replace(/\/api\/?$/, "");
+const apiUrlObj = new URL(apiOrigin);
+
 const nextConfig: NextConfig = {
   transpilePackages: ["@superstars/shared"],
 
   images: {
     remotePatterns: [
       {
-        protocol: "http",
-        hostname: "localhost",
-        port: "3001",
+        protocol: apiUrlObj.protocol.replace(":", "") as "http" | "https",
+        hostname: apiUrlObj.hostname,
+        port: apiUrlObj.port,
         pathname: "/uploads/**",
       },
     ],
@@ -41,9 +46,9 @@ const nextConfig: NextConfig = {
               "default-src 'self'",
               "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
               "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: blob: http://localhost:3001",
+              `img-src 'self' data: blob: ${apiOrigin}`,
               "font-src 'self'",
-              "connect-src 'self' http://localhost:3001",
+              `connect-src 'self' ${apiOrigin}`,
               "frame-ancestors 'none'",
             ].join("; "),
           },
