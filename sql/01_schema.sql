@@ -106,19 +106,51 @@ CREATE TRIGGER trg_usuario_updated_at
     BEFORE UPDATE ON usuario
     FOR EACH ROW EXECUTE FUNCTION trigger_set_updated_at();
 
--- 2. EMPRESA (11 cols)
+-- 2. EMPRESA (30 cols)
 CREATE TABLE empresa (
-    id              INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    usuario_id      INT         NOT NULL,
-    razon_social    TEXT        NOT NULL,
-    nit             TEXT        NOT NULL,
-    registro_seprec TEXT,
-    tipo_empresa    TEXT,
-    departamento    TEXT,
-    anio_fundacion  INT,
-    rubro           TEXT,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    id                          INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    usuario_id                  INT         NOT NULL,
+
+    -- Datos legales (Q7-Q8)
+    razon_social                TEXT        NOT NULL,
+    nit                         TEXT        NOT NULL,
+    registro_seprec             TEXT,
+    tipo_empresa                TEXT,
+
+    -- Datos generales (Q9-Q16)
+    numero_socios               TEXT,
+    num_empleados_mujeres       INT,
+    num_empleados_hombres       INT,
+    rubro                       TEXT,
+    anio_fundacion              INT,
+    departamento                TEXT,
+    ciudad                      TEXT,
+    direccion                   TEXT,
+    telefono                    TEXT,
+    descripcion                 TEXT,
+
+    -- Perfil comercial (Q17-Q21)
+    etapa                       TEXT,
+    tipo_relacion_comercial     TEXT[],
+    ubicacion_clientes          TEXT[],
+    departamentos_clientes      TEXT[],
+    productos_servicios         TEXT,
+
+    -- Registros de la empresa (Q24-Q25)
+    tipo_registros              TEXT,
+    metodo_registros            TEXT,
+
+    -- Presencia digital (Q29)
+    redes_sociales              JSONB,
+
+    -- Persona de contacto (Q2-Q5)
+    contacto_cargo              TEXT,
+    contacto_telefono           TEXT,
+    contacto_genero             TEXT,
+    contacto_fecha_nacimiento   DATE,
+
+    created_at                  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at                  TIMESTAMPTZ NOT NULL DEFAULT now(),
 
     CONSTRAINT uq_empresa_usuario  UNIQUE (usuario_id),
     CONSTRAINT uq_empresa_nit      UNIQUE (nit),
@@ -385,15 +417,20 @@ CREATE TABLE notificacion_email (
     CONSTRAINT chk_notificacion_intentos    CHECK (intentos >= 0)
 );
 
--- 17. SESION_REFRESH_TOKEN (5 cols)
+-- 17. SESION_REFRESH_TOKEN (8 cols)
 CREATE TABLE sesion_refresh_token (
     id          INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     usuario_id  INT         NOT NULL,
     token_hash  TEXT        NOT NULL,
     expira_en   TIMESTAMPTZ NOT NULL,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    family_id   TEXT        NOT NULL,
+    revocado_en TIMESTAMPTZ,
+    replaced_by INT,
 
-    CONSTRAINT fk_sesion_usuario FOREIGN KEY (usuario_id) REFERENCES usuario(id) ON DELETE CASCADE
+    CONSTRAINT uq_sesion_token_hash  UNIQUE (token_hash),
+    CONSTRAINT fk_sesion_usuario     FOREIGN KEY (usuario_id)  REFERENCES usuario(id)              ON DELETE CASCADE,
+    CONSTRAINT fk_sesion_replaced_by FOREIGN KEY (replaced_by) REFERENCES sesion_refresh_token(id)  ON DELETE SET NULL
 );
 
 -- ============================================================
@@ -437,5 +474,11 @@ CREATE INDEX idx_notificacion_destinatario_id ON notificacion_email(destinatario
 
 -- sesion_refresh_token: buscar sesiones de un usuario
 CREATE INDEX idx_sesion_usuario_id ON sesion_refresh_token(usuario_id);
+
+-- sesion_refresh_token: buscar tokens por familia
+CREATE INDEX idx_sesion_family_id ON sesion_refresh_token(family_id);
+
+-- sesion_refresh_token: buscar tokens activos por expiracion (cleanup cron)
+CREATE INDEX idx_sesion_expira_en ON sesion_refresh_token(expira_en) WHERE revocado_en IS NULL;
 
 COMMIT;

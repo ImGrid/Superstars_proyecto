@@ -13,6 +13,7 @@ export const concurso = pgTable("concurso", {
 	fechaInicioPostulacion: date("fecha_inicio_postulacion").notNull(),
 	fechaCierrePostulacion: date("fecha_cierre_postulacion").notNull(),
 	fechaAnuncioGanadores: date("fecha_anuncio_ganadores"),
+	fechaCierreEfectiva: date("fecha_cierre_efectiva"),
 	montoPremio: numeric("monto_premio", { precision: 12, scale: 2 }).notNull(),
 	numeroGanadores: integer("numero_ganadores").default(3).notNull(),
 	topNSistema: integer("top_n_sistema").default(5).notNull(),
@@ -32,6 +33,7 @@ export const concurso = pgTable("concurso", {
 	check("chk_concurso_monto", sql`monto_premio > (0)::numeric`),
 	check("chk_concurso_ganadores", sql`numero_ganadores > 0`),
 	check("chk_concurso_top_n", sql`top_n_sistema > 0`),
+	check("chk_concurso_cierre_efectiva", sql`fecha_cierre_efectiva IS NULL OR fecha_cierre_efectiva >= fecha_cierre_postulacion`),
 ]);
 
 export const responsableConcurso = pgTable("responsable_concurso", {
@@ -80,7 +82,7 @@ export const formularioDinamico = pgTable("formulario_dinamico", {
 	concursoId: integer("concurso_id").notNull(),
 	nombre: text().notNull(),
 	descripcion: text(),
-	schemaDefinition: jsonb("schema_definition").notNull(),
+	schemaDefinition: jsonb("schema_definition").$type<{ secciones: Array<Record<string, unknown>> }>().notNull(),
 	version: integer().default(1).notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),

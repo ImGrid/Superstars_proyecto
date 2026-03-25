@@ -3,7 +3,7 @@ import { usuario, sesionRefreshToken } from "./schema/auth";
 import { concurso, responsableConcurso, documentoConcurso, formularioDinamico } from "./schema/concurso";
 import { empresa, postulacion, archivoPostulacion } from "./schema/empresa";
 import { rubrica, criterio, subCriterio, nivelEvaluacion } from "./schema/rubrica";
-import { asignacionEvaluador, calificacion, calificacionDetalle } from "./schema/calificacion";
+import { evaluadorConcurso, asignacionEvaluador, calificacion, calificacionDetalle } from "./schema/calificacion";
 import { notificacionEmail } from "./schema/notificacion";
 
 export const empresaRelations = relations(empresa, ({one, many}) => ({
@@ -18,6 +18,12 @@ export const usuarioRelations = relations(usuario, ({many}) => ({
 	empresas: many(empresa),
 	concursos: many(concurso),
 	responsableConcursos: many(responsableConcurso),
+	evaluadorConcursos_evaluadorId: many(evaluadorConcurso, {
+		relationName: "evaluadorConcurso_evaluadorId_usuario_id"
+	}),
+	evaluadorConcursos_asignadoPor: many(evaluadorConcurso, {
+		relationName: "evaluadorConcurso_asignadoPor_usuario_id"
+	}),
 	asignacionEvaluadors_evaluadorId: many(asignacionEvaluador, {
 		relationName: "asignacionEvaluador_evaluadorId_usuario_id"
 	}),
@@ -40,6 +46,7 @@ export const concursoRelations = relations(concurso, ({one, many}) => ({
 		references: [usuario.id]
 	}),
 	responsableConcursos: many(responsableConcurso),
+	evaluadorConcursos: many(evaluadorConcurso),
 	documentoConcursos: many(documentoConcurso),
 	formularioDinamicos: many(formularioDinamico),
 	postulacions: many(postulacion),
@@ -55,6 +62,23 @@ export const responsableConcursoRelations = relations(responsableConcurso, ({one
 	usuario: one(usuario, {
 		fields: [responsableConcurso.usuarioId],
 		references: [usuario.id]
+	}),
+}));
+
+export const evaluadorConcursoRelations = relations(evaluadorConcurso, ({one}) => ({
+	concurso: one(concurso, {
+		fields: [evaluadorConcurso.concursoId],
+		references: [concurso.id]
+	}),
+	usuario_evaluadorId: one(usuario, {
+		fields: [evaluadorConcurso.evaluadorId],
+		references: [usuario.id],
+		relationName: "evaluadorConcurso_evaluadorId_usuario_id"
+	}),
+	usuario_asignadoPor: one(usuario, {
+		fields: [evaluadorConcurso.asignadoPor],
+		references: [usuario.id],
+		relationName: "evaluadorConcurso_asignadoPor_usuario_id"
 	}),
 }));
 

@@ -23,11 +23,21 @@ export const sesionRefreshToken = pgTable("sesion_refresh_token", {
 	tokenHash: text("token_hash").notNull(),
 	expiraEn: timestamp("expira_en", { withTimezone: true, mode: 'string' }).notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	familyId: text("family_id").notNull(),
+	revocadoEn: timestamp("revocado_en", { withTimezone: true, mode: 'string' }),
+	replacedBy: integer("replaced_by"),
 }, (table) => [
+	unique("uq_sesion_token_hash").on(table.tokenHash),
 	index("idx_sesion_usuario_id").using("btree", table.usuarioId.asc().nullsLast().op("int4_ops")),
+	index("idx_sesion_family_id").using("btree", table.familyId),
 	foreignKey({
 			columns: [table.usuarioId],
 			foreignColumns: [usuario.id],
 			name: "fk_sesion_usuario"
 		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.replacedBy],
+			foreignColumns: [table.id],
+			name: "fk_sesion_replaced_by"
+		}).onDelete("set null"),
 ]);

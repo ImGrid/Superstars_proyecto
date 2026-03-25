@@ -1,12 +1,42 @@
-// Bloque Calificacion: asignacion_evaluador, calificacion, calificacion_detalle
+// Bloque Calificacion: evaluador_concurso, asignacion_evaluador, calificacion, calificacion_detalle
 import { pgTable, pgEnum, unique, integer, text, timestamp, foreignKey, check, numeric, index } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 import { usuario } from "./auth"
+import { concurso } from "./concurso"
 import { postulacion } from "./empresa"
 import { subCriterio } from "./rubrica"
 
 export const estadoCalificacion = pgEnum("estado_calificacion", ['en_progreso', 'completado', 'aprobado', 'devuelto'])
 
+// evaluadores asignados a un concurso (no a postulaciones individuales)
+export const evaluadorConcurso = pgTable("evaluador_concurso", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity({ name: "evaluador_concurso_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
+	concursoId: integer("concurso_id").notNull(),
+	evaluadorId: integer("evaluador_id").notNull(),
+	asignadoPor: integer("asignado_por").notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("idx_evaluador_concurso_concurso_id").using("btree", table.concursoId.asc().nullsLast().op("int4_ops")),
+	index("idx_evaluador_concurso_evaluador_id").using("btree", table.evaluadorId.asc().nullsLast().op("int4_ops")),
+	foreignKey({
+			columns: [table.concursoId],
+			foreignColumns: [concurso.id],
+			name: "fk_evaluador_concurso_concurso"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.evaluadorId],
+			foreignColumns: [usuario.id],
+			name: "fk_evaluador_concurso_evaluador"
+		}).onDelete("restrict"),
+	foreignKey({
+			columns: [table.asignadoPor],
+			foreignColumns: [usuario.id],
+			name: "fk_evaluador_concurso_asignado_por"
+		}).onDelete("restrict"),
+	unique("uq_evaluador_concurso").on(table.concursoId, table.evaluadorId),
+]);
+
+// asignacion de evaluadores a postulaciones individuales (nivel 2)
 export const asignacionEvaluador = pgTable("asignacion_evaluador", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity({ name: "asignacion_evaluador_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
 	postulacionId: integer("postulacion_id").notNull(),
@@ -14,6 +44,7 @@ export const asignacionEvaluador = pgTable("asignacion_evaluador", {
 	asignadoPor: integer("asignado_por").notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
+	index("idx_asignacion_postulacion_id").using("btree", table.postulacionId.asc().nullsLast().op("int4_ops")),
 	index("idx_asignacion_evaluador_id").using("btree", table.evaluadorId.asc().nullsLast().op("int4_ops")),
 	foreignKey({
 			columns: [table.postulacionId],

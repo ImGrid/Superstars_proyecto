@@ -6,10 +6,23 @@ dist/
 .env.*
 !.env.example
 
+# Archivos subidos (storage local)
+uploads/
+
 # Documentacion interna (no es parte del codigo)
 docs/
 excel/
 regla.txt
 respuestas.txt
+credenciales.txt
 CLAUDE.md
 .claude/
+
+# Archivos temporales de interaccion/debug
+FAQ/
+images/
+error.txt
+respuesta.txt
+server.log
+test_upload.pdf
+cookies.txt

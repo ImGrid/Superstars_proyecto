@@ -7,19 +7,30 @@ export const loginSchema = z.object({
   password: z.string().min(8),
 });
 
-// Registro de usuario
+// Auto-registro de proponente (rol se asigna en el backend)
 export const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
   nombre: z.string().min(1),
-  rol: z.nativeEnum(RolUsuario),
-});
-
-// Refresh token
-export const refreshTokenSchema = z.object({
-  refreshToken: z.string().min(1),
 });
 
 export type LoginDto = z.infer<typeof loginSchema>;
 export type RegisterDto = z.infer<typeof registerSchema>;
-export type RefreshTokenDto = z.infer<typeof refreshTokenSchema>;
+
+// POST /auth/register
+export interface RegisterResponse {
+  id: number;
+  email: string;
+  nombre: string;
+  rol: RolUsuario;
+}
+
+// POST /auth/login, POST /auth/refresh
+export interface LoginResponse {
+  user: {
+    id: number;
+    email: string;
+    nombre: string;
+    rol: RolUsuario;
+  };
+}

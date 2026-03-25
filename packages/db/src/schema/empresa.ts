@@ -1,5 +1,5 @@
 // Bloque Empresas: empresa, postulacion, archivo_postulacion
-import { pgTable, pgEnum, unique, integer, text, timestamp, foreignKey, check, numeric, index, bigint, jsonb } from "drizzle-orm/pg-core"
+import { pgTable, pgEnum, unique, integer, text, timestamp, foreignKey, check, numeric, index, bigint, jsonb, date } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 import { usuario } from "./auth"
 import { concurso } from "./concurso"
@@ -9,13 +9,31 @@ export const estadoPostulacion = pgEnum("estado_postulacion", ['borrador', 'envi
 export const empresa = pgTable("empresa", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity({ name: "empresa_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
 	usuarioId: integer("usuario_id").notNull(),
+
+	// Datos legales (Q7-Q8)
 	razonSocial: text("razon_social").notNull(),
 	nit: text().notNull(),
 	registroSeprec: text("registro_seprec"),
 	tipoEmpresa: text("tipo_empresa"),
-	departamento: text(),
-	anioFundacion: integer("anio_fundacion"),
+
+	// Datos generales (Q9-Q16)
+	numeroSocios: text("numero_socios"),
+	numEmpleadosMujeres: integer("num_empleados_mujeres"),
+	numEmpleadosHombres: integer("num_empleados_hombres"),
 	rubro: text(),
+	anioFundacion: integer("anio_fundacion"),
+	departamento: text(),
+	ciudad: text(),
+	direccion: text(),
+	telefono: text(),
+	descripcion: text(),
+
+	// Persona de contacto (Q2-Q5)
+	contactoCargo: text("contacto_cargo"),
+	contactoTelefono: text("contacto_telefono"),
+	contactoGenero: text("contacto_genero"),
+	contactoFechaNacimiento: date("contacto_fecha_nacimiento", { mode: 'string' }),
+
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
@@ -33,7 +51,7 @@ export const postulacion = pgTable("postulacion", {
 	concursoId: integer("concurso_id").notNull(),
 	empresaId: integer("empresa_id").notNull(),
 	estado: estadoPostulacion().default('borrador').notNull(),
-	responseData: jsonb("response_data").default({}).notNull(),
+	responseData: jsonb("response_data").$type<Record<string, unknown>>().default({}).notNull(),
 	schemaVersion: integer("schema_version").default(1).notNull(),
 	porcentajeCompletado: numeric("porcentaje_completado", { precision: 5, scale: 2 }).default('0').notNull(),
 	fechaEnvio: timestamp("fecha_envio", { withTimezone: true, mode: 'string' }),

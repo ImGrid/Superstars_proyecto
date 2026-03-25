@@ -4,8 +4,9 @@ import {
 	concurso, responsableConcurso, documentoConcurso, formularioDinamico,
 	empresa, postulacion, archivoPostulacion,
 	rubrica, criterio, subCriterio, nivelEvaluacion,
-	asignacionEvaluador, calificacion, calificacionDetalle,
+	evaluadorConcurso, asignacionEvaluador, calificacion, calificacionDetalle,
 	notificacionEmail,
+	preguntaFrecuente,
 } from "./schema";
 
 // Tipos Select (lectura)
@@ -22,10 +23,12 @@ export type Rubrica = InferSelectModel<typeof rubrica>;
 export type Criterio = InferSelectModel<typeof criterio>;
 export type SubCriterio = InferSelectModel<typeof subCriterio>;
 export type NivelEvaluacion = InferSelectModel<typeof nivelEvaluacion>;
+export type EvaluadorConcurso = InferSelectModel<typeof evaluadorConcurso>;
 export type AsignacionEvaluador = InferSelectModel<typeof asignacionEvaluador>;
 export type Calificacion = InferSelectModel<typeof calificacion>;
 export type CalificacionDetalle = InferSelectModel<typeof calificacionDetalle>;
 export type NotificacionEmail = InferSelectModel<typeof notificacionEmail>;
+export type PreguntaFrecuente = InferSelectModel<typeof preguntaFrecuente>;
 
 // Tipos Insert (escritura)
 export type NewUsuario = InferInsertModel<typeof usuario>;
@@ -41,7 +44,9 @@ export type NewRubrica = InferInsertModel<typeof rubrica>;
 export type NewCriterio = InferInsertModel<typeof criterio>;
 export type NewSubCriterio = InferInsertModel<typeof subCriterio>;
 export type NewNivelEvaluacion = InferInsertModel<typeof nivelEvaluacion>;
+export type NewEvaluadorConcurso = InferInsertModel<typeof evaluadorConcurso>;
 export type NewAsignacionEvaluador = InferInsertModel<typeof asignacionEvaluador>;
 export type NewCalificacion = InferInsertModel<typeof calificacion>;
 export type NewCalificacionDetalle = InferInsertModel<typeof calificacionDetalle>;
 export type NewNotificacionEmail = InferInsertModel<typeof notificacionEmail>;
+export type NewPreguntaFrecuente = InferInsertModel<typeof preguntaFrecuente>;

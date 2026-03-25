@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "dev:api": "turbo run dev --filter=api",
+    "dev:web": "turbo run dev --filter=web",
     "build": "turbo run build",
     "lint": "turbo run lint"
   },
@@ -14,7 +15,8 @@
     "onlyBuiltDependencies": [
       "argon2",
       "esbuild",
-      "@nestjs/core"
+      "@nestjs/core",
+      "sharp"
     ]
   }
 }

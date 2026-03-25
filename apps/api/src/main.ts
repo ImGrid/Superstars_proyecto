@@ -29,7 +29,7 @@ async function bootstrap() {
       .split(',')
       .map((o) => o.trim()),
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     maxAge: 86400,
   });
 
