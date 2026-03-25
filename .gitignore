@@ -19,7 +19,7 @@ CLAUDE.md
 .claude/
 
 # Archivos temporales de interaccion/debug
-FAQ/
+/FAQ/
 images/
 error.txt
 respuesta.txt
