@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { eq, and, or, ilike, count, desc, sql } from 'drizzle-orm';
+import { eq, ne, and, or, ilike, count, desc, sql } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/drizzle.provider';
 import type { DrizzleDB } from '../../database/drizzle.provider';
 import {
@@ -52,6 +52,33 @@ export class ConcursoRepository {
     }
 
     const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+    const [data, totalResult] = await Promise.all([
+      this.db.select().from(concurso).where(where)
+        .orderBy(desc(concurso.createdAt))
+        .limit(limit).offset(offset),
+      this.db.select({ count: count() }).from(concurso).where(where),
+    ]);
+
+    return { data, total: Number(totalResult[0].count) };
+  }
+
+  // Listar concursos excluyendo un estado (para proponente: excluir borrador)
+  async findAllExcludeEstado(params: FindAllConcursosParams, excludeEstado: EstadoConcurso) {
+    const { page, limit, search } = params;
+    const offset = (page - 1) * limit;
+
+    const conditions = [ne(concurso.estado, excludeEstado as EstadoConcurso)];
+    if (search) {
+      conditions.push(
+        or(
+          ilike(concurso.nombre, `%${search}%`),
+          ilike(concurso.descripcion, `%${search}%`),
+        )!,
+      );
+    }
+
+    const where = and(...conditions);
 
     const [data, totalResult] = await Promise.all([
       this.db.select().from(concurso).where(where)

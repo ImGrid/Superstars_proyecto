@@ -59,8 +59,8 @@ export class ConcursoService {
     const c = await this.concursoRepo.findById(id);
     if (!c) throw new NotFoundException('Concurso no encontrado');
 
-    // Proponente solo puede ver concursos publicados
-    if (user?.rol === RolUsuario.PROPONENTE && c.estado !== EstadoConcurso.PUBLICADO) {
+    // Proponente no puede ver concursos en borrador
+    if (user?.rol === RolUsuario.PROPONENTE && c.estado === EstadoConcurso.BORRADOR) {
       throw new NotFoundException('Concurso no encontrado');
     }
 
@@ -73,11 +73,8 @@ export class ConcursoService {
     let result: { data: unknown[]; total: number };
 
     if (user.rol === RolUsuario.PROPONENTE) {
-      // Proponente solo ve concursos publicados
-      result = await this.concursoRepo.findAll({
-        ...query,
-        estado: EstadoConcurso.PUBLICADO,
-      });
+      // Proponente ve todos los concursos excepto borradores
+      result = await this.concursoRepo.findAllExcludeEstado(query, EstadoConcurso.BORRADOR);
     } else if (user.rol === RolUsuario.ADMINISTRADOR) {
       result = await this.concursoRepo.findAll(query);
     } else {
