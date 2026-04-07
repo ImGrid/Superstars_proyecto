@@ -77,12 +77,19 @@ export function PublicacionForm({ initialData }: PublicacionFormProps) {
 
   const form = useForm<PublicacionFormValues>({
     resolver: zodResolver(publicacionFormSchema),
-    defaultValues: {
-      titulo: "",
-      contenido: "",
-      categoriaId: null,
-      destacado: false,
-    },
+    defaultValues: initialData
+      ? {
+          titulo: initialData.titulo,
+          contenido: initialData.contenido,
+          categoriaId: initialData.categoriaId,
+          destacado: initialData.destacado,
+        }
+      : {
+          titulo: "",
+          contenido: "",
+          categoriaId: null,
+          destacado: false,
+        },
   });
 
   // estado para imagen al crear
@@ -144,17 +151,6 @@ export function PublicacionForm({ initialData }: PublicacionFormProps) {
     };
   }, [previewUrl]);
 
-  // pre-llenar cuando hay datos existentes
-  useEffect(() => {
-    if (initialData) {
-      form.reset({
-        titulo: initialData.titulo,
-        contenido: initialData.contenido,
-        categoriaId: initialData.categoriaId,
-        destacado: initialData.destacado,
-      });
-    }
-  }, [initialData, form]);
 
   // mutacion crear
   const createMutation = useMutation({
@@ -196,7 +192,7 @@ export function PublicacionForm({ initialData }: PublicacionFormProps) {
     const dto = {
       titulo: values.titulo,
       contenido: values.contenido,
-      categoriaId: values.categoriaId ?? undefined,
+      categoriaId: values.categoriaId,
       destacado: values.destacado,
     };
 
