@@ -41,9 +41,12 @@ const TODOS_DEPTOS = 9;
 function buildTimelinePhases(concurso: {
   fechaInicioPostulacion: string;
   fechaCierrePostulacion: string;
+  fechaCierreEfectiva: string | null;
   fechaAnuncioGanadores: string | null;
 }) {
   const now = new Date();
+  // fecha real de cierre: la efectiva (extension) o la original
+  const fechaCierreReal = concurso.fechaCierreEfectiva ?? concurso.fechaCierrePostulacion;
 
   const phases = [
     {
@@ -52,13 +55,13 @@ function buildTimelinePhases(concurso: {
       icon: FileSearch,
     },
     {
-      label: "Cierre postulaciones",
-      date: concurso.fechaCierrePostulacion,
+      label: concurso.fechaCierreEfectiva ? "Cierre postulaciones (extendido)" : "Cierre postulaciones",
+      date: fechaCierreReal,
       icon: Clock,
     },
     {
       label: "Evaluacion",
-      date: concurso.fechaCierrePostulacion,
+      date: fechaCierreReal,
       icon: CheckCircle2,
     },
     {
@@ -131,7 +134,10 @@ export default function ConcursoDetallePage({
   }
 
   const deptos = concurso.departamentos ?? [];
-  const deadline = getDiasRestantes(concurso.fechaCierrePostulacion);
+  // fecha real de cierre: la efectiva (extension) o la original
+  const fechaCierreReal = concurso.fechaCierreEfectiva ?? concurso.fechaCierrePostulacion;
+  const plazoExtendido = !!concurso.fechaCierreEfectiva;
+  const deadline = getDiasRestantes(fechaCierreReal);
   const phases = buildTimelinePhases(concurso);
 
   // texto de deadline para sidebar
@@ -146,7 +152,7 @@ export default function ConcursoDetallePage({
     if (deadline <= 30)
       return { text: `Quedan ${deadline} dias`, className: "text-primary-700 font-semibold" };
     return {
-      text: `Cierra: ${formatShortMonth(concurso.fechaCierrePostulacion)}`,
+      text: `Cierra: ${formatShortMonth(fechaCierreReal)}`,
       className: "text-secondary-700",
     };
   })();
@@ -160,6 +166,7 @@ export default function ConcursoDetallePage({
             concurso={concurso}
             deptos={deptos}
             deadlineText={deadlineText}
+            plazoExtendido={plazoExtendido}
           />
         </div>
 
@@ -267,6 +274,7 @@ export default function ConcursoDetallePage({
                 concurso={concurso}
                 deptos={deptos}
                 deadlineText={deadlineText}
+                plazoExtendido={plazoExtendido}
               />
             </div>
           </div>
@@ -281,10 +289,12 @@ function SidebarCard({
   concurso,
   deptos,
   deadlineText,
+  plazoExtendido,
 }: {
   concurso: { estado: string; montoPremio: string; fechaCierrePostulacion: string };
   deptos: string[];
   deadlineText: { text: string; className: string };
+  plazoExtendido: boolean;
 }) {
   return (
     <Card>
@@ -299,7 +309,12 @@ function SidebarCard({
 
         {/* deadline */}
         <div className="flex items-center justify-between">
-          <span className="text-sm text-secondary-500">Plazo</span>
+          <div className="flex flex-col">
+            <span className="text-sm text-secondary-500">Plazo</span>
+            {plazoExtendido && (
+              <span className="text-xs text-orange-600 font-medium">Plazo extendido</span>
+            )}
+          </div>
           <span className={cn("text-sm", deadlineText.className)}>
             {deadlineText.text}
           </span>
@@ -345,15 +360,23 @@ function SidebarCard({
 
         <Separator />
 
-        {/* CTA */}
-        <Button asChild className="w-full bg-orange-600 hover:bg-orange-700">
-          <Link href="/auth/login">
-            Quiero participar
-          </Link>
-        </Button>
-        <p className="text-center text-xs text-secondary-400">
-          Necesitas una cuenta para participar
-        </p>
+        {/* CTA - solo si el concurso esta abierto */}
+        {concurso.estado === "publicado" ? (
+          <>
+            <Button asChild className="w-full bg-orange-600 hover:bg-orange-700">
+              <Link href="/auth/login">
+                Quiero participar
+              </Link>
+            </Button>
+            <p className="text-center text-xs text-secondary-400">
+              Necesitas una cuenta para participar
+            </p>
+          </>
+        ) : (
+          <p className="text-center text-sm text-secondary-500">
+            Este concurso ya no acepta postulaciones
+          </p>
+        )}
       </CardContent>
     </Card>
   );
@@ -374,29 +397,50 @@ function ConcursoTimeline({
     <>
       {/* desktop: horizontal */}
       <div className="hidden sm:block">
-        <div className="flex items-start justify-between">
+        <div className="grid mb-8" style={{ gridTemplateColumns: `repeat(${phases.length}, 1fr)` }}>
           {phases.map((phase, idx) => (
-            <div key={phase.label} className="flex flex-1 flex-col items-center text-center">
-              {/* icono */}
-              <div
-                className={cn(
-                  "flex size-10 items-center justify-center rounded-full border-2",
-                  phase.isPast
-                    ? "border-success-500 bg-success-50"
-                    : "border-secondary-300 bg-white",
+            <div key={phase.label} className="flex flex-col items-center text-center">
+              {/* icono con lineas conectoras */}
+              <div className="relative flex w-full items-center justify-center">
+                {/* linea izquierda */}
+                {idx > 0 && (
+                  <div
+                    className={cn(
+                      "absolute left-0 h-0.5 w-1/2",
+                      phases[idx - 1]?.isPast && phase.isPast
+                        ? "bg-success-500"
+                        : "bg-secondary-200",
+                    )}
+                  />
                 )}
-              >
-                <phase.icon
+                {/* linea derecha */}
+                {idx < phases.length - 1 && (
+                  <div
+                    className={cn(
+                      "absolute right-0 h-0.5 w-1/2",
+                      phase.isPast && phases[idx + 1]?.isPast
+                        ? "bg-success-500"
+                        : "bg-secondary-200",
+                    )}
+                  />
+                )}
+                {/* icono */}
+                <div
                   className={cn(
-                    "size-5",
-                    phase.isPast ? "text-success-600" : "text-secondary-400",
+                    "relative z-10 flex size-10 items-center justify-center rounded-full border-2",
+                    phase.isPast
+                      ? "border-success-500 bg-success-50"
+                      : "border-secondary-300 bg-white",
                   )}
-                />
+                >
+                  <phase.icon
+                    className={cn(
+                      "size-5",
+                      phase.isPast ? "text-success-600" : "text-secondary-400",
+                    )}
+                  />
+                </div>
               </div>
-              {/* linea conectora */}
-              {idx < phases.length - 1 && (
-                <div className="absolute" />
-              )}
               {/* texto */}
               <p
                 className={cn(
@@ -410,21 +454,6 @@ function ConcursoTimeline({
                 {phase.date ? formatShortMonth(phase.date) : "Por definir"}
               </p>
             </div>
-          ))}
-        </div>
-
-        {/* barra de progreso horizontal */}
-        <div className="relative mx-auto mt-[-52px] mb-16 flex items-center px-[10%]">
-          {phases.slice(0, -1).map((phase, idx) => (
-            <div
-              key={`line-${idx}`}
-              className={cn(
-                "h-0.5 flex-1",
-                phase.isPast && phases[idx + 1]?.isPast
-                  ? "bg-success-500"
-                  : "bg-secondary-200",
-              )}
-            />
           ))}
         </div>
       </div>

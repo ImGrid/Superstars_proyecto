@@ -5,6 +5,8 @@ export const listPublicConcursosQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(50).default(12),
   search: z.string().trim().optional(),
+  // activos = publicado, anteriores = cerrado/en_evaluacion/finalizado
+  tipo: z.enum(['activos', 'anteriores']).default('activos'),
 });
 
 export type ListPublicConcursosQueryDto = z.infer<typeof listPublicConcursosQuerySchema>;

@@ -1,9 +1,9 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { eq, and, or, ilike, count, desc, isNull, sql } from 'drizzle-orm';
+import { eq, and, or, ilike, count, desc, isNull, sql, inArray } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/drizzle.provider';
 import type { DrizzleDB } from '../../database/drizzle.provider';
 import { concurso, formularioDinamico, documentoConcurso, publicacion, categoriaPublicacion } from '@superstars/db';
-import { ESTADO_CONCURSO_PUBLICO } from '@superstars/shared';
+import { ESTADO_CONCURSO_PUBLICO, EstadoConcurso } from '@superstars/shared';
 import type { EstadoPublicacion } from '@superstars/shared';
 
 // Columnas seguras para el listado publico (excluye createdBy, topNSistema)
@@ -29,6 +29,7 @@ export interface FindPublicConcursosParams {
   page: number;
   limit: number;
   search?: string;
+  tipo: 'activos' | 'anteriores';
 }
 
 export interface FindPublicPublicacionesParams {
@@ -43,11 +44,20 @@ export class PublicRepository {
   constructor(@Inject(DRIZZLE) private readonly db: DrizzleDB) {}
 
   async findPublicConcursos(params: FindPublicConcursosParams) {
-    const { page, limit, search } = params;
+    const { page, limit, search, tipo } = params;
     const offset = (page - 1) * limit;
 
+    // activos = publicado, anteriores = cerrado/en_evaluacion/finalizado
+    const estadosAnteriores = [
+      EstadoConcurso.CERRADO as 'cerrado',
+      EstadoConcurso.EN_EVALUACION as 'en_evaluacion',
+      EstadoConcurso.FINALIZADO as 'finalizado',
+    ];
+
     const conditions = [
-      eq(concurso.estado, ESTADO_CONCURSO_PUBLICO),
+      tipo === 'activos'
+        ? eq(concurso.estado, ESTADO_CONCURSO_PUBLICO)
+        : inArray(concurso.estado, estadosAnteriores),
     ];
 
     if (search) {

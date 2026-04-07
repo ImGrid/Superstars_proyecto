@@ -5,6 +5,7 @@ import { ConcursoService } from './concurso.service';
 import { ConcursoRepository } from './concurso.repository';
 import { ConcursoAccessService } from './concurso-access.service';
 import { ConcursoAccessGuard } from './guards/concurso-access.guard';
+import { ConcursoCron } from './concurso.cron';
 import { RubricaModule } from '../rubrica/rubrica.module';
 
 @Module({
@@ -14,6 +15,7 @@ import { RubricaModule } from '../rubrica/rubrica.module';
     ConcursoService,
     ConcursoRepository,
     ConcursoAccessService,
+    ConcursoCron,
     // Guard global: solo actua en endpoints con @CheckConcurso()
     { provide: APP_GUARD, useClass: ConcursoAccessGuard },
   ],

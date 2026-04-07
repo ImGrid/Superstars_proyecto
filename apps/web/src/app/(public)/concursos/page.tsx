@@ -21,17 +21,25 @@ import { cn } from "@/lib/utils";
 
 const ITEMS_PER_PAGE = 12;
 
+type TipoConcurso = "activos" | "anteriores";
+
 export default function ConcursosPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const [tipo, setTipo] = useState<TipoConcurso>("activos");
 
   const { data, isLoading } = useQuery(
-    publicQueries.concursos({ page, limit: ITEMS_PER_PAGE, search: search || undefined }),
+    publicQueries.concursos({ page, limit: ITEMS_PER_PAGE, search: search || undefined, tipo }),
   );
 
-  // al buscar, volver a pagina 1
+  // al buscar o cambiar tab, volver a pagina 1
   const handleSearch = (value: string) => {
     setSearch(value);
+    setPage(1);
+  };
+
+  const handleTipo = (value: TipoConcurso) => {
+    setTipo(value);
     setPage(1);
   };
 
@@ -53,15 +61,41 @@ export default function ConcursosPage() {
       {/* contenido */}
       <section className="py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {/* barra de busqueda */}
-          <div className="relative mb-8 max-w-md">
-            <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-secondary-400" />
-            <Input
-              placeholder="Buscar concurso..."
-              value={search}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="pl-9"
-            />
+          {/* tabs activos/anteriores + busqueda */}
+          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex gap-1 rounded-lg bg-secondary-100 p-1">
+              <button
+                onClick={() => handleTipo("activos")}
+                className={cn(
+                  "rounded-md px-4 py-2 text-sm font-medium transition-colors",
+                  tipo === "activos"
+                    ? "bg-white text-primary-700 shadow-sm"
+                    : "text-secondary-500 hover:text-secondary-700",
+                )}
+              >
+                Activos
+              </button>
+              <button
+                onClick={() => handleTipo("anteriores")}
+                className={cn(
+                  "rounded-md px-4 py-2 text-sm font-medium transition-colors",
+                  tipo === "anteriores"
+                    ? "bg-white text-primary-700 shadow-sm"
+                    : "text-secondary-500 hover:text-secondary-700",
+                )}
+              >
+                Anteriores
+              </button>
+            </div>
+            <div className="relative max-w-md sm:w-72">
+              <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-secondary-400" />
+              <Input
+                placeholder="Buscar concurso..."
+                value={search}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="pl-9"
+              />
+            </div>
           </div>
 
           {/* cargando */}
@@ -71,11 +105,13 @@ export default function ConcursosPage() {
           {!isLoading && (!data || data.data.length === 0) && (
             <EmptyState
               icon={Trophy}
-              title="No hay concursos disponibles"
+              title={tipo === "activos" ? "No hay concursos activos" : "No hay concursos anteriores"}
               description={
                 search
                   ? "No se encontraron concursos con ese criterio de busqueda."
-                  : "Aun no se han publicado concursos. Vuelve pronto para ver las convocatorias."
+                  : tipo === "activos"
+                    ? "Aun no se han publicado concursos. Vuelve pronto para ver las convocatorias."
+                    : "No hay concursos finalizados por el momento."
               }
             />
           )}

@@ -1,5 +1,4 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ESTADO_CONCURSO_PUBLICO } from '@superstars/shared';
 import type { ListPublicConcursosQueryDto, ListPublicPublicacionesQueryDto, PaginatedResponse } from '@superstars/shared';
 import { PublicRepository } from './public.repository';
 
@@ -20,14 +19,19 @@ export class PublicService {
     };
   }
 
+  // estados visibles en la web publica
+  private readonly estadosPublicos = [
+    'publicado', 'cerrado', 'en_evaluacion', 'finalizado',
+  ];
+
   async findConcursoById(id: number) {
     const concurso = await this.publicRepo.findPublicConcursoById(id);
     if (!concurso) {
       throw new NotFoundException('Concurso no encontrado');
     }
 
-    // Solo mostrar concursos publicados (abiertos)
-    if (concurso.estado !== ESTADO_CONCURSO_PUBLICO) {
+    // solo mostrar concursos que ya fueron publicados (no borradores)
+    if (!this.estadosPublicos.includes(concurso.estado)) {
       throw new NotFoundException('Concurso no encontrado');
     }
 

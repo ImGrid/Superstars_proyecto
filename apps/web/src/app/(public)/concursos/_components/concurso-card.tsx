@@ -40,7 +40,8 @@ function getDeadlineDisplay(fechaCierre: string) {
 }
 
 export function ConcursoCard({ concurso }: ConcursoCardProps) {
-  const deadline = getDeadlineDisplay(concurso.fechaCierrePostulacion);
+  const fechaCierreReal = concurso.fechaCierreEfectiva ?? concurso.fechaCierrePostulacion;
+  const deadline = getDeadlineDisplay(fechaCierreReal);
   const deptos = concurso.departamentos ?? [];
   const maxTags = 3;
 
