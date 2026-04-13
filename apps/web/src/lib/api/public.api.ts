@@ -7,6 +7,7 @@ import type {
   PublicConcursoDetailResponse,
   PublicPublicacionListItem,
   PublicPublicacionResponse,
+  PublicResultadosResponse,
   CategoriaPublicacionResponse,
 } from "@superstars/shared";
 
@@ -44,6 +45,14 @@ export function listPublicPublicaciones(
 export function getPublicPublicacion(slug: string) {
   return apiClient
     .get<PublicPublicacionResponse>(`/public/publicaciones/${slug}`)
+    .then((r) => r.data);
+}
+
+// --- Resultados publicos ---
+
+export function getPublicResultados(concursoId: number) {
+  return apiClient
+    .get<PublicResultadosResponse>(`/public/concursos/${concursoId}/resultados`)
     .then((r) => r.data);
 }
 

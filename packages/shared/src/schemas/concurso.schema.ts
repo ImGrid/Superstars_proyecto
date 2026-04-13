@@ -52,11 +52,17 @@ export const updateFechasConcursoSchema = z.object({
   fechaAnuncioGanadores: z.string().date().nullable().optional(),
 });
 
+// Seleccionar ganadores (batch: marcar N como ganador, resto como no_seleccionado)
+export const seleccionarGanadoresSchema = z.object({
+  ganadorIds: z.array(z.number().int().positive()).min(1),
+});
+
 export type CreateConcursoDto = z.infer<typeof createConcursoSchema>;
 export type UpdateConcursoDto = z.infer<typeof updateConcursoSchema>;
 export type UpdateFechasConcursoDto = z.infer<typeof updateFechasConcursoSchema>;
 export type ListConcursosQueryDto = z.infer<typeof listConcursosQuerySchema>;
 export type AssignResponsableDto = z.infer<typeof assignResponsableSchema>;
+export type SeleccionarGanadoresDto = z.infer<typeof seleccionarGanadoresSchema>;
 
 // GET /concursos/:id, POST /concursos, PATCH /concursos/:id, transiciones de estado
 export interface ConcursoResponse {
@@ -108,4 +114,42 @@ export interface EvaluadorConcursoResponse {
 export interface CanPublicarResponse {
   canPublicar: boolean;
   errors: string[];
+}
+
+// GET /concursos/resumen-resultados — estadisticas agregadas por concurso (admin/responsable)
+export interface ConcursoResultadosResumenItem {
+  id: number;
+  nombre: string;
+  estado: EstadoConcurso;
+  montoPremio: string;
+  numeroGanadores: number;
+  fechaPublicacionResultados: string | null;
+  totalPostulaciones: number;
+  totalCalificadas: number;
+  promedioCalificadas: number | null;
+  totalGanadores: number;
+}
+
+// Item de ranking de una postulacion (admin/responsable)
+export interface PostulacionRankingItem {
+  postulacionId: number;
+  empresaNombre: string;
+  puntajeFinal: number | null;
+  posicionFinal: number | null;
+  estado: string;
+  fechaEnvio: string | null;
+}
+
+// GET /concursos/:id/ranking — ranking completo de un concurso
+export interface ConcursoRankingResponse {
+  id: number;
+  nombre: string;
+  estado: EstadoConcurso;
+  montoPremio: string;
+  numeroGanadores: number;
+  totalCalificadas: number;
+  promedioCalificadas: number | null;
+  maxPuntaje: number | null;
+  minPuntaje: number | null;
+  ranking: PostulacionRankingItem[];
 }

@@ -3,7 +3,7 @@ import { pgTable, pgEnum, unique, integer, text, timestamp, foreignKey, check, d
 import { sql } from "drizzle-orm"
 import { usuario } from "./auth"
 
-export const estadoConcurso = pgEnum("estado_concurso", ['borrador', 'publicado', 'cerrado', 'en_evaluacion', 'finalizado'])
+export const estadoConcurso = pgEnum("estado_concurso", ['borrador', 'publicado', 'cerrado', 'en_evaluacion', 'resultados_listos', 'finalizado'])
 
 export const concurso = pgTable("concurso", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity({ name: "concurso_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),

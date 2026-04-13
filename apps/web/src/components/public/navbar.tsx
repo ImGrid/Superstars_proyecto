@@ -24,6 +24,7 @@ const navLinks: NavLink[] = [
   { label: "Como funciona", href: "/#como-funciona" },
   { label: "Concursos", href: "/concursos" },
   { label: "Noticias", href: "/noticias" },
+  { label: "Resultados", href: "/resultados" },
   { label: "FAQ", href: "/faq" },
   { label: "Contacto", href: "/contacto" },
 ];
@@ -90,7 +91,7 @@ export function PublicNavbar() {
               scrolled ? "text-primary-700" : "text-white"
             }`}
           >
-            SEGIC
+            SUPERIMPACT360
           </span>
         </Link>
 
@@ -154,7 +155,7 @@ export function PublicNavbar() {
                     onClick={() => setOpen(false)}
                   >
                     <span className="font-heading text-lg font-bold tracking-tight text-primary-700">
-                      SEGIC
+                      SUPERIMPACT360
                     </span>
                   </Link>
                 </div>

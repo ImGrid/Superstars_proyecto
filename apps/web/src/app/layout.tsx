@@ -18,8 +18,8 @@ const jakarta = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: "SEGIC - Sistema de Gestion de Concursos",
-    template: "%s | SEGIC",
+    default: "SUPERIMPACT360 - Plataforma de Competencias Empresariales",
+    template: "%s | SUPERIMPACT360",
   },
   description:
     "Plataforma de competencias empresariales en Bolivia. Postula tu empresa y compite por premios.",

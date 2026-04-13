@@ -20,4 +20,10 @@ export class PublicController {
   async findById(@Param('id', ParseIntPipe) id: number) {
     return this.publicService.findConcursoById(id);
   }
+
+  // GET /api/public/concursos/:id/resultados
+  @Get(':id/resultados')
+  async findResultados(@Param('id', ParseIntPipe) id: number) {
+    return this.publicService.findResultados(id);
+  }
 }

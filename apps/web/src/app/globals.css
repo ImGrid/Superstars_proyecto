@@ -6,7 +6,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  /* Paleta primaria (navy SEGIC) */
+  /* Paleta primaria (navy SUPERIMPACT360) */
   --color-primary-50: #F0F3F9;
   --color-primary-100: #D7DEE9;
   --color-primary-200: #B3BFD3;
@@ -121,7 +121,7 @@ body {
 
 :root {
   --radius: 0.625rem;
-  /* shadcn semanticos mapeados a paleta SEGIC */
+  /* shadcn semanticos mapeados a paleta SUPERIMPACT360 */
   --background: #ffffff;
   --foreground: #0f172a;
   --card: #ffffff;

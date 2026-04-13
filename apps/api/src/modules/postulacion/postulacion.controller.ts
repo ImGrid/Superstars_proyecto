@@ -116,21 +116,4 @@ export class PostulacionController {
     return this.postulacionService.aprobar(id);
   }
 
-  // Seleccionar como ganadora (calificado → ganador)
-  @Post(':id/seleccionar-ganador')
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
-  @CheckConcurso('concursoId')
-  @HttpCode(HttpStatus.OK)
-  async seleccionarGanador(@Param('id', ParseIntPipe) id: number) {
-    return this.postulacionService.seleccionarGanador(id);
-  }
-
-  // Marcar como no seleccionada (calificado → no_seleccionado)
-  @Post(':id/no-seleccionar')
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
-  @CheckConcurso('concursoId')
-  @HttpCode(HttpStatus.OK)
-  async noSeleccionar(@Param('id', ParseIntPipe) id: number) {
-    return this.postulacionService.noSeleccionar(id);
-  }
 }

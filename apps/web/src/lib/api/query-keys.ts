@@ -15,8 +15,11 @@ import {
   listConcursos,
   getConcurso,
   canPublicar,
+  canFinalizar,
   listResponsables,
   listEvaluadores,
+  getResumenResultados,
+  getRankingConcurso,
 } from "./concurso.api";
 import { getFormulario } from "./formulario.api";
 import { listDocumentos } from "./documento.api";
@@ -37,6 +40,7 @@ import {
 import {
   listPublicConcursos,
   getPublicConcurso,
+  getPublicResultados,
   listPublicPublicaciones,
   getPublicPublicacion,
   listPublicCategorias,
@@ -126,6 +130,12 @@ export const concursoQueries = {
       queryFn: () => canPublicar(id),
     }),
 
+  canFinalizar: (id: number) =>
+    queryOptions({
+      queryKey: ["concursos", "detail", id, "can-finalizar"] as const,
+      queryFn: () => canFinalizar(id),
+    }),
+
   responsables: (concursoId: number) =>
     queryOptions({
       queryKey: ["concursos", "detail", concursoId, "responsables"] as const,
@@ -136,6 +146,18 @@ export const concursoQueries = {
     queryOptions({
       queryKey: ["concursos", "detail", concursoId, "evaluadores"] as const,
       queryFn: () => listEvaluadores(concursoId),
+    }),
+
+  resumenResultados: () =>
+    queryOptions({
+      queryKey: ["concursos", "resumen-resultados"] as const,
+      queryFn: getResumenResultados,
+    }),
+
+  ranking: (id: number) =>
+    queryOptions({
+      queryKey: ["concursos", "ranking", id] as const,
+      queryFn: () => getRankingConcurso(id),
     }),
 };
 
@@ -269,6 +291,12 @@ export const publicQueries = {
     queryOptions({
       queryKey: ["public", "concursos", "detail", id] as const,
       queryFn: () => getPublicConcurso(id),
+    }),
+
+  resultados: (id: number) =>
+    queryOptions({
+      queryKey: ["public", "concursos", "resultados", id] as const,
+      queryFn: () => getPublicResultados(id),
     }),
 
   publicaciones: (filters?: Partial<ListPublicPublicacionesQueryDto>) =>

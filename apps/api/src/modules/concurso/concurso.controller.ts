@@ -19,8 +19,9 @@ import {
   listConcursosQuerySchema,
   assignResponsableSchema,
   assignEvaluadorSchema,
+  seleccionarGanadoresSchema,
 } from '@superstars/shared';
-import type { AuthUser, CreateConcursoDto, UpdateConcursoDto, UpdateFechasConcursoDto } from '@superstars/shared';
+import type { AuthUser, CreateConcursoDto, UpdateConcursoDto, UpdateFechasConcursoDto, SeleccionarGanadoresDto } from '@superstars/shared';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { CheckConcurso } from './decorators/check-concurso.decorator';
@@ -53,6 +54,13 @@ export class ConcursoController {
   ) {
     const query = listConcursosQuerySchema.parse(rawQuery);
     return this.concursoService.findAll(query, user);
+  }
+
+  // Resumen estadistico de concursos en evaluacion/resultados/finalizado (ANTES de :id para evitar colision)
+  @Get('resumen-resultados')
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
+  async getResumenResultados(@CurrentUser() user: AuthUser) {
+    return this.concursoService.getResumenResultados(user);
   }
 
   // Obtener concurso por ID (proponente solo ve publicados)
@@ -134,12 +142,33 @@ export class ConcursoController {
     return this.concursoService.iniciarEvaluacion(id);
   }
 
-  // Finalizar concurso (en_evaluacion -> finalizado)
-  @Post(':id/finalizar')
+  // Seleccionar ganadores (en_evaluacion -> resultados_listos)
+  @Post(':id/seleccionar-ganadores')
   @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
   @CheckConcurso('id')
-  async finalizar(@Param('id', ParseIntPipe) id: number) {
-    return this.concursoService.finalizar(id);
+  async seleccionarGanadores(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: SeleccionarGanadoresDto,
+  ) {
+    const dto = seleccionarGanadoresSchema.parse(body);
+    return this.concursoService.seleccionarGanadores(id, dto);
+  }
+
+  // Verificar si se puede publicar resultados
+  @Get(':id/can-finalizar')
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
+  @CheckConcurso('id')
+  async canFinalizar(@Param('id', ParseIntPipe) id: number) {
+    const errors = await this.concursoService.canFinalizar(id);
+    return { canFinalizar: errors.length === 0, errors };
+  }
+
+  // Publicar resultados (resultados_listos -> finalizado)
+  @Post(':id/publicar-resultados')
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
+  @CheckConcurso('id')
+  async publicarResultados(@Param('id', ParseIntPipe) id: number) {
+    return this.concursoService.publicarResultados(id);
   }
 
   // --- Responsables ---
@@ -211,5 +240,13 @@ export class ConcursoController {
     @Param('evaluadorId', ParseIntPipe) evaluadorId: number,
   ) {
     await this.concursoService.removeEvaluador(id, evaluadorId);
+  }
+
+  // Ranking de postulaciones de un concurso (admin/responsable)
+  @Get(':id/ranking')
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
+  @CheckConcurso('id')
+  async getRanking(@Param('id', ParseIntPipe) id: number) {
+    return this.concursoService.getRankingConcurso(id);
   }
 }

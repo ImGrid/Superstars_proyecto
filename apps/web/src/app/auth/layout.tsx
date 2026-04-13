@@ -17,7 +17,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           href="/"
           className="font-heading text-[1.75rem] font-bold tracking-tight text-primary-600 transition-colors hover:text-primary-700"
         >
-          SEGIC
+          SUPERIMPACT360
         </Link>
       </div>
       <div className="w-full max-w-md">{children}</div>

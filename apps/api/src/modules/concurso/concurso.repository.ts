@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { eq, ne, and, or, ilike, count, desc, sql } from 'drizzle-orm';
+import { eq, ne, and, or, ilike, count, desc, sql, inArray } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/drizzle.provider';
 import type { DrizzleDB } from '../../database/drizzle.provider';
 import {
@@ -12,6 +12,9 @@ import {
   subCriterio,
   nivelEvaluacion,
   usuario,
+  postulacion,
+  empresa,
+  calificacion,
 } from '@superstars/db';
 import type { EstadoConcurso } from '@superstars/shared';
 
@@ -343,5 +346,193 @@ export class ConcursoRepository {
       ))
       .limit(1);
     return rows.length > 0;
+  }
+
+  // --- Resultados: queries para seleccion de ganadores ---
+
+  // postulaciones calificadas de un concurso (para validar seleccion)
+  async findPostulacionesCalificadas(concursoId: number) {
+    return this.db
+      .select({
+        id: postulacion.id,
+        estado: postulacion.estado,
+        puntajeFinal: postulacion.puntajeFinal,
+        empresaRazonSocial: empresa.razonSocial,
+      })
+      .from(postulacion)
+      .innerJoin(empresa, eq(postulacion.empresaId, empresa.id))
+      .where(and(
+        eq(postulacion.concursoId, concursoId),
+        eq(postulacion.estado, 'calificado' as any),
+      ))
+      .orderBy(desc(postulacion.puntajeFinal));
+  }
+
+  // verificar si hay postulaciones en estados intermedios (no terminales y no calificado)
+  async countPostulacionesPendientes(concursoId: number): Promise<number> {
+    const [result] = await this.db
+      .select({ count: count() })
+      .from(postulacion)
+      .where(and(
+        eq(postulacion.concursoId, concursoId),
+        sql`${postulacion.estado} IN ('en_evaluacion')`,
+      ));
+    return Number(result.count);
+  }
+
+  // verificar si hay calificaciones no aprobadas en un concurso
+  async countCalificacionesNoAprobadas(concursoId: number): Promise<number> {
+    const [result] = await this.db
+      .select({ count: count() })
+      .from(calificacion)
+      .innerJoin(postulacion, eq(calificacion.postulacionId, postulacion.id))
+      .where(and(
+        eq(postulacion.concursoId, concursoId),
+        sql`${calificacion.estado} != 'aprobado'`,
+      ));
+    return Number(result.count);
+  }
+
+  // calcular ranking con DENSE_RANK y persistir posicion_final
+  async calcularRanking(concursoId: number) {
+    await this.db.execute(sql`
+      UPDATE postulacion SET posicion_final = ranked.pos
+      FROM (
+        SELECT id, DENSE_RANK() OVER (
+          ORDER BY puntaje_final DESC, fecha_envio ASC
+        ) AS pos
+        FROM postulacion
+        WHERE concurso_id = ${concursoId}
+          AND puntaje_final IS NOT NULL
+          AND estado IN ('calificado', 'ganador', 'no_seleccionado')
+      ) ranked
+      WHERE postulacion.id = ranked.id
+    `);
+  }
+
+  // marcar postulaciones como ganadoras (batch)
+  async marcarGanadores(ids: number[]) {
+    await this.db
+      .update(postulacion)
+      .set({ estado: 'ganador' as any })
+      .where(and(
+        inArray(postulacion.id, ids),
+        eq(postulacion.estado, 'calificado' as any),
+      ));
+  }
+
+  // marcar postulaciones restantes como no seleccionadas
+  async marcarNoSeleccionados(concursoId: number, exceptIds: number[]) {
+    await this.db
+      .update(postulacion)
+      .set({ estado: 'no_seleccionado' as any })
+      .where(and(
+        eq(postulacion.concursoId, concursoId),
+        eq(postulacion.estado, 'calificado' as any),
+        exceptIds.length > 0
+          ? sql`${postulacion.id} NOT IN (${sql.join(exceptIds.map(id => sql`${id}`), sql`, `)})`
+          : sql`true`,
+      ));
+  }
+
+  // contar ganadores actuales de un concurso
+  async countGanadores(concursoId: number): Promise<number> {
+    const [result] = await this.db
+      .select({ count: count() })
+      .from(postulacion)
+      .where(and(
+        eq(postulacion.concursoId, concursoId),
+        eq(postulacion.estado, 'ganador' as any),
+      ));
+    return Number(result.count);
+  }
+
+  // postulaciones calificadas que aun no fueron decididas (ni ganador ni no_seleccionado)
+  async countCalificadasSinDecidir(concursoId: number): Promise<number> {
+    const [result] = await this.db
+      .select({ count: count() })
+      .from(postulacion)
+      .where(and(
+        eq(postulacion.concursoId, concursoId),
+        eq(postulacion.estado, 'calificado' as any),
+      ));
+    return Number(result.count);
+  }
+
+  // --- Resultados: vista admin/responsable ---
+
+  // resumen estadistico de concursos en evaluacion/resultados_listos/finalizado
+  // si usuarioId se pasa, solo retorna los concursos del responsable
+  async findResumenResultados(usuarioId?: number) {
+    const query = this.db
+      .select({
+        id: concurso.id,
+        nombre: concurso.nombre,
+        estado: concurso.estado,
+        montoPremio: concurso.montoPremio,
+        numeroGanadores: concurso.numeroGanadores,
+        fechaPublicacionResultados: concurso.fechaPublicacionResultados,
+        totalPostulaciones: sql<number>`count(${postulacion.id}) filter (where ${postulacion.estado} not in ('borrador'))`.mapWith(Number),
+        totalCalificadas: sql<number>`count(${postulacion.id}) filter (where ${postulacion.estado} in ('calificado', 'ganador', 'no_seleccionado'))`.mapWith(Number),
+        promedioCalificadas: sql<string | null>`round(avg(${postulacion.puntajeFinal}) filter (where ${postulacion.puntajeFinal} is not null), 2)`,
+        totalGanadores: sql<number>`count(${postulacion.id}) filter (where ${postulacion.estado} = 'ganador')`.mapWith(Number),
+      })
+      .from(concurso)
+      .leftJoin(postulacion, eq(postulacion.concursoId, concurso.id))
+      .where(
+        sql`${concurso.estado} in ('en_evaluacion', 'resultados_listos', 'finalizado')`,
+      )
+      .groupBy(concurso.id)
+      .orderBy(desc(concurso.createdAt));
+
+    if (usuarioId) {
+      // responsable: solo sus concursos asignados
+      return this.db
+        .select({
+          id: concurso.id,
+          nombre: concurso.nombre,
+          estado: concurso.estado,
+          montoPremio: concurso.montoPremio,
+          numeroGanadores: concurso.numeroGanadores,
+          fechaPublicacionResultados: concurso.fechaPublicacionResultados,
+          totalPostulaciones: sql<number>`count(${postulacion.id}) filter (where ${postulacion.estado} not in ('borrador'))`.mapWith(Number),
+          totalCalificadas: sql<number>`count(${postulacion.id}) filter (where ${postulacion.estado} in ('calificado', 'ganador', 'no_seleccionado'))`.mapWith(Number),
+          promedioCalificadas: sql<string | null>`round(avg(${postulacion.puntajeFinal}) filter (where ${postulacion.puntajeFinal} is not null), 2)`,
+          totalGanadores: sql<number>`count(${postulacion.id}) filter (where ${postulacion.estado} = 'ganador')`.mapWith(Number),
+        })
+        .from(concurso)
+        .innerJoin(responsableConcurso, and(
+          eq(responsableConcurso.concursoId, concurso.id),
+          eq(responsableConcurso.usuarioId, usuarioId),
+        ))
+        .leftJoin(postulacion, eq(postulacion.concursoId, concurso.id))
+        .where(
+          sql`${concurso.estado} in ('en_evaluacion', 'resultados_listos', 'finalizado')`,
+        )
+        .groupBy(concurso.id)
+        .orderBy(desc(concurso.createdAt));
+    }
+
+    return query;
+  }
+
+  // ranking de postulaciones calificadas/ganadoras de un concurso
+  async findRankingPostulaciones(concursoId: number) {
+    return this.db
+      .select({
+        postulacionId: postulacion.id,
+        empresaNombre: empresa.razonSocial,
+        puntajeFinal: postulacion.puntajeFinal,
+        posicionFinal: postulacion.posicionFinal,
+        estado: postulacion.estado,
+        fechaEnvio: postulacion.fechaEnvio,
+      })
+      .from(postulacion)
+      .innerJoin(empresa, eq(postulacion.empresaId, empresa.id))
+      .where(and(
+        eq(postulacion.concursoId, concursoId),
+        sql`${postulacion.estado} in ('calificado', 'ganador', 'no_seleccionado')`,
+      ))
+      .orderBy(desc(postulacion.puntajeFinal));
   }
 }

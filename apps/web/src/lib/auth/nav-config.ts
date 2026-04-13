@@ -7,6 +7,7 @@ import {
   ClipboardCheck,
   Newspaper,
   HelpCircle,
+  BarChart2,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { RolUsuario } from "@superstars/shared";
@@ -24,6 +25,7 @@ const navByRole: Record<RolUsuario, NavItem[]> = {
     { label: "Usuarios", href: "/dashboard/usuarios", icon: Users },
     { label: "Concursos", href: "/dashboard/concursos", icon: Trophy },
     { label: "Postulaciones", href: "/dashboard/postulaciones", icon: FileText },
+    { label: "Resultados", href: "/dashboard/resultados", icon: BarChart2 },
     { label: "Publicaciones", href: "/dashboard/publicaciones", icon: Newspaper },
     { label: "FAQ", href: "/dashboard/faq", icon: HelpCircle },
   ],
@@ -32,6 +34,7 @@ const navByRole: Record<RolUsuario, NavItem[]> = {
     { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { label: "Concursos", href: "/dashboard/concursos", icon: Trophy },
     { label: "Postulaciones", href: "/dashboard/postulaciones", icon: FileText },
+    { label: "Resultados", href: "/dashboard/resultados", icon: BarChart2 },
     { label: "Publicaciones", href: "/dashboard/publicaciones", icon: Newspaper },
     { label: "FAQ", href: "/dashboard/faq", icon: HelpCircle },
   ],

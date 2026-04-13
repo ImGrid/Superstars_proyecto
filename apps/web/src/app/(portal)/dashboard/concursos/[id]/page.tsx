@@ -577,7 +577,7 @@ function ConcursoDetailAdmin({
         </TabsContent>
 
         <TabsContent value="postulaciones" className="mt-4">
-          <PostulacionesTab concursoId={concursoId} estadoConcurso={data.estado} />
+          <PostulacionesTab concursoId={concursoId} estadoConcurso={data.estado} numeroGanadores={data.numeroGanadores} />
         </TabsContent>
       </Tabs>
     </div>

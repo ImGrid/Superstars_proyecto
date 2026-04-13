@@ -245,55 +245,6 @@ export class PostulacionService {
     return updated;
   }
 
-  // Seleccionar como ganadora (calificado → ganador)
-  async seleccionarGanador(id: number) {
-    const existing = await this.postulacionRepo.findById(id);
-    if (!existing) {
-      throw new NotFoundException('Postulacion no encontrada');
-    }
-
-    if (!this.stateMachine.canTransition(existing.estado, 'seleccionar')) {
-      throw new ConflictException(
-        `No se puede seleccionar como ganadora una postulacion en estado "${existing.estado}"`,
-      );
-    }
-
-    const updated = await this.postulacionRepo.updateEstado(
-      id,
-      existing.estado,
-      EstadoPostulacion.GANADOR,
-    );
-    if (!updated) {
-      throw new ConflictException('La postulacion fue modificada por otro proceso');
-    }
-
-    return updated;
-  }
-
-  // Marcar como no seleccionada (calificado → no_seleccionado)
-  async noSeleccionar(id: number) {
-    const existing = await this.postulacionRepo.findById(id);
-    if (!existing) {
-      throw new NotFoundException('Postulacion no encontrada');
-    }
-
-    if (!this.stateMachine.canTransition(existing.estado, 'no_seleccionar')) {
-      throw new ConflictException(
-        `No se puede marcar como no seleccionada una postulacion en estado "${existing.estado}"`,
-      );
-    }
-
-    const updated = await this.postulacionRepo.updateEstado(
-      id,
-      existing.estado,
-      EstadoPostulacion.NO_SELECCIONADO,
-    );
-    if (!updated) {
-      throw new ConflictException('La postulacion fue modificada por otro proceso');
-    }
-
-    return updated;
-  }
 
   // --- Helpers privados ---
 

@@ -26,3 +26,8 @@ respuesta.txt
 server.log
 test_upload.pdf
 cookies.txt
+
+# Backups de base de datos
+*.sql.bak
+backup_*.sql
+preview_*.html

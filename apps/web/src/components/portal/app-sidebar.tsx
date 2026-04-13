@@ -45,13 +45,13 @@ export function AppSidebar() {
             <SidebarMenuButton size="lg" asChild>
               <Link href="/dashboard">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary-700 text-white font-heading text-xs font-bold">
-                  SG
+                  SI
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-heading font-semibold">
-                    SEGIC
+                    SUPERIMPACT360
                   </span>
-                  <span className="truncate text-xs">Sistema de Gestion de Concursos</span>
+                  <span className="truncate text-xs">Plataforma de Competencias</span>
                 </div>
               </Link>
             </SidebarMenuButton>

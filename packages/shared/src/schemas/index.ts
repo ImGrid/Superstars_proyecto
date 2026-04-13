@@ -34,16 +34,21 @@ export {
   listConcursosQuerySchema,
   assignResponsableSchema,
   assignEvaluadorSchema,
+  seleccionarGanadoresSchema,
   type CreateConcursoDto,
   type UpdateConcursoDto,
   type UpdateFechasConcursoDto,
   type ListConcursosQueryDto,
   type AssignResponsableDto,
   type AssignEvaluadorDto,
+  type SeleccionarGanadoresDto,
   type ConcursoResponse,
   type ResponsableResponse,
   type EvaluadorConcursoResponse,
   type CanPublicarResponse,
+  type ConcursoResultadosResumenItem,
+  type PostulacionRankingItem,
+  type ConcursoRankingResponse,
 } from './concurso.schema';
 
 export {
@@ -145,6 +150,8 @@ export {
   type PublicDocumentoResponse,
   type PublicPublicacionListItem,
   type PublicPublicacionResponse,
+  type PublicResultadoGanador,
+  type PublicResultadosResponse,
 } from './public.schema';
 
 export {

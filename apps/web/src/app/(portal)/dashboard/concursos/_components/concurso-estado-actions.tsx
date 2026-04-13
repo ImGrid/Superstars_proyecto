@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Send, Lock, PlayCircle, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Loader2, Send, Lock, PlayCircle, Globe, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { EstadoConcurso, type ConcursoResponse } from "@superstars/shared";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import {
   publicarConcurso,
   cerrarConcurso,
   iniciarEvaluacion,
-  finalizarConcurso,
+  publicarResultados,
 } from "@/lib/api/concurso.api";
 import { concursoQueries } from "@/lib/api/query-keys";
 
@@ -38,6 +38,12 @@ export function ConcursoEstadoActions({
   const canPublicarQuery = useQuery({
     ...concursoQueries.canPublicar(concurso.id),
     enabled: concurso.estado === EstadoConcurso.BORRADOR,
+  });
+
+  // solo consultar canFinalizar si esta en resultados_listos
+  const canFinalizarQuery = useQuery({
+    ...concursoQueries.canFinalizar(concurso.id),
+    enabled: concurso.estado === EstadoConcurso.RESULTADOS_LISTOS,
   });
 
   function onTransitionSuccess(msg: string) {
@@ -95,16 +101,19 @@ export function ConcursoEstadoActions({
         />
       );
     case EstadoConcurso.EN_EVALUACION:
-      if (!showButton) return null;
+      // la seleccion de ganadores se hace desde la tab de postulaciones
+      return null;
+    case EstadoConcurso.RESULTADOS_LISTOS:
       return (
-        <TransitionAction
-          label="Finalizar concurso"
-          icon={<CheckCircle2 className="size-4" />}
-          confirmTitle="Finalizar concurso"
-          confirmDescription="Se finalizara el concurso y se publicaran los resultados. Esta accion no se puede deshacer."
-          mutationFn={() => finalizarConcurso(concurso.id)}
-          onSuccess={() => onTransitionSuccess("Concurso finalizado correctamente")}
+        <PublicarResultadosAction
+          concursoId={concurso.id}
+          canFinalizar={canFinalizarQuery.data?.canFinalizar ?? false}
+          errors={canFinalizarQuery.data?.errors ?? []}
+          isChecking={canFinalizarQuery.isLoading}
+          onSuccess={() => onTransitionSuccess("Resultados publicados correctamente")}
           onError={onTransitionError}
+          showButton={showButton}
+          showAlerts={showAlerts}
         />
       );
     default:
@@ -112,7 +121,7 @@ export function ConcursoEstadoActions({
   }
 }
 
-// componente especial para Publicar (tiene canPublicar + lista de errores)
+// componente especial para Publicar concurso (tiene canPublicar + lista de errores)
 function PublicarAction({
   concursoId,
   canPublicar,
@@ -192,7 +201,87 @@ function PublicarAction({
   );
 }
 
-// componente generico para transiciones simples (cerrar, iniciar evaluacion, finalizar)
+// componente para Publicar resultados (tiene canFinalizar + lista de errores)
+function PublicarResultadosAction({
+  concursoId,
+  canFinalizar,
+  errors,
+  isChecking,
+  onSuccess,
+  onError,
+  showButton,
+  showAlerts,
+}: {
+  concursoId: number;
+  canFinalizar: boolean;
+  errors: string[];
+  isChecking: boolean;
+  onSuccess: () => void;
+  onError: (error: any) => void;
+  showButton: boolean;
+  showAlerts: boolean;
+}) {
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const mutation = useMutation({
+    mutationFn: () => publicarResultados(concursoId),
+    onSuccess: () => {
+      setConfirmOpen(false);
+      onSuccess();
+    },
+    onError: (error) => {
+      setConfirmOpen(false);
+      onError(error);
+    },
+  });
+
+  return (
+    <>
+      {showAlerts && !isChecking && errors.length > 0 && (
+        <Alert>
+          <AlertTriangle className="size-4" />
+          <AlertDescription>
+            <p className="mb-2 font-medium">Requisitos pendientes para publicar resultados:</p>
+            <ul className="list-disc pl-4 space-y-1">
+              {errors.map((err) => (
+                <li key={err} className="text-sm">{err}</li>
+              ))}
+            </ul>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {showButton && (
+        <>
+          <Button
+            onClick={() => setConfirmOpen(true)}
+            disabled={!canFinalizar || isChecking}
+          >
+            {isChecking ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Globe className="size-4" />
+            )}
+            Publicar resultados
+          </Button>
+
+          <ConfirmDialog
+            open={confirmOpen}
+            onOpenChange={setConfirmOpen}
+            title="Publicar resultados"
+            description="Los resultados seran visibles en la pagina publica del concurso. Los ganadores y las empresas no seleccionadas podran ver su resultado. Esta accion no se puede deshacer."
+            confirmLabel="Publicar resultados"
+            onConfirm={() => mutation.mutate()}
+            isLoading={mutation.isPending}
+            destructive={false}
+          />
+        </>
+      )}
+    </>
+  );
+}
+
+// componente generico para transiciones simples (cerrar, iniciar evaluacion)
 function TransitionAction({
   label,
   icon,

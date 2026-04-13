@@ -159,7 +159,7 @@ export default function HomePage() {
                 Transformando ideas en realidades sostenibles
               </h2>
               <p className="mt-6 text-lg leading-relaxed text-secondary-600">
-                SEGIC es una plataforma de competencias empresariales que
+                SUPERIMPACT360 es una plataforma de competencias empresariales que
                 busca identificar, visibilizar y apoyar a empresas bolivianas
                 con modelos de negocio innovadores y de alto impacto social y
                 ambiental.

@@ -12,7 +12,7 @@ export interface EstadoConfig {
   className?: string;
 }
 
-// --- Concurso (5 estados) ---
+// --- Concurso (6 estados) ---
 
 export const concursoEstadoConfig: Record<EstadoConcurso, EstadoConfig> = {
   [EstadoConcurso.BORRADOR]: {
@@ -33,6 +33,11 @@ export const concursoEstadoConfig: Record<EstadoConcurso, EstadoConfig> = {
     label: "En Evaluacion",
     variant: "default",
     className: "bg-primary-600 text-white border-transparent",
+  },
+  [EstadoConcurso.RESULTADOS_LISTOS]: {
+    label: "Resultados Listos",
+    variant: "default",
+    className: "bg-violet-600 text-white border-transparent",
   },
   [EstadoConcurso.FINALIZADO]: {
     label: "Finalizado",

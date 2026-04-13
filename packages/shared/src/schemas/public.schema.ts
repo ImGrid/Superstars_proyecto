@@ -55,6 +55,18 @@ export interface PublicConcursoDetailResponse extends PublicConcursoResponse {
   documentos: PublicDocumentoResponse[];
 }
 
+// GET /public/concursos/:id/resultados
+export interface PublicResultadoGanador {
+  empresaNombre: string;
+  posicionFinal: number;
+}
+
+export interface PublicResultadosResponse {
+  concursoNombre: string;
+  fechaPublicacionResultados: string;
+  ganadores: PublicResultadoGanador[];
+}
+
 // GET /public/publicaciones (lista, sin contenido, con categoriaNombre)
 export interface PublicPublicacionListItem {
   id: number;

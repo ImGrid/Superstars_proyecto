@@ -11,6 +11,7 @@ import type {
   UpdateConcursoDto,
   UpdateFechasConcursoDto,
   ListConcursosQueryDto,
+  SeleccionarGanadoresDto,
   PaginatedResponse,
   AuthUser,
 } from '@superstars/shared';
@@ -180,11 +181,126 @@ export class ConcursoService {
     return this.executeTransition(concursoId, 'iniciar_evaluacion');
   }
 
-  async finalizar(concursoId: number) {
-    const updated = await this.executeTransition(concursoId, 'finalizar');
-    // Marcar timestamp de publicacion de resultados
-    await this.concursoRepo.setFechaPublicacionResultados(concursoId);
+  // Seleccionar ganadores (batch: en_evaluacion -> resultados_listos)
+  async seleccionarGanadores(concursoId: number, dto: SeleccionarGanadoresDto) {
+    const c = await this.ensureExists(concursoId);
+
+    if (!this.stateMachine.canTransition(c.estado, 'seleccionar_ganadores')) {
+      throw new ConflictException(
+        `No se puede seleccionar ganadores desde el estado "${c.estado}"`,
+      );
+    }
+
+    // validar que no haya postulaciones pendientes de evaluacion
+    const pendientes = await this.concursoRepo.countPostulacionesPendientes(concursoId);
+    if (pendientes > 0) {
+      throw new BadRequestException(
+        `Hay ${pendientes} postulacion(es) aun en evaluacion. Todas deben estar calificadas.`,
+      );
+    }
+
+    // validar que no haya calificaciones sin aprobar
+    const califNoAprobadas = await this.concursoRepo.countCalificacionesNoAprobadas(concursoId);
+    if (califNoAprobadas > 0) {
+      throw new BadRequestException(
+        `Hay ${califNoAprobadas} calificacion(es) no aprobadas. Todas deben estar aprobadas.`,
+      );
+    }
+
+    // verificar que las postulaciones calificadas existen
+    const calificadas = await this.concursoRepo.findPostulacionesCalificadas(concursoId);
+    if (calificadas.length === 0) {
+      throw new BadRequestException('No hay postulaciones calificadas para seleccionar ganadores');
+    }
+
+    // validar que los IDs de ganadores pertenecen a postulaciones calificadas del concurso
+    const idsCalificadas = new Set(calificadas.map(p => p.id));
+    const idsInvalidos = dto.ganadorIds.filter((id: number) => !idsCalificadas.has(id));
+    if (idsInvalidos.length > 0) {
+      throw new BadRequestException(
+        `Las postulaciones [${idsInvalidos.join(', ')}] no estan calificadas o no pertenecen a este concurso`,
+      );
+    }
+
+    // validar cantidad de ganadores vs numero_ganadores del concurso
+    if (dto.ganadorIds.length > c.numeroGanadores) {
+      throw new BadRequestException(
+        `Se seleccionaron ${dto.ganadorIds.length} ganadores pero el maximo permitido es ${c.numeroGanadores}`,
+      );
+    }
+
+    // ejecutar todo en transaccion
+    // 1. calcular ranking
+    await this.concursoRepo.calcularRanking(concursoId);
+    // 2. marcar ganadores
+    await this.concursoRepo.marcarGanadores(dto.ganadorIds);
+    // 3. marcar no seleccionados
+    await this.concursoRepo.marcarNoSeleccionados(concursoId, dto.ganadorIds);
+    // 4. transicionar concurso a resultados_listos
+    const updated = await this.concursoRepo.updateEstado(
+      concursoId,
+      EstadoConcurso.EN_EVALUACION,
+      EstadoConcurso.RESULTADOS_LISTOS,
+    );
+
+    if (!updated) {
+      throw new ConflictException('No se pudo cambiar el estado (concurrencia detectada)');
+    }
+
     return updated;
+  }
+
+  // Verificar requisitos para publicar resultados
+  async canFinalizar(concursoId: number): Promise<string[]> {
+    const errors: string[] = [];
+
+    const c = await this.concursoRepo.findById(concursoId);
+    if (!c) {
+      return ['Concurso no encontrado'];
+    }
+
+    if (!this.stateMachine.canTransition(c.estado, 'publicar_resultados')) {
+      errors.push(`No se puede publicar resultados desde el estado "${c.estado}"`);
+      return errors;
+    }
+
+    // debe haber al menos 1 ganador
+    const numGanadores = await this.concursoRepo.countGanadores(concursoId);
+    if (numGanadores === 0) {
+      errors.push('No se han seleccionado ganadores');
+    }
+
+    // no deben quedar postulaciones calificadas sin decidir
+    const sinDecidir = await this.concursoRepo.countCalificadasSinDecidir(concursoId);
+    if (sinDecidir > 0) {
+      errors.push(`Hay ${sinDecidir} postulacion(es) calificadas sin decidir (ganador/no seleccionado)`);
+    }
+
+    return errors;
+  }
+
+  // Publicar resultados (resultados_listos -> finalizado)
+  async publicarResultados(concursoId: number) {
+    const errors = await this.canFinalizar(concursoId);
+    if (errors.length > 0) {
+      throw new BadRequestException(errors);
+    }
+
+    const updated = await this.concursoRepo.updateEstado(
+      concursoId,
+      EstadoConcurso.RESULTADOS_LISTOS,
+      EstadoConcurso.FINALIZADO,
+    );
+
+    if (!updated) {
+      throw new ConflictException('No se pudo cambiar el estado (concurrencia detectada)');
+    }
+
+    // marcar timestamp de publicacion
+    await this.concursoRepo.setFechaPublicacionResultados(concursoId);
+
+    // retornar con el timestamp actualizado
+    return this.concursoRepo.findById(concursoId);
   }
 
   // --- Responsables ---
@@ -262,11 +378,12 @@ export class ConcursoService {
     const c = await this.concursoRepo.findById(id);
     if (!c) throw new NotFoundException('Concurso no encontrado');
 
-    // solo permitido en publicado, cerrado o en_evaluacion
+    // solo permitido en publicado, cerrado, en_evaluacion o resultados_listos
     const estadosPermitidos = [
       EstadoConcurso.PUBLICADO,
       EstadoConcurso.CERRADO,
       EstadoConcurso.EN_EVALUACION,
+      EstadoConcurso.RESULTADOS_LISTOS,
     ];
     if (!estadosPermitidos.includes(c.estado as EstadoConcurso)) {
       throw new ConflictException(
@@ -309,6 +426,58 @@ export class ConcursoService {
 
   async cerrarVencidos(): Promise<number> {
     return this.concursoRepo.cerrarVencidos();
+  }
+
+  // --- Resultados: vista admin/responsable ---
+
+  // resumen estadistico de concursos en evaluacion/resultados_listos/finalizado
+  async getResumenResultados(user: AuthUser) {
+    const usuarioId = user.rol === RolUsuario.RESPONSABLE_CONCURSO ? user.id : undefined;
+    const rows = await this.concursoRepo.findResumenResultados(usuarioId);
+
+    return rows.map(row => ({
+      ...row,
+      promedioCalificadas: row.promedioCalificadas !== null ? Number(row.promedioCalificadas) : null,
+    }));
+  }
+
+  // ranking completo de postulaciones de un concurso
+  async getRankingConcurso(concursoId: number) {
+    const c = await this.concursoRepo.findById(concursoId);
+    if (!c) throw new NotFoundException('Concurso no encontrado');
+
+    const rows = await this.concursoRepo.findRankingPostulaciones(concursoId);
+
+    // calcular estadisticas de puntajes
+    const puntajes = rows
+      .map(r => r.puntajeFinal ? Number(r.puntajeFinal) : null)
+      .filter((p): p is number => p !== null);
+
+    const promedioCalificadas = puntajes.length > 0
+      ? Math.round((puntajes.reduce((a, b) => a + b, 0) / puntajes.length) * 100) / 100
+      : null;
+    const maxPuntaje = puntajes.length > 0 ? Math.max(...puntajes) : null;
+    const minPuntaje = puntajes.length > 0 ? Math.min(...puntajes) : null;
+
+    return {
+      id: c.id,
+      nombre: c.nombre,
+      estado: c.estado,
+      montoPremio: c.montoPremio,
+      numeroGanadores: c.numeroGanadores,
+      totalCalificadas: rows.length,
+      promedioCalificadas,
+      maxPuntaje,
+      minPuntaje,
+      ranking: rows.map(r => ({
+        postulacionId: r.postulacionId,
+        empresaNombre: r.empresaNombre,
+        puntajeFinal: r.puntajeFinal ? Number(r.puntajeFinal) : null,
+        posicionFinal: r.posicionFinal,
+        estado: r.estado,
+        fechaEnvio: r.fechaEnvio,
+      })),
+    };
   }
 
   // --- Helpers privados ---

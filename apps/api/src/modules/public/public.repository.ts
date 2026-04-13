@@ -2,7 +2,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { eq, and, or, ilike, count, desc, isNull, sql, inArray } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/drizzle.provider';
 import type { DrizzleDB } from '../../database/drizzle.provider';
-import { concurso, formularioDinamico, documentoConcurso, publicacion, categoriaPublicacion } from '@superstars/db';
+import { concurso, formularioDinamico, documentoConcurso, publicacion, categoriaPublicacion, postulacion, empresa } from '@superstars/db';
 import { ESTADO_CONCURSO_PUBLICO, EstadoConcurso } from '@superstars/shared';
 import type { EstadoPublicacion } from '@superstars/shared';
 
@@ -51,6 +51,7 @@ export class PublicRepository {
     const estadosAnteriores = [
       EstadoConcurso.CERRADO as 'cerrado',
       EstadoConcurso.EN_EVALUACION as 'en_evaluacion',
+      EstadoConcurso.RESULTADOS_LISTOS as 'resultados_listos',
       EstadoConcurso.FINALIZADO as 'finalizado',
     ];
 
@@ -206,5 +207,21 @@ export class PublicRepository {
 
   async findCategorias() {
     return this.db.select().from(categoriaPublicacion).orderBy(categoriaPublicacion.nombre);
+  }
+
+  // ganadores de un concurso (solo datos publicos)
+  async findGanadores(concursoId: number) {
+    return this.db
+      .select({
+        empresaNombre: empresa.razonSocial,
+        posicionFinal: postulacion.posicionFinal,
+      })
+      .from(postulacion)
+      .innerJoin(empresa, eq(postulacion.empresaId, empresa.id))
+      .where(and(
+        eq(postulacion.concursoId, concursoId),
+        eq(postulacion.estado, 'ganador' as any),
+      ))
+      .orderBy(postulacion.posicionFinal);
   }
 }

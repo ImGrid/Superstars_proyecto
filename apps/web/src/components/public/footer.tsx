@@ -46,7 +46,7 @@ export function PublicFooter() {
           <div className="sm:col-span-2 lg:col-span-1">
             <Link href="/" className="mb-4 flex items-center gap-2.5">
               <span className="font-heading text-xl font-bold tracking-tight text-white">
-                SEGIC
+                SUPERIMPACT360
               </span>
             </Link>
             <p className="mt-3 text-sm leading-relaxed text-primary-300">
@@ -107,10 +107,10 @@ export function PublicFooter() {
               <li className="flex items-start gap-2 text-sm text-primary-300">
                 <Mail className="mt-0.5 size-4 shrink-0 text-orange-500" />
                 <a
-                  href="mailto:info@segic.bo"
+                  href="mailto:info@superimpact360.lat"
                   className="transition-colors hover:text-orange-400"
                 >
-                  info@segic.bo
+                  info@superimpact360.lat
                 </a>
               </li>
               <li className="flex items-start gap-2 text-sm text-primary-300">
@@ -126,7 +126,7 @@ export function PublicFooter() {
       <div className="border-t border-primary-700/50">
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           <p className="text-center text-xs text-primary-400">
-            &copy; {new Date().getFullYear()} SEGIC. Todos los derechos
+            &copy; {new Date().getFullYear()} SUPERIMPACT360. Todos los derechos
             reservados.
           </p>
         </div>

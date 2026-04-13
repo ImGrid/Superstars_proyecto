@@ -1,9 +1,9 @@
 import { EstadoConcurso } from '@superstars/shared';
 
 // Eventos que disparan transiciones de estado
-export type ConcursoEvent = 'publicar' | 'cerrar' | 'iniciar_evaluacion' | 'finalizar';
+export type ConcursoEvent = 'publicar' | 'cerrar' | 'iniciar_evaluacion' | 'seleccionar_ganadores' | 'publicar_resultados';
 
-// Mapa declarativo de transiciones: estado actual → evento → estado nuevo
+// Mapa declarativo de transiciones: estado actual -> evento -> estado nuevo
 const TRANSITIONS: Record<string, Partial<Record<ConcursoEvent, EstadoConcurso>>> = {
   [EstadoConcurso.BORRADOR]: {
     publicar: EstadoConcurso.PUBLICADO,
@@ -15,7 +15,10 @@ const TRANSITIONS: Record<string, Partial<Record<ConcursoEvent, EstadoConcurso>>
     iniciar_evaluacion: EstadoConcurso.EN_EVALUACION,
   },
   [EstadoConcurso.EN_EVALUACION]: {
-    finalizar: EstadoConcurso.FINALIZADO,
+    seleccionar_ganadores: EstadoConcurso.RESULTADOS_LISTOS,
+  },
+  [EstadoConcurso.RESULTADOS_LISTOS]: {
+    publicar_resultados: EstadoConcurso.FINALIZADO,
   },
 };
 

@@ -4,5 +4,6 @@ export enum EstadoConcurso {
   PUBLICADO = 'publicado',
   CERRADO = 'cerrado',
   EN_EVALUACION = 'en_evaluacion',
+  RESULTADOS_LISTOS = 'resultados_listos',
   FINALIZADO = 'finalizado',
 }

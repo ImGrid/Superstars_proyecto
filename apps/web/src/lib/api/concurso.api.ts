@@ -7,10 +7,13 @@ import type {
   ListConcursosQueryDto,
   AssignResponsableDto,
   AssignEvaluadorDto,
+  SeleccionarGanadoresDto,
   ConcursoResponse,
   ResponsableResponse,
   EvaluadorConcursoResponse,
   CanPublicarResponse,
+  ConcursoResultadosResumenItem,
+  ConcursoRankingResponse,
 } from "@superstars/shared";
 
 // --- CRUD ---
@@ -75,9 +78,24 @@ export function iniciarEvaluacion(id: number) {
     .then((r) => r.data);
 }
 
-export function finalizarConcurso(id: number) {
+// Seleccionar ganadores (en_evaluacion -> resultados_listos)
+export function seleccionarGanadores(id: number, dto: SeleccionarGanadoresDto) {
   return apiClient
-    .post<ConcursoResponse>(`/concursos/${id}/finalizar`)
+    .post<ConcursoResponse>(`/concursos/${id}/seleccionar-ganadores`, dto)
+    .then((r) => r.data);
+}
+
+// Verificar si se puede publicar resultados
+export function canFinalizar(id: number) {
+  return apiClient
+    .get<{ canFinalizar: boolean; errors: string[] }>(`/concursos/${id}/can-finalizar`)
+    .then((r) => r.data);
+}
+
+// Publicar resultados (resultados_listos -> finalizado)
+export function publicarResultados(id: number) {
+  return apiClient
+    .post<ConcursoResponse>(`/concursos/${id}/publicar-resultados`)
     .then((r) => r.data);
 }
 
@@ -119,4 +137,18 @@ export function removeEvaluador(concursoId: number, evaluadorId: number) {
   return apiClient.delete(
     `/concursos/${concursoId}/evaluadores/${evaluadorId}`,
   );
+}
+
+// --- Resultados ---
+
+export function getResumenResultados() {
+  return apiClient
+    .get<ConcursoResultadosResumenItem[]>("/concursos/resumen-resultados")
+    .then((r) => r.data);
+}
+
+export function getRankingConcurso(id: number) {
+  return apiClient
+    .get<ConcursoRankingResponse>(`/concursos/${id}/ranking`)
+    .then((r) => r.data);
 }

@@ -21,8 +21,28 @@ export class PublicService {
 
   // estados visibles en la web publica
   private readonly estadosPublicos = [
-    'publicado', 'cerrado', 'en_evaluacion', 'finalizado',
+    'publicado', 'cerrado', 'en_evaluacion', 'resultados_listos', 'finalizado',
   ];
+
+  async findResultados(id: number) {
+    const concurso = await this.publicRepo.findPublicConcursoById(id);
+    if (!concurso) {
+      throw new NotFoundException('Concurso no encontrado');
+    }
+
+    // solo mostrar resultados de concursos finalizados con resultados publicados
+    if (!concurso.fechaPublicacionResultados) {
+      throw new NotFoundException('Resultados no disponibles');
+    }
+
+    const ganadores = await this.publicRepo.findGanadores(id);
+
+    return {
+      concursoNombre: concurso.nombre,
+      fechaPublicacionResultados: concurso.fechaPublicacionResultados,
+      ganadores,
+    };
+  }
 
   async findConcursoById(id: number) {
     const concurso = await this.publicRepo.findPublicConcursoById(id);

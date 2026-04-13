@@ -106,20 +106,3 @@ export function aprobarPostulacion(concursoId: number, id: number) {
     .then((r) => r.data);
 }
 
-// Seleccionar como ganadora (calificado → ganador)
-export function seleccionarGanador(concursoId: number, id: number) {
-  return apiClient
-    .post<PostulacionResponse>(
-      `/concursos/${concursoId}/postulaciones/${id}/seleccionar-ganador`,
-    )
-    .then((r) => r.data);
-}
-
-// Marcar como no seleccionada (calificado → no_seleccionado)
-export function noSeleccionarPostulacion(concursoId: number, id: number) {
-  return apiClient
-    .post<PostulacionResponse>(
-      `/concursos/${concursoId}/postulaciones/${id}/no-seleccionar`,
-    )
-    .then((r) => r.data);
-}
