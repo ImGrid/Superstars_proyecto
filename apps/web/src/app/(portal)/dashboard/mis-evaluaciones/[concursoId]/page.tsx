@@ -72,7 +72,7 @@ export default function PostulacionesEvaluadorPage({ params }: PageProps) {
 
       {postulaciones.length === 0 ? (
         <EmptyState
-          icon={FileText}
+          icon="ph:file-text-duotone"
           title="Sin postulaciones"
           description="No hay postulaciones disponibles para evaluar en este concurso."
         />

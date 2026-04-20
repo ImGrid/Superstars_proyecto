@@ -200,7 +200,7 @@ export function EvaluadoresAsignadosTab({
         {/* tabla de evaluadores asignados */}
         {totalAsignados === 0 ? (
           <EmptyState
-            icon={UserCheck}
+            icon="ph:user-check-duotone"
             title="Sin evaluadores asignados"
             description="Asigna evaluadores del concurso para que califiquen esta postulacion."
           />

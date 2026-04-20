@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ClipboardList, Loader2, Plus, Trash2 } from "lucide-react";
+import { Loader2, Plus, Trash2 } from "lucide-react";
 import { EstadoConcurso } from "@superstars/shared";
 import { Button } from "@/components/ui/button";
 import {
@@ -114,7 +114,7 @@ export function RubricaTab({ concursoId, estadoConcurso }: RubricaTabProps) {
       <Card>
         <CardContent className="py-8">
           <EmptyState
-            icon={ClipboardList}
+            icon="ph:clipboard-text-duotone"
             title="Sin rubrica"
             description="Este concurso no tiene una rubrica de evaluacion configurada."
             action={
