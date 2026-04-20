@@ -3,10 +3,10 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { createFaqSchema, type FaqResponse } from "@superstars/shared";
+import { createFaqSchema, type FaqResponse, type CategoriaFaq } from "@superstars/shared";
 import { z } from "zod";
 import {
   Dialog,
@@ -19,20 +19,34 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { createFaq, updateFaq } from "@/lib/api/faq.api";
-import { faqQueries } from "@/lib/api/query-keys";
+import { faqQueries, concursoQueries } from "@/lib/api/query-keys";
 
-// schema del formulario (mismo para crear y editar)
 const formSchema = createFaqSchema;
 type FormValues = z.infer<typeof formSchema>;
+
+// labels amigables para las categorias
+const CATEGORIA_OPTIONS = [
+  { value: "general", label: "General", desc: "Sobre el programa en general" },
+  { value: "participacion", label: "Participacion", desc: "Como inscribirse y requisitos" },
+  { value: "proceso", label: "Proceso", desc: "Evaluacion, resultados y premios" },
+] as const;
 
 interface FaqFormDialogProps {
   open: boolean;
@@ -44,9 +58,18 @@ export function FaqFormDialog({ open, onOpenChange, faq }: FaqFormDialogProps) {
   const isEditing = !!faq;
   const queryClient = useQueryClient();
 
+  // lista de concursos para el selector opcional
+  const { data: concursos } = useQuery(concursoQueries.list({ limit: 100 }));
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: { pregunta: "", respuesta: "", orden: 0 },
+    defaultValues: {
+      pregunta: "",
+      respuesta: "",
+      orden: 0,
+      categoria: "general",
+      concursoId: null,
+    },
   });
 
   // resetear cuando se abre/cierra o cambia el faq
@@ -57,9 +80,17 @@ export function FaqFormDialog({ open, onOpenChange, faq }: FaqFormDialogProps) {
         pregunta: faq.pregunta,
         respuesta: faq.respuesta,
         orden: faq.orden,
+        categoria: faq.categoria as CategoriaFaq,
+        concursoId: faq.concursoId,
       });
     } else {
-      form.reset({ pregunta: "", respuesta: "", orden: 0 });
+      form.reset({
+        pregunta: "",
+        respuesta: "",
+        orden: 0,
+        categoria: "general",
+        concursoId: null,
+      });
     }
   }, [open, faq, form]);
 
@@ -110,7 +141,7 @@ export function FaqFormDialog({ open, onOpenChange, faq }: FaqFormDialogProps) {
                   <FormLabel>Pregunta</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Ej: ¿Cómo puedo postular al programa?"
+                      placeholder="Ej: Como puedo postular al programa?"
                       {...field}
                     />
                   </FormControl>
@@ -128,7 +159,7 @@ export function FaqFormDialog({ open, onOpenChange, faq }: FaqFormDialogProps) {
                   <FormControl>
                     <Textarea
                       placeholder="Escribe la respuesta a la pregunta..."
-                      rows={5}
+                      rows={4}
                       {...field}
                     />
                   </FormControl>
@@ -137,20 +168,84 @@ export function FaqFormDialog({ open, onOpenChange, faq }: FaqFormDialogProps) {
               )}
             />
 
+            <div className="grid grid-cols-2 gap-4">
+              {/* categoria */}
+              <FormField
+                control={form.control}
+                name="categoria"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Categoria</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {CATEGORIA_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* orden */}
+              <FormField
+                control={form.control}
+                name="orden"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Orden</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={0}
+                        {...field}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* concurso especifico opcional */}
             <FormField
               control={form.control}
-              name="orden"
+              name="concursoId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Orden de aparición</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min={0}
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
-                  </FormControl>
+                  <FormLabel>Concurso especifico (opcional)</FormLabel>
+                  <Select
+                    onValueChange={(val) =>
+                      field.onChange(val === "none" ? null : Number(val))
+                    }
+                    value={field.value?.toString() ?? "none"}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Para todos los concursos" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="none">Para todos los concursos</SelectItem>
+                      {concursos?.data.map((c) => (
+                        <SelectItem key={c.id} value={c.id.toString()}>
+                          {c.nombre}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    Si vinculas esta pregunta a un concurso, solo aparecera en la pagina de ese concurso, no en el FAQ general.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

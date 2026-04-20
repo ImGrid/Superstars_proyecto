@@ -4,7 +4,8 @@ import { Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
-import { FileText, Eye, ClipboardCheck } from "lucide-react";
+import { Eye } from "lucide-react";
+import { Icon } from "@iconify/react";
 import type {
   ListPostulacionesQueryDto,
   PostulacionAdminListItem,
@@ -116,7 +117,7 @@ const columns: Column<PostulacionAdminListItem>[] = [
         {row.calificacionesPendientes > 0 && (
           <Button asChild variant="ghost" size="sm" className="gap-1 text-blue-600">
             <Link href={`/dashboard/concursos/${row.concursoId}/postulaciones/${row.id}`}>
-              <ClipboardCheck className="size-3.5" />
+              <Icon icon="ph:clipboard-text-duotone" className="size-3.5" />
               {row.calificacionesPendientes} por revisar
             </Link>
           </Button>
@@ -233,7 +234,7 @@ function PostulacionesContent() {
         isLoading={isLoading}
         emptyState={
           <EmptyState
-            icon={FileText}
+            icon="ph:file-text-duotone"
             title="No hay postulaciones"
             description={
               filters.estado !== ALL || filters.concursoId !== ALL

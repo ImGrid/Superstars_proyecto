@@ -4,18 +4,15 @@ import { use } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import {
-  AlertTriangle,
   ArrowLeft,
-  CheckCircle2,
   Pencil,
-  Users,
   Calendar,
   DollarSign,
   MapPin,
   Clock,
-  FileText,
   Download,
 } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { EstadoConcurso, EstadoPostulacion, RolUsuario } from "@superstars/shared";
 import { isAxiosError } from "axios";
 import { Button } from "@/components/ui/button";
@@ -231,7 +228,7 @@ function ConcursoDetailProponente({
         <Card>
           <CardContent className="flex items-center gap-3 pt-6">
             <div className="flex size-10 items-center justify-center rounded-lg bg-secondary-100">
-              <Users className="size-5 text-secondary-600" />
+              <Icon icon="ph:users-three-duotone"className="size-5 text-secondary-600" />
             </div>
             <div>
               <p className="text-xs text-secondary-500">Ganadores</p>
@@ -380,7 +377,7 @@ function DocumentosProponente({ concursoId }: { concursoId: number }) {
             className="flex items-center gap-3 rounded-lg border p-4"
           >
             <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary-100">
-              <FileText className="size-5 text-primary-700" />
+              <Icon icon="ph:file-text-duotone"className="size-5 text-primary-700" />
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-secondary-900">
@@ -618,7 +615,7 @@ function PostulacionCTA({
             className="gap-2 shrink-0"
             onClick={() => router.push(postularHref)}
           >
-            <FileText className="size-4" />
+            <Icon icon="ph:file-text-duotone"className="size-4" />
             Iniciar postulacion
           </Button>
         </CardContent>
@@ -647,7 +644,7 @@ function PostulacionCTA({
             className="gap-2 shrink-0"
             onClick={() => router.push(postularHref)}
           >
-            <FileText className="size-4" />
+            <Icon icon="ph:file-text-duotone"className="size-4" />
             Continuar postulacion
           </Button>
         </CardContent>
@@ -661,7 +658,7 @@ function PostulacionCTA({
       <Card className="border-amber-300 bg-amber-50/50">
         <CardContent className="space-y-3 py-6">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 size-5 shrink-0 text-amber-600" />
+            <Icon icon="ph:warning-duotone"className="mt-0.5 size-5 shrink-0 text-amber-600" />
             <div>
               <p className="font-semibold text-amber-900">
                 Tu postulacion fue observada
@@ -684,7 +681,7 @@ function PostulacionCTA({
               className="gap-2"
               onClick={() => router.push(postularHref)}
             >
-              <FileText className="size-4" />
+              <Icon icon="ph:file-text-duotone"className="size-4" />
               Corregir postulacion
             </Button>
           </div>
@@ -698,7 +695,7 @@ function PostulacionCTA({
     return (
       <Card className="border-blue-200 bg-blue-50/50">
         <CardContent className="flex items-center gap-3 py-6">
-          <CheckCircle2 className="size-5 shrink-0 text-blue-600" />
+          <Icon icon="ph:check-circle-duotone"className="size-5 shrink-0 text-blue-600" />
           <div>
             <p className="font-semibold text-blue-900">
               Tu postulacion fue enviada
@@ -718,7 +715,7 @@ function PostulacionCTA({
     return (
       <Card className="border-red-200 bg-red-50/50">
         <CardContent className="flex items-center gap-3 py-6">
-          <AlertTriangle className="size-5 shrink-0 text-red-600" />
+          <Icon icon="ph:warning-duotone"className="size-5 shrink-0 text-red-600" />
           <div>
             <p className="font-semibold text-red-900">
               Tu postulacion fue rechazada

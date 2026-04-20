@@ -3,7 +3,8 @@
 import { Suspense, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
-import { Plus, Search, Users } from "lucide-react";
+import { Plus, Search } from "lucide-react";
+import { Icon } from "@iconify/react";
 import {
   RolUsuario,
   type ListUsuariosQueryDto,
@@ -215,7 +216,7 @@ function UsuariosContent() {
         isLoading={isLoading}
         emptyState={
           <EmptyState
-            icon={Users}
+            icon="ph:users-three-duotone"
             title="No se encontraron usuarios"
             description={
               debouncedSearch || filters.rol !== ALL || filters.activo !== ALL

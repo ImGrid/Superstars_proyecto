@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Search, Trophy } from "lucide-react";
+import { Search } from "lucide-react";
 import { publicQueries } from "@/lib/api/query-keys";
 import { CardSkeleton } from "@/components/shared/loading-skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -104,7 +104,7 @@ export default function ConcursosPage() {
           {/* sin resultados */}
           {!isLoading && (!data || data.data.length === 0) && (
             <EmptyState
-              icon={Trophy}
+              icon="ph:trophy-duotone"
               title={tipo === "activos" ? "No hay concursos activos" : "No hay concursos anteriores"}
               description={
                 search

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin } from "lucide-react";
 
 const quickLinks = [
   { label: "Inicio", href: "/" },
@@ -107,15 +107,11 @@ export function PublicFooter() {
               <li className="flex items-start gap-2 text-sm text-primary-300">
                 <Mail className="mt-0.5 size-4 shrink-0 text-orange-500" />
                 <a
-                  href="mailto:info@superimpact360.lat"
+                  href="mailto:superimpact@ecv-impactobo.com"
                   className="transition-colors hover:text-orange-400"
                 >
-                  info@superimpact360.lat
+                  superimpact@ecv-impactobo.com
                 </a>
-              </li>
-              <li className="flex items-start gap-2 text-sm text-primary-300">
-                <Phone className="mt-0.5 size-4 shrink-0 text-orange-500" />
-                <span>+591 2 XXXXXXX</span>
               </li>
             </ul>
           </div>

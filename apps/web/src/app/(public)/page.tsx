@@ -1,33 +1,28 @@
 import Image from "next/image";
 import Link from "next/link";
-import {
-  FileCheck,
-  Users,
-  Trophy,
-  ArrowRight,
-  ChevronRight,
-} from "lucide-react";
+import { ArrowRight, ChevronRight } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ConcursosActivosSection } from "./_components/concursos-activos-section";
 
-// pasos de "como funciona"
+// pasos de "como funciona" - iconos de Phosphor duotone via Iconify
 const steps = [
   {
-    icon: FileCheck,
+    icon: "ph:building-office-duotone",
     title: "Registra tu empresa",
     description:
       "Crea tu perfil empresarial con los datos de tu empresa y documentacion requerida.",
   },
   {
-    icon: Users,
+    icon: "ph:note-pencil-duotone",
     title: "Completa el formulario",
     description:
       "Llena el formulario dinamico del concurso con tu propuesta de impacto.",
   },
   {
-    icon: Trophy,
+    icon: "ph:trophy-duotone",
     title: "Compite y gana",
     description:
       "Un jurado independiente evalua las propuestas y selecciona a los ganadores.",
@@ -206,7 +201,7 @@ export default function HomePage() {
               <div key={step.title} className="relative text-center">
                 {/* numero de paso */}
                 <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-2xl bg-orange-600 text-white shadow-lg shadow-orange-600/25">
-                  <step.icon className="size-7" />
+                  <Icon icon={step.icon} className="size-7" />
                 </div>
                 <span className="mb-2 block text-sm font-bold text-orange-600">
                   Paso {index + 1}
@@ -272,7 +267,7 @@ export default function HomePage() {
       {/* ===== CTA FINAL ===== */}
       <section className="bg-primary-700 py-20 lg:py-28">
         <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
-          <Trophy className="mx-auto mb-6 size-12 text-orange-400" />
+          <Icon icon="ph:trophy-duotone" className="mx-auto mb-6 size-12 text-orange-400" />
           <h2 className="font-heading text-3xl font-bold text-white sm:text-4xl">
             Listo para llevar tu empresa al siguiente nivel?
           </h2>

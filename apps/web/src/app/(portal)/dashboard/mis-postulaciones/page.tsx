@@ -3,7 +3,7 @@
 import { Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { FileText, Trophy } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -83,7 +83,7 @@ function MisPostulacionesContent() {
             variant="outline"
             onClick={() => router.push("/dashboard/concursos")}
           >
-            <Trophy className="size-4" />
+            <Icon icon="ph:trophy-duotone" className="size-4" />
             Ver concursos
           </Button>
         }
@@ -92,12 +92,12 @@ function MisPostulacionesContent() {
       {/* sin postulaciones */}
       {postulaciones.length === 0 && (
         <EmptyState
-          icon={FileText}
+          icon="ph:file-text-duotone"
           title="Aun no tienes postulaciones"
           description="Explora los concursos disponibles y postulate a los que apliquen para tu empresa."
           action={
             <Button onClick={() => router.push("/dashboard/concursos")}>
-              <Trophy className="size-4" />
+              <Icon icon="ph:trophy-duotone" className="size-4" />
               Ver concursos disponibles
             </Button>
           }

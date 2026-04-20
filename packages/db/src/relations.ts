@@ -5,6 +5,7 @@ import { empresa, postulacion, archivoPostulacion } from "./schema/empresa";
 import { rubrica, criterio, subCriterio, nivelEvaluacion } from "./schema/rubrica";
 import { evaluadorConcurso, asignacionEvaluador, calificacion, calificacionDetalle } from "./schema/calificacion";
 import { notificacionEmail } from "./schema/notificacion";
+import { preguntaFrecuente } from "./schema/faq";
 
 export const empresaRelations = relations(empresa, ({one, many}) => ({
 	usuario: one(usuario, {
@@ -52,6 +53,7 @@ export const concursoRelations = relations(concurso, ({one, many}) => ({
 	postulacions: many(postulacion),
 	rubricas: many(rubrica),
 	notificacionEmails: many(notificacionEmail),
+	preguntaFrecuentes: many(preguntaFrecuente),
 }));
 
 export const responsableConcursoRelations = relations(responsableConcurso, ({one}) => ({
@@ -215,5 +217,12 @@ export const sesionRefreshTokenRelations = relations(sesionRefreshToken, ({one})
 	usuario: one(usuario, {
 		fields: [sesionRefreshToken.usuarioId],
 		references: [usuario.id]
+	}),
+}));
+
+export const preguntaFrecuenteRelations = relations(preguntaFrecuente, ({one}) => ({
+	concurso: one(concurso, {
+		fields: [preguntaFrecuente.concursoId],
+		references: [concurso.id]
 	}),
 }));

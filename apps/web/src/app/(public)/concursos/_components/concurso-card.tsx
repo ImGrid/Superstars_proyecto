@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Trophy } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -50,7 +50,7 @@ export function ConcursoCard({ concurso }: ConcursoCardProps) {
       <Card className="group overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
         {/* header con gradiente */}
         <div className="relative flex h-28 items-center justify-center bg-gradient-to-r from-primary-700 via-primary-600 to-orange-500">
-          <Trophy className="size-14 text-white/15" />
+          <Icon icon="ph:trophy-duotone" className="size-14 text-white/15" />
           <div className="absolute top-3 right-3">
             <StateBadge tipo="concurso" valor={concurso.estado} />
           </div>

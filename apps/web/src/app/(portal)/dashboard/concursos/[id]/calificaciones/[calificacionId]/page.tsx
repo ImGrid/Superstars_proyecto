@@ -6,12 +6,11 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   ArrowLeft,
-  CheckCircle2,
   RotateCcw,
-  AlertTriangle,
   Loader2,
   User,
 } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { EstadoCalificacion } from "@superstars/shared";
 import type { CalificacionDetalleResponsable } from "@superstars/shared";
 import { Button } from "@/components/ui/button";
@@ -211,7 +210,7 @@ export default function RevisionCalificacionPage({ params }: PageProps) {
               {aprobarMutation.isPending ? (
                 <Loader2 className="size-3.5 animate-spin" />
               ) : (
-                <CheckCircle2 className="size-3.5" />
+                <Icon icon="ph:check-circle-duotone"className="size-3.5" />
               )}
               Aprobar calificacion
             </Button>
@@ -223,7 +222,7 @@ export default function RevisionCalificacionPage({ params }: PageProps) {
       {calif.estado === EstadoCalificacion.DEVUELTO && calif.comentarioResponsable && (
         <div className="px-4 pt-3 shrink-0">
           <Alert className="border-amber-300 bg-amber-50">
-            <AlertTriangle className="size-4 text-amber-600" />
+            <Icon icon="ph:warning-duotone"className="size-4 text-amber-600" />
             <AlertDescription className="text-amber-800">
               <span className="font-medium">Motivo de devolucion: </span>
               {calif.comentarioResponsable}

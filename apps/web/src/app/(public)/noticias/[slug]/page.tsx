@@ -3,7 +3,7 @@
 import { use } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Newspaper } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { publicQueries } from "@/lib/api/query-keys";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -47,7 +47,7 @@ export default function NoticiaDetallePage({
     return (
       <div className="mx-auto max-w-3xl px-4 pt-28 pb-12 sm:px-6 lg:px-8">
         <EmptyState
-          icon={Newspaper}
+          icon="ph:newspaper-duotone"
           title="Publicacion no encontrada"
           description="La publicacion que buscas no existe o fue removida."
           action={

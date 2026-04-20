@@ -1,7 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Trophy, Award, ArrowRight } from "lucide-react";
+import { Award, ArrowRight } from "lucide-react";
+import { Icon } from "@iconify/react";
 import Link from "next/link";
 import { publicQueries } from "@/lib/api/query-keys";
 import { getPublicResultados } from "@/lib/api/public.api";
@@ -49,7 +50,7 @@ export default function ResultadosPage() {
             </div>
           ) : concursosConResultados.length === 0 ? (
             <EmptyState
-              icon={Trophy}
+              icon="ph:trophy-duotone"
               title="Sin resultados publicados"
               description="Aun no hay resultados publicados. Cuando se finalice un concurso, los ganadores se mostraran aqui."
               action={
@@ -171,7 +172,7 @@ function GanadorCard({
         {/* icono de posicion */}
         <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-white shadow-sm">
           {posicion <= 3 ? (
-            <Trophy className={`size-7 ${estilo.icon}`} />
+            <Icon icon="ph:trophy-duotone" className={`size-7 ${estilo.icon}`} />
           ) : (
             <Award className={`size-7 ${estilo.icon}`} />
           )}

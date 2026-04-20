@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { FileText, Loader2, Plus, Trash2 } from "lucide-react";
+import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { EstadoConcurso, DEFAULT_TEMPLATE } from "@superstars/shared";
 import { Button } from "@/components/ui/button";
 import {
@@ -115,7 +116,7 @@ export function FormularioTab({ concursoId, estadoConcurso }: FormularioTabProps
       <Card>
         <CardContent className="py-8">
           <EmptyState
-            icon={FileText}
+            icon="ph:file-text-duotone"
             title="Sin formulario"
             description="Este concurso no tiene un formulario de postulacion configurado."
             action={

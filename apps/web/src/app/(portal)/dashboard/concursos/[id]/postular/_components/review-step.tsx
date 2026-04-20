@@ -1,7 +1,7 @@
 "use client";
 
 import { memo } from "react";
-import { CheckCircle2, AlertTriangle } from "lucide-react";
+import { Icon } from "@iconify/react";
 import type { SchemaDefinition } from "@superstars/shared";
 import { calculateCompletionPercentage, isFieldFilled } from "@superstars/shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,12 +43,12 @@ export const ReviewStep = memo(function ReviewStep({
           <Progress value={porcentaje} className="h-3" />
           {isComplete ? (
             <p className="mt-3 flex items-center gap-2 text-sm text-emerald-600">
-              <CheckCircle2 className="size-4" />
+              <Icon icon="ph:check-circle-duotone"className="size-4" />
               Tu formulario esta completo. Puedes enviar tu postulacion.
             </p>
           ) : (
             <p className="mt-3 flex items-center gap-2 text-sm text-amber-600">
-              <AlertTriangle className="size-4" />
+              <Icon icon="ph:warning-duotone"className="size-4" />
               Completa todos los campos requeridos antes de enviar.
             </p>
           )}
@@ -71,7 +71,7 @@ export const ReviewStep = memo(function ReviewStep({
                 <div className="flex items-center gap-2">
                   {secComplete ? (
                     <Badge variant="outline" className="text-emerald-600 border-emerald-300">
-                      <CheckCircle2 className="size-3 mr-1" />
+                      <Icon icon="ph:check-circle-duotone"className="size-3 mr-1" />
                       Completa
                     </Badge>
                   ) : (

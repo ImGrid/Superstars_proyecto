@@ -3,7 +3,8 @@
 import { use, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Send, Loader2, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Save, Send, Loader2 } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { toast } from "sonner";
 import { EstadoCalificacion } from "@superstars/shared";
 import { Button } from "@/components/ui/button";
@@ -239,7 +240,7 @@ export default function CalificacionPage({ params }: PageProps) {
         <div className="px-4 pt-3 shrink-0">
           {isDevuelto && calif?.comentarioResponsable && (
             <Alert className="border-amber-300 bg-amber-50">
-              <AlertTriangle className="size-4 text-amber-600" />
+              <Icon icon="ph:warning-duotone"className="size-4 text-amber-600" />
               <AlertDescription className="text-amber-800">
                 <span className="font-medium">Devuelta por el responsable: </span>
                 {calif.comentarioResponsable}
@@ -248,7 +249,7 @@ export default function CalificacionPage({ params }: PageProps) {
           )}
           {calif?.estado === EstadoCalificacion.APROBADO && (
             <Alert className="border-emerald-300 bg-emerald-50">
-              <CheckCircle2 className="size-4 text-emerald-600" />
+              <Icon icon="ph:check-circle-duotone"className="size-4 text-emerald-600" />
               <AlertDescription className="text-emerald-800">
                 Calificacion aprobada. Solo lectura.
               </AlertDescription>

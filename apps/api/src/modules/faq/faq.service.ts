@@ -12,12 +12,17 @@ import { FaqRepository } from './faq.repository';
 export class FaqService {
   constructor(private readonly faqRepository: FaqRepository) {}
 
-  // Listar FAQs ordenadas (endpoint publico)
+  // Listar preguntas generales (endpoint publico /faq — sin concurso asignado)
   async findAllPublic(): Promise<FaqResponse[]> {
     return this.faqRepository.findAllPublic();
   }
 
-  // Listar FAQs con paginacion (admin)
+  // Listar preguntas de un concurso especifico (endpoint publico /faq/concurso/:id)
+  async findByConcursoId(concursoId: number): Promise<FaqResponse[]> {
+    return this.faqRepository.findByConcursoId(concursoId);
+  }
+
+  // Listar FAQs con paginacion y filtros opcionales (admin)
   async findAll(query: ListFaqQueryDto): Promise<PaginatedResponse<FaqResponse>> {
     const { page, limit } = query;
     const { data, total } = await this.faqRepository.findAll(query);

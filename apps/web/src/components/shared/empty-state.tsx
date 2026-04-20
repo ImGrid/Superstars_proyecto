@@ -1,14 +1,15 @@
-import type { LucideIcon } from "lucide-react";
+import { Icon } from "@iconify/react";
 
 interface EmptyStateProps {
-  icon: LucideIcon;
+  // nombre del icono Iconify (ej: "ph:trophy-duotone")
+  icon: string;
   title: string;
   description?: string;
   action?: React.ReactNode;
 }
 
 export function EmptyState({
-  icon: Icon,
+  icon,
   title,
   description,
   action,
@@ -16,7 +17,7 @@ export function EmptyState({
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
       <div className="flex size-12 items-center justify-center rounded-xl bg-secondary-100">
-        <Icon className="size-6 text-secondary-400" />
+        <Icon icon={icon} className="size-6 text-secondary-400" />
       </div>
       <h3 className="mt-4 text-sm font-semibold text-secondary-900">
         {title}

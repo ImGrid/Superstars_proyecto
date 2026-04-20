@@ -4,7 +4,8 @@ import { Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
-import { Newspaper, Plus, Search, Star } from "lucide-react";
+import { Plus, Search } from "lucide-react";
+import { Icon } from "@iconify/react";
 import {
   EstadoPublicacion,
   type ListPublicacionesQueryDto,
@@ -69,7 +70,7 @@ const columns: Column<PublicacionResponse>[] = [
     header: "Dest.",
     cell: (row) =>
       row.destacado ? (
-        <Star className="size-4 fill-warning-500 text-warning-500" />
+        <Icon icon="ph:star-duotone" className="size-4 text-warning-500" />
       ) : null,
     className: "w-16",
   },
@@ -179,7 +180,7 @@ function PublicacionesContent() {
         isLoading={isLoading}
         emptyState={
           <EmptyState
-            icon={Newspaper}
+            icon="ph:newspaper-duotone"
             title="No se encontraron publicaciones"
             description={
               debouncedSearch || filters.estado !== ALL

@@ -2,11 +2,8 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import {
-  AlertTriangle,
-  CheckCircle2,
-  Info,
-} from "lucide-react";
+import { Info } from "lucide-react";
+import { Icon } from "@iconify/react";
 import type { RubricaFullResponse } from "@superstars/shared";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -76,12 +73,12 @@ export function RubricaBuilder({
                     variant="outline"
                     className="gap-1 border-emerald-300 text-emerald-600"
                   >
-                    <CheckCircle2 className="size-3" />
+                    <Icon icon="ph:check-circle-duotone"className="size-3" />
                     Completa
                   </Badge>
                 ) : (
                   <Badge variant="destructive" className="gap-1">
-                    <AlertTriangle className="size-3" />
+                    <Icon icon="ph:warning-duotone"className="size-3" />
                     {validacion.errores.length}{" "}
                     {validacion.errores.length === 1 ? "error" : "errores"}
                   </Badge>

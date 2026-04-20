@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogOut, ChevronsUpDown } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { useAuth, useLogout } from "@/hooks/use-auth";
 import { getNavItems } from "@/lib/auth/nav-config";
 import { rolConfig } from "@/lib/estado-labels";
@@ -90,7 +91,7 @@ export function AppSidebar() {
                           className="h-10"
                         >
                           <Link href={item.href}>
-                            <item.icon className="size-5" />
+                            <Icon icon={item.icon} className="size-5" />
                             <span className="text-base">{item.label}</span>
                           </Link>
                         </SidebarMenuButton>

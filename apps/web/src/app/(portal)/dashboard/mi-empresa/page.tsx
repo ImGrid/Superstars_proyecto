@@ -3,7 +3,7 @@
 import { Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
-import { Building2 } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { PageHeader } from "@/components/shared/page-header";
 import { FormSkeleton } from "@/components/shared/loading-skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -72,7 +72,7 @@ function MiEmpresaContent() {
 
       {isCreating && (
         <div className="flex items-center gap-3 rounded-lg border border-primary-200 bg-primary-50 p-4">
-          <Building2 className="size-5 text-primary-600 shrink-0" />
+          <Icon icon="ph:building-office-duotone" className="size-5 text-primary-600 shrink-0" />
           <p className="text-sm text-primary-700">
             Aun no tienes una empresa registrada. Completa el formulario para crear el perfil de tu empresa.
             Los campos marcados con * son obligatorios.

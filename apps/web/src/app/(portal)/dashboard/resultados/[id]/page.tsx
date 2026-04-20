@@ -5,13 +5,11 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
-  Trophy,
   Medal,
-  Star,
   TrendingUp,
   TrendingDown,
-  Users,
 } from "lucide-react";
+import { Icon } from "@iconify/react";
 import {
   BarChart,
   Bar,
@@ -46,7 +44,7 @@ function getBarColor(estado: string, posicion: number | null): string {
 // medalla para posicion
 function MedalIcon({ posicion }: { posicion: number }) {
   if (posicion === 1)
-    return <Trophy className="size-4 text-amber-500" />;
+    return <Icon icon="ph:trophy-duotone" className="size-4 text-amber-500" />;
   if (posicion === 2)
     return <Medal className="size-4 text-slate-400" />;
   if (posicion === 3)
@@ -141,12 +139,12 @@ export default function RankingConcursoPage({
       {/* stats de resumen */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MiniStat
-          icon={<Users className="size-5 text-primary-600" />}
+          icon={<Icon icon="ph:users-three-duotone" className="size-5 text-primary-600" />}
           label="Postulaciones calificadas"
           value={String(data.totalCalificadas)}
         />
         <MiniStat
-          icon={<Star className="size-5 text-amber-500" />}
+          icon={<Icon icon="ph:star-duotone" className="size-5 text-amber-500" />}
           label="Promedio"
           value={
             data.promedioCalificadas !== null

@@ -5,7 +5,8 @@ import { useForm, FormProvider } from "react-hook-form";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { isAxiosError } from "axios";
-import { ArrowLeft, AlertTriangle, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { toast } from "sonner";
 import {
   EstadoPostulacion,
@@ -270,7 +271,7 @@ function PostularFormContent({
       {/* alerta de observacion */}
       {estado === EstadoPostulacion.OBSERVADO && observacion && (
         <Alert className="border-amber-300 bg-amber-50">
-          <AlertTriangle className="size-4 text-amber-600" />
+          <Icon icon="ph:warning-duotone"className="size-4 text-amber-600" />
           <AlertDescription className="text-amber-800">
             <span className="font-medium">Observacion del responsable:</span>{" "}
             {observacion}

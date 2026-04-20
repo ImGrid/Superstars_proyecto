@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Newspaper } from "lucide-react";
 import { publicQueries } from "@/lib/api/query-keys";
 import { CardSkeleton } from "@/components/shared/loading-skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -90,7 +89,7 @@ export default function NoticiasPage() {
 
           {!isLoading && (!data || data.data.length === 0) && (
             <EmptyState
-              icon={Newspaper}
+              icon="ph:newspaper-duotone"
               title="No hay publicaciones disponibles"
               description="Aun no se han publicado noticias. Vuelve pronto para ver las novedades."
             />

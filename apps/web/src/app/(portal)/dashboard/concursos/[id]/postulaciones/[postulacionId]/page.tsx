@@ -7,14 +7,12 @@ import { toast } from "sonner";
 import Link from "next/link";
 import {
   ArrowLeft,
-  CheckCircle2,
-  AlertTriangle,
   XCircle,
   MessageSquare,
   Loader2,
-  ClipboardCheck,
   User,
 } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { EstadoPostulacion, EstadoCalificacion } from "@superstars/shared";
 import type { CalificacionListItem } from "@superstars/shared";
 import { Button } from "@/components/ui/button";
@@ -204,7 +202,7 @@ export default function PostulacionDetallePage({ params }: PageProps) {
       {/* observacion existente */}
       {postulacion.observacion && (
         <Alert className="border-amber-300 bg-amber-50">
-          <AlertTriangle className="size-4 text-amber-600" />
+          <Icon icon="ph:warning-duotone"className="size-4 text-amber-600" />
           <AlertDescription className="text-amber-800">
             <span className="font-medium">Observacion: </span>
             {postulacion.observacion}
@@ -258,7 +256,7 @@ export default function PostulacionDetallePage({ params }: PageProps) {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
-                  <ClipboardCheck className="size-5 text-secondary-400" />
+                  <Icon icon="ph:clipboard-text-duotone"className="size-5 text-secondary-400" />
                   Calificaciones ({califsDeEstaPostulacion.length})
                 </CardTitle>
               </CardHeader>
@@ -334,7 +332,7 @@ export default function PostulacionDetallePage({ params }: PageProps) {
               {aprobarMutation.isPending ? (
                 <Loader2 className="size-4 animate-spin" />
               ) : (
-                <CheckCircle2 className="size-4" />
+                <Icon icon="ph:check-circle-duotone"className="size-4" />
               )}
               Aprobar para evaluacion
             </Button>
@@ -344,7 +342,7 @@ export default function PostulacionDetallePage({ params }: PageProps) {
               onClick={() => { setObservacion(""); setObservarOpen(true); }}
               disabled={isBusy}
             >
-              <AlertTriangle className="size-4" />
+              <Icon icon="ph:warning-duotone"className="size-4" />
               Observar
             </Button>
             <Button

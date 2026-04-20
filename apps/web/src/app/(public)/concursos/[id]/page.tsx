@@ -5,13 +5,12 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
-  Trophy,
   Clock,
-  CheckCircle2,
   FileSearch,
   Award,
 } from "lucide-react";
-import { publicQueries } from "@/lib/api/query-keys";
+import { Icon } from "@iconify/react";
+import { publicQueries, faqQueries } from "@/lib/api/query-keys";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,6 +22,12 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { StateBadge } from "@/components/shared/state-badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import {
@@ -62,7 +67,10 @@ function buildTimelinePhases(concurso: {
     {
       label: "Evaluacion",
       date: fechaCierreReal,
-      icon: CheckCircle2,
+      // ph:check-circle-duotone via Icon (compatible con React.ComponentType rendering abajo)
+      icon: (props: { className?: string }) => (
+        <Icon icon="ph:check-circle-duotone" className={props.className} />
+      ),
     },
     {
       label: "Resultados",
@@ -92,6 +100,8 @@ export default function ConcursoDetallePage({
     isError,
   } = useQuery(publicQueries.concursoDetail(concursoId));
 
+  const { data: faqItems } = useQuery(faqQueries.byConcurso(concursoId));
+
   // skeleton de carga
   if (isLoading) {
     return (
@@ -117,7 +127,7 @@ export default function ConcursoDetallePage({
     return (
       <div className="mx-auto max-w-7xl px-4 pt-28 pb-12 sm:px-6 lg:px-8">
         <EmptyState
-          icon={Trophy}
+          icon="ph:trophy-duotone"
           title="Concurso no encontrado"
           description="El concurso que buscas no existe o no esta disponible."
           action={
@@ -196,6 +206,10 @@ export default function ConcursoDetallePage({
               <TabsList className="w-full justify-start">
                 <TabsTrigger value="descripcion">Descripcion y Requisitos</TabsTrigger>
                 <TabsTrigger value="cronograma">Cronograma</TabsTrigger>
+                {/* tab preguntas: solo visible si el concurso tiene FAQs */}
+                {faqItems && faqItems.length > 0 && (
+                  <TabsTrigger value="preguntas">Preguntas frecuentes</TabsTrigger>
+                )}
               </TabsList>
 
               {/* tab: descripcion + bases + documentos */}
@@ -264,6 +278,24 @@ export default function ConcursoDetallePage({
               <TabsContent value="cronograma" className="mt-6">
                 <ConcursoTimeline phases={phases} />
               </TabsContent>
+
+              {/* tab: preguntas frecuentes del concurso */}
+              {faqItems && faqItems.length > 0 && (
+                <TabsContent value="preguntas" className="mt-6">
+                  <Accordion type="multiple" className="w-full">
+                    {faqItems.map((faq) => (
+                      <AccordionItem key={faq.id} value={`faq-${faq.id}`}>
+                        <AccordionTrigger className="text-base font-medium text-secondary-900 hover:no-underline hover:text-primary-700">
+                          {faq.pregunta}
+                        </AccordionTrigger>
+                        <AccordionContent className="leading-relaxed text-secondary-600">
+                          {faq.respuesta}
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                </TabsContent>
+              )}
             </Tabs>
           </div>
 

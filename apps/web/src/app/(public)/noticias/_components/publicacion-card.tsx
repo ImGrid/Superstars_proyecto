@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Newspaper } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/format";
@@ -29,7 +29,7 @@ export function PublicacionCard({ publicacion }: PublicacionCardProps) {
             />
           ) : (
             <div className="flex size-full items-center justify-center">
-              <Newspaper className="size-10 text-secondary-300" />
+              <Icon icon="ph:newspaper-duotone" className="size-10 text-secondary-300" />
             </div>
           )}
         </div>

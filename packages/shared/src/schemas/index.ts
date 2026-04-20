@@ -170,9 +170,12 @@ export {
 } from './publicacion.schema';
 
 export {
+  categoriaFaqValues,
+  categoriaFaqSchema,
   createFaqSchema,
   updateFaqSchema,
   listFaqQuerySchema,
+  type CategoriaFaq,
   type CreateFaqDto,
   type UpdateFaqDto,
   type ListFaqQueryDto,

@@ -15,6 +15,12 @@ export function listPublicFaq() {
     .then((r) => r.data);
 }
 
+export function listPublicFaqByConcurso(concursoId: number) {
+  return apiClient
+    .get<FaqResponse[]>(`/public/faq/concurso/${concursoId}`)
+    .then((r) => r.data);
+}
+
 // --- Endpoints admin ---
 
 export function listFaq(params?: Partial<ListFaqQueryDto>) {

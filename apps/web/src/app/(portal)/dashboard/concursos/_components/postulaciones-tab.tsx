@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { FileText, Eye, ClipboardCheck, UserCheck, Trophy, CheckCircle2 } from "lucide-react";
+import { Eye, UserCheck } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { toast } from "sonner";
 import { EstadoCalificacion, EstadoConcurso, EstadoPostulacion } from "@superstars/shared";
 import type { PostulacionListItem } from "@superstars/shared";
@@ -172,7 +173,7 @@ export function PostulacionesTab({ concursoId, estadoConcurso, numeroGanadores }
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            <FileText className="size-5 text-secondary-400" />
+            <Icon icon="ph:file-text-duotone" className="size-5 text-secondary-400" />
             Postulaciones ({postulaciones.length})
           </CardTitle>
           <Select value={filtroEstado} onValueChange={setFiltroEstado}>
@@ -191,7 +192,7 @@ export function PostulacionesTab({ concursoId, estadoConcurso, numeroGanadores }
         {/* banner de calificaciones pendientes de revision */}
         {pendientesRevision.length > 0 && (
           <div className="flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
-            <ClipboardCheck className="size-5 text-blue-600 shrink-0" />
+            <Icon icon="ph:clipboard-text-duotone" className="size-5 text-blue-600 shrink-0" />
             <div className="flex-1">
               <p className="text-sm font-medium text-blue-800">
                 {pendientesRevision.length} calificacion{pendientesRevision.length !== 1 ? "es" : ""} pendiente{pendientesRevision.length !== 1 ? "s" : ""} de revision
@@ -221,7 +222,7 @@ export function PostulacionesTab({ concursoId, estadoConcurso, numeroGanadores }
         {/* banner de seleccion de ganadores */}
         {puedeSeleccionarGanadores && todasCalificadas && (
           <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-            <Trophy className="size-5 text-amber-600 shrink-0" />
+            <Icon icon="ph:trophy-duotone" className="size-5 text-amber-600 shrink-0" />
             <div className="flex-1">
               <p className="text-sm font-medium text-amber-800">
                 Todas las postulaciones estan calificadas
@@ -243,7 +244,7 @@ export function PostulacionesTab({ concursoId, estadoConcurso, numeroGanadores }
 
         {postulaciones.length === 0 ? (
           <EmptyState
-            icon={FileText}
+            icon="ph:file-text-duotone"
             title="No hay postulaciones"
             description={
               filtroEstado !== "all"
@@ -295,7 +296,7 @@ export function PostulacionesTab({ concursoId, estadoConcurso, numeroGanadores }
           <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white p-4 shadow-lg">
             <div className="mx-auto flex max-w-7xl items-center justify-between">
               <div className="flex items-center gap-3">
-                <CheckCircle2 className="size-5 text-success-600" />
+                <Icon icon="ph:check-circle-duotone" className="size-5 text-success-600" />
                 <span className="text-sm font-medium">
                   {selectedIds.size} de {Math.min(numeroGanadores, calificadas.length)} ganador{selectedIds.size !== 1 ? "es" : ""} seleccionado{selectedIds.size !== 1 ? "s" : ""}
                 </span>
@@ -313,7 +314,7 @@ export function PostulacionesTab({ concursoId, estadoConcurso, numeroGanadores }
                   className="bg-amber-600 hover:bg-amber-700"
                   onClick={() => setConfirmOpen(true)}
                 >
-                  <Trophy className="size-4" />
+                  <Icon icon="ph:trophy-duotone" className="size-4" />
                   Confirmar ganadores
                 </Button>
               </div>

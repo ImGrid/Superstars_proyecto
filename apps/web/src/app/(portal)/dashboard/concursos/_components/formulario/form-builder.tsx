@@ -3,12 +3,8 @@
 import { useReducer, useRef, useState, useMemo, useCallback, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import {
-  AlertTriangle,
-  Loader2,
-  Plus,
-  Save,
-} from "lucide-react";
+import { Loader2, Plus, Save } from "lucide-react";
+import { Icon } from "@iconify/react";
 import type { FormularioResponse, FormField, SchemaDefinition } from "@superstars/shared";
 import { schemaDefinitionSchema } from "@superstars/shared";
 import { Button } from "@/components/ui/button";
@@ -184,7 +180,7 @@ export function FormBuilder({ concursoId, formulario, canEdit }: FormBuilderProp
             <Tooltip>
               <TooltipTrigger asChild>
                 <Badge variant="destructive" className="gap-1">
-                  <AlertTriangle className="size-3" />
+                  <Icon icon="ph:warning-duotone"className="size-3" />
                   {errorCount} {errorCount === 1 ? "error" : "errores"}
                 </Badge>
               </TooltipTrigger>

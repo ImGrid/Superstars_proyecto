@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^4",
+    "@iconify/react": "^6.0.2",
     "@superstars/shared": "workspace:*",
     "@tanstack/react-query": "^5",
     "@tanstack/react-query-devtools": "^5",

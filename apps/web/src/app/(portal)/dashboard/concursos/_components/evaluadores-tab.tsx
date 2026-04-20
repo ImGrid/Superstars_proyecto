@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Loader2, Plus, Trash2, ClipboardCheck } from "lucide-react";
+import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Icon } from "@iconify/react";
 import {
   RolUsuario,
   type EvaluadorConcursoResponse,
@@ -170,7 +171,7 @@ export function EvaluadoresTab({ concursoId }: EvaluadoresTabProps) {
         {/* tabla de evaluadores */}
         {!evaluadores || evaluadores.length === 0 ? (
           <EmptyState
-            icon={ClipboardCheck}
+            icon="ph:clipboard-text-duotone"
             title="Sin evaluadores"
             description="No hay evaluadores asignados a este concurso. Agrega jurados para que puedan evaluar las postulaciones."
           />

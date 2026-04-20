@@ -2,7 +2,7 @@
 
 import { Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Search, Trophy } from "lucide-react";
+import { Search } from "lucide-react";
 import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
 import type { ListConcursosQueryDto } from "@superstars/shared";
 import { Input } from "@/components/ui/input";
@@ -91,7 +91,7 @@ function ConcursosProponenteContent() {
       {/* sin resultados */}
       {!isLoading && concursos.length === 0 && (
         <EmptyState
-          icon={Trophy}
+          icon="ph:trophy-duotone"
           title="No hay concursos disponibles"
           description={
             debouncedSearch

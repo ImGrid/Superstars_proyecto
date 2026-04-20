@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Loader2, Plus, Trash2, Users } from "lucide-react";
+import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Icon } from "@iconify/react";
 import {
   RolUsuario,
   type ResponsableResponse,
@@ -177,7 +178,7 @@ export function ResponsablesTab({ concursoId }: ResponsablesTabProps) {
         {/* tabla de responsables */}
         {!responsables || responsables.length === 0 ? (
           <EmptyState
-            icon={Users}
+            icon="ph:users-three-duotone"
             title="Sin responsables"
             description="No hay responsables asignados a este concurso."
           />

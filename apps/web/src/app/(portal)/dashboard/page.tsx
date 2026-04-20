@@ -2,13 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import {
-  Trophy,
-  FileText,
-  Building2,
-  AlertTriangle,
-  ArrowRight,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { RolUsuario, EstadoPostulacion } from "@superstars/shared";
 import type { PostulacionListItem } from "@superstars/shared";
 import { Button } from "@/components/ui/button";
@@ -87,7 +82,7 @@ function DashboardProponente({ nombre }: { nombre: string }) {
       {/* alerta si no tiene empresa */}
       {!loadingEmp && !hasEmpresa && (
         <div className="flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4">
-          <AlertTriangle className="mt-0.5 size-5 shrink-0 text-amber-600" />
+          <Icon icon="ph:warning-duotone" className="mt-0.5 size-5 shrink-0 text-amber-600" />
           <div>
             <p className="text-sm font-medium text-amber-800">
               Registra tu empresa para poder postularte
@@ -101,7 +96,7 @@ function DashboardProponente({ nombre }: { nombre: string }) {
               className="mt-2"
               onClick={() => router.push("/dashboard/mi-empresa")}
             >
-              <Building2 className="size-4" />
+              <Icon icon="ph:building-office-duotone" className="size-4" />
               Registrar empresa
             </Button>
           </div>
@@ -115,7 +110,7 @@ function DashboardProponente({ nombre }: { nombre: string }) {
           title="Concursos disponibles"
           value={loadingConc ? null : String(totalConcursos)}
           description="Concursos abiertos para postularte"
-          icon={<Trophy className="size-5 text-primary-600" />}
+          icon={<Icon icon="ph:trophy-duotone" className="size-5 text-primary-600" />}
           action={
             <Button
               variant="ghost"
@@ -138,7 +133,7 @@ function DashboardProponente({ nombre }: { nombre: string }) {
               ? `${counts.borrador} en borrador`
               : "Total de postulaciones"
           }
-          icon={<FileText className="size-5 text-primary-600" />}
+          icon={<Icon icon="ph:file-text-duotone" className="size-5 text-primary-600" />}
           action={
             <Button
               variant="ghost"
@@ -157,7 +152,7 @@ function DashboardProponente({ nombre }: { nombre: string }) {
           title="Mi empresa"
           value={loadingEmp ? null : (hasEmpresa ? empresa.razonSocial ?? "Registrada" : "Sin registrar")}
           description={hasEmpresa ? "Datos de empresa completos" : "Completa el registro"}
-          icon={<Building2 className="size-5 text-primary-600" />}
+          icon={<Icon icon="ph:building-office-duotone" className="size-5 text-primary-600" />}
           action={
             <Button
               variant="ghost"
@@ -175,7 +170,7 @@ function DashboardProponente({ nombre }: { nombre: string }) {
       {/* alertas de postulaciones observadas */}
       {counts.observado > 0 && (
         <div className="flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4">
-          <AlertTriangle className="mt-0.5 size-5 shrink-0 text-amber-600" />
+          <Icon icon="ph:warning-duotone" className="mt-0.5 size-5 shrink-0 text-amber-600" />
           <div>
             <p className="text-sm font-medium text-amber-800">
               Tienes {counts.observado} postulacion{counts.observado !== 1 && "es"} con observaciones

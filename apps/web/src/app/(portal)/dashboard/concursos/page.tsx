@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
-import { Plus, Search, Trophy } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import {
   EstadoConcurso,
   RolUsuario,
@@ -203,7 +203,7 @@ function ConcursosAdminContent() {
         isLoading={isLoading}
         emptyState={
           <EmptyState
-            icon={Trophy}
+            icon="ph:trophy-duotone"
             title="No se encontraron concursos"
             description={
               debouncedSearch || filters.estado !== ALL

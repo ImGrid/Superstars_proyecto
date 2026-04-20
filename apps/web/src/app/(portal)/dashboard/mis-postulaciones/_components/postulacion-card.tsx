@@ -1,13 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import {
-  Clock,
-  FileEdit,
-  AlertTriangle,
-  Eye,
-  Trophy as TrophyIcon,
-} from "lucide-react";
+import { Clock, FileEdit, Eye } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { EstadoPostulacion } from "@superstars/shared";
 import type { PostulacionListItem } from "@superstars/shared";
 import { Button } from "@/components/ui/button";
@@ -67,7 +62,7 @@ function getMainAction(estado: EstadoPostulacion): {
     case EstadoPostulacion.OBSERVADO:
       return {
         label: "Corregir postulacion",
-        icon: <AlertTriangle className="size-4" />,
+        icon: <Icon icon="ph:warning-duotone" className="size-4" />,
         variant: "default",
       };
     default:
@@ -109,7 +104,7 @@ export function PostulacionCard({ postulacion }: PostulacionCardProps) {
         {/* ganador: destacado especial */}
         {isGanador && (
           <div className="flex items-center gap-2 rounded-md bg-emerald-100 px-3 py-2">
-            <TrophyIcon className="size-4 text-emerald-600" />
+            <Icon icon="ph:trophy-duotone" className="size-4 text-emerald-600" />
             <span className="text-sm font-semibold text-emerald-700">
               Tu empresa fue seleccionada como ganadora
             </span>
@@ -119,7 +114,7 @@ export function PostulacionCard({ postulacion }: PostulacionCardProps) {
         {/* observacion del responsable */}
         {isObservado && postulacion.observacion && (
           <div className="flex items-start gap-2 rounded-md bg-amber-100 px-3 py-2">
-            <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-600" />
+            <Icon icon="ph:warning-duotone" className="mt-0.5 size-4 shrink-0 text-amber-600" />
             <p className="text-sm text-amber-800 line-clamp-3">
               {postulacion.observacion}
             </p>

@@ -22,15 +22,22 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { Public } from '../auth/decorators/public.decorator';
 import { FaqService } from './faq.service';
 
-// Endpoint publico: GET /api/public/faq
+// Endpoints publicos: GET /api/public/faq y GET /api/public/faq/concurso/:id
 @Public()
 @Controller('public/faq')
 export class FaqPublicController {
   constructor(private readonly faqService: FaqService) {}
 
+  // Preguntas generales (sin concurso asignado), agrupables por categoria en el frontend
   @Get()
   async findAllPublic() {
     return this.faqService.findAllPublic();
+  }
+
+  // Preguntas especificas de un concurso (para mostrar en la pagina del concurso)
+  @Get('concurso/:id')
+  async findByConcurso(@Param('id', ParseIntPipe) id: number) {
+    return this.faqService.findByConcursoId(id);
   }
 }
 
@@ -39,7 +46,7 @@ export class FaqPublicController {
 export class FaqAdminController {
   constructor(private readonly faqService: FaqService) {}
 
-  // Listar con paginacion (admin/responsable)
+  // Listar con paginacion y filtros opcionales (admin/responsable)
   @Get()
   @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
   async findAll(@Query() rawQuery: Record<string, string>) {

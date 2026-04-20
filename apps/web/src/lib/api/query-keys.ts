@@ -53,7 +53,7 @@ import {
   getCalificacionDetalle,
   listAsignacionesEvaluador,
 } from "./evaluacion.api";
-import { listPublicFaq, listFaq } from "./faq.api";
+import { listPublicFaq, listFaq, listPublicFaqByConcurso } from "./faq.api";
 
 // --- Auth ---
 
@@ -385,5 +385,11 @@ export const faqQueries = {
     queryOptions({
       queryKey: ["public", "faq"] as const,
       queryFn: listPublicFaq,
+    }),
+
+  byConcurso: (concursoId: number) =>
+    queryOptions({
+      queryKey: ["public", "faq", "concurso", concursoId] as const,
+      queryFn: () => listPublicFaqByConcurso(concursoId),
     }),
 };

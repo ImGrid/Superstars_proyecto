@@ -2,14 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import {
-  Trophy,
-  BarChart2,
-  ArrowRight,
-  CheckCircle2,
-  Users,
-  Star,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -69,17 +63,17 @@ export default function ResultadosPage() {
       {/* resumen global */}
       <div className="grid gap-4 sm:grid-cols-3">
         <MiniStat
-          icon={<BarChart2 className="size-5 text-primary-600" />}
+          icon={<Icon icon="ph:chart-line-up-duotone" className="size-5 text-primary-600" />}
           label="En evaluacion"
           value={String(enEvaluacion)}
         />
         <MiniStat
-          icon={<CheckCircle2 className="size-5 text-secondary-600" />}
+          icon={<Icon icon="ph:check-circle-duotone" className="size-5 text-secondary-600" />}
           label="Finalizados"
           value={String(finalizados)}
         />
         <MiniStat
-          icon={<Users className="size-5 text-primary-600" />}
+          icon={<Icon icon="ph:users-three-duotone" className="size-5 text-primary-600" />}
           label="Postulaciones calificadas"
           value={String(totalCalificadas)}
         />
@@ -88,7 +82,7 @@ export default function ResultadosPage() {
       {/* lista de concursos */}
       {concursos.length === 0 ? (
         <EmptyState
-          icon={BarChart2}
+          icon="ph:chart-line-up-duotone"
           title="Sin concursos en seguimiento"
           description="No hay concursos en evaluacion o con resultados publicados."
         />
@@ -158,7 +152,7 @@ function ConcursoCard({
         {/* puntaje promedio */}
         {concurso.promedioCalificadas !== null && (
           <div className="flex items-center gap-2 text-sm">
-            <Star className="size-4 text-amber-500" />
+            <Icon icon="ph:star-duotone" className="size-4 text-amber-500" />
             <span className="text-secondary-600">Promedio:</span>
             <span className="font-semibold text-secondary-900">
               {concurso.promedioCalificadas.toFixed(1)} pts
@@ -169,7 +163,7 @@ function ConcursoCard({
         {/* ganadores si los hay */}
         {concurso.totalGanadores > 0 && (
           <div className="flex items-center gap-2 text-sm">
-            <Trophy className="size-4 text-amber-500" />
+            <Icon icon="ph:trophy-duotone" className="size-4 text-amber-500" />
             <span className="text-secondary-600">Ganadores seleccionados:</span>
             <span className="font-semibold text-secondary-900">
               {concurso.totalGanadores}

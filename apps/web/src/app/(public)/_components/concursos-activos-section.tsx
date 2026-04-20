@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Trophy } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CardSkeleton } from "@/components/shared/loading-skeleton";
@@ -48,7 +49,7 @@ export function ConcursosActivosSection() {
               <Card className="flex items-center justify-center border-dashed bg-secondary-50 sm:col-span-2 lg:col-span-3">
                 <CardContent className="p-8 text-center">
                   <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-xl bg-primary-100">
-                    <Trophy className="size-6 text-primary-600" />
+                    <Icon icon="ph:trophy-duotone" className="size-6 text-primary-600" />
                   </div>
                   <h3 className="font-heading text-lg font-bold text-primary-800">
                     Nuevas convocatorias en camino
@@ -81,7 +82,7 @@ export function ConcursosActivosSection() {
                 <Card className="flex items-center justify-center border-dashed bg-secondary-50">
                   <CardContent className="p-6 text-center">
                     <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-xl bg-primary-100">
-                      <Trophy className="size-6 text-primary-600" />
+                      <Icon icon="ph:trophy-duotone" className="size-6 text-primary-600" />
                     </div>
                     <h3 className="font-heading text-lg font-bold text-primary-800">
                       Mas concursos pronto

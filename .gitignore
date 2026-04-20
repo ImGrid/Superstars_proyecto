@@ -26,6 +26,8 @@ respuesta.txt
 server.log
 test_upload.pdf
 cookies.txt
+.playwright-mcp/
+superstars_backup_*.sql
 
 # Backups de base de datos
 *.sql.bak

@@ -3,7 +3,8 @@
 import { use } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ClipboardCheck, FileText } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { EstadoCalificacion } from "@superstars/shared";
 import type { PostulacionEvaluableItem } from "@superstars/shared";
 import { Button } from "@/components/ui/button";
@@ -79,7 +80,7 @@ export default function PostulacionesEvaluadorPage({ params }: PageProps) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <ClipboardCheck className="size-5 text-secondary-400" />
+              <Icon icon="ph:clipboard-text-duotone"className="size-5 text-secondary-400" />
               {postulaciones.length} postulacion{postulaciones.length !== 1 ? "es" : ""}
             </CardTitle>
           </CardHeader>

@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { ClipboardCheck, Calendar, DollarSign, ArrowRight } from "lucide-react";
+import { Calendar, DollarSign, ArrowRight } from "lucide-react";
 import type { EvaluadorConcursoItem } from "@superstars/shared";
 import { Button } from "@/components/ui/button";
 import {
@@ -47,7 +47,7 @@ export default function MisEvaluacionesPage() {
 
       {concursos.length === 0 ? (
         <EmptyState
-          icon={ClipboardCheck}
+          icon="ph:clipboard-text-duotone"
           title="Sin concursos asignados"
           description="Aun no te han asignado como evaluador en ningun concurso."
         />

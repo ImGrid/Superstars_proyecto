@@ -48,7 +48,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline'",
               `img-src 'self' data: blob: ${apiOrigin}`,
               "font-src 'self'",
-              `connect-src 'self' ${apiOrigin}`,
+              `connect-src 'self' ${apiOrigin} https://api.iconify.design`,
               "frame-ancestors 'none'",
             ].join("; "),
           },

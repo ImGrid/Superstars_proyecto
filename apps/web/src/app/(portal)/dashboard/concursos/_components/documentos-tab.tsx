@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import {
   CloudUpload,
   Download,
-  FileText,
   Loader2,
   MoreHorizontal,
   Plus,
@@ -14,6 +13,7 @@ import {
   Upload,
   X,
 } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { EstadoConcurso, type DocumentoResponse } from "@superstars/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -153,7 +153,7 @@ export function DocumentosTab({
       <CardContent>
         {!documentos || documentos.length === 0 ? (
           <EmptyState
-            icon={FileText}
+            icon="ph:file-text-duotone"
             title="Sin documentos"
             description="No se han subido documentos para este concurso."
             action={
@@ -382,7 +382,7 @@ function UploadDialog({
           ) : (
             // archivo seleccionado
             <div className="flex items-center gap-3 rounded-lg border border-secondary-200 bg-secondary-50 p-3">
-              <FileText className="size-8 shrink-0 text-primary-600" />
+              <Icon icon="ph:file-text-duotone"className="size-8 shrink-0 text-primary-600" />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-secondary-900">
                   {file.name}

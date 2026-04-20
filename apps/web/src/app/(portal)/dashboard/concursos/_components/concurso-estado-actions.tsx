@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Send, Lock, PlayCircle, Globe, AlertTriangle } from "lucide-react";
+import { Loader2, Send, Lock, PlayCircle, Globe } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { toast } from "sonner";
 import { EstadoConcurso, type ConcursoResponse } from "@superstars/shared";
 import { Button } from "@/components/ui/button";
@@ -159,7 +160,7 @@ function PublicarAction({
     <>
       {showAlerts && !isChecking && errors.length > 0 && (
         <Alert>
-          <AlertTriangle className="size-4" />
+          <Icon icon="ph:warning-duotone"className="size-4" />
           <AlertDescription>
             <p className="mb-2 font-medium">Requisitos pendientes para publicar:</p>
             <ul className="list-disc pl-4 space-y-1">
@@ -239,7 +240,7 @@ function PublicarResultadosAction({
     <>
       {showAlerts && !isChecking && errors.length > 0 && (
         <Alert>
-          <AlertTriangle className="size-4" />
+          <Icon icon="ph:warning-duotone"className="size-4" />
           <AlertDescription>
             <p className="mb-2 font-medium">Requisitos pendientes para publicar resultados:</p>
             <ul className="list-disc pl-4 space-y-1">
