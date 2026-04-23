@@ -18,6 +18,9 @@
   --color-primary-800: #081C3E;
   --color-primary-900: #051430;
 
+  /* Color exacto del fondo del logo FUNDES (para banda de sponsors, funde sin costura) */
+  --color-fundes: #0C2140;
+
   /* Paleta secundaria (slate - neutral) */
   --color-secondary-50: #f8fafc;
   --color-secondary-100: #f1f5f9;

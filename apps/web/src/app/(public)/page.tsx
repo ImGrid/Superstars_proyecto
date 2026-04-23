@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ConcursosActivosSection } from "./_components/concursos-activos-section";
+import { SponsorsStrip } from "@/components/public/sponsors-strip";
 
 // pasos de "como funciona" - iconos de Phosphor duotone via Iconify
 const steps = [
@@ -59,7 +60,7 @@ export default function HomePage() {
   return (
     <>
       {/* ===== HERO ===== */}
-      <section className="relative flex min-h-[90vh] items-center overflow-hidden bg-primary-800">
+      <section className="relative flex min-h-screen items-center overflow-hidden bg-primary-800">
         {/* imagen de fondo */}
         <Image
           src="/images/img5.jpg"
@@ -111,23 +112,7 @@ export default function HomePage() {
       </section>
 
       {/* ===== SPONSORS ===== */}
-      <section className="border-b bg-secondary-50 py-8">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <p className="mb-4 text-center text-xs font-medium tracking-wider text-secondary-500 uppercase">
-            Con el apoyo de
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12">
-            {["OXFAM", "Ayuda en Accion", "FUNDES Bolivia"].map((name) => (
-              <div
-                key={name}
-                className="text-sm font-semibold tracking-wide text-secondary-400"
-              >
-                {name}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <SponsorsStrip variant="landing" />
 
       {/* ===== NOSOTROS ===== */}
       <section id="nosotros" className="py-20 lg:py-28">

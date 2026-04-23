@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Mail, MapPin } from "lucide-react";
+import { SponsorsStrip } from "@/components/public/sponsors-strip";
 
 const quickLinks = [
   { label: "Inicio", href: "/" },
@@ -19,25 +20,8 @@ const legalLinks = [
 export function PublicFooter() {
   return (
     <footer className="bg-primary-800 text-primary-100">
-      {/* sponsors */}
-      <div className="border-b border-primary-700/50">
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <p className="mb-4 text-center text-xs font-medium tracking-wider text-primary-300 uppercase">
-            Con el apoyo de
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-8">
-            {/* placeholders de sponsors */}
-            {["OXFAM", "Ayuda en Accion", "FUNDES Bolivia"].map((name) => (
-              <div
-                key={name}
-                className="flex h-10 items-center rounded bg-white/10 px-4 text-sm font-medium text-primary-200"
-              >
-                {name}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      {/* sponsors - banda navy con logos reales */}
+      <SponsorsStrip variant="footer" />
 
       {/* contenido principal */}
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
