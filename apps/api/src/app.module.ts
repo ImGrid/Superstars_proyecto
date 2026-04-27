@@ -21,6 +21,7 @@ import { PublicacionModule } from './modules/publicacion/publicacion.module';
 import { PublicModule } from './modules/public/public.module';
 import { EvaluacionModule } from './modules/evaluacion/evaluacion.module';
 import { FaqModule } from './modules/faq/faq.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -89,6 +90,9 @@ import { FaqModule } from './modules/faq/faq.module';
 
     // Preguntas frecuentes (FAQ configurable)
     FaqModule,
+
+    // Dashboards por rol (admin, responsable, evaluador)
+    DashboardModule,
 
     // Endpoints publicos (sin autenticacion)
     PublicModule,

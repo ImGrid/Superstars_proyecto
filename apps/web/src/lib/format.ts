@@ -1,6 +1,19 @@
+// parsea fechas evitando el shift de timezone para strings YYYY-MM-DD
+// (PostgreSQL DATE llega como "2026-04-10" y new Date() lo interpreta como UTC,
+// causando que en zonas oeste se muestre el dia anterior). Strings con hora
+// o timezone se delegan a new Date() que ya los maneja bien.
+function parseLocalDate(date: string | Date): Date {
+  if (typeof date !== "string") return date;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    const [year, month, day] = date.split("-").map(Number);
+    return new Date(year, month - 1, day);
+  }
+  return new Date(date);
+}
+
 // formato de fecha: "25 de febrero de 2026"
 export function formatDate(date: string | Date): string {
-  const d = typeof date === "string" ? new Date(date) : date;
+  const d = parseLocalDate(date);
   return d.toLocaleDateString("es-BO", {
     year: "numeric",
     month: "long",
@@ -10,7 +23,7 @@ export function formatDate(date: string | Date): string {
 
 // formato de fecha con hora: "25 de febrero de 2026, 14:30"
 export function formatDateTime(date: string | Date): string {
-  const d = typeof date === "string" ? new Date(date) : date;
+  const d = parseLocalDate(date);
   return d.toLocaleDateString("es-BO", {
     year: "numeric",
     month: "long",
@@ -22,7 +35,7 @@ export function formatDateTime(date: string | Date): string {
 
 // formato de fecha corta: "25/02/2026"
 export function formatShortDate(date: string | Date): string {
-  const d = typeof date === "string" ? new Date(date) : date;
+  const d = parseLocalDate(date);
   return d.toLocaleDateString("es-BO", {
     year: "numeric",
     month: "2-digit",
@@ -47,7 +60,7 @@ export function formatPercent(value: string | number): string {
 
 // dias restantes hasta una fecha (negativo = ya paso)
 export function getDiasRestantes(fecha: string | Date): number {
-  const target = typeof fecha === "string" ? new Date(fecha) : fecha;
+  const target = parseLocalDate(fecha);
   const now = new Date();
   const diff = target.getTime() - now.getTime();
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
@@ -55,7 +68,7 @@ export function getDiasRestantes(fecha: string | Date): number {
 
 // formato de fecha corta con mes abreviado: "15 mar. 2026"
 export function formatShortMonth(date: string | Date): string {
-  const d = typeof date === "string" ? new Date(date) : date;
+  const d = parseLocalDate(date);
   return d.toLocaleDateString("es-BO", {
     year: "numeric",
     month: "short",

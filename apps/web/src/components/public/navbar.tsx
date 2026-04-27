@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -20,8 +20,6 @@ interface NavLink {
 // links de navegacion del sitio publico
 const navLinks: NavLink[] = [
   { label: "Inicio", href: "/" },
-  { label: "Nosotros", href: "/#nosotros" },
-  { label: "Como funciona", href: "/#como-funciona" },
   { label: "Concursos", href: "/concursos" },
   { label: "Noticias", href: "/noticias" },
   { label: "Resultados", href: "/resultados" },
@@ -47,31 +45,14 @@ export function PublicNavbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // determinar si un link es ancla dentro de la landing
-  const isAnchorLink = (href: string) => href.startsWith("/#");
-
-  // determinar si un link esta activo
+  // determinar si un link esta activo segun la ruta actual
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
-    if (isAnchorLink(href)) return pathname === "/";
     return pathname === href || pathname.startsWith(href + "/");
   };
 
-  // manejar click en link ancla
-  const handleAnchorClick = (
-    e: React.MouseEvent<HTMLAnchorElement>,
-    href: string,
-  ) => {
-    if (isAnchorLink(href) && pathname === "/") {
-      e.preventDefault();
-      const id = href.replace("/#", "");
-      const element = document.getElementById(id);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" });
-      }
-    }
-    setOpen(false);
-  };
+  // cerrar el sheet mobile al hacer clic en un link
+  const handleLinkClick = () => setOpen(false);
 
   return (
     <header
@@ -101,8 +82,6 @@ export function PublicNavbar() {
             <Link
               key={link.href}
               href={link.href}
-              scroll={!isAnchorLink(link.href)}
-              onClick={(e) => handleAnchorClick(e, link.href)}
               className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                 isActive(link.href)
                   ? scrolled
@@ -166,8 +145,7 @@ export function PublicNavbar() {
                     <Link
                       key={link.href}
                       href={link.href}
-                      scroll={!isAnchorLink(link.href)}
-                      onClick={(e) => handleAnchorClick(e, link.href)}
+                      onClick={handleLinkClick}
                       className={`block px-6 py-3 text-sm font-medium transition-colors ${
                         isActive(link.href)
                           ? "bg-orange-50 text-orange-600"

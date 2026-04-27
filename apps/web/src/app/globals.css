@@ -212,3 +212,9 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Animacion de la barra de progreso del hero carrusel */
+@keyframes hero-fill-bar {
+  from { width: 0%; }
+  to { width: 100%; }
+}

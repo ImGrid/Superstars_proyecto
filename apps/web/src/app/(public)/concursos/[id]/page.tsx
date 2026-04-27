@@ -31,13 +31,13 @@ import {
 import { StateBadge } from "@/components/shared/state-badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import {
-  formatDate,
   formatMoney,
   formatFileSize,
   getDiasRestantes,
   formatShortMonth,
 } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { EstadoConcurso } from "@superstars/shared";
 
 // todos los departamentos de Bolivia
 const TODOS_DEPTOS = 9;
@@ -48,10 +48,25 @@ function buildTimelinePhases(concurso: {
   fechaCierrePostulacion: string;
   fechaCierreEfectiva: string | null;
   fechaAnuncioGanadores: string | null;
+  fechaPublicacionResultados: string | null;
+  estado: EstadoConcurso;
 }) {
   const now = new Date();
   // fecha real de cierre: la efectiva (extension) o la original
   const fechaCierreReal = concurso.fechaCierreEfectiva ?? concurso.fechaCierrePostulacion;
+
+  // estados que indican que ya se paso de cada fase
+  const enEvaluacionOPosterior =
+    concurso.estado === EstadoConcurso.EN_EVALUACION ||
+    concurso.estado === EstadoConcurso.RESULTADOS_LISTOS ||
+    concurso.estado === EstadoConcurso.FINALIZADO;
+  const evaluacionTerminada =
+    concurso.estado === EstadoConcurso.RESULTADOS_LISTOS ||
+    concurso.estado === EstadoConcurso.FINALIZADO;
+  const resultadosPublicados = !!concurso.fechaPublicacionResultados;
+
+  // si ya hay timestamp real de publicacion, mostrarlo en vez de la fecha planeada
+  const fechaResultados = concurso.fechaPublicacionResultados ?? concurso.fechaAnuncioGanadores;
 
   const phases = [
     {
@@ -73,15 +88,33 @@ function buildTimelinePhases(concurso: {
       ),
     },
     {
-      label: "Resultados",
-      date: concurso.fechaAnuncioGanadores,
+      label: resultadosPublicados ? "Resultados publicados" : "Resultados",
+      date: fechaResultados,
       icon: Award,
     },
   ];
 
-  return phases.map((phase) => {
+  return phases.map((phase, idx) => {
     const phaseDate = phase.date ? new Date(phase.date) : null;
-    const isPast = phaseDate ? phaseDate < now : false;
+    const dateBased = phaseDate ? phaseDate < now : false;
+
+    // override por estado del concurso para fases que dependen de transiciones,
+    // no solo del calendario
+    let isPast = dateBased;
+    if (idx === 1) {
+      // cierre postulaciones: pasado si concurso ya no acepta envios
+      isPast = dateBased ||
+        concurso.estado === EstadoConcurso.CERRADO ||
+        enEvaluacionOPosterior;
+    } else if (idx === 2) {
+      // evaluacion: pasada solo si ya termino (resultados_listos o finalizado).
+      // Mientras esta "en_evaluacion" sigue en curso aunque la fecha de cierre haya pasado
+      isPast = evaluacionTerminada;
+    } else if (idx === 3) {
+      // resultados: pasada solo si ya se publicaron oficialmente
+      isPast = resultadosPublicados;
+    }
+
     return { ...phase, isPast };
   });
 }
@@ -191,10 +224,10 @@ export default function ConcursoDetallePage({
               {concurso.nombre}
             </h1>
 
-            {/* sponsors */}
+            {/* sponsors — sincronizar con SponsorsStrip */}
             <div className="mt-4 flex flex-wrap items-center gap-4 text-xs font-medium text-secondary-400">
               <span>Con el apoyo de:</span>
-              {["OXFAM", "Ayuda en Accion", "FUNDES Bolivia"].map((s) => (
+              {["OXFAM", "FUNDES Bolivia", "Maria Marina Foundation"].map((s) => (
                 <span key={s} className="font-semibold text-secondary-500">
                   {s}
                 </span>

@@ -182,3 +182,16 @@ export {
   type ListFaqQueryDto,
   type FaqResponse,
 } from './faq.schema';
+
+export {
+  type AdminConcursoResumenItem,
+  type AdminDashboardStats,
+  type ResponsablePostulacionPendiente,
+  type ResponsableCalificacionPendiente,
+  type ResponsableConcursoResumenItem,
+  type ResponsableDashboardStats,
+  type EvaluadorPostulacionPendiente,
+  type EvaluadorCalificacionDevuelta,
+  type EvaluadorConcursoProgreso,
+  type EvaluadorDashboardStats,
+} from './dashboard.schema';

@@ -54,6 +54,11 @@ import {
   listAsignacionesEvaluador,
 } from "./evaluacion.api";
 import { listPublicFaq, listFaq, listPublicFaqByConcurso } from "./faq.api";
+import {
+  getAdminDashboard,
+  getResponsableDashboard,
+  getEvaluadorDashboard,
+} from "./dashboard.api";
 
 // --- Auth ---
 
@@ -391,5 +396,31 @@ export const faqQueries = {
     queryOptions({
       queryKey: ["public", "faq", "concurso", concursoId] as const,
       queryFn: () => listPublicFaqByConcurso(concursoId),
+    }),
+};
+
+// --- Dashboard (KPIs y trabajo pendiente por rol) ---
+// staleTime corto: el dashboard cambia frecuentemente con la actividad del programa
+
+export const dashboardQueries = {
+  admin: () =>
+    queryOptions({
+      queryKey: ["dashboard", "admin"] as const,
+      queryFn: getAdminDashboard,
+      staleTime: 30 * 1000,
+    }),
+
+  responsable: () =>
+    queryOptions({
+      queryKey: ["dashboard", "responsable"] as const,
+      queryFn: getResponsableDashboard,
+      staleTime: 30 * 1000,
+    }),
+
+  evaluador: () =>
+    queryOptions({
+      queryKey: ["dashboard", "evaluador"] as const,
+      queryFn: getEvaluadorDashboard,
+      staleTime: 30 * 1000,
     }),
 };

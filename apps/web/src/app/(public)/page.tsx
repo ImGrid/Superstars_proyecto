@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ConcursosActivosSection } from "./_components/concursos-activos-section";
+import { HeroCarousel } from "./_components/hero-carousel";
 import { SponsorsStrip } from "@/components/public/sponsors-strip";
 
 // pasos de "como funciona" - iconos de Phosphor duotone via Iconify
@@ -59,57 +60,8 @@ const stories = [
 export default function HomePage() {
   return (
     <>
-      {/* ===== HERO ===== */}
-      <section className="relative flex min-h-screen items-center overflow-hidden bg-primary-800">
-        {/* imagen de fondo */}
-        <Image
-          src="/images/img5.jpg"
-          alt="Presentación de proyecto en espacio de coworking"
-          fill
-          sizes="100vw"
-          className="object-cover opacity-30"
-          priority
-        />
-        {/* overlay degradado */}
-        <div className="absolute inset-0 bg-gradient-to-r from-primary-900/90 via-primary-800/70 to-primary-800/50" />
-
-        <div className="relative z-10 mx-auto max-w-7xl px-4 py-32 sm:px-6 lg:px-8">
-          <div className="max-w-2xl">
-            <Badge className="mb-6 border-orange-500/30 bg-orange-500/10 px-3 py-1 text-sm text-orange-300">
-              Convocatoria 2026 Abierta
-            </Badge>
-            <h1 className="font-heading text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
-              Impulsa tu empresa al{" "}
-              <span className="text-orange-400">siguiente nivel</span>
-            </h1>
-            <p className="mt-6 text-lg leading-relaxed text-primary-200 sm:text-xl">
-              Participa en nuestros concursos empresariales y accede a
-              financiamiento, mentoria y visibilidad para tu emprendimiento con
-              impacto social y ambiental en Bolivia.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-4">
-              <Button
-                asChild
-                size="lg"
-                className="bg-orange-600 text-white hover:bg-orange-700"
-              >
-                <Link href="/auth/registro">
-                  Participar ahora
-                  <ArrowRight className="size-4" />
-                </Link>
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                size="lg"
-                className="border-white/30 bg-white/5 text-white hover:bg-white/10 hover:text-white"
-              >
-                <Link href="/concursos">Ver concursos</Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* ===== HERO CARRUSEL ===== */}
+      <HeroCarousel />
 
       {/* ===== SPONSORS ===== */}
       <SponsorsStrip variant="landing" />

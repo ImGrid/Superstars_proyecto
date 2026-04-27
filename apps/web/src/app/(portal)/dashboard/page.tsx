@@ -18,6 +18,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/shared/page-header";
 import { useAuth } from "@/hooks/use-auth";
 import { postulacionQueries, empresaQueries, concursoQueries } from "@/lib/api/query-keys";
+import { AdminDashboard } from "./_components/admin-dashboard";
+import { ResponsableDashboard } from "./_components/responsable-dashboard";
+import { EvaluadorDashboard } from "./_components/evaluador-dashboard";
 
 export default function DashboardPage() {
   const { data: user } = useAuth();
@@ -35,23 +38,24 @@ export default function DashboardPage() {
     );
   }
 
-  // proponente ve su dashboard personalizado
-  if (user.rol === RolUsuario.PROPONENTE) {
-    return <DashboardProponente nombre={user.nombre} />;
+  // dashboard especifico por rol
+  if (user.rol === RolUsuario.ADMINISTRADOR) {
+    return <AdminDashboard nombre={user.nombre} />;
   }
 
-  // admin y responsable ven el dashboard generico (se puede expandir despues)
-  return (
-    <div>
-      <PageHeader
-        title="Dashboard"
-        description={`Bienvenido, ${user.nombre}`}
-      />
-    </div>
-  );
+  if (user.rol === RolUsuario.RESPONSABLE_CONCURSO) {
+    return <ResponsableDashboard nombre={user.nombre} />;
+  }
+
+  if (user.rol === RolUsuario.EVALUADOR) {
+    return <EvaluadorDashboard nombre={user.nombre} />;
+  }
+
+  // proponente: mantiene su dashboard existente
+  return <DashboardProponente nombre={user.nombre} />;
 }
 
-// dashboard especifico para proponente
+// dashboard especifico para proponente (sin cambios respecto a la version previa)
 function DashboardProponente({ nombre }: { nombre: string }) {
   const router = useRouter();
 
