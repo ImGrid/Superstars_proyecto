@@ -13,7 +13,7 @@ export const OPCIONES_NUMERO_SOCIOS = [
   { valor: '1', label: '1' },
   { valor: '2', label: '2' },
   { valor: '3', label: '3' },
-  { valor: 'mas_de_tres', label: 'Mas de tres' },
+  { valor: 'mas_de_tres', label: 'Más de tres' },
 ] as const;
 
 export const OPCIONES_RUBRO = [
@@ -31,7 +31,7 @@ export const OPCIONES_DEPARTAMENTO = [
   { valor: 'chuquisaca', label: 'Chuquisaca' },
   { valor: 'beni', label: 'Beni' },
   { valor: 'pando', label: 'Pando' },
-  { valor: 'potosi', label: 'Potosi' },
+  { valor: 'potosi', label: 'Potosí' },
   { valor: 'tarija', label: 'Tarija' },
 ] as const;
 
@@ -60,7 +60,7 @@ export const OPCIONES_UBICACION_CLIENTES = [
   { valor: 'urbanos', label: 'Clientes Urbanos' },
   { valor: 'rurales', label: 'Clientes Rurales' },
   { valor: 'nacionales', label: 'Nacionales' },
-  { valor: 'extranjeros', label: 'Extranjeros (Exterior del pais)' },
+  { valor: 'extranjeros', label: 'Extranjeros (Exterior del país)' },
 ] as const;
 
 export const OPCIONES_TIPO_REGISTROS = [

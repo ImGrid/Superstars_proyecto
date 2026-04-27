@@ -71,7 +71,7 @@ export default function RegistroPage() {
 
         <div className="space-y-1">
           <Label htmlFor="email" className="text-secondary-700">
-            Correo electronico
+            Correo electrónico
           </Label>
           <Input
             id="email"
@@ -91,12 +91,12 @@ export default function RegistroPage() {
 
         <div className="space-y-1">
           <Label htmlFor="password" className="text-secondary-700">
-            Contrasena
+            Contraseña
           </Label>
           <Input
             id="password"
             type="password"
-            placeholder="Minimo 8 caracteres"
+            placeholder="Mínimo 8 caracteres"
             autoComplete="new-password"
             aria-invalid={!!errors.password}
             aria-describedby={errors.password ? "password-error" : undefined}

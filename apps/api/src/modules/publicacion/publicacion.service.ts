@@ -184,10 +184,10 @@ export class PublicacionService {
       );
     }
 
-    // Validar tamano
+    // Validar tamaño
     if (file.size > IMAGE_CONFIG.maxSizeBytes) {
       throw new BadRequestException(
-        `La imagen excede el tamano maximo de ${IMAGE_CONFIG.maxSizeBytes / (1024 * 1024)} MB`,
+        `La imagen excede el tamaño máximo de ${IMAGE_CONFIG.maxSizeBytes / (1024 * 1024)} MB`,
       );
     }
 

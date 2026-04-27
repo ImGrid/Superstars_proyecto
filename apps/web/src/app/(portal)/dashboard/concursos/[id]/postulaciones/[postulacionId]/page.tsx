@@ -415,8 +415,8 @@ export default function PostulacionDetallePage({ params }: PageProps) {
       <ConfirmDialog
         open={rechazarOpen}
         onOpenChange={setRechazarOpen}
-        title="Rechazar postulacion"
-        description="Esta accion es irreversible. La postulacion sera rechazada definitivamente y el proponente no podra reenviarla."
+        title="Rechazar postulación"
+        description="Esta acción es irreversible. La postulación será rechazada definitivamente y el proponente no podrá reenviarla."
         onConfirm={() => rechazarMutation.mutate()}
         isLoading={rechazarMutation.isPending}
         destructive

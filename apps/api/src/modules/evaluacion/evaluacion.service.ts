@@ -39,10 +39,10 @@ export class EvaluacionService {
 
     const post = await this.evaluacionRepo.findPostulacionById(postulacionId);
     if (!post) {
-      throw new NotFoundException('Postulacion no encontrada');
+      throw new NotFoundException('Postulación no encontrada');
     }
     if (post.concursoId !== concursoId) {
-      throw new ForbiddenException('La postulacion no pertenece a este concurso');
+      throw new ForbiddenException('La postulación no pertenece a este concurso');
     }
 
     // obtener calificacion del evaluador si existe
@@ -70,13 +70,13 @@ export class EvaluacionService {
 
     const post = await this.evaluacionRepo.findPostulacionById(postulacionId);
     if (!post) {
-      throw new NotFoundException('Postulacion no encontrada');
+      throw new NotFoundException('Postulación no encontrada');
     }
     if (post.concursoId !== concursoId) {
-      throw new ForbiddenException('La postulacion no pertenece a este concurso');
+      throw new ForbiddenException('La postulación no pertenece a este concurso');
     }
     if (post.estado !== EstadoPostulacion.EN_EVALUACION) {
-      throw new ConflictException('La postulacion no esta en estado de evaluacion');
+      throw new ConflictException('La postulación no está en estado de evaluación');
     }
 
     // validar puntajes contra rangos de la rubrica
@@ -94,7 +94,7 @@ export class EvaluacionService {
       // solo se puede editar en en_progreso o devuelto
       if (calif.estado !== EstadoCalificacion.EN_PROGRESO && calif.estado !== EstadoCalificacion.DEVUELTO) {
         throw new ConflictException(
-          `La calificacion no se puede editar en estado "${calif.estado}"`,
+          `La calificación no se puede editar en estado "${calif.estado}"`,
         );
       }
       // si estaba devuelta, volver a en_progreso
@@ -136,12 +136,12 @@ export class EvaluacionService {
 
     const calif = await this.evaluacionRepo.findCalificacion(postulacionId, evaluadorId);
     if (!calif) {
-      throw new NotFoundException('No tienes una calificacion para esta postulacion');
+      throw new NotFoundException('No tienes una calificación para esta postulación');
     }
 
     if (!this.stateMachine.canTransition(calif.estado, 'completar')) {
       throw new ConflictException(
-        `No se puede completar una calificacion en estado "${calif.estado}"`,
+        `No se puede completar una calificación en estado "${calif.estado}"`,
       );
     }
 
@@ -168,7 +168,7 @@ export class EvaluacionService {
   async findPostulacionParaConcursoId(postulacionId: number) {
     const post = await this.evaluacionRepo.findPostulacionById(postulacionId);
     if (!post) {
-      throw new NotFoundException('Postulacion no encontrada');
+      throw new NotFoundException('Postulación no encontrada');
     }
     return post;
   }
@@ -184,7 +184,7 @@ export class EvaluacionService {
   async findCalificacionDetalle(calificacionId: number) {
     const result = await this.evaluacionRepo.findCalificacionConDetalle(calificacionId);
     if (!result) {
-      throw new NotFoundException('Calificacion no encontrada');
+      throw new NotFoundException('Calificación no encontrada');
     }
     return result;
   }
@@ -193,7 +193,7 @@ export class EvaluacionService {
   async aprobarCalificacion(calificacionId: number) {
     const calif = await this.evaluacionRepo.findCalificacionById(calificacionId);
     if (!calif) {
-      throw new NotFoundException('Calificacion no encontrada');
+      throw new NotFoundException('Calificación no encontrada');
     }
 
     if (!this.stateMachine.canTransition(calif.estado, 'aprobar')) {
@@ -216,7 +216,7 @@ export class EvaluacionService {
   async devolverCalificacion(calificacionId: number, dto: DevolverCalificacionDto) {
     const calif = await this.evaluacionRepo.findCalificacionById(calificacionId);
     if (!calif) {
-      throw new NotFoundException('Calificacion no encontrada');
+      throw new NotFoundException('Calificación no encontrada');
     }
 
     if (!this.stateMachine.canTransition(calif.estado, 'devolver')) {
@@ -248,10 +248,10 @@ export class EvaluacionService {
     // verificar que la postulacion existe y pertenece al concurso
     const post = await this.evaluacionRepo.findPostulacionById(postulacionId);
     if (!post) {
-      throw new NotFoundException('Postulacion no encontrada');
+      throw new NotFoundException('Postulación no encontrada');
     }
     if (post.concursoId !== concursoId) {
-      throw new ForbiddenException('La postulacion no pertenece a este concurso');
+      throw new ForbiddenException('La postulación no pertenece a este concurso');
     }
 
     // verificar que el evaluador pertenece al pool del concurso
@@ -271,7 +271,7 @@ export class EvaluacionService {
     } catch (error: any) {
       const pgCode = error?.cause?.code ?? error?.code;
       if (pgCode === '23505') {
-        throw new ConflictException('El evaluador ya esta asignado a esta postulacion');
+        throw new ConflictException('El evaluador ya está asignado a esta postulación');
       }
       throw error;
     }
@@ -282,15 +282,15 @@ export class EvaluacionService {
     // verificar que la postulacion pertenece al concurso
     const post = await this.evaluacionRepo.findPostulacionById(postulacionId);
     if (!post) {
-      throw new NotFoundException('Postulacion no encontrada');
+      throw new NotFoundException('Postulación no encontrada');
     }
     if (post.concursoId !== concursoId) {
-      throw new ForbiddenException('La postulacion no pertenece a este concurso');
+      throw new ForbiddenException('La postulación no pertenece a este concurso');
     }
 
     const removed = await this.evaluacionRepo.removeAsignacion(postulacionId, evaluadorId);
     if (!removed) {
-      throw new NotFoundException('El evaluador no esta asignado a esta postulacion');
+      throw new NotFoundException('El evaluador no está asignado a esta postulación');
     }
   }
 
@@ -299,7 +299,7 @@ export class EvaluacionService {
   private async verificarAccesoEvaluador(concursoId: number, evaluadorId: number) {
     const isAsignado = await this.evaluacionRepo.isEvaluadorDelConcurso(concursoId, evaluadorId);
     if (!isAsignado) {
-      throw new ForbiddenException('No estas asignado como evaluador a este concurso');
+      throw new ForbiddenException('No estás asignado como evaluador a este concurso');
     }
   }
 
@@ -307,7 +307,7 @@ export class EvaluacionService {
   private async verificarAsignacionPostulacion(postulacionId: number, evaluadorId: number) {
     const isAsignado = await this.evaluacionRepo.isAsignadoAPostulacion(postulacionId, evaluadorId);
     if (!isAsignado) {
-      throw new ForbiddenException('No estas asignado para evaluar esta postulacion');
+      throw new ForbiddenException('No estás asignado para evaluar esta postulación');
     }
   }
 

@@ -4,7 +4,7 @@ import { z } from 'zod';
 export const createEmpresaSchema = z.object({
   // Datos legales (Q7-Q8)
   razonSocial: z.string().min(1),
-  nit: z.string().min(1),
+  nit: z.string().min(1).optional(),
   registroSeprec: z.string().optional(),
   tipoEmpresa: z.string().optional(),
 
@@ -46,7 +46,7 @@ export interface EmpresaResponse {
   id: number;
   usuarioId: number;
   razonSocial: string;
-  nit: string;
+  nit: string | null;
   registroSeprec: string | null;
   tipoEmpresa: string | null;
   numeroSocios: string | null;

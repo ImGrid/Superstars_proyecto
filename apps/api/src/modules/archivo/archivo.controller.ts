@@ -39,7 +39,7 @@ export class ArchivoController {
     @CurrentUser() user: AuthUser,
   ) {
     if (!file) {
-      throw new BadRequestException('No se envio ningun archivo');
+      throw new BadRequestException('No se envió ningún archivo');
     }
     if (!fieldId) {
       throw new BadRequestException('El campo fieldId es requerido');

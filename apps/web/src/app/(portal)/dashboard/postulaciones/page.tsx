@@ -36,7 +36,7 @@ const ESTADOS_FILTRO = [
   { value: "enviado", label: "Enviado" },
   { value: "observado", label: "Observado" },
   { value: "rechazado", label: "Rechazado" },
-  { value: "en_evaluacion", label: "En evaluacion" },
+  { value: "en_evaluacion", label: "En evaluación" },
   { value: "calificado", label: "Calificado" },
   { value: "ganador", label: "Ganador" },
   { value: "no_seleccionado", label: "No seleccionado" },

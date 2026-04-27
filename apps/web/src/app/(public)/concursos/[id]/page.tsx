@@ -156,11 +156,11 @@ export default function ConcursoDetallePage({
     if (deadline === 0) return { text: "Cierra hoy", className: "text-error-600 font-semibold" };
     if (deadline <= 7)
       return {
-        text: `Ultimos ${deadline} dia${deadline > 1 ? "s" : ""}`,
+        text: `Últimos ${deadline} día${deadline > 1 ? "s" : ""}`,
         className: "text-warning-600 font-semibold",
       };
     if (deadline <= 30)
-      return { text: `Quedan ${deadline} dias`, className: "text-primary-700 font-semibold" };
+      return { text: `Quedan ${deadline} días`, className: "text-primary-700 font-semibold" };
     return {
       text: `Cierra: ${formatShortMonth(fechaCierreReal)}`,
       className: "text-secondary-700",
@@ -204,7 +204,7 @@ export default function ConcursoDetallePage({
             {/* tabs */}
             <Tabs defaultValue="descripcion" className="mt-8">
               <TabsList className="w-full justify-start">
-                <TabsTrigger value="descripcion">Descripcion y Requisitos</TabsTrigger>
+                <TabsTrigger value="descripcion">Descripción y Requisitos</TabsTrigger>
                 <TabsTrigger value="cronograma">Cronograma</TabsTrigger>
                 {/* tab preguntas: solo visible si el concurso tiene FAQs */}
                 {faqItems && faqItems.length > 0 && (
@@ -269,7 +269,7 @@ export default function ConcursoDetallePage({
                 {/* sin descripcion ni bases */}
                 {!concurso.descripcion && !concurso.bases && (!concurso.documentos || concurso.documentos.length === 0) && (
                   <p className="text-secondary-500">
-                    La informacion de este concurso aun no ha sido publicada.
+                    La información de este concurso aún no ha sido publicada.
                   </p>
                 )}
               </TabsContent>

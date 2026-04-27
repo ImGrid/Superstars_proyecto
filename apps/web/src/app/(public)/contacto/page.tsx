@@ -18,16 +18,16 @@ const contactoSchema = z.object({
   nombre: z
     .string()
     .min(2, "El nombre debe tener al menos 2 caracteres")
-    .max(100, "Maximo 100 caracteres"),
-  email: z.string().email("Correo electronico invalido"),
+    .max(100, "Máximo 100 caracteres"),
+  email: z.string().email("Correo electrónico inválido"),
   asunto: z
     .string()
     .min(3, "El asunto debe tener al menos 3 caracteres")
-    .max(150, "Maximo 150 caracteres"),
+    .max(150, "Máximo 150 caracteres"),
   mensaje: z
     .string()
     .min(20, "El mensaje debe tener al menos 20 caracteres")
-    .max(2000, "Maximo 2000 caracteres"),
+    .max(2000, "Máximo 2000 caracteres"),
 });
 
 type ContactoForm = z.infer<typeof contactoSchema>;
@@ -59,7 +59,7 @@ export default function ContactoPage() {
     window.location.href = mailto;
 
     toast.success("Abriendo tu cliente de correo", {
-      description: "Si no se abre automaticamente, escribenos directamente a " + CONTACT_EMAIL,
+      description: "Si no se abre automáticamente, escríbenos directamente a " + CONTACT_EMAIL,
     });
   };
 
@@ -72,7 +72,7 @@ export default function ContactoPage() {
             Contacto
           </h1>
           <p className="mt-3 text-lg text-primary-200">
-            Escribenos tus dudas, comentarios o consultas sobre el programa.
+            Escríbenos tus dudas, comentarios o consultas sobre el programa.
           </p>
         </div>
       </section>
@@ -85,10 +85,10 @@ export default function ContactoPage() {
             <div className="lg:col-span-2">
               <div className="rounded-xl bg-secondary-50 p-6 ring-1 ring-secondary-200">
                 <h2 className="font-heading text-lg font-semibold text-primary-800">
-                  Informacion de contacto
+                  Información de contacto
                 </h2>
                 <p className="mt-2 text-sm text-secondary-600">
-                  Tambien puedes escribirnos directamente o visitarnos.
+                  También puedes escribirnos directamente o visitarnos.
                 </p>
 
                 <ul className="mt-6 space-y-4">
@@ -111,7 +111,7 @@ export default function ContactoPage() {
                     <MapPin className="mt-0.5 size-5 shrink-0 text-orange-600" />
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-wider text-secondary-500">
-                        Ubicacion
+                        Ubicación
                       </p>
                       <p className="text-sm text-secondary-800">La Paz, Bolivia</p>
                     </div>
@@ -124,7 +124,7 @@ export default function ContactoPage() {
                         Tiempo de respuesta
                       </p>
                       <p className="text-sm text-secondary-800">
-                        Respondemos en 1 a 2 dias habiles
+                        Respondemos en 1 a 2 días hábiles
                       </p>
                     </div>
                   </li>
@@ -136,10 +136,10 @@ export default function ContactoPage() {
             <div className="lg:col-span-3">
               <div className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-secondary-200 sm:p-8">
                 <h2 className="font-heading text-lg font-semibold text-secondary-900">
-                  Envianos un mensaje
+                  Envíanos un mensaje
                 </h2>
                 <p className="mt-1 text-sm text-secondary-500">
-                  Al enviar se abrira tu cliente de correo con el mensaje listo.
+                  Al enviar se abrirá tu cliente de correo con el mensaje listo.
                 </p>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
@@ -165,7 +165,7 @@ export default function ContactoPage() {
 
                   <div className="space-y-1">
                     <Label htmlFor="email" className="text-secondary-700">
-                      Correo electronico
+                      Correo electrónico
                     </Label>
                     <Input
                       id="email"
@@ -209,7 +209,7 @@ export default function ContactoPage() {
                     <Textarea
                       id="mensaje"
                       rows={6}
-                      placeholder="Cuentanos tu consulta..."
+                      placeholder="Cuéntanos tu consulta..."
                       aria-invalid={!!errors.mensaje}
                       aria-describedby={errors.mensaje ? "mensaje-error" : undefined}
                       {...register("mensaje")}

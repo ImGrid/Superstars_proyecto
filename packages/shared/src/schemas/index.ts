@@ -67,6 +67,7 @@ export {
   type UpdateFormularioDto,
   type OpcionCampo,
   type ColumnaTabla,
+  type FilaFijaTabla,
   type AutoRelleno,
   type FormularioResponse,
 } from './formulario.schema';

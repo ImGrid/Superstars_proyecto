@@ -31,9 +31,12 @@ export class EmpresaService {
       throw new ConflictException('Ya tienes una empresa registrada');
     }
 
-    const nitExists = await this.empresaRepository.existsByNit(dto.nit);
-    if (nitExists) {
-      throw new ConflictException('El NIT ya esta registrado por otra empresa');
+    // Verificar NIT unico solo si se proporciona (es opcional)
+    if (dto.nit) {
+      const nitExists = await this.empresaRepository.existsByNit(dto.nit);
+      if (nitExists) {
+        throw new ConflictException('El NIT ya está registrado por otra empresa');
+      }
     }
 
     return this.empresaRepository.create({
@@ -53,7 +56,7 @@ export class EmpresaService {
     if (dto.nit) {
       const nitExists = await this.empresaRepository.existsByNit(dto.nit, emp.id);
       if (nitExists) {
-        throw new ConflictException('El NIT ya esta registrado por otra empresa');
+        throw new ConflictException('El NIT ya está registrado por otra empresa');
       }
     }
 

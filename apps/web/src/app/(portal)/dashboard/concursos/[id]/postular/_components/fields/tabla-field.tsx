@@ -33,11 +33,19 @@ export const TablaField = memo(function TablaField({
   const { columnas, filasIniciales, filasDinamicas, filasFijas } = campo;
 
   // crear una fila vacia basada en las columnas
+  // celdas numericas se inicializan como undefined (no "") para evitar
+  // rechazo del validador Zod en draft save (z.number no acepta string vacio)
   const createEmptyRow = useCallback(
     (fixedLabel?: string): RowData => {
       const row: RowData = {};
       for (const col of columnas) {
-        row[col.id] = fixedLabel && col === columnas[0] ? fixedLabel : "";
+        if (fixedLabel && col === columnas[0]) {
+          row[col.id] = fixedLabel;
+        } else if (col.tipo === "numerico") {
+          row[col.id] = undefined;
+        } else {
+          row[col.id] = "";
+        }
       }
       return row;
     },
@@ -70,11 +78,17 @@ export const TablaField = memo(function TablaField({
           colType: string,
         ) => {
           const updated = [...rows];
+          // celdas numericas vacias se almacenan como undefined,
+          // no como string "" (no es Number ni undefined → falla Zod)
+          let cellValue: string | number | undefined;
+          if (colType === "numerico") {
+            cellValue = value === "" ? undefined : Number(value);
+          } else {
+            cellValue = value;
+          }
           updated[rowIndex] = {
             ...updated[rowIndex],
-            [colId]: colType === "numerico" && value !== ""
-              ? Number(value)
-              : value,
+            [colId]: cellValue,
           };
           field.onChange(updated);
         };

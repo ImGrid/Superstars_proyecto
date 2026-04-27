@@ -371,7 +371,7 @@ export function ConcursoForm({ initialData }: ConcursoFormProps) {
           <CardHeader>
             <CardTitle>Departamentos *</CardTitle>
             <CardDescription>
-              Selecciona los departamentos donde estara disponible el concurso.
+              Selecciona los departamentos donde estará disponible el concurso.
             </CardDescription>
           </CardHeader>
           <CardContent>

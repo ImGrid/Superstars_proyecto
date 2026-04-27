@@ -256,8 +256,8 @@ export function EvaluadoresAsignadosTab({
           <ConfirmDialog
             open={!!deleteTarget}
             onOpenChange={(open) => !open && setDeleteTarget(null)}
-            title="Remover evaluador de esta postulacion"
-            description={`Se removera a "${deleteTarget.evaluadorNombre}" de la evaluacion de esta postulacion.`}
+            title="Remover evaluador de esta postulación"
+            description={`Se removerá a "${deleteTarget.evaluadorNombre}" de la evaluación de esta postulación.`}
             confirmLabel="Remover"
             onConfirm={() => removeMutation.mutate(deleteTarget.evaluadorId)}
             isLoading={removeMutation.isPending}

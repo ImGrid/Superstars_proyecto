@@ -194,8 +194,8 @@ export const SeccionItem = memo(function SeccionItem({
       <ConfirmDialog
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
-        title="Eliminar seccion"
-        description={`Se eliminara la seccion "${seccion.titulo}" y todos sus campos. Esta accion no se puede deshacer.`}
+        title="Eliminar sección"
+        description={`Se eliminará la sección "${seccion.titulo}" y todos sus campos. Esta acción no se puede deshacer.`}
         confirmLabel="Eliminar"
         onConfirm={handleDelete}
       />

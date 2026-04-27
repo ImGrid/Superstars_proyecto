@@ -23,7 +23,7 @@ const camposContacto: FormField[] = [
   {
     id: 'contacto_nombre',
     tipo: 'texto_corto',
-    etiqueta: 'Nombre de la persona que realiza la postulacion',
+    etiqueta: 'Nombre de la persona que realiza la postulación',
     requerido: true,
     orden: 1,
     fijo: true,
@@ -43,7 +43,7 @@ const camposContacto: FormField[] = [
   {
     id: 'contacto_telefono',
     tipo: 'texto_corto',
-    etiqueta: 'Numero de contacto',
+    etiqueta: 'Número de contacto',
     requerido: true,
     orden: 3,
     fijo: true,
@@ -53,7 +53,7 @@ const camposContacto: FormField[] = [
   {
     id: 'contacto_genero',
     tipo: 'seleccion_unica',
-    etiqueta: 'Genero',
+    etiqueta: 'Género',
     requerido: true,
     orden: 4,
     fijo: true,
@@ -76,7 +76,7 @@ const camposContacto: FormField[] = [
   {
     id: 'contacto_email',
     tipo: 'texto_corto',
-    etiqueta: 'Direccion de correo electronico',
+    etiqueta: 'Dirección de correo electrónico',
     requerido: true,
     orden: 6,
     fijo: true,
@@ -90,7 +90,7 @@ const camposEmpresa: FormField[] = [
   {
     id: 'empresa_razon_social',
     tipo: 'texto_corto',
-    etiqueta: 'Nombre de la empresa (razon social)',
+    etiqueta: 'Nombre de la empresa (razón social)',
     requerido: true,
     orden: 1,
     fijo: true,
@@ -113,7 +113,7 @@ const camposEmpresa: FormField[] = [
   {
     id: 'empresa_socios',
     tipo: 'seleccion_unica',
-    etiqueta: 'Cuantos socios tiene la empresa',
+    etiqueta: 'Cuántos socios tiene la empresa',
     requerido: true,
     orden: 3,
     fijo: true,
@@ -126,7 +126,7 @@ const camposEmpresa: FormField[] = [
   {
     id: 'empresa_empleadas_mujeres',
     tipo: 'numerico',
-    etiqueta: 'Numero de empleadas mujeres',
+    etiqueta: 'Número de empleadas mujeres',
     descripcion: 'Permanentes y no permanentes',
     requerido: true,
     orden: 4,
@@ -138,7 +138,7 @@ const camposEmpresa: FormField[] = [
   {
     id: 'empresa_empleados_hombres',
     tipo: 'numerico',
-    etiqueta: 'Numero de empleados hombres',
+    etiqueta: 'Número de empleados hombres',
     descripcion: 'Permanentes y no permanentes',
     requerido: true,
     orden: 5,
@@ -163,7 +163,7 @@ const camposEmpresa: FormField[] = [
   {
     id: 'empresa_anio_fundacion',
     tipo: 'numerico',
-    etiqueta: 'Anio de fundacion o creacion de la empresa',
+    etiqueta: 'Año de fundación o creación de la empresa',
     requerido: true,
     orden: 7,
     fijo: true,
@@ -197,7 +197,7 @@ const camposEmpresa: FormField[] = [
   {
     id: 'empresa_direccion',
     tipo: 'texto_corto',
-    etiqueta: 'Direccion de la empresa',
+    etiqueta: 'Dirección de la empresa',
     requerido: true,
     orden: 10,
     fijo: true,
@@ -207,7 +207,7 @@ const camposEmpresa: FormField[] = [
   {
     id: 'empresa_telefono',
     tipo: 'texto_corto',
-    etiqueta: 'Numero de telefono de la empresa',
+    etiqueta: 'Número de teléfono de la empresa',
     requerido: true,
     orden: 11,
     fijo: true,
@@ -217,8 +217,8 @@ const camposEmpresa: FormField[] = [
   {
     id: 'empresa_descripcion',
     tipo: 'texto_largo',
-    etiqueta: 'Descripcion de la empresa',
-    descripcion: 'Explique brevemente a que se dedica su empresa, que necesidad atiende en el mercado y que propuesta innovadora ofrece a traves de su negocio.',
+    etiqueta: 'Descripción de la empresa',
+    descripcion: 'Explique brevemente a qué se dedica su empresa, qué necesidad atiende en el mercado y qué propuesta innovadora ofrece a través de su negocio.',
     requerido: true,
     orden: 12,
     fijo: true,
@@ -242,7 +242,7 @@ const camposEmpresa: FormField[] = [
   {
     id: 'empresa_relacion_comercial',
     tipo: 'seleccion_multiple',
-    etiqueta: 'Tipo de relacion comercial con el mercado',
+    etiqueta: 'Tipo de relación comercial con el mercado',
     requerido: true,
     orden: 14,
     fijo: true,
@@ -253,7 +253,7 @@ const camposEmpresa: FormField[] = [
   {
     id: 'empresa_ubicacion_clientes',
     tipo: 'seleccion_multiple',
-    etiqueta: 'Ubicacion de los clientes',
+    etiqueta: 'Ubicación de los clientes',
     requerido: true,
     orden: 15,
     fijo: true,
@@ -269,7 +269,7 @@ const camposEmpresa: FormField[] = [
     orden: 16,
     fijo: true,
 
-    opciones: [...OPCIONES_DEPARTAMENTO, { valor: 'exterior', label: 'Exterior del pais' }],
+    opciones: [...OPCIONES_DEPARTAMENTO, { valor: 'exterior', label: 'Exterior del país' }],
     permiteOtra: false,
   },
   {
@@ -287,7 +287,7 @@ const camposEmpresa: FormField[] = [
     id: 'empresa_tipo_registros',
     tipo: 'seleccion_unica',
     etiqueta: 'Registros productivos y financieros',
-    descripcion: 'Su empresa cuenta con registros productivos y financieros?',
+    descripcion: '¿Su empresa cuenta con registros productivos y financieros?',
     requerido: true,
     orden: 18,
     fijo: true,
@@ -299,8 +299,8 @@ const camposEmpresa: FormField[] = [
   {
     id: 'empresa_metodo_registros',
     tipo: 'seleccion_unica',
-    etiqueta: 'Metodo de elaboracion de registros',
-    descripcion: 'Como son elaborados sus registros?',
+    etiqueta: 'Método de elaboración de registros',
+    descripcion: '¿Cómo son elaborados sus registros?',
     requerido: true,
     orden: 19,
     fijo: true,
@@ -386,7 +386,7 @@ const camposEmpresa: FormField[] = [
 const seccionContacto: Seccion = {
   id: TEMPLATE_SECTION_IDS.CONTACTO,
   titulo: 'Datos de la persona de contacto',
-  descripcion: 'Informacion de la persona que realiza la postulacion.',
+  descripcion: 'Información de la persona que realiza la postulación.',
   orden: 1,
   fija: true,
   campos: camposContacto,
@@ -395,7 +395,7 @@ const seccionContacto: Seccion = {
 const seccionEmpresa: Seccion = {
   id: TEMPLATE_SECTION_IDS.EMPRESA,
   titulo: 'Datos de la empresa',
-  descripcion: 'Informacion general de la empresa postulante.',
+  descripcion: 'Información general de la empresa postulante.',
   orden: 2,
   fija: true,
   campos: camposEmpresa,

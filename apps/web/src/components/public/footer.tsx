@@ -35,8 +35,8 @@ export function PublicFooter() {
             </Link>
             <p className="mt-3 text-sm leading-relaxed text-primary-300">
               Plataforma de competencias empresariales en Bolivia. Impulsamos
-              empresas con impacto social y ambiental a traves de concursos,
-              financiamiento y acompanamiento.
+              empresas con impacto social y ambiental a través de concursos,
+              financiamiento y acompañamiento.
             </p>
           </div>
 

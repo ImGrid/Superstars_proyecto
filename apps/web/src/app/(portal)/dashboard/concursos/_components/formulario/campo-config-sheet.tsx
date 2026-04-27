@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { FormField, OpcionCampo, ColumnaTabla } from "@superstars/shared";
+import type {
+  FormField,
+  OpcionCampo,
+  ColumnaTabla,
+  FilaFijaTabla,
+} from "@superstars/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,6 +33,7 @@ import { Lock } from "lucide-react";
 import { campoTypeMap } from "./_lib/campo-types";
 import { OpcionesEditor } from "./opciones-editor";
 import { ColumnasEditor } from "./columnas-editor";
+import { FilasFijasEditor } from "./filas-fijas-editor";
 
 interface CampoConfigSheetProps {
   campo: FormField | null;
@@ -353,34 +359,72 @@ function TypeSpecificConfig({
         </>
       );
 
-    case "tabla":
+    case "tabla": {
+      // detectar si la tabla usa filas predefinidas (ej: años 2023, 2024, 2025)
+      // filasFijas y filasDinamicas son mutuamente excluyentes (validado en schema)
+      const usaFilasFijas = !!campo.filasFijas && campo.filasFijas.length > 0;
+
+      function toggleFilasFijas(enabled: boolean) {
+        if (enabled) {
+          // al activar, sembrar con una fila por defecto y desactivar dinamicas
+          update({
+            filasFijas: [{ key: "fila_1", label: "Fila 1" }],
+            filasDinamicas: false,
+          });
+        } else {
+          // al desactivar, eliminar filasFijas (queda como tabla normal)
+          update({ filasFijas: undefined });
+        }
+      }
+
       return (
         <>
           <ColumnasEditor
             columnas={campo.columnas}
             onChange={(columnas: ColumnaTabla[]) => update({ columnas })}
           />
-          <div className="space-y-2">
-            <Label>Filas iniciales</Label>
-            <Input
-              type="number"
-              value={campo.filasIniciales ?? 3}
-              onChange={(e) => update({ filasIniciales: Number(e.target.value) || 3 })}
-              min={1}
-              max={50}
-              disabled={disabled}
-            />
-          </div>
           <div className="flex items-center justify-between">
-            <Label>Filas dinamicas</Label>
+            <Label>Filas predefinidas</Label>
             <Switch
-              checked={campo.filasDinamicas ?? false}
-              onCheckedChange={(v) => update({ filasDinamicas: v })}
+              checked={usaFilasFijas}
+              onCheckedChange={toggleFilasFijas}
               disabled={disabled}
             />
           </div>
+          {usaFilasFijas ? (
+            <FilasFijasEditor
+              filasFijas={campo.filasFijas ?? []}
+              onChange={(filasFijas: FilaFijaTabla[]) => update({ filasFijas })}
+              disabled={disabled}
+            />
+          ) : (
+            <>
+              <div className="space-y-2">
+                <Label>Filas iniciales</Label>
+                <Input
+                  type="number"
+                  value={campo.filasIniciales ?? 3}
+                  onChange={(e) =>
+                    update({ filasIniciales: Number(e.target.value) || 3 })
+                  }
+                  min={1}
+                  max={50}
+                  disabled={disabled}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label>Filas dinamicas</Label>
+                <Switch
+                  checked={campo.filasDinamicas ?? false}
+                  onCheckedChange={(v) => update({ filasDinamicas: v })}
+                  disabled={disabled}
+                />
+              </div>
+            </>
+          )}
         </>
       );
+    }
 
     case "archivo":
       return (

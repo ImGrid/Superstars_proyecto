@@ -9,6 +9,7 @@ import {
   Trash2,
   AlertCircle,
 } from "lucide-react";
+import { Icon as IconifyIcon } from "@iconify/react";
 import type { FormField } from "@superstars/shared";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +23,7 @@ import type { SchemaAction } from "./_lib/schema-reducer";
 import type { BuilderWarning } from "./_lib/builder-validation";
 import { getWarningsForItem } from "./_lib/builder-validation";
 import { campoTypeMap } from "./_lib/campo-types";
+import { getAutoRellenoLabel } from "./_lib/auto-relleno-labels";
 
 interface CampoItemProps {
   campo: FormField;
@@ -81,6 +83,24 @@ export const CampoItem = memo(function CampoItem({
       </Badge>
       {campo.requerido && (
         <span className="shrink-0 text-sm font-bold text-destructive">*</span>
+      )}
+      {campo.autoRelleno && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="shrink-0 cursor-help">
+              <IconifyIcon
+                icon="ph:sparkle-duotone"
+                className="size-4 text-secondary-400"
+              />
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>
+              El proponente verá este campo ya cargado con{" "}
+              {getAutoRellenoLabel(campo.autoRelleno)}.
+            </p>
+          </TooltipContent>
+        </Tooltip>
       )}
       {hasError && (
         <Tooltip>

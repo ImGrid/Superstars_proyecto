@@ -129,7 +129,7 @@ export class DocumentoService {
 
     // Proponente solo ve documentos de concursos no borrador
     if (estado === EstadoConcurso.BORRADOR) {
-      throw new ForbiddenException('El concurso no esta disponible');
+      throw new ForbiddenException('El concurso no está disponible');
     }
   }
 }

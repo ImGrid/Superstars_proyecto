@@ -12,7 +12,7 @@ export const empresa = pgTable("empresa", {
 
 	// Datos legales (Q7-Q8)
 	razonSocial: text("razon_social").notNull(),
-	nit: text().notNull(),
+	nit: text(),
 	registroSeprec: text("registro_seprec"),
 	tipoEmpresa: text("tipo_empresa"),
 

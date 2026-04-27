@@ -71,13 +71,13 @@ export function PublicacionEstadoActions({
     case EstadoPublicacion.PROGRAMADO:
       return (
         <SimpleTransition
-          label="Cancelar programacion"
+          label="Cancelar programación"
           icon={<XCircle className="size-4" />}
-          confirmTitle="Cancelar programacion"
-          confirmDescription="La publicacion volvera a estado borrador y no se publicara automaticamente."
+          confirmTitle="Cancelar programación"
+          confirmDescription="La publicación volverá a estado borrador y no se publicará automáticamente."
           mutationFn={() => cancelarProgramacion(publicacion.id)}
           onSuccess={() =>
-            onTransitionSuccess("Programacion cancelada correctamente")
+            onTransitionSuccess("Programación cancelada correctamente")
           }
           onError={onTransitionError}
         />
@@ -87,11 +87,11 @@ export function PublicacionEstadoActions({
         <SimpleTransition
           label="Archivar"
           icon={<Archive className="size-4" />}
-          confirmTitle="Archivar publicacion"
-          confirmDescription="La publicacion dejara de ser visible en el sitio publico."
+          confirmTitle="Archivar publicación"
+          confirmDescription="La publicación dejará de ser visible en el sitio público."
           mutationFn={() => archivarPublicacion(publicacion.id)}
           onSuccess={() =>
-            onTransitionSuccess("Publicacion archivada correctamente")
+            onTransitionSuccess("Publicación archivada correctamente")
           }
           onError={onTransitionError}
         />
@@ -102,11 +102,11 @@ export function PublicacionEstadoActions({
           <SimpleTransition
             label="Republicar"
             icon={<RefreshCw className="size-4" />}
-            confirmTitle="Republicar publicacion"
-            confirmDescription="La publicacion volvera a ser visible en el sitio publico."
+            confirmTitle="Republicar publicación"
+            confirmDescription="La publicación volverá a ser visible en el sitio público."
             mutationFn={() => republicarPublicacion(publicacion.id)}
             onSuccess={() =>
-              onTransitionSuccess("Publicacion republicada correctamente")
+              onTransitionSuccess("Publicación republicada correctamente")
             }
             onError={onTransitionError}
           />
@@ -114,11 +114,11 @@ export function PublicacionEstadoActions({
             label="Archivar"
             icon={<Archive className="size-4" />}
             variant="outline"
-            confirmTitle="Archivar publicacion"
-            confirmDescription="La publicacion se movera a archivados."
+            confirmTitle="Archivar publicación"
+            confirmDescription="La publicación se moverá a archivados."
             mutationFn={() => archivarPublicacion(publicacion.id)}
             onSuccess={() =>
-              onTransitionSuccess("Publicacion archivada correctamente")
+              onTransitionSuccess("Publicación archivada correctamente")
             }
             onError={onTransitionError}
           />
@@ -129,11 +129,11 @@ export function PublicacionEstadoActions({
         <SimpleTransition
           label="Republicar"
           icon={<RefreshCw className="size-4" />}
-          confirmTitle="Republicar publicacion"
-          confirmDescription="La publicacion volvera a estado borrador."
+          confirmTitle="Republicar publicación"
+          confirmDescription="La publicación volverá a estado borrador."
           mutationFn={() => republicarPublicacion(publicacion.id)}
           onSuccess={() =>
-            onTransitionSuccess("Publicacion republicada correctamente")
+            onTransitionSuccess("Publicación republicada correctamente")
           }
           onError={onTransitionError}
         />
@@ -212,14 +212,14 @@ function BorradorActions({
       <Dialog open={publicarOpen} onOpenChange={setPublicarOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Publicar publicacion</DialogTitle>
+            <DialogTitle>Publicar publicación</DialogTitle>
             <DialogDescription>
-              La publicacion sera visible inmediatamente en el sitio publico.
+              La publicación será visible inmediatamente en el sitio público.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
             <Label htmlFor="fecha-exp-publicar">
-              Fecha de expiracion (opcional)
+              Fecha de expiración (opcional)
             </Label>
             <Input
               id="fecha-exp-publicar"
@@ -228,7 +228,7 @@ function BorradorActions({
               onChange={(e) => setFechaExpiracionPublicar(e.target.value)}
             />
             <p className="text-xs text-secondary-500">
-              Si no se establece, la publicacion permanecera visible
+              Si no se establece, la publicación permanecerá visible
               indefinidamente.
             </p>
           </div>
@@ -260,9 +260,9 @@ function BorradorActions({
       <Dialog open={programarOpen} onOpenChange={setProgramarOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Programar publicacion</DialogTitle>
+            <DialogTitle>Programar publicación</DialogTitle>
             <DialogDescription>
-              Selecciona la fecha y hora en que se publicara automaticamente.
+              Selecciona la fecha y hora en que se publicará automáticamente.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -289,7 +289,7 @@ function BorradorActions({
                 min={fechaProgramada || undefined}
               />
               <p className="text-xs text-secondary-500">
-                Si no se establece, la publicacion permanecera visible
+                Si no se establece, la publicación permanecerá visible
                 indefinidamente.
               </p>
             </div>

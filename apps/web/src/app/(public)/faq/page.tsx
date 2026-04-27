@@ -18,8 +18,8 @@ import type { FaqResponse } from "@superstars/shared";
 // orden y labels de las categorias
 const CATEGORIAS = [
   { slug: "general", label: "General" },
-  { slug: "participacion", label: "Participacion" },
-  { slug: "proceso", label: "Proceso de evaluacion" },
+  { slug: "participacion", label: "Participación" },
+  { slug: "proceso", label: "Proceso de evaluación" },
 ] as const;
 
 export default function FaqPage() {
@@ -93,7 +93,7 @@ export default function FaqPage() {
           <Button asChild className="mt-6 bg-orange-600 hover:bg-orange-700">
             <Link href="/contacto">
               <Mail className="size-4" />
-              Contactanos
+              Contáctanos
             </Link>
           </Button>
         </div>

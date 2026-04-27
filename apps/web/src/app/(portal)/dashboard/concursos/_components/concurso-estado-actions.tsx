@@ -82,7 +82,7 @@ export function ConcursoEstadoActions({
           label="Cerrar postulaciones"
           icon={<Lock className="size-4" />}
           confirmTitle="Cerrar postulaciones"
-          confirmDescription="Al cerrar el concurso, ya no se podran recibir nuevas postulaciones. Las postulaciones existentes se mantienen."
+          confirmDescription="Al cerrar el concurso, ya no se podrán recibir nuevas postulaciones. Las postulaciones existentes se mantienen."
           mutationFn={() => cerrarConcurso(concurso.id)}
           onSuccess={() => onTransitionSuccess("Concurso cerrado correctamente")}
           onError={onTransitionError}
@@ -92,12 +92,12 @@ export function ConcursoEstadoActions({
       if (!showButton) return null;
       return (
         <TransitionAction
-          label="Iniciar evaluacion"
+          label="Iniciar evaluación"
           icon={<PlayCircle className="size-4" />}
-          confirmTitle="Iniciar evaluacion"
-          confirmDescription="Se iniciara el periodo de evaluacion. Los evaluadores asignados podran comenzar a calificar las postulaciones."
+          confirmTitle="Iniciar evaluación"
+          confirmDescription="Se iniciará el periodo de evaluación. Los evaluadores asignados podrán comenzar a calificar las postulaciones."
           mutationFn={() => iniciarEvaluacion(concurso.id)}
-          onSuccess={() => onTransitionSuccess("Evaluacion iniciada correctamente")}
+          onSuccess={() => onTransitionSuccess("Evaluación iniciada correctamente")}
           onError={onTransitionError}
         />
       );
@@ -190,7 +190,7 @@ function PublicarAction({
             open={confirmOpen}
             onOpenChange={setConfirmOpen}
             title="Publicar concurso"
-            description="Al publicar el concurso, el formulario y la rubrica quedaran inmutables. Las empresas podran ver y postularse al concurso."
+            description="Al publicar el concurso, el formulario y la rúbrica quedarán inmutables. Las empresas podrán ver y postularse al concurso."
             confirmLabel="Publicar"
             onConfirm={() => mutation.mutate()}
             isLoading={mutation.isPending}
@@ -270,7 +270,7 @@ function PublicarResultadosAction({
             open={confirmOpen}
             onOpenChange={setConfirmOpen}
             title="Publicar resultados"
-            description="Los resultados seran visibles en la pagina publica del concurso. Los ganadores y las empresas no seleccionadas podran ver su resultado. Esta accion no se puede deshacer."
+            description="Los resultados serán visibles en la página pública del concurso. Los ganadores y las empresas no seleccionadas podrán ver su resultado. Esta acción no se puede deshacer."
             confirmLabel="Publicar resultados"
             onConfirm={() => mutation.mutate()}
             isLoading={mutation.isPending}

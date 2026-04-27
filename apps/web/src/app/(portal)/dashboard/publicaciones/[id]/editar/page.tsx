@@ -32,7 +32,7 @@ export default function EditarPublicacionPage({
     return (
       <div className="space-y-6">
         <PageHeader
-          title="Editar publicacion"
+          title="Editar publicación"
           description="Cargando datos..."
         />
         <FormSkeleton fields={6} />
@@ -44,10 +44,10 @@ export default function EditarPublicacionPage({
   if (isError || !data) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Editar publicacion" />
+        <PageHeader title="Editar publicación" />
         <Alert variant="destructive">
           <AlertDescription>
-            No se pudo cargar la publicacion. Verifica que el ID sea correcto.
+            No se pudo cargar la publicación. Verifica que el ID sea correcto.
           </AlertDescription>
         </Alert>
         <Button
@@ -65,10 +65,10 @@ export default function EditarPublicacionPage({
   if (data.estado === EstadoPublicacion.EXPIRADO) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Editar publicacion" />
+        <PageHeader title="Editar publicación" />
         <Alert>
           <AlertDescription>
-            No se puede editar una publicacion en estado
+            No se puede editar una publicación en estado
             &ldquo;expirado&rdquo;. Puedes republicarla o archivarla desde la
             lista.
           </AlertDescription>
@@ -87,7 +87,7 @@ export default function EditarPublicacionPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Editar publicacion"
+        title="Editar publicación"
         description={`Editando: ${data.titulo}`}
       />
       <PublicacionForm initialData={data} />

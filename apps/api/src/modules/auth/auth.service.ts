@@ -57,7 +57,7 @@ export class AuthService {
       where: eq(usuario.email, dto.email),
     });
     if (existing) {
-      throw new ConflictException('El email ya esta registrado');
+      throw new ConflictException('El email ya está registrado');
     }
 
     const passwordHash = await this.hashPassword(dto.password);
@@ -86,12 +86,12 @@ export class AuthService {
       where: eq(usuario.email, dto.email),
     });
     if (!user || !user.activo) {
-      throw new UnauthorizedException('Credenciales invalidas');
+      throw new UnauthorizedException('Credenciales inválidas');
     }
 
     const isValid = await this.verifyPassword(user.passwordHash, dto.password);
     if (!isValid) {
-      throw new UnauthorizedException('Credenciales invalidas');
+      throw new UnauthorizedException('Credenciales inválidas');
     }
 
     const familyId = randomUUID();
@@ -117,7 +117,7 @@ export class AuthService {
 
     // Token no encontrado
     if (!session) {
-      throw new UnauthorizedException('Refresh token invalido');
+      throw new UnauthorizedException('Refresh token inválido');
     }
 
     // Reuso detectado: token ya fue consumido
@@ -126,7 +126,7 @@ export class AuthService {
         `Reuso de refresh token detectado, family=${session.familyId}, usuario=${session.usuarioId}`,
       );
       await this.revokeFamily(session.familyId);
-      throw new UnauthorizedException('Refresh token invalido');
+      throw new UnauthorizedException('Refresh token inválido');
     }
 
     // Token expirado
@@ -145,7 +145,7 @@ export class AuthService {
         `Familia expirada (lifetime absoluto), family=${session.familyId}`,
       );
       await this.revokeFamily(session.familyId);
-      throw new UnauthorizedException('Sesion expirada, inicie sesion nuevamente');
+      throw new UnauthorizedException('Sesión expirada, inicie sesión nuevamente');
     }
 
     // Verificar que el usuario sigue activo
@@ -180,7 +180,7 @@ export class AuthService {
         `Rotacion concurrente detectada, family=${session.familyId}`,
       );
       await this.revokeFamily(session.familyId);
-      throw new UnauthorizedException('Refresh token invalido');
+      throw new UnauthorizedException('Refresh token inválido');
     }
 
     const accessToken = await this.generateAccessToken(user);

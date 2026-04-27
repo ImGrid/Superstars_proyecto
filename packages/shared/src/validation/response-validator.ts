@@ -14,7 +14,7 @@ export function buildResponseSchema(
   const allCampos = schema.secciones.flatMap(s => s.campos);
 
   for (const campo of allCampos) {
-    let fieldSchema = buildFieldValidator(campo);
+    let fieldSchema = buildFieldValidator(campo, mode);
 
     // Draft: todo opcional (guardar parcial). Submit: solo no-requeridos opcionales
     if (mode === 'draft' || !campo.requerido) {
@@ -38,8 +38,10 @@ export function buildResponseSchema(
     : z.object(shape).strip();
 }
 
-// Construye el validador Zod para un campo segun su tipo
-function buildFieldValidator(campo: FormField): ZodTypeAny {
+// Construye el validador Zod para un campo segun su tipo.
+// El parametro `mode` solo se usa para tabla: en draft las celdas internas
+// son ultra-permisivas (acepta cualquier string en columnas numericas).
+function buildFieldValidator(campo: FormField, mode: ValidationMode = 'submit'): ZodTypeAny {
   switch (campo.tipo) {
     case 'texto_corto': {
       let s = z.string().min(1, 'Campo obligatorio');
@@ -87,15 +89,28 @@ function buildFieldValidator(campo: FormField): ZodTypeAny {
     }
 
     case 'tabla': {
-      // Cada fila es un objeto con las columnas definidas
+      // Cada fila es un objeto con las columnas definidas.
+      // En modo draft, las columnas numericas aceptan cualquier string
+      // (incluyendo "") porque las filas vacias iniciales no deben
+      // bloquear el guardado parcial. En submit se valida con regex estricto.
       const rowShape: Record<string, ZodTypeAny> = {};
       for (const col of campo.columnas) {
-        const colValidator = col.tipo === 'numerico'
-          ? z.union([z.number(), z.string().regex(/^-?\d+(\.\d+)?$/, 'Debe ser un numero')])
-          : z.string();
-        rowShape[col.id] = col.requerido ? colValidator : colValidator.optional().nullable();
+        let colValidator: ZodTypeAny;
+        if (col.tipo === 'numerico') {
+          colValidator = mode === 'draft'
+            ? z.union([z.number(), z.string()])
+            : z.union([z.number(), z.string().regex(/^-?\d+(\.\d+)?$/, 'Debe ser un numero')]);
+        } else {
+          colValidator = z.string();
+        }
+        // Draft: todas las celdas son opcionales/nullable. Submit: respeta col.requerido
+        rowShape[col.id] = mode === 'draft' || !col.requerido
+          ? colValidator.optional().nullable()
+          : colValidator;
       }
-      return z.array(z.object(rowShape)).min(1, 'La tabla debe tener al menos una fila');
+      // Solo exigir min(1) en submit (en draft puede no haber filas todavia)
+      const arr = z.array(z.object(rowShape));
+      return mode === 'draft' ? arr : arr.min(1, 'La tabla debe tener al menos una fila');
     }
 
     case 'archivo': {

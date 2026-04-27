@@ -157,13 +157,34 @@ export const schemaDefinitionSchema = z.object({
     const secIds = data.secciones.map(s => s.id);
     return new Set(secIds).size === secIds.length;
   },
-  { message: 'Los IDs de secciones deben ser unicos' },
+  { message: 'Los IDs de secciones deben ser únicos' },
 ).refine(
   (data) => {
     const fieldIds = data.secciones.flatMap(s => s.campos.map(c => c.id));
     return new Set(fieldIds).size === fieldIds.length;
   },
-  { message: 'Los IDs de campos deben ser unicos en todo el formulario' },
+  { message: 'Los IDs de campos deben ser únicos en todo el formulario' },
+).refine(
+  // Tabla con filas predefinidas (filasFijas) NO puede ser también dinámica.
+  // Las filas predefinidas implican estructura cerrada (ej: años 2023, 2024, 2025).
+  (data) => {
+    for (const seccion of data.secciones) {
+      for (const campo of seccion.campos) {
+        if (
+          campo.tipo === 'tabla' &&
+          campo.filasFijas &&
+          campo.filasFijas.length > 0 &&
+          campo.filasDinamicas
+        ) {
+          return false;
+        }
+      }
+    }
+    return true;
+  },
+  {
+    message: 'Una tabla no puede tener filas predefinidas y filas dinámicas al mismo tiempo',
+  },
 );
 
 // Crear formulario dinamico
@@ -190,6 +211,7 @@ export type CreateFormularioDto = z.infer<typeof createFormularioSchema>;
 export type UpdateFormularioDto = z.infer<typeof updateFormularioSchema>;
 export type OpcionCampo = z.infer<typeof opcionSchema>;
 export type ColumnaTabla = z.infer<typeof columnaTablaSchema>;
+export type FilaFijaTabla = z.infer<typeof filaFijaSchema>;
 export type AutoRelleno = z.infer<typeof autoRellenoSchema>;
 
 // GET /concursos/:concursoId/formulario, POST, PUT

@@ -14,24 +14,24 @@ const steps = [
     icon: "ph:building-office-duotone",
     title: "Registra tu empresa",
     description:
-      "Crea tu perfil empresarial con los datos de tu empresa y documentacion requerida.",
+      "Crea tu perfil empresarial con los datos de tu empresa y documentación requerida.",
   },
   {
     icon: "ph:note-pencil-duotone",
     title: "Completa el formulario",
     description:
-      "Llena el formulario dinamico del concurso con tu propuesta de impacto.",
+      "Llena el formulario dinámico del concurso con tu propuesta de impacto.",
   },
   {
     icon: "ph:trophy-duotone",
     title: "Compite y gana",
     description:
-      "Un jurado independiente evalua las propuestas y selecciona a los ganadores.",
+      "Un jurado independiente evalúa las propuestas y selecciona a los ganadores.",
   },
 ];
 
 
-// historias de exito placeholder
+// historias de éxito placeholder
 const stories = [
   {
     image: "/images/img1.jpg",
@@ -42,17 +42,17 @@ const stories = [
   },
   {
     image: "/images/img3.jpg",
-    category: "Tecnologia",
+    category: "Tecnología",
     title: "Emprendedora Digital",
     description:
-      "Desde su hogar, esta emprendedora construyo una plataforma digital que conecta productores locales con mercados internacionales.",
+      "Desde su hogar, esta emprendedora construyó una plataforma digital que conecta productores locales con mercados internacionales.",
   },
   {
     image: "/images/img4.jpg",
     category: "Medio Ambiente",
     title: "Reciclaje Inteligente",
     description:
-      "Un proyecto de economia circular que convierte residuos plasticos en materiales de construccion accesibles.",
+      "Un proyecto de economía circular que convierte residuos plásticos en materiales de construcción accesibles.",
   },
 ];
 
@@ -64,7 +64,7 @@ export default function HomePage() {
         {/* imagen de fondo */}
         <Image
           src="/images/img5.jpg"
-          alt="Presentacion de proyecto en espacio de coworking"
+          alt="Presentación de proyecto en espacio de coworking"
           fill
           sizes="100vw"
           className="object-cover opacity-30"
@@ -146,8 +146,8 @@ export default function HomePage() {
               </p>
               <p className="mt-4 leading-relaxed text-secondary-600">
                 Trabajamos junto a organizaciones internacionales como OXFAM,
-                Ayuda en Accion y FUNDES Bolivia para ofrecer a los
-                emprendedores financiamiento, acompanamiento tecnico y
+                Ayuda en Acción y FUNDES Bolivia para ofrecer a los
+                emprendedores financiamiento, acompañamiento técnico y
                 oportunidades de crecimiento.
               </p>
               <Button
@@ -184,7 +184,7 @@ export default function HomePage() {
           <div className="mt-16 grid gap-8 sm:grid-cols-3">
             {steps.map((step, index) => (
               <div key={step.title} className="relative text-center">
-                {/* numero de paso */}
+                {/* número de paso */}
                 <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-2xl bg-orange-600 text-white shadow-lg shadow-orange-600/25">
                   <Icon icon={step.icon} className="size-7" />
                 </div>
@@ -209,7 +209,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
             <p className="text-sm font-semibold tracking-wider text-orange-600 uppercase">
-              Casos de exito
+              Casos de éxito
             </p>
             <h2 className="mt-2 font-heading text-3xl font-bold text-primary-800 sm:text-4xl">
               Historias que inspiran
@@ -258,7 +258,7 @@ export default function HomePage() {
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-primary-200">
             Registra tu empresa, completa tu propuesta y compite por premios de
-            hasta Bs 58.000. El siguiente caso de exito puedes ser tu.
+            hasta Bs 58.000. El siguiente caso de éxito puedes ser tú.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Button
@@ -291,7 +291,7 @@ export default function HomePage() {
               href="/contacto"
               className="transition-colors hover:text-orange-400"
             >
-              Contactanos
+              Contáctanos
             </Link>
           </div>
         </div>

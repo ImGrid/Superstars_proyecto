@@ -78,7 +78,7 @@ export class AuthController {
     }
     res.clearCookie(REFRESH_COOKIE_NAME, { path: '/api/auth' });
     res.clearCookie(ACCESS_COOKIE_NAME, { path: '/' });
-    return { message: 'Sesion cerrada' };
+    return { message: 'Sesión cerrada' };
   }
 
   // Requiere autenticacion (access token valido)

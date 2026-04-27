@@ -23,13 +23,13 @@ function getDeadlineDisplay(fechaCierre: string) {
   }
   if (dias <= 7) {
     return {
-      text: `Ultimos ${dias} dia${dias > 1 ? "s" : ""}`,
+      text: `Últimos ${dias} día${dias > 1 ? "s" : ""}`,
       className: "text-warning-600 font-semibold",
     };
   }
   if (dias <= 30) {
     return {
-      text: `Quedan ${dias} dias`,
+      text: `Quedan ${dias} días`,
       className: "text-primary-700",
     };
   }

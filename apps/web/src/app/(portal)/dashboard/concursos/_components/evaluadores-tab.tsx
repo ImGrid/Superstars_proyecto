@@ -217,7 +217,7 @@ export function EvaluadoresTab({ concursoId }: EvaluadoresTabProps) {
             open={!!deleteTarget}
             onOpenChange={(open) => !open && setDeleteTarget(null)}
             title="Remover evaluador"
-            description={`Se removera a "${deleteTarget.nombre}" como evaluador de este concurso.`}
+            description={`Se removerá a "${deleteTarget.nombre}" como evaluador de este concurso.`}
             confirmLabel="Remover"
             onConfirm={() => removeMutation.mutate(deleteTarget.evaluadorId)}
             isLoading={removeMutation.isPending}

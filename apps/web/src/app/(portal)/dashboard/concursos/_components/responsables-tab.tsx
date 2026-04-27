@@ -226,7 +226,7 @@ export function ResponsablesTab({ concursoId }: ResponsablesTabProps) {
             open={!!deleteTarget}
             onOpenChange={(open) => !open && setDeleteTarget(null)}
             title="Remover responsable"
-            description={`Se removera a "${deleteTarget.nombre}" como responsable de este concurso.`}
+            description={`Se removerá a "${deleteTarget.nombre}" como responsable de este concurso.`}
             confirmLabel="Remover"
             onConfirm={() => removeMutation.mutate(deleteTarget.usuarioId)}
             isLoading={removeMutation.isPending}

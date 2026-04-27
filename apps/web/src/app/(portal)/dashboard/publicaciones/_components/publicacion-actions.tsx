@@ -244,8 +244,8 @@ export function PublicacionActions({ publicacion }: PublicacionActionsProps) {
       <ConfirmDialog
         open={publicarOpen}
         onOpenChange={setPublicarOpen}
-        title="Publicar publicacion"
-        description="La publicacion sera visible inmediatamente en el sitio publico."
+        title="Publicar publicación"
+        description="La publicación será visible inmediatamente en el sitio público."
         confirmLabel="Publicar"
         onConfirm={() => publicarMutation.mutate()}
         isLoading={publicarMutation.isPending}
@@ -256,13 +256,13 @@ export function PublicacionActions({ publicacion }: PublicacionActionsProps) {
       <Dialog open={programarOpen} onOpenChange={setProgramarOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Programar publicacion</DialogTitle>
+            <DialogTitle>Programar publicación</DialogTitle>
             <DialogDescription>
-              Selecciona la fecha y hora en que se publicara automaticamente.
+              Selecciona la fecha y hora en que se publicará automáticamente.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
-            <Label htmlFor="fecha-programada">Fecha y hora de publicacion</Label>
+            <Label htmlFor="fecha-programada">Fecha y hora de publicación</Label>
             <Input
               id="fecha-programada"
               type="datetime-local"
@@ -295,8 +295,8 @@ export function PublicacionActions({ publicacion }: PublicacionActionsProps) {
       <ConfirmDialog
         open={archivarOpen}
         onOpenChange={setArchivarOpen}
-        title="Archivar publicacion"
-        description="La publicacion dejara de ser visible en el sitio publico."
+        title="Archivar publicación"
+        description="La publicación dejará de ser visible en el sitio público."
         confirmLabel="Archivar"
         onConfirm={() => archivarMutation.mutate()}
         isLoading={archivarMutation.isPending}
@@ -307,8 +307,8 @@ export function PublicacionActions({ publicacion }: PublicacionActionsProps) {
       <ConfirmDialog
         open={republicarOpen}
         onOpenChange={setRepublicarOpen}
-        title="Republicar publicacion"
-        description="La publicacion volvera a ser visible en el sitio publico."
+        title="Republicar publicación"
+        description="La publicación volverá a ser visible en el sitio público."
         confirmLabel="Republicar"
         onConfirm={() => republicarMutation.mutate()}
         isLoading={republicarMutation.isPending}
@@ -319,9 +319,9 @@ export function PublicacionActions({ publicacion }: PublicacionActionsProps) {
       <ConfirmDialog
         open={cancelarOpen}
         onOpenChange={setCancelarOpen}
-        title="Cancelar programacion"
-        description="La publicacion volvera a estado borrador y no se publicara automaticamente."
-        confirmLabel="Cancelar programacion"
+        title="Cancelar programación"
+        description="La publicación volverá a estado borrador y no se publicará automáticamente."
+        confirmLabel="Cancelar programación"
         onConfirm={() => cancelarMutation.mutate()}
         isLoading={cancelarMutation.isPending}
         destructive={false}
@@ -332,8 +332,8 @@ export function PublicacionActions({ publicacion }: PublicacionActionsProps) {
         <ConfirmDialog
           open={deleteOpen}
           onOpenChange={setDeleteOpen}
-          title="Eliminar publicacion"
-          description={`Se eliminara permanentemente la publicacion "${publicacion.titulo}". Esta accion no se puede deshacer.`}
+          title="Eliminar publicación"
+          description={`Se eliminará permanentemente la publicación "${publicacion.titulo}". Esta acción no se puede deshacer.`}
           confirmLabel="Eliminar"
           onConfirm={() => deleteMutation.mutate()}
           isLoading={deleteMutation.isPending}

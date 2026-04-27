@@ -7,8 +7,8 @@ export default function NuevaPublicacionPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Nueva publicacion"
-        description="Crea una nueva publicacion o noticia. Se guardara como borrador."
+        title="Nueva publicación"
+        description="Crea una nueva publicación o noticia. Se guardará como borrador."
       />
       <PublicacionForm />
     </div>

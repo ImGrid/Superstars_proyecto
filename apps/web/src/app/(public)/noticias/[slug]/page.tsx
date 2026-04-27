@@ -48,8 +48,8 @@ export default function NoticiaDetallePage({
       <div className="mx-auto max-w-3xl px-4 pt-28 pb-12 sm:px-6 lg:px-8">
         <EmptyState
           icon="ph:newspaper-duotone"
-          title="Publicacion no encontrada"
-          description="La publicacion que buscas no existe o fue removida."
+          title="Publicación no encontrada"
+          description="La publicación que buscas no existe o fue removida."
           action={
             <Button asChild variant="outline">
               <Link href="/noticias">

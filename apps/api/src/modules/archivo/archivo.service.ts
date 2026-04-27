@@ -60,19 +60,19 @@ export class ArchivoService {
       );
     }
 
-    // Validar tamano
+    // Validar tamaño
     const maxBytes = campo.maxTamanoMb * 1024 * 1024;
     if (file.size > maxBytes) {
       throw new BadRequestException(
-        `El archivo excede el tamano maximo de ${campo.maxTamanoMb} MB`,
+        `El archivo excede el tamaño máximo de ${campo.maxTamanoMb} MB`,
       );
     }
 
-    // Validar cantidad maxima de archivos para este campo
+    // Validar cantidad máxima de archivos para este campo
     const currentCount = await this.archivoRepo.countByPostulacionAndField(postulacionId, fieldId);
     if (currentCount >= campo.maxArchivos) {
       throw new ConflictException(
-        `Ya se alcanzo el maximo de ${campo.maxArchivos} archivo(s) para este campo`,
+        `Ya se alcanzó el máximo de ${campo.maxArchivos} archivo(s) para este campo`,
       );
     }
 
@@ -167,11 +167,11 @@ export class ArchivoService {
   private async verificarAccesoEvaluador(postulacionId: number, userId: number): Promise<void> {
     const post = await this.getPostulacionOrFail(postulacionId);
     if (!ESTADOS_EVALUABLES.includes(post.estado as EstadoPostulacion)) {
-      throw new ForbiddenException('La postulacion no esta en estado de evaluacion');
+      throw new ForbiddenException('La postulación no está en estado de evaluación');
     }
     const esAsignado = await this.evaluacionRepo.isAsignadoAPostulacion(postulacionId, userId);
     if (!esAsignado) {
-      throw new ForbiddenException('No estas asignado para evaluar esta postulacion');
+      throw new ForbiddenException('No estás asignado para evaluar esta postulación');
     }
   }
 

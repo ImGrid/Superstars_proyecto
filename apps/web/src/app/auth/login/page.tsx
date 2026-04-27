@@ -39,7 +39,7 @@ function LoginForm() {
     <div className="rounded-xl bg-white p-8 shadow-sm ring-1 ring-secondary-200">
       <div className="mb-6 text-center">
         <h1 className="font-heading text-2xl font-bold text-secondary-900">
-          Iniciar Sesion
+          Iniciar Sesión
         </h1>
         <p className="mt-1 text-sm text-secondary-500">
           Accede a tu cuenta
@@ -49,7 +49,7 @@ function LoginForm() {
       {registered && (
         <Alert className="mb-4 border-success-500 bg-success-50 text-success-700">
           <AlertDescription>
-            Cuenta creada exitosamente. Inicia sesion con tus credenciales.
+            Cuenta creada exitosamente. Inicia sesión con tus credenciales.
           </AlertDescription>
         </Alert>
       )}
@@ -63,7 +63,7 @@ function LoginForm() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-1">
           <Label htmlFor="email" className="text-secondary-700">
-            Correo electronico
+            Correo electrónico
           </Label>
           <Input
             id="email"
@@ -83,12 +83,12 @@ function LoginForm() {
 
         <div className="space-y-1">
           <Label htmlFor="password" className="text-secondary-700">
-            Contrasena
+            Contraseña
           </Label>
           <Input
             id="password"
             type="password"
-            placeholder="Minimo 8 caracteres"
+            placeholder="Mínimo 8 caracteres"
             autoComplete="current-password"
             aria-invalid={!!errors.password}
             aria-describedby={errors.password ? "password-error" : undefined}
@@ -103,14 +103,14 @@ function LoginForm() {
 
         <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
           {loginMutation.isPending && <Loader2 className="animate-spin" />}
-          Iniciar Sesion
+          Iniciar Sesión
         </Button>
       </form>
 
       <p className="mt-4 text-center text-sm text-secondary-500">
-        No tienes cuenta?{" "}
+        ¿No tienes cuenta?{" "}
         <Link href="/auth/registro" className="font-medium text-primary-600 hover:text-primary-700">
-          Registrate
+          Regístrate
         </Link>
       </p>
     </div>

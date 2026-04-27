@@ -51,7 +51,7 @@ type EmpresaFormValues = CreateEmpresaDto;
 function empresaToFormValues(emp: EmpresaResponse): EmpresaFormValues {
   return {
     razonSocial: emp.razonSocial,
-    nit: emp.nit,
+    nit: emp.nit ?? undefined,
     registroSeprec: emp.registroSeprec ?? undefined,
     tipoEmpresa: emp.tipoEmpresa ?? undefined,
     numeroSocios: emp.numeroSocios ?? undefined,
@@ -85,7 +85,7 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
       ? empresaToFormValues(initialData)
       : {
           razonSocial: "",
-          nit: "",
+          nit: undefined,
           registroSeprec: undefined,
           tipoEmpresa: undefined,
           numeroSocios: undefined,
@@ -146,7 +146,7 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
 
     // campos de texto opcionales: "" -> undefined
     const textFields = [
-      "registroSeprec", "tipoEmpresa", "numeroSocios", "rubro",
+      "nit", "registroSeprec", "tipoEmpresa", "numeroSocios", "rubro",
       "departamento", "ciudad", "direccion", "telefono", "descripcion",
       "contactoCargo", "contactoTelefono", "contactoGenero",
       "contactoFechaNacimiento",
@@ -277,9 +277,13 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
               name="nit"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>NIT *</FormLabel>
+                  <FormLabel>NIT</FormLabel>
                   <FormControl>
-                    <Input placeholder="Numero de identificacion tributaria" {...field} />
+                    <Input
+                      placeholder="Número de identificación tributaria"
+                      {...field}
+                      value={field.value ?? ""}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -292,7 +296,7 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
                 <FormItem>
                   <FormLabel>Registro SEPREC</FormLabel>
                   <FormControl>
-                    <Input placeholder="Numero de registro" {...field} value={field.value ?? ""} />
+                    <Input placeholder="Número de registro" {...field} value={field.value ?? ""} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
