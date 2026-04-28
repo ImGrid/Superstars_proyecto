@@ -6,6 +6,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
+import { NotificacionModule } from '../notificacion/notificacion.module';
 
 @Module({
   imports: [
@@ -19,6 +20,8 @@ import { RolesGuard } from './guards/roles.guard';
         },
       }),
     }),
+    // Para inyectar MailService en AuthService (envio de codigos de verificacion)
+    NotificacionModule,
   ],
   controllers: [AuthController],
   providers: [

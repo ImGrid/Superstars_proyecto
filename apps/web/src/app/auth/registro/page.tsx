@@ -1,10 +1,12 @@
 "use client";
 
+import { Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema, type RegisterDto } from "@superstars/shared";
 import { isAxiosError } from "axios";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,8 +14,12 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useRegister } from "@/hooks/use-register";
 
-export default function RegistroPage() {
+function RegistroForm() {
   const registerMutation = useRegister();
+  const searchParams = useSearchParams();
+  // Prellena el email cuando se llega aqui desde "Volver a registrarse"
+  // (despues de MAX_RESENDS o codigo expirado)
+  const emailPrefill = searchParams.get("email") ?? "";
 
   const {
     register,
@@ -21,6 +27,7 @@ export default function RegistroPage() {
     formState: { errors },
   } = useForm<RegisterDto>({
     resolver: zodResolver(registerSchema),
+    defaultValues: { email: emailPrefill },
   });
 
   const onSubmit = (data: RegisterDto) => registerMutation.mutate(data);
@@ -49,6 +56,29 @@ export default function RegistroPage() {
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {/* Honeypot anti-bot: invisible para humanos (off-screen + tabIndex=-1).
+            Si el campo llega al backend con valor, se trata como bot.
+            Mantener el name="website" — coincide con la convencion del backend. */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            left: "-9999px",
+            width: "1px",
+            height: "1px",
+            overflow: "hidden",
+          }}
+        >
+          <label htmlFor="website">No llenar este campo</label>
+          <input
+            id="website"
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+            {...register("website")}
+          />
+        </div>
+
         <div className="space-y-1">
           <Label htmlFor="nombre" className="text-secondary-700">
             Nombre
@@ -118,9 +148,17 @@ export default function RegistroPage() {
       <p className="mt-4 text-center text-sm text-secondary-500">
         Ya tienes cuenta?{" "}
         <Link href="/auth/login" className="font-medium text-primary-600 hover:text-primary-700">
-          Inicia sesion
+          Inicia sesión
         </Link>
       </p>
     </div>
+  );
+}
+
+export default function RegistroPage() {
+  return (
+    <Suspense>
+      <RegistroForm />
+    </Suspense>
   );
 }

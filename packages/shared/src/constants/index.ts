@@ -23,3 +23,9 @@ export {
   OPCIONES_TIPO_REGISTROS,
   OPCIONES_METODO_REGISTROS,
 } from './opciones-empresa';
+export {
+  RESEND_MAX,
+  RESEND_COOLDOWNS_SEG,
+  computeResendCooldownSec,
+  VERIFICACION_EXPIRACION_MINUTOS,
+} from './auth';

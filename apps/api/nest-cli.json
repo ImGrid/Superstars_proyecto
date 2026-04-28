@@ -3,6 +3,9 @@
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
   "compilerOptions": {
-    "tsConfigPath": "tsconfig.json"
+    "tsConfigPath": "tsconfig.json",
+    "assets": [
+      { "include": "modules/notificacion/templates/**/*", "outDir": "dist", "watchAssets": true }
+    ]
   }
 }

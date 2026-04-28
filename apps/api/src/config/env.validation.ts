@@ -23,6 +23,15 @@ export const envSchema = z.object({
 
   THROTTLE_TTL: z.coerce.number().default(60000),
   THROTTLE_LIMIT: z.coerce.number().default(100),
+
+  SMTP_HOST: z.string().min(1),
+  SMTP_PORT: z.coerce.number().positive().default(465),
+  // z.coerce.boolean trata cualquier string no vacio como true (incluido "false")
+  // por usar Boolean() de JS — issue oficial #5501 de Zod. Parseamos explicitamente
+  SMTP_SECURE: z.enum(['true', 'false']).transform((v) => v === 'true').default('true'),
+  SMTP_USER: z.string().email(),
+  SMTP_PASSWORD: z.string().min(1),
+  SMTP_FROM: z.string().min(1),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

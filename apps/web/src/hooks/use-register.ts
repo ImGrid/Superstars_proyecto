@@ -10,8 +10,11 @@ export function useRegister() {
 
   return useMutation({
     mutationFn: (dto: RegisterDto) => register(dto),
-    onSuccess: () => {
-      router.push("/auth/login?registered=true");
+    // El backend nunca crea el usuario aqui — solo manda un codigo al correo.
+    // Redirigir a la pantalla de verificacion con el email en query param.
+    onSuccess: (_data, variables) => {
+      const email = encodeURIComponent(variables.email.toLowerCase().trim());
+      router.push(`/auth/verificar-cuenta?email=${email}`);
     },
   });
 }

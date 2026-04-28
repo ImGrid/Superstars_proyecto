@@ -10,6 +10,7 @@
     "lint": "eslint \"{src,test}/**/*.ts\" --fix"
   },
   "dependencies": {
+    "@nestjs-modules/mailer": "^2.3.4",
     "@nestjs/common": "^11",
     "@nestjs/config": "^4",
     "@nestjs/core": "^11",
@@ -21,9 +22,12 @@
     "@superstars/shared": "workspace:*",
     "argon2": "^0.41",
     "cookie-parser": "^1",
+    "disposable-email-domains": "^1.0.62",
     "drizzle-orm": "^0.45.1",
+    "handlebars": "^4.7.9",
     "helmet": "^8",
     "nestjs-zod": "^5.1.1",
+    "nodemailer": "^8.0.7",
     "pg": "^8.18.0",
     "reflect-metadata": "^0.2",
     "rxjs": "^7",
@@ -39,11 +43,13 @@
     "@types/express": "^5",
     "@types/multer": "^2.0.0",
     "@types/node": "^22",
+    "@types/nodemailer": "^8.0.0",
     "@types/pg": "^8.16.0",
     "@types/sanitize-html": "^2.16.0",
     "eslint": "^9",
     "ts-loader": "^9",
     "tsconfig-paths": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5",
     "typescript-eslint": "^8"
   }

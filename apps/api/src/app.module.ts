@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { APP_FILTER, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ZodValidationPipe } from 'nestjs-zod';
-import { validate, appConfig, databaseConfig, jwtConfig } from './config';
+import { validate, appConfig, databaseConfig, jwtConfig, mailConfig } from './config';
 import { DrizzleModule } from './database/drizzle.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { AuthModule } from './modules/auth/auth.module';
@@ -22,6 +22,7 @@ import { PublicModule } from './modules/public/public.module';
 import { EvaluacionModule } from './modules/evaluacion/evaluacion.module';
 import { FaqModule } from './modules/faq/faq.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { NotificacionModule } from './modules/notificacion/notificacion.module';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
     ConfigModule.forRoot({
       isGlobal: true,
       validate,
-      load: [appConfig, databaseConfig, jwtConfig],
+      load: [appConfig, databaseConfig, jwtConfig, mailConfig],
       envFilePath: '.env',
     }),
 
@@ -39,12 +40,15 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
     // Tareas programadas (cron cleanup de tokens)
     ScheduleModule.forRoot(),
 
-    // Rate limiting
+    // Rate limiting global por IP (limite generoso). Endpoints especificos
+    // pueden aplicar guards custom (ej: AuthRateLimitGuard) con limites mas
+    // estrictos por IP y por email.
     ThrottlerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         throttlers: [
           {
+            name: 'default',
             ttl: config.get<number>('THROTTLE_TTL', 60000),
             limit: config.get<number>('THROTTLE_LIMIT', 100),
           },
@@ -54,6 +58,9 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
 
     // Autenticacion y autorizacion
     AuthModule,
+
+    // Envio de correos transaccionales (verificacion de cuenta, etc.)
+    NotificacionModule,
 
     // Gestion de usuarios
     UsuarioModule,
@@ -103,6 +110,9 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
 
     // Formato consistente de errores
     { provide: APP_FILTER, useClass: GlobalExceptionFilter },
+
+    // Rate limiting global. Cada endpoint puede sobrescribir limites con @Throttle
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],
 })
 export class AppModule {}

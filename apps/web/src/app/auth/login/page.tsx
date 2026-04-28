@@ -16,7 +16,12 @@ import { useLogin } from "@/hooks/use-login";
 
 function LoginForm() {
   const searchParams = useSearchParams();
+  // ?registered=true:       legacy (registro pre-verificacion). Mantener por compat.
+  // ?verified=true:         despues de confirmar el codigo de email — flujo actual.
+  // ?password-changed=true: tras reset de contrasena exitoso
   const registered = searchParams.get("registered") === "true";
+  const verified = searchParams.get("verified") === "true";
+  const passwordChanged = searchParams.get("password-changed") === "true";
   const loginMutation = useLogin();
 
   const {
@@ -32,8 +37,8 @@ function LoginForm() {
   // extraer mensaje de error del backend
   const apiError = loginMutation.error;
   const errorMessage = apiError && isAxiosError(apiError)
-    ? (apiError.response?.data as { message?: string })?.message || "Error al iniciar sesion"
-    : apiError ? "Error al iniciar sesion" : null;
+    ? (apiError.response?.data as { message?: string })?.message || "Error al iniciar sesión"
+    : apiError ? "Error al iniciar sesión" : null;
 
   return (
     <div className="rounded-xl bg-white p-8 shadow-sm ring-1 ring-secondary-200">
@@ -46,7 +51,23 @@ function LoginForm() {
         </p>
       </div>
 
-      {registered && (
+      {passwordChanged && (
+        <Alert className="mb-4 border-success-500 bg-success-50 text-success-700">
+          <AlertDescription>
+            Contraseña restablecida correctamente. Inicia sesión con tu nueva contraseña.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {verified && !passwordChanged && (
+        <Alert className="mb-4 border-success-500 bg-success-50 text-success-700">
+          <AlertDescription>
+            Cuenta verificada correctamente. Inicia sesión con tu correo y contraseña.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {registered && !verified && !passwordChanged && (
         <Alert className="mb-4 border-success-500 bg-success-50 text-success-700">
           <AlertDescription>
             Cuenta creada exitosamente. Inicia sesión con tus credenciales.
@@ -99,6 +120,14 @@ function LoginForm() {
               {errors.password.message}
             </p>
           )}
+          <div className="text-right">
+            <Link
+              href="/auth/recuperar-password"
+              className="text-sm font-medium text-primary-600 hover:text-primary-700"
+            >
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </div>
         </div>
 
         <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
