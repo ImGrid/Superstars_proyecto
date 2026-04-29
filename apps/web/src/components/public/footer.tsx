@@ -4,7 +4,7 @@ import { SponsorsStrip } from "@/components/public/sponsors-strip";
 
 const quickLinks = [
   { label: "Inicio", href: "/" },
-  { label: "Concursos", href: "/concursos" },
+  { label: "Convocatorias", href: "/convocatorias" },
   { label: "Noticias", href: "/noticias" },
   { label: "Resultados", href: "/resultados" },
   { label: "FAQ", href: "/faq" },
@@ -12,7 +12,7 @@ const quickLinks = [
 ];
 
 const legalLinks = [
-  { label: "Bases del concurso", href: "/concursos" },
+  { label: "Bases de la convocatoria", href: "/convocatorias" },
   { label: "Acceso Empresas", href: "/auth/login" },
   { label: "Registro", href: "/auth/registro" },
 ];
@@ -35,7 +35,7 @@ export function PublicFooter() {
             </Link>
             <p className="mt-3 text-sm leading-relaxed text-primary-300">
               Plataforma de competencias empresariales en Bolivia. Impulsamos
-              empresas con impacto social y ambiental a través de concursos,
+              empresas con impacto social y ambiental a través de convocatorias,
               financiamiento y acompañamiento.
             </p>
           </div>

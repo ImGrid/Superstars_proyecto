@@ -18,11 +18,11 @@ export class DashboardController {
   }
 
   // GET /api/dashboard/responsable
-  // Datos filtrados a los concursos asignados al responsable autenticado.
+  // Datos filtrados a las convocatorias asignadas al responsable autenticado.
   // Se permite al admin tambien para que pueda inspeccionar la vista del responsable
   // pasando user.id si en el futuro queremos exponerlo (por ahora usa su propio id)
   @Get('responsable')
-  @Roles(RolUsuario.RESPONSABLE_CONCURSO, RolUsuario.ADMINISTRADOR)
+  @Roles(RolUsuario.RESPONSABLE_CONVOCATORIA, RolUsuario.ADMINISTRADOR)
   async getResponsable(@CurrentUser() user: AuthUser) {
     return this.dashboardService.getResponsableStats(user.id);
   }

@@ -19,7 +19,7 @@ import {
 import type { AuthUser, SaveCalificacionDto, DevolverCalificacionDto, AssignEvaluadorPostulacionDto } from '@superstars/shared';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { CheckConcurso } from '../concurso/decorators/check-concurso.decorator';
+import { CheckConvocatoria } from '../convocatoria/decorators/check-convocatoria.decorator';
 import { EvaluacionService } from './evaluacion.service';
 
 // --- Endpoints del evaluador ---
@@ -27,32 +27,32 @@ import { EvaluacionService } from './evaluacion.service';
 export class EvaluacionEvaluadorController {
   constructor(private readonly evaluacionService: EvaluacionService) {}
 
-  // concursos donde estoy asignado como evaluador
-  @Get('concursos')
+  // convocatorias donde estoy asignado como evaluador
+  @Get('convocatorias')
   @Roles(RolUsuario.EVALUADOR)
-  async findMisConcursos(@CurrentUser() user: AuthUser) {
-    return this.evaluacionService.findMisConcursos(user.id);
+  async findMisConvocatorias(@CurrentUser() user: AuthUser) {
+    return this.evaluacionService.findMisConvocatorias(user.id);
   }
 
-  // postulaciones evaluables de un concurso
-  @Get('concursos/:concursoId/postulaciones')
+  // postulaciones evaluables de una convocatoria
+  @Get('convocatorias/:convocatoriaId/postulaciones')
   @Roles(RolUsuario.EVALUADOR)
   async findPostulaciones(
-    @Param('concursoId', ParseIntPipe) concursoId: number,
+    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
     @CurrentUser() user: AuthUser,
   ) {
-    return this.evaluacionService.findPostulacionesEvaluables(concursoId, user.id);
+    return this.evaluacionService.findPostulacionesEvaluables(convocatoriaId, user.id);
   }
 
   // detalle de una postulacion (propuesta + mi calificacion)
-  @Get('concursos/:concursoId/postulaciones/:postulacionId')
+  @Get('convocatorias/:convocatoriaId/postulaciones/:postulacionId')
   @Roles(RolUsuario.EVALUADOR)
   async findPostulacionDetalle(
-    @Param('concursoId', ParseIntPipe) concursoId: number,
+    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
     @Param('postulacionId', ParseIntPipe) postulacionId: number,
     @CurrentUser() user: AuthUser,
   ) {
-    return this.evaluacionService.findPostulacionDetalle(concursoId, postulacionId, user.id);
+    return this.evaluacionService.findPostulacionDetalle(convocatoriaId, postulacionId, user.id);
   }
 
   // guardar calificacion (parcial o completa)
@@ -64,9 +64,9 @@ export class EvaluacionEvaluadorController {
     @CurrentUser() user: AuthUser,
   ) {
     const dto = saveCalificacionSchema.parse(body);
-    // obtener concursoId de la postulacion
-    const post = await this.evaluacionService.findPostulacionParaConcursoId(postulacionId);
-    return this.evaluacionService.saveCalificacion(post.concursoId, postulacionId, user.id, dto);
+    // obtener convocatoriaId de la postulacion
+    const post = await this.evaluacionService.findPostulacionParaConvocatoriaId(postulacionId);
+    return this.evaluacionService.saveCalificacion(post.convocatoriaId, postulacionId, user.id, dto);
   }
 
   // completar calificacion (enviar para revision)
@@ -77,30 +77,30 @@ export class EvaluacionEvaluadorController {
     @Param('postulacionId', ParseIntPipe) postulacionId: number,
     @CurrentUser() user: AuthUser,
   ) {
-    const post = await this.evaluacionService.findPostulacionParaConcursoId(postulacionId);
-    return this.evaluacionService.completarCalificacion(post.concursoId, postulacionId, user.id);
+    const post = await this.evaluacionService.findPostulacionParaConvocatoriaId(postulacionId);
+    return this.evaluacionService.completarCalificacion(post.convocatoriaId, postulacionId, user.id);
   }
 }
 
 // --- Endpoints del responsable/admin para supervision ---
-@Controller('concursos/:concursoId/calificaciones')
+@Controller('convocatorias/:convocatoriaId/calificaciones')
 export class EvaluacionResponsableController {
   constructor(private readonly evaluacionService: EvaluacionService) {}
 
-  // listar calificaciones de un concurso
+  // listar calificaciones de una convocatoria
   @Get()
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
-  @CheckConcurso('concursoId')
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
+  @CheckConvocatoria('convocatoriaId')
   async findAll(
-    @Param('concursoId', ParseIntPipe) concursoId: number,
+    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
   ) {
-    return this.evaluacionService.findCalificacionesByConcurso(concursoId);
+    return this.evaluacionService.findCalificacionesByConvocatoria(convocatoriaId);
   }
 
   // detalle de una calificacion (puntajes + postulacion con responseData)
   @Get(':calificacionId/detalle')
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
-  @CheckConcurso('concursoId')
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
+  @CheckConvocatoria('convocatoriaId')
   async findDetalle(
     @Param('calificacionId', ParseIntPipe) calificacionId: number,
   ) {
@@ -109,8 +109,8 @@ export class EvaluacionResponsableController {
 
   // aprobar calificacion
   @Post(':calificacionId/aprobar')
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
-  @CheckConcurso('concursoId')
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
+  @CheckConvocatoria('convocatoriaId')
   @HttpCode(HttpStatus.OK)
   async aprobar(
     @Param('calificacionId', ParseIntPipe) calificacionId: number,
@@ -120,8 +120,8 @@ export class EvaluacionResponsableController {
 
   // devolver calificacion al evaluador
   @Post(':calificacionId/devolver')
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
-  @CheckConcurso('concursoId')
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
+  @CheckConvocatoria('convocatoriaId')
   @HttpCode(HttpStatus.OK)
   async devolver(
     @Param('calificacionId', ParseIntPipe) calificacionId: number,
@@ -133,14 +133,14 @@ export class EvaluacionResponsableController {
 }
 
 // --- Endpoints para asignar evaluadores a postulaciones ---
-@Controller('concursos/:concursoId/postulaciones/:postulacionId/evaluadores-asignados')
+@Controller('convocatorias/:convocatoriaId/postulaciones/:postulacionId/evaluadores-asignados')
 export class AsignacionEvaluadorController {
   constructor(private readonly evaluacionService: EvaluacionService) {}
 
   // listar evaluadores asignados a una postulacion
   @Get()
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
-  @CheckConcurso('concursoId')
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
+  @CheckConvocatoria('convocatoriaId')
   async findAll(
     @Param('postulacionId', ParseIntPipe) postulacionId: number,
   ) {
@@ -149,31 +149,31 @@ export class AsignacionEvaluadorController {
 
   // asignar evaluador a una postulacion
   @Post()
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
-  @CheckConcurso('concursoId')
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
+  @CheckConvocatoria('convocatoriaId')
   @HttpCode(HttpStatus.CREATED)
   async assign(
-    @Param('concursoId', ParseIntPipe) concursoId: number,
+    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
     @Param('postulacionId', ParseIntPipe) postulacionId: number,
     @Body() body: AssignEvaluadorPostulacionDto,
     @CurrentUser() user: AuthUser,
   ) {
     const dto = assignEvaluadorPostulacionSchema.parse(body);
     return this.evaluacionService.assignEvaluadorToPostulacion(
-      concursoId, postulacionId, dto, user.id,
+      convocatoriaId, postulacionId, dto, user.id,
     );
   }
 
   // desasignar evaluador de una postulacion
   @Delete(':evaluadorId')
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
-  @CheckConcurso('concursoId')
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
+  @CheckConvocatoria('convocatoriaId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(
-    @Param('concursoId', ParseIntPipe) concursoId: number,
+    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
     @Param('postulacionId', ParseIntPipe) postulacionId: number,
     @Param('evaluadorId', ParseIntPipe) evaluadorId: number,
   ) {
-    await this.evaluacionService.removeAsignacion(concursoId, postulacionId, evaluadorId);
+    await this.evaluacionService.removeAsignacion(convocatoriaId, postulacionId, evaluadorId);
   }
 }

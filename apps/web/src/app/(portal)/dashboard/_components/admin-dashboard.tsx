@@ -13,8 +13,8 @@ import {
   Cell,
 } from "recharts";
 import type {
-  AdminConcursoResumenItem,
-  EstadoConcurso,
+  AdminConvocatoriaResumenItem,
+  EstadoConvocatoria,
 } from "@superstars/shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,8 +25,8 @@ import { dashboardQueries } from "@/lib/api/query-keys";
 import { KpiCard } from "./kpi-card";
 import { DashboardSkeleton } from "./dashboard-skeleton";
 
-// labels legibles para los estados de concurso (para el grafico)
-const estadoConcursoLabels: Record<string, string> = {
+// labels legibles para los estados de convocatoria (para el grafico)
+const estadoConvocatoriaLabels: Record<string, string> = {
   borrador: "Borrador",
   publicado: "Publicado",
   cerrado: "Cerrado",
@@ -36,7 +36,7 @@ const estadoConcursoLabels: Record<string, string> = {
 };
 
 // colores alineados con la paleta del proyecto
-const estadoConcursoColors: Record<string, string> = {
+const estadoConvocatoriaColors: Record<string, string> = {
   borrador: "#94a3b8",
   publicado: "#3a893d",
   cerrado: "#d4880c",
@@ -48,14 +48,14 @@ const estadoConcursoColors: Record<string, string> = {
 // labels y colores para roles de usuario
 const rolLabels: Record<string, string> = {
   administrador: "Administradores",
-  responsable_concurso: "Responsables",
+  responsable_convocatoria: "Responsables",
   evaluador: "Evaluadores",
   proponente: "Proponentes",
 };
 
 const rolColors: Record<string, string> = {
   administrador: "#0d2b5b",
-  responsable_concurso: "#0b244e",
+  responsable_convocatoria: "#0b244e",
   evaluador: "#d4880c",
   proponente: "#3a893d",
 };
@@ -71,11 +71,11 @@ export function AdminDashboard({ nombre }: Props) {
     return <DashboardSkeleton />;
   }
 
-  // datos para el grafico de concursos por estado (solo los que tienen valor > 0)
-  const concursosChartData = Object.entries(data.concursosPorEstado)
+  // datos para el grafico de convocatorias por estado (solo los que tienen valor > 0)
+  const convocatoriasChartData = Object.entries(data.convocatoriasPorEstado)
     .filter(([, total]) => total > 0)
     .map(([estado, total]) => ({
-      name: estadoConcursoLabels[estado] ?? estado,
+      name: estadoConvocatoriaLabels[estado] ?? estado,
       value: total,
       estado,
     }));
@@ -90,8 +90,8 @@ export function AdminDashboard({ nombre }: Props) {
     }));
 
   const tieneAlertas =
-    data.alertas.concursosCerradosSinEvaluacion > 0 ||
-    data.alertas.concursosSinResponsable > 0;
+    data.alertas.convocatoriasCerradasSinEvaluacion > 0 ||
+    data.alertas.convocatoriasSinResponsable > 0;
 
   return (
     <div className="space-y-6">
@@ -107,9 +107,9 @@ export function AdminDashboard({ nombre }: Props) {
               </Link>
             </Button>
             <Button asChild size="sm" className="bg-orange-600 hover:bg-orange-700">
-              <Link href="/dashboard/concursos/nuevo">
+              <Link href="/dashboard/convocatorias/nuevo">
                 <Icon icon="ph:plus-circle-duotone" className="size-4" />
-                Nuevo concurso
+                Nueva convocatoria
               </Link>
             </Button>
           </div>
@@ -119,20 +119,20 @@ export function AdminDashboard({ nombre }: Props) {
       {/* alertas operativas */}
       {tieneAlertas && (
         <AlertasAdmin
-          concursosCerradosSinEval={data.alertas.concursosCerradosSinEvaluacion}
-          concursosSinResponsable={data.alertas.concursosSinResponsable}
+          convocatoriasCerradasSinEval={data.alertas.convocatoriasCerradasSinEvaluacion}
+          convocatoriasSinResponsable={data.alertas.convocatoriasSinResponsable}
         />
       )}
 
       {/* KPIs */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
-          title="Concursos activos"
-          value={data.totalConcursosActivos}
+          title="Convocatorias activas"
+          value={data.totalConvocatoriasActivas}
           description="En curso o evaluación"
           icon={<Icon icon="ph:trophy-duotone" className="size-5" />}
           accent="primary"
-          href="/dashboard/concursos"
+          href="/dashboard/convocatorias"
         />
         <KpiCard
           title="Empresas"
@@ -159,22 +159,22 @@ export function AdminDashboard({ nombre }: Props) {
         />
       </div>
 
-      {/* concursos activos */}
-      <ConcursosActivosCard items={data.concursosActivosResumen} />
+      {/* convocatorias activas */}
+      <ConvocatoriasActivasCard items={data.convocatoriasActivasResumen} />
 
       {/* graficos lado a lado */}
       <div className="grid gap-4 lg:grid-cols-2">
-        {concursosChartData.length > 0 && (
+        {convocatoriasChartData.length > 0 && (
           <Card>
             <CardHeader>
               <CardTitle className="text-base">
-                Distribución de concursos
+                Distribución de convocatorias
               </CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={240}>
                 <BarChart
-                  data={concursosChartData}
+                  data={convocatoriasChartData}
                   layout="vertical"
                   margin={{ top: 0, right: 24, left: 0, bottom: 0 }}
                 >
@@ -187,10 +187,10 @@ export function AdminDashboard({ nombre }: Props) {
                   />
                   <Tooltip />
                   <Bar dataKey="value" radius={[0, 4, 4, 0]} maxBarSize={28}>
-                    {concursosChartData.map((entry) => (
+                    {convocatoriasChartData.map((entry) => (
                       <Cell
                         key={entry.estado}
-                        fill={estadoConcursoColors[entry.estado] ?? "#94a3b8"}
+                        fill={estadoConvocatoriaColors[entry.estado] ?? "#94a3b8"}
                       />
                     ))}
                   </Bar>
@@ -238,25 +238,25 @@ export function AdminDashboard({ nombre }: Props) {
   );
 }
 
-// banda de alertas operativas (solo si hay concursos requiriendo accion)
+// banda de alertas operativas (solo si hay convocatorias requiriendo accion)
 function AlertasAdmin({
-  concursosCerradosSinEval,
-  concursosSinResponsable,
+  convocatoriasCerradasSinEval,
+  convocatoriasSinResponsable,
 }: {
-  concursosCerradosSinEval: number;
-  concursosSinResponsable: number;
+  convocatoriasCerradasSinEval: number;
+  convocatoriasSinResponsable: number;
 }) {
   const mensajes: { texto: string; href?: string }[] = [];
-  if (concursosCerradosSinEval > 0) {
+  if (convocatoriasCerradasSinEval > 0) {
     mensajes.push({
-      texto: `${concursosCerradosSinEval} ${concursosCerradosSinEval === 1 ? "concurso cerrado" : "concursos cerrados"} esperando que alguien inicie la evaluación`,
-      href: "/dashboard/concursos?estado=cerrado",
+      texto: `${convocatoriasCerradasSinEval} ${convocatoriasCerradasSinEval === 1 ? "convocatoria cerrada" : "convocatorias cerradas"} esperando que alguien inicie la evaluación`,
+      href: "/dashboard/convocatorias?estado=cerrado",
     });
   }
-  if (concursosSinResponsable > 0) {
+  if (convocatoriasSinResponsable > 0) {
     mensajes.push({
-      texto: `${concursosSinResponsable} ${concursosSinResponsable === 1 ? "concurso sin responsable asignado" : "concursos sin responsable asignado"}`,
-      href: "/dashboard/concursos",
+      texto: `${convocatoriasSinResponsable} ${convocatoriasSinResponsable === 1 ? "convocatoria sin responsable asignado" : "convocatorias sin responsable asignado"}`,
+      href: "/dashboard/convocatorias",
     });
   }
 
@@ -288,16 +288,16 @@ function AlertasAdmin({
   );
 }
 
-// lista de concursos activos con acceso directo al detalle
-function ConcursosActivosCard({
+// lista de convocatorias activas con acceso directo al detalle
+function ConvocatoriasActivasCard({
   items,
 }: {
-  items: AdminConcursoResumenItem[];
+  items: AdminConvocatoriaResumenItem[];
 }) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-3">
-        <CardTitle className="text-base">Concursos activos</CardTitle>
+        <CardTitle className="text-base">Convocatorias activas</CardTitle>
         <Badge variant="secondary" className="font-normal">
           {items.length}
         </Badge>
@@ -312,13 +312,13 @@ function ConcursosActivosCard({
               />
             </div>
             <p className="mt-3 text-sm font-medium text-secondary-900">
-              No hay concursos activos
+              No hay convocatorias activas
             </p>
             <p className="mt-1 max-w-sm text-xs text-secondary-500">
-              Cuando publiques un concurso aparecerá aquí. Empezá creando uno.
+              Cuando publiques una convocatoria aparecerá aquí. Empezá creando una.
             </p>
             <Button asChild size="sm" className="mt-4 bg-orange-600 hover:bg-orange-700">
-              <Link href="/dashboard/concursos/nuevo">Crear primer concurso</Link>
+              <Link href="/dashboard/convocatorias/nuevo">Crear primera convocatoria</Link>
             </Button>
           </div>
         ) : (
@@ -326,7 +326,7 @@ function ConcursosActivosCard({
             {items.map((c) => (
               <Link
                 key={c.id}
-                href={`/dashboard/concursos/${c.id}`}
+                href={`/dashboard/convocatorias/${c.id}`}
                 className="flex items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-secondary-50"
               >
                 <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary-100">
@@ -348,7 +348,7 @@ function ConcursosActivosCard({
                   {c.diasParaCerrar !== null && c.diasParaCerrar >= 0 && (
                     <DiasParaCerrarBadge dias={c.diasParaCerrar} />
                   )}
-                  <StateBadge tipo="concurso" valor={c.estado as EstadoConcurso} />
+                  <StateBadge tipo="convocatoria" valor={c.estado as EstadoConvocatoria} />
                 </div>
               </Link>
             ))}

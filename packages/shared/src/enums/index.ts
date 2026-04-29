@@ -1,5 +1,5 @@
 export { RolUsuario } from './rol-usuario.enum';
-export { EstadoConcurso } from './estado-concurso.enum';
+export { EstadoConvocatoria } from './estado-convocatoria.enum';
 export { EstadoPostulacion } from './estado-postulacion.enum';
 export { EstadoCalificacion } from './estado-calificacion.enum';
 export { NivelEnum } from './nivel.enum';

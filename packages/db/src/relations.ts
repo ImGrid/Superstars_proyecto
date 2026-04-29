@@ -1,9 +1,9 @@
 import { relations } from "drizzle-orm/relations";
 import { usuario, sesionRefreshToken } from "./schema/auth";
-import { concurso, responsableConcurso, documentoConcurso, formularioDinamico } from "./schema/concurso";
+import { convocatoria, responsableConvocatoria, documentoConvocatoria, formularioDinamico } from "./schema/convocatoria";
 import { empresa, postulacion, archivoPostulacion } from "./schema/empresa";
 import { rubrica, criterio, subCriterio, nivelEvaluacion } from "./schema/rubrica";
-import { evaluadorConcurso, asignacionEvaluador, calificacion, calificacionDetalle } from "./schema/calificacion";
+import { evaluadorConvocatoria, asignacionEvaluador, calificacion, calificacionDetalle } from "./schema/calificacion";
 import { notificacionEmail } from "./schema/notificacion";
 import { preguntaFrecuente } from "./schema/faq";
 
@@ -17,13 +17,13 @@ export const empresaRelations = relations(empresa, ({one, many}) => ({
 
 export const usuarioRelations = relations(usuario, ({many}) => ({
 	empresas: many(empresa),
-	concursos: many(concurso),
-	responsableConcursos: many(responsableConcurso),
-	evaluadorConcursos_evaluadorId: many(evaluadorConcurso, {
-		relationName: "evaluadorConcurso_evaluadorId_usuario_id"
+	convocatorias: many(convocatoria),
+	responsableConvocatorias: many(responsableConvocatoria),
+	evaluadorConvocatorias_evaluadorId: many(evaluadorConvocatoria, {
+		relationName: "evaluadorConvocatoria_evaluadorId_usuario_id"
 	}),
-	evaluadorConcursos_asignadoPor: many(evaluadorConcurso, {
-		relationName: "evaluadorConcurso_asignadoPor_usuario_id"
+	evaluadorConvocatorias_asignadoPor: many(evaluadorConvocatoria, {
+		relationName: "evaluadorConvocatoria_asignadoPor_usuario_id"
 	}),
 	asignacionEvaluadors_evaluadorId: many(asignacionEvaluador, {
 		relationName: "asignacionEvaluador_evaluadorId_usuario_id"
@@ -41,14 +41,14 @@ export const usuarioRelations = relations(usuario, ({many}) => ({
 	sesionRefreshTokens: many(sesionRefreshToken),
 }));
 
-export const concursoRelations = relations(concurso, ({one, many}) => ({
+export const convocatoriaRelations = relations(convocatoria, ({one, many}) => ({
 	usuario: one(usuario, {
-		fields: [concurso.createdBy],
+		fields: [convocatoria.createdBy],
 		references: [usuario.id]
 	}),
-	responsableConcursos: many(responsableConcurso),
-	evaluadorConcursos: many(evaluadorConcurso),
-	documentoConcursos: many(documentoConcurso),
+	responsableConvocatorias: many(responsableConvocatoria),
+	evaluadorConvocatorias: many(evaluadorConvocatoria),
+	documentoConvocatorias: many(documentoConvocatoria),
 	formularioDinamicos: many(formularioDinamico),
 	postulacions: many(postulacion),
 	rubricas: many(rubrica),
@@ -56,52 +56,52 @@ export const concursoRelations = relations(concurso, ({one, many}) => ({
 	preguntaFrecuentes: many(preguntaFrecuente),
 }));
 
-export const responsableConcursoRelations = relations(responsableConcurso, ({one}) => ({
-	concurso: one(concurso, {
-		fields: [responsableConcurso.concursoId],
-		references: [concurso.id]
+export const responsableConvocatoriaRelations = relations(responsableConvocatoria, ({one}) => ({
+	convocatoria: one(convocatoria, {
+		fields: [responsableConvocatoria.convocatoriaId],
+		references: [convocatoria.id]
 	}),
 	usuario: one(usuario, {
-		fields: [responsableConcurso.usuarioId],
+		fields: [responsableConvocatoria.usuarioId],
 		references: [usuario.id]
 	}),
 }));
 
-export const evaluadorConcursoRelations = relations(evaluadorConcurso, ({one}) => ({
-	concurso: one(concurso, {
-		fields: [evaluadorConcurso.concursoId],
-		references: [concurso.id]
+export const evaluadorConvocatoriaRelations = relations(evaluadorConvocatoria, ({one}) => ({
+	convocatoria: one(convocatoria, {
+		fields: [evaluadorConvocatoria.convocatoriaId],
+		references: [convocatoria.id]
 	}),
 	usuario_evaluadorId: one(usuario, {
-		fields: [evaluadorConcurso.evaluadorId],
+		fields: [evaluadorConvocatoria.evaluadorId],
 		references: [usuario.id],
-		relationName: "evaluadorConcurso_evaluadorId_usuario_id"
+		relationName: "evaluadorConvocatoria_evaluadorId_usuario_id"
 	}),
 	usuario_asignadoPor: one(usuario, {
-		fields: [evaluadorConcurso.asignadoPor],
+		fields: [evaluadorConvocatoria.asignadoPor],
 		references: [usuario.id],
-		relationName: "evaluadorConcurso_asignadoPor_usuario_id"
+		relationName: "evaluadorConvocatoria_asignadoPor_usuario_id"
 	}),
 }));
 
-export const documentoConcursoRelations = relations(documentoConcurso, ({one}) => ({
-	concurso: one(concurso, {
-		fields: [documentoConcurso.concursoId],
-		references: [concurso.id]
+export const documentoConvocatoriaRelations = relations(documentoConvocatoria, ({one}) => ({
+	convocatoria: one(convocatoria, {
+		fields: [documentoConvocatoria.convocatoriaId],
+		references: [convocatoria.id]
 	}),
 }));
 
 export const formularioDinamicoRelations = relations(formularioDinamico, ({one}) => ({
-	concurso: one(concurso, {
-		fields: [formularioDinamico.concursoId],
-		references: [concurso.id]
+	convocatoria: one(convocatoria, {
+		fields: [formularioDinamico.convocatoriaId],
+		references: [convocatoria.id]
 	}),
 }));
 
 export const postulacionRelations = relations(postulacion, ({one, many}) => ({
-	concurso: one(concurso, {
-		fields: [postulacion.concursoId],
-		references: [concurso.id]
+	convocatoria: one(convocatoria, {
+		fields: [postulacion.convocatoriaId],
+		references: [convocatoria.id]
 	}),
 	empresa: one(empresa, {
 		fields: [postulacion.empresaId],
@@ -121,9 +121,9 @@ export const archivoPostulacionRelations = relations(archivoPostulacion, ({one})
 }));
 
 export const rubricaRelations = relations(rubrica, ({one, many}) => ({
-	concurso: one(concurso, {
-		fields: [rubrica.concursoId],
-		references: [concurso.id]
+	convocatoria: one(convocatoria, {
+		fields: [rubrica.convocatoriaId],
+		references: [convocatoria.id]
 	}),
 	criterios: many(criterio),
 }));
@@ -203,9 +203,9 @@ export const notificacionEmailRelations = relations(notificacionEmail, ({one}) =
 		references: [usuario.id],
 		relationName: "notificacionEmail_remitenteId_usuario_id"
 	}),
-	concurso: one(concurso, {
-		fields: [notificacionEmail.concursoId],
-		references: [concurso.id]
+	convocatoria: one(convocatoria, {
+		fields: [notificacionEmail.convocatoriaId],
+		references: [convocatoria.id]
 	}),
 	postulacion: one(postulacion, {
 		fields: [notificacionEmail.postulacionId],
@@ -221,8 +221,8 @@ export const sesionRefreshTokenRelations = relations(sesionRefreshToken, ({one})
 }));
 
 export const preguntaFrecuenteRelations = relations(preguntaFrecuente, ({one}) => ({
-	concurso: one(concurso, {
-		fields: [preguntaFrecuente.concursoId],
-		references: [concurso.id]
+	convocatoria: one(convocatoria, {
+		fields: [preguntaFrecuente.convocatoriaId],
+		references: [convocatoria.id]
 	}),
 }));

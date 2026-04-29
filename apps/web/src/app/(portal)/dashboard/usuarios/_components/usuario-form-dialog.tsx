@@ -44,7 +44,7 @@ import { usuarioQueries } from "@/lib/api/query-keys";
 // labels legibles para cada rol
 const rolLabels: Record<RolUsuario, string> = {
   [RolUsuario.ADMINISTRADOR]: "Administrador",
-  [RolUsuario.RESPONSABLE_CONCURSO]: "Responsable de concurso",
+  [RolUsuario.RESPONSABLE_CONVOCATORIA]: "Responsable de convocatoria",
   [RolUsuario.PROPONENTE]: "Proponente",
   [RolUsuario.EVALUADOR]: "Evaluador",
 };

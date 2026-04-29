@@ -15,7 +15,7 @@ import type {
 } from '@superstars/shared';
 import {
   RolUsuario,
-  EstadoConcurso,
+  EstadoConvocatoria,
   EstadoPostulacion,
   buildResponseSchema,
   calculateCompletionPercentage,
@@ -23,7 +23,7 @@ import {
 import { PostulacionRepository } from './postulacion.repository';
 import { PostulacionStateMachine } from './postulacion.state-machine';
 import { FormularioService } from '../formulario/formulario.service';
-import { ConcursoRepository } from '../concurso/concurso.repository';
+import { ConvocatoriaRepository } from '../convocatoria/convocatoria.repository';
 
 @Injectable()
 export class PostulacionService {
@@ -32,24 +32,24 @@ export class PostulacionService {
   constructor(
     private readonly postulacionRepo: PostulacionRepository,
     private readonly formularioService: FormularioService,
-    private readonly concursoRepo: ConcursoRepository,
+    private readonly convocatoriaRepo: ConvocatoriaRepository,
   ) {}
 
   // --- Proponente ---
 
   // Guardar borrador (crea si no existe, actualiza si ya hay uno)
-  async saveDraft(concursoId: number, userId: number, dto: SavePostulacionDraftDto) {
+  async saveDraft(convocatoriaId: number, userId: number, dto: SavePostulacionDraftDto) {
     const empresaId = await this.resolveEmpresaId(userId);
-    await this.verificarConcursoAbierto(concursoId);
+    await this.verificarConvocatoriaAbierta(convocatoriaId);
 
-    const formulario = await this.formularioService.findByConcursoId(concursoId);
+    const formulario = await this.formularioService.findByConvocatoriaId(convocatoriaId);
     const schemaDef = formulario.schemaDefinition as SchemaDefinition;
 
     // Validacion dinamica en modo draft (todo opcional, passthrough)
     const validated = this.validateResponseData(schemaDef, dto.responseData, 'draft');
     const porcentaje = calculateCompletionPercentage(schemaDef, validated);
 
-    let existing = await this.postulacionRepo.findByEmpresaAndConcurso(empresaId, concursoId);
+    let existing = await this.postulacionRepo.findByEmpresaAndConvocatoria(empresaId, convocatoriaId);
 
     if (existing) {
       // Solo se puede editar en borrador u observado
@@ -66,7 +66,7 @@ export class PostulacionService {
 
     // Crear nueva postulacion en borrador
     return this.postulacionRepo.create({
-      concursoId,
+      convocatoriaId,
       empresaId,
       responseData: validated,
       porcentajeCompletado: porcentaje.toString(),
@@ -75,13 +75,13 @@ export class PostulacionService {
   }
 
   // Enviar postulacion (valida 100% y transiciona a enviado)
-  async submit(concursoId: number, userId: number) {
+  async submit(convocatoriaId: number, userId: number) {
     const empresaId = await this.resolveEmpresaId(userId);
-    await this.verificarConcursoAbierto(concursoId);
+    await this.verificarConvocatoriaAbierta(convocatoriaId);
 
-    const existing = await this.postulacionRepo.findByEmpresaAndConcurso(empresaId, concursoId);
+    const existing = await this.postulacionRepo.findByEmpresaAndConvocatoria(empresaId, convocatoriaId);
     if (!existing) {
-      throw new NotFoundException('No tienes una postulacion para este concurso');
+      throw new NotFoundException('No tienes una postulacion para esta convocatoria');
     }
 
     // Verificar transicion valida
@@ -92,7 +92,7 @@ export class PostulacionService {
     }
 
     // Validar con modo submit (requeridos obligatorios)
-    const formulario = await this.formularioService.findByConcursoId(concursoId);
+    const formulario = await this.formularioService.findByConvocatoriaId(convocatoriaId);
     const schemaDef = formulario.schemaDefinition as SchemaDefinition;
     const responseData = existing.responseData as Record<string, unknown>;
 
@@ -113,27 +113,27 @@ export class PostulacionService {
     return updated;
   }
 
-  // Todas mis postulaciones cross-concurso (dashboard del proponente)
+  // Todas mis postulaciones cross-convocatoria (dashboard del proponente)
   async findAllMine(userId: number) {
     const empresaId = await this.resolveEmpresaId(userId);
     return this.postulacionRepo.findAllByEmpresa(empresaId);
   }
 
-  // listado cross-concurso para admin/responsable
+  // listado cross-convocatoria para admin/responsable
   async findAllAdmin(
     query: ListPostulacionesQueryDto,
     user: AuthUser,
   ): Promise<PaginatedResponse<unknown>> {
-    const { page, limit, concursoId, estado } = query;
+    const { page, limit, convocatoriaId, estado } = query;
 
-    // responsable solo ve postulaciones de sus concursos asignados
+    // responsable solo ve postulaciones de sus convocatorias asignadas
     const responsableUsuarioId =
-      user.rol === RolUsuario.RESPONSABLE_CONCURSO ? user.id : undefined;
+      user.rol === RolUsuario.RESPONSABLE_CONVOCATORIA ? user.id : undefined;
 
     const { data, total } = await this.postulacionRepo.findAllAdmin({
       page,
       limit,
-      concursoId,
+      convocatoriaId,
       estado,
       responsableUsuarioId,
     });
@@ -142,27 +142,27 @@ export class PostulacionService {
     return { data, total, page, limit, totalPages };
   }
 
-  // Obtener mi postulacion para un concurso
-  async findMine(concursoId: number, userId: number) {
+  // Obtener mi postulacion para una convocatoria
+  async findMine(convocatoriaId: number, userId: number) {
     const empresaId = await this.resolveEmpresaId(userId);
-    const existing = await this.postulacionRepo.findByEmpresaAndConcurso(empresaId, concursoId);
+    const existing = await this.postulacionRepo.findByEmpresaAndConvocatoria(empresaId, convocatoriaId);
     if (!existing) {
-      throw new NotFoundException('No tienes una postulacion para este concurso');
+      throw new NotFoundException('No tienes una postulacion para esta convocatoria');
     }
     return existing;
   }
 
   // --- Responsable / Admin ---
 
-  // Listar postulaciones de un concurso (sin responseData)
-  async findAllByConcurso(concursoId: number, estado?: string) {
-    // Verificar que el concurso existe
-    const concursoEstado = await this.concursoRepo.getEstado(concursoId);
-    if (!concursoEstado) {
-      throw new NotFoundException('Concurso no encontrado');
+  // Listar postulaciones de una convocatoria (sin responseData)
+  async findAllByConvocatoria(convocatoriaId: number, estado?: string) {
+    // Verificar que la convocatoria existe
+    const convocatoriaEstado = await this.convocatoriaRepo.getEstado(convocatoriaId);
+    if (!convocatoriaEstado) {
+      throw new NotFoundException('Convocatoria no encontrada');
     }
 
-    return this.postulacionRepo.findAllByConcurso(concursoId, estado);
+    return this.postulacionRepo.findAllByConvocatoria(convocatoriaId, estado);
   }
 
   // Detalle de una postulacion (con responseData)
@@ -258,13 +258,13 @@ export class PostulacionService {
     return empresaId;
   }
 
-  private async verificarConcursoAbierto(concursoId: number): Promise<void> {
-    const estado = await this.concursoRepo.getEstado(concursoId);
+  private async verificarConvocatoriaAbierta(convocatoriaId: number): Promise<void> {
+    const estado = await this.convocatoriaRepo.getEstado(convocatoriaId);
     if (!estado) {
-      throw new NotFoundException('Concurso no encontrado');
+      throw new NotFoundException('Convocatoria no encontrada');
     }
-    if (estado !== EstadoConcurso.PUBLICADO) {
-      throw new ConflictException('El concurso no esta abierto para postulaciones');
+    if (estado !== EstadoConvocatoria.PUBLICADO) {
+      throw new ConflictException('La convocatoria no esta abierta para postulaciones');
     }
   }
 

@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { ConcursoModule } from '../concurso/concurso.module';
+import { ConvocatoriaModule } from '../convocatoria/convocatoria.module';
 import { DocumentoController } from './documento.controller';
 import { DocumentoService } from './documento.service';
 import { DocumentoRepository } from './documento.repository';
 
 @Module({
-  imports: [ConcursoModule],
+  imports: [ConvocatoriaModule],
   controllers: [DocumentoController],
   providers: [DocumentoService, DocumentoRepository],
   exports: [DocumentoService],

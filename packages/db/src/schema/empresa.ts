@@ -2,7 +2,7 @@
 import { pgTable, pgEnum, unique, integer, text, timestamp, foreignKey, check, numeric, index, bigint, jsonb, date } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 import { usuario } from "./auth"
-import { concurso } from "./concurso"
+import { convocatoria } from "./convocatoria"
 
 export const estadoPostulacion = pgEnum("estado_postulacion", ['borrador', 'enviado', 'observado', 'rechazado', 'en_evaluacion', 'calificado', 'ganador', 'no_seleccionado'])
 
@@ -48,7 +48,7 @@ export const empresa = pgTable("empresa", {
 
 export const postulacion = pgTable("postulacion", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity({ name: "postulacion_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
-	concursoId: integer("concurso_id").notNull(),
+	convocatoriaId: integer("convocatoria_id").notNull(),
 	empresaId: integer("empresa_id").notNull(),
 	estado: estadoPostulacion().default('borrador').notNull(),
 	responseData: jsonb("response_data").$type<Record<string, unknown>>().default({}).notNull(),
@@ -61,19 +61,19 @@ export const postulacion = pgTable("postulacion", {
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
-	index("idx_postulacion_concurso_estado").using("btree", table.concursoId.asc().nullsLast().op("enum_ops"), table.estado.asc().nullsLast().op("enum_ops")),
+	index("idx_postulacion_convocatoria_estado").using("btree", table.convocatoriaId.asc().nullsLast().op("enum_ops"), table.estado.asc().nullsLast().op("enum_ops")),
 	index("idx_postulacion_empresa_id").using("btree", table.empresaId.asc().nullsLast().op("int4_ops")),
 	foreignKey({
-			columns: [table.concursoId],
-			foreignColumns: [concurso.id],
-			name: "fk_postulacion_concurso"
+			columns: [table.convocatoriaId],
+			foreignColumns: [convocatoria.id],
+			name: "fk_postulacion_convocatoria"
 		}).onDelete("restrict"),
 	foreignKey({
 			columns: [table.empresaId],
 			foreignColumns: [empresa.id],
 			name: "fk_postulacion_empresa"
 		}).onDelete("restrict"),
-	unique("uq_postulacion_concurso_empresa").on(table.concursoId, table.empresaId),
+	unique("uq_postulacion_convocatoria_empresa").on(table.convocatoriaId, table.empresaId),
 	check("chk_postulacion_porcentaje", sql`(porcentaje_completado >= (0)::numeric) AND (porcentaje_completado <= (100)::numeric)`),
 	check("chk_postulacion_puntaje", sql`(puntaje_final IS NULL) OR (puntaje_final >= (0)::numeric)`),
 	check("chk_postulacion_posicion", sql`(posicion_final IS NULL) OR (posicion_final > 0)`),

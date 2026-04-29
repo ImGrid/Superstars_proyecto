@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { getEstadoConfig } from "@/lib/estado-labels";
 
 interface StateBadgeProps {
-  tipo: "concurso" | "postulacion" | "publicacion" | "calificacion" | "rol";
+  tipo: "convocatoria" | "postulacion" | "publicacion" | "calificacion" | "rol";
   valor: string;
 }
 

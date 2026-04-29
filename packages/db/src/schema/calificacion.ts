@@ -1,39 +1,39 @@
-// Bloque Calificacion: evaluador_concurso, asignacion_evaluador, calificacion, calificacion_detalle
+// Bloque Calificacion: evaluador_convocatoria, asignacion_evaluador, calificacion, calificacion_detalle
 import { pgTable, pgEnum, unique, integer, text, timestamp, foreignKey, check, numeric, index } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 import { usuario } from "./auth"
-import { concurso } from "./concurso"
+import { convocatoria } from "./convocatoria"
 import { postulacion } from "./empresa"
 import { subCriterio } from "./rubrica"
 
 export const estadoCalificacion = pgEnum("estado_calificacion", ['en_progreso', 'completado', 'aprobado', 'devuelto'])
 
-// evaluadores asignados a un concurso (no a postulaciones individuales)
-export const evaluadorConcurso = pgTable("evaluador_concurso", {
-	id: integer().primaryKey().generatedAlwaysAsIdentity({ name: "evaluador_concurso_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
-	concursoId: integer("concurso_id").notNull(),
+// evaluadores asignados a una convocatoria (no a postulaciones individuales)
+export const evaluadorConvocatoria = pgTable("evaluador_convocatoria", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity({ name: "evaluador_convocatoria_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
+	convocatoriaId: integer("convocatoria_id").notNull(),
 	evaluadorId: integer("evaluador_id").notNull(),
 	asignadoPor: integer("asignado_por").notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
-	index("idx_evaluador_concurso_concurso_id").using("btree", table.concursoId.asc().nullsLast().op("int4_ops")),
-	index("idx_evaluador_concurso_evaluador_id").using("btree", table.evaluadorId.asc().nullsLast().op("int4_ops")),
+	index("idx_evaluador_convocatoria_convocatoria_id").using("btree", table.convocatoriaId.asc().nullsLast().op("int4_ops")),
+	index("idx_evaluador_convocatoria_evaluador_id").using("btree", table.evaluadorId.asc().nullsLast().op("int4_ops")),
 	foreignKey({
-			columns: [table.concursoId],
-			foreignColumns: [concurso.id],
-			name: "fk_evaluador_concurso_concurso"
+			columns: [table.convocatoriaId],
+			foreignColumns: [convocatoria.id],
+			name: "fk_evaluador_convocatoria_convocatoria"
 		}).onDelete("cascade"),
 	foreignKey({
 			columns: [table.evaluadorId],
 			foreignColumns: [usuario.id],
-			name: "fk_evaluador_concurso_evaluador"
+			name: "fk_evaluador_convocatoria_evaluador"
 		}).onDelete("restrict"),
 	foreignKey({
 			columns: [table.asignadoPor],
 			foreignColumns: [usuario.id],
-			name: "fk_evaluador_concurso_asignado_por"
+			name: "fk_evaluador_convocatoria_asignado_por"
 		}).onDelete("restrict"),
-	unique("uq_evaluador_concurso").on(table.concursoId, table.evaluadorId),
+	unique("uq_evaluador_convocatoria").on(table.convocatoriaId, table.evaluadorId),
 ]);
 
 // asignacion de evaluadores a postulaciones individuales (nivel 2)

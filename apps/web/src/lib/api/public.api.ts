@@ -1,31 +1,31 @@
 import { apiClient } from "./client";
 import type {
   PaginatedResponse,
-  ListPublicConcursosQueryDto,
+  ListPublicConvocatoriasQueryDto,
   ListPublicPublicacionesQueryDto,
-  PublicConcursoResponse,
-  PublicConcursoDetailResponse,
+  PublicConvocatoriaResponse,
+  PublicConvocatoriaDetailResponse,
   PublicPublicacionListItem,
   PublicPublicacionResponse,
   PublicResultadosResponse,
   CategoriaPublicacionResponse,
 } from "@superstars/shared";
 
-// --- Concursos publicos ---
+// --- Convocatorias publicas ---
 
-export function listPublicConcursos(
-  params?: Partial<ListPublicConcursosQueryDto>,
+export function listPublicConvocatorias(
+  params?: Partial<ListPublicConvocatoriasQueryDto>,
 ) {
   return apiClient
-    .get<PaginatedResponse<PublicConcursoResponse>>("/public/concursos", {
+    .get<PaginatedResponse<PublicConvocatoriaResponse>>("/public/convocatorias", {
       params,
     })
     .then((r) => r.data);
 }
 
-export function getPublicConcurso(id: number) {
+export function getPublicConvocatoria(id: number) {
   return apiClient
-    .get<PublicConcursoDetailResponse>(`/public/concursos/${id}`)
+    .get<PublicConvocatoriaDetailResponse>(`/public/convocatorias/${id}`)
     .then((r) => r.data);
 }
 
@@ -50,9 +50,9 @@ export function getPublicPublicacion(slug: string) {
 
 // --- Resultados publicos ---
 
-export function getPublicResultados(concursoId: number) {
+export function getPublicResultados(convocatoriaId: number) {
   return apiClient
-    .get<PublicResultadosResponse>(`/public/concursos/${concursoId}/resultados`)
+    .get<PublicResultadosResponse>(`/public/convocatorias/${convocatoriaId}/resultados`)
     .then((r) => r.data);
 }
 

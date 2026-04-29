@@ -13,7 +13,7 @@ interface ResponseViewerProps {
   schema: SchemaDefinition;
   responseData: Record<string, unknown>;
   archivos: ArchivoResponse[];
-  concursoId: number;
+  convocatoriaId: number;
   postulacionId: number;
 }
 
@@ -30,7 +30,7 @@ export function ResponseViewer({
   schema,
   responseData,
   archivos,
-  concursoId,
+  convocatoriaId,
   postulacionId,
 }: ResponseViewerProps) {
   if (!schema.secciones.length) {
@@ -65,7 +65,7 @@ export function ResponseViewer({
                   value={responseData[campo.id]}
                   otraValue={responseData[`${campo.id}__otra`] as string | undefined}
                   archivos={archivos.filter((a) => a.fieldId === campo.id)}
-                  concursoId={concursoId}
+                  convocatoriaId={convocatoriaId}
                   postulacionId={postulacionId}
                   wide={isWideCampo(campo)}
                 />
@@ -84,7 +84,7 @@ const CampoReadonly = memo(function CampoReadonly({
   value,
   otraValue,
   archivos,
-  concursoId,
+  convocatoriaId,
   postulacionId,
   wide,
 }: {
@@ -92,7 +92,7 @@ const CampoReadonly = memo(function CampoReadonly({
   value: unknown;
   otraValue?: string;
   archivos: ArchivoResponse[];
-  concursoId: number;
+  convocatoriaId: number;
   postulacionId: number;
   wide: boolean;
 }) {
@@ -111,7 +111,7 @@ const CampoReadonly = memo(function CampoReadonly({
           value={value}
           otraValue={otraValue}
           archivos={archivos}
-          concursoId={concursoId}
+          convocatoriaId={convocatoriaId}
           postulacionId={postulacionId}
         />
       </dd>
@@ -125,14 +125,14 @@ function FieldValue({
   value,
   otraValue,
   archivos,
-  concursoId,
+  convocatoriaId,
   postulacionId,
 }: {
   campo: FormField;
   value: unknown;
   otraValue?: string;
   archivos: ArchivoResponse[];
-  concursoId: number;
+  convocatoriaId: number;
   postulacionId: number;
 }) {
   if (value === undefined || value === null || value === "") {
@@ -232,7 +232,7 @@ function FieldValue({
             <ArchivoItem
               key={archivo.id}
               archivo={archivo}
-              concursoId={concursoId}
+              convocatoriaId={convocatoriaId}
               postulacionId={postulacionId}
             />
           ))}
@@ -258,15 +258,15 @@ function FieldValue({
 // item de archivo con boton de descarga
 function ArchivoItem({
   archivo,
-  concursoId,
+  convocatoriaId,
   postulacionId,
 }: {
   archivo: ArchivoResponse;
-  concursoId: number;
+  convocatoriaId: number;
   postulacionId: number;
 }) {
   const handleDownload = async () => {
-    const blob = await downloadArchivo(concursoId, postulacionId, archivo.id);
+    const blob = await downloadArchivo(convocatoriaId, postulacionId, archivo.id);
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;

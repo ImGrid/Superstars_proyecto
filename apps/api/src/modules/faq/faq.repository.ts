@@ -8,7 +8,7 @@ export interface FindAllParams {
   page: number;
   limit: number;
   categoria?: string;
-  concursoId?: number;
+  convocatoriaId?: number;
 }
 
 @Injectable()
@@ -26,12 +26,12 @@ export class FaqRepository {
 
   // Listar con paginacion y filtros opcionales (admin)
   async findAll(params: FindAllParams) {
-    const { page, limit, categoria, concursoId } = params;
+    const { page, limit, categoria, convocatoriaId } = params;
     const offset = (page - 1) * limit;
 
     const conditions = [];
     if (categoria) conditions.push(eq(preguntaFrecuente.categoria, categoria));
-    if (concursoId !== undefined) conditions.push(eq(preguntaFrecuente.concursoId, concursoId));
+    if (convocatoriaId !== undefined) conditions.push(eq(preguntaFrecuente.convocatoriaId, convocatoriaId));
     const where = conditions.length > 0 ? and(...conditions) : undefined;
 
     const [data, totalResult] = await Promise.all([
@@ -52,21 +52,21 @@ export class FaqRepository {
   }
 
   // Listar preguntas generales ordenadas (endpoint publico /faq)
-  // Solo retorna preguntas sin concurso asignado
+  // Solo retorna preguntas sin convocatoria asignada
   async findAllPublic() {
     return this.db
       .select()
       .from(preguntaFrecuente)
-      .where(isNull(preguntaFrecuente.concursoId))
+      .where(isNull(preguntaFrecuente.convocatoriaId))
       .orderBy(asc(preguntaFrecuente.categoria), asc(preguntaFrecuente.orden), asc(preguntaFrecuente.id));
   }
 
-  // Listar preguntas de un concurso especifico (endpoint publico /faq/concurso/:id)
-  async findByConcursoId(concursoId: number) {
+  // Listar preguntas de una convocatoria especifica (endpoint publico /faq/convocatoria/:id)
+  async findByConvocatoriaId(convocatoriaId: number) {
     return this.db
       .select()
       .from(preguntaFrecuente)
-      .where(eq(preguntaFrecuente.concursoId, concursoId))
+      .where(eq(preguntaFrecuente.convocatoriaId, convocatoriaId))
       .orderBy(asc(preguntaFrecuente.orden), asc(preguntaFrecuente.id));
   }
 
@@ -76,7 +76,7 @@ export class FaqRepository {
     respuesta: string;
     orden: number;
     categoria: string;
-    concursoId?: number | null;
+    convocatoriaId?: number | null;
   }) {
     const [created] = await this.db
       .insert(preguntaFrecuente)
@@ -91,7 +91,7 @@ export class FaqRepository {
     respuesta: string;
     orden: number;
     categoria: string;
-    concursoId: number | null;
+    convocatoriaId: number | null;
   }>) {
     const [updated] = await this.db
       .update(preguntaFrecuente)

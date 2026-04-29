@@ -2,7 +2,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { eq, and, count, desc, sql } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/drizzle.provider';
 import type { DrizzleDB } from '../../database/drizzle.provider';
-import { postulacion, empresa, concurso, responsableConcurso, calificacion } from '@superstars/db';
+import { postulacion, empresa, convocatoria, responsableConvocatoria, calificacion } from '@superstars/db';
 import type { EstadoPostulacion } from '@superstars/shared';
 
 @Injectable()
@@ -15,7 +15,7 @@ export class PostulacionRepository {
     const rows = await this.db
       .select({
         id: postulacion.id,
-        concursoId: postulacion.concursoId,
+        convocatoriaId: postulacion.convocatoriaId,
         empresaId: postulacion.empresaId,
         estado: postulacion.estado,
         responseData: postulacion.responseData,
@@ -36,8 +36,8 @@ export class PostulacionRepository {
   }
 
   // Listado sin responseData (evita cargar JSONB grandes)
-  async findAllByConcurso(concursoId: number, estado?: string) {
-    const conditions = [eq(postulacion.concursoId, concursoId)];
+  async findAllByConvocatoria(convocatoriaId: number, estado?: string) {
+    const conditions = [eq(postulacion.convocatoriaId, convocatoriaId)];
     if (estado) {
       conditions.push(eq(postulacion.estado, estado as EstadoPostulacion));
     }
@@ -52,7 +52,7 @@ export class PostulacionRepository {
     return this.db
       .select({
         id: postulacion.id,
-        concursoId: postulacion.concursoId,
+        convocatoriaId: postulacion.convocatoriaId,
         empresaId: postulacion.empresaId,
         estado: postulacion.estado,
         porcentajeCompletado: postulacion.porcentajeCompletado,
@@ -71,13 +71,13 @@ export class PostulacionRepository {
       .orderBy(desc(postulacion.createdAt));
   }
 
-  async findByEmpresaAndConcurso(empresaId: number, concursoId: number) {
+  async findByEmpresaAndConvocatoria(empresaId: number, convocatoriaId: number) {
     const rows = await this.db
       .select()
       .from(postulacion)
       .where(and(
         eq(postulacion.empresaId, empresaId),
-        eq(postulacion.concursoId, concursoId),
+        eq(postulacion.convocatoriaId, convocatoriaId),
       ));
     return rows[0] ?? null;
   }
@@ -85,7 +85,7 @@ export class PostulacionRepository {
   // --- Mutations ---
 
   async create(data: {
-    concursoId: number;
+    convocatoriaId: number;
     empresaId: number;
     responseData: Record<string, unknown>;
     porcentajeCompletado: string;
@@ -158,12 +158,12 @@ export class PostulacionRepository {
     return result[0] ?? null;
   }
 
-  // Todas las postulaciones de una empresa (sin responseData) + datos del concurso
+  // Todas las postulaciones de una empresa (sin responseData) + datos de la convocatoria
   async findAllByEmpresa(empresaId: number) {
     return this.db
       .select({
         id: postulacion.id,
-        concursoId: postulacion.concursoId,
+        convocatoriaId: postulacion.convocatoriaId,
         empresaId: postulacion.empresaId,
         estado: postulacion.estado,
         porcentajeCompletado: postulacion.porcentajeCompletado,
@@ -173,39 +173,39 @@ export class PostulacionRepository {
         posicionFinal: postulacion.posicionFinal,
         createdAt: postulacion.createdAt,
         updatedAt: postulacion.updatedAt,
-        concursoNombre: concurso.nombre,
-        concursoEstado: concurso.estado,
+        convocatoriaNombre: convocatoria.nombre,
+        convocatoriaEstado: convocatoria.estado,
       })
       .from(postulacion)
-      .innerJoin(concurso, eq(postulacion.concursoId, concurso.id))
+      .innerJoin(convocatoria, eq(postulacion.convocatoriaId, convocatoria.id))
       .where(eq(postulacion.empresaId, empresaId))
       .orderBy(desc(postulacion.updatedAt));
   }
 
-  // listado cross-concurso para admin/responsable (con nombre empresa y concurso)
+  // listado cross-convocatoria para admin/responsable (con nombre empresa y convocatoria)
   async findAllAdmin(params: {
     page: number;
     limit: number;
-    concursoId?: number;
+    convocatoriaId?: number;
     estado?: string;
     responsableUsuarioId?: number;
   }) {
-    const { page, limit, concursoId, estado, responsableUsuarioId } = params;
+    const { page, limit, convocatoriaId, estado, responsableUsuarioId } = params;
     const offset = (page - 1) * limit;
 
     const conditions = [];
-    if (concursoId) {
-      conditions.push(eq(postulacion.concursoId, concursoId));
+    if (convocatoriaId) {
+      conditions.push(eq(postulacion.convocatoriaId, convocatoriaId));
     }
     if (estado) {
       conditions.push(eq(postulacion.estado, estado as EstadoPostulacion));
     }
     if (responsableUsuarioId) {
       conditions.push(
-        sql`${postulacion.concursoId} IN (
-          SELECT ${responsableConcurso.concursoId}
-          FROM ${responsableConcurso}
-          WHERE ${responsableConcurso.usuarioId} = ${responsableUsuarioId}
+        sql`${postulacion.convocatoriaId} IN (
+          SELECT ${responsableConvocatoria.convocatoriaId}
+          FROM ${responsableConvocatoria}
+          WHERE ${responsableConvocatoria.usuarioId} = ${responsableUsuarioId}
         )`,
       );
     }
@@ -223,7 +223,7 @@ export class PostulacionRepository {
       this.db
         .select({
           id: postulacion.id,
-          concursoId: postulacion.concursoId,
+          convocatoriaId: postulacion.convocatoriaId,
           empresaId: postulacion.empresaId,
           estado: postulacion.estado,
           porcentajeCompletado: postulacion.porcentajeCompletado,
@@ -234,12 +234,12 @@ export class PostulacionRepository {
           createdAt: postulacion.createdAt,
           updatedAt: postulacion.updatedAt,
           empresaRazonSocial: empresa.razonSocial,
-          concursoNombre: concurso.nombre,
+          convocatoriaNombre: convocatoria.nombre,
           calificacionesPendientes: califPendientes,
         })
         .from(postulacion)
         .innerJoin(empresa, eq(postulacion.empresaId, empresa.id))
-        .innerJoin(concurso, eq(postulacion.concursoId, concurso.id))
+        .innerJoin(convocatoria, eq(postulacion.convocatoriaId, convocatoria.id))
         .where(where)
         .orderBy(desc(postulacion.updatedAt))
         .limit(limit)
@@ -248,7 +248,7 @@ export class PostulacionRepository {
         .select({ count: count() })
         .from(postulacion)
         .innerJoin(empresa, eq(postulacion.empresaId, empresa.id))
-        .innerJoin(concurso, eq(postulacion.concursoId, concurso.id))
+        .innerJoin(convocatoria, eq(postulacion.convocatoriaId, convocatoria.id))
         .where(where),
     ]);
 

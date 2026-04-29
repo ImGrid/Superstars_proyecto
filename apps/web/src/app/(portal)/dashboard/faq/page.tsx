@@ -10,7 +10,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { DataTable, type Column } from "@/components/shared/data-table";
 import { EmptyState } from "@/components/shared/empty-state";
 import { TableSkeleton } from "@/components/shared/loading-skeleton";
-import { faqQueries, concursoQueries } from "@/lib/api/query-keys";
+import { faqQueries, convocatoriaQueries } from "@/lib/api/query-keys";
 import { formatDateTime } from "@/lib/format";
 import { FaqFormDialog } from "./_components/faq-form-dialog";
 import { FaqActions } from "./_components/faq-actions";
@@ -43,15 +43,15 @@ function FaqContent() {
   const [createOpen, setCreateOpen] = useState(false);
 
   const { data, isLoading } = useQuery(faqQueries.list());
-  // concursos para mostrar el nombre en lugar del id
-  const { data: concursos } = useQuery(concursoQueries.list({ limit: 100 }));
+  // convocatorias para mostrar el nombre en lugar del id
+  const { data: convocatorias } = useQuery(convocatoriaQueries.list({ limit: 100 }));
 
   // mapa id -> nombre para lookup rapido
-  const concursoMap = new Map(
-    concursos?.data.map((c) => [c.id, c.nombre]) ?? [],
+  const convocatoriaMap = new Map(
+    convocatorias?.data.map((c) => [c.id, c.nombre]) ?? [],
   );
 
-  // columnas definidas aqui para acceder al concursoMap del closure
+  // columnas definidas aqui para acceder al convocatoriaMap del closure
   const columns: Column<FaqResponse>[] = [
     {
       key: "orden",
@@ -73,7 +73,7 @@ function FaqContent() {
     },
     {
       key: "categoria",
-      header: "Categoria",
+      header: "Categoría",
       cell: (row) => {
         const badge = CATEGORIA_BADGE[row.categoria] ?? {
           label: row.categoria,
@@ -88,12 +88,12 @@ function FaqContent() {
       className: "w-36",
     },
     {
-      key: "concurso",
-      header: "Concurso",
+      key: "convocatoria",
+      header: "Convocatoria",
       cell: (row) =>
-        row.concursoId ? (
+        row.convocatoriaId ? (
           <span className="text-sm text-secondary-700">
-            {concursoMap.get(row.concursoId) ?? `#${row.concursoId}`}
+            {convocatoriaMap.get(row.convocatoriaId) ?? `#${row.convocatoriaId}`}
           </span>
         ) : (
           <span className="text-sm text-secondary-400">General</span>
@@ -122,7 +122,7 @@ function FaqContent() {
     <div className="space-y-6">
       <PageHeader
         title="Preguntas frecuentes"
-        description="Gestiona las preguntas del FAQ general y las especificas de cada concurso."
+        description="Gestiona las preguntas del FAQ general y las especificas de cada convocatoria."
         action={
           <Button onClick={() => setCreateOpen(true)}>
             <Plus className="size-4" />

@@ -3,7 +3,7 @@ import type { UpdateDocumentoDto, DocumentoResponse } from "@superstars/shared";
 
 // Subir documento (multipart/form-data)
 export function uploadDocumento(
-  concursoId: number,
+  convocatoriaId: number,
   file: File,
   nombre: string,
   orden?: number,
@@ -17,24 +17,24 @@ export function uploadDocumento(
 
   return apiClient
     .post<DocumentoResponse>(
-      `/concursos/${concursoId}/documentos`,
+      `/convocatorias/${convocatoriaId}/documentos`,
       formData,
       { headers: { "Content-Type": "multipart/form-data" } },
     )
     .then((r) => r.data);
 }
 
-// Listar documentos del concurso
-export function listDocumentos(concursoId: number) {
+// Listar documentos de la convocatoria
+export function listDocumentos(convocatoriaId: number) {
   return apiClient
-    .get<DocumentoResponse[]>(`/concursos/${concursoId}/documentos`)
+    .get<DocumentoResponse[]>(`/convocatorias/${convocatoriaId}/documentos`)
     .then((r) => r.data);
 }
 
 // Descargar documento (retorna blob)
-export function downloadDocumento(concursoId: number, documentoId: number) {
+export function downloadDocumento(convocatoriaId: number, documentoId: number) {
   return apiClient
-    .get(`/concursos/${concursoId}/documentos/${documentoId}/download`, {
+    .get(`/convocatorias/${convocatoriaId}/documentos/${documentoId}/download`, {
       responseType: "blob",
     })
     .then((r) => r.data as Blob);
@@ -42,21 +42,21 @@ export function downloadDocumento(concursoId: number, documentoId: number) {
 
 // Actualizar metadatos del documento
 export function updateDocumento(
-  concursoId: number,
+  convocatoriaId: number,
   documentoId: number,
   dto: UpdateDocumentoDto,
 ) {
   return apiClient
     .put<DocumentoResponse>(
-      `/concursos/${concursoId}/documentos/${documentoId}`,
+      `/convocatorias/${convocatoriaId}/documentos/${documentoId}`,
       dto,
     )
     .then((r) => r.data);
 }
 
 // Eliminar documento
-export function deleteDocumento(concursoId: number, documentoId: number) {
+export function deleteDocumento(convocatoriaId: number, documentoId: number) {
   return apiClient.delete(
-    `/concursos/${concursoId}/documentos/${documentoId}`,
+    `/convocatorias/${convocatoriaId}/documentos/${documentoId}`,
   );
 }

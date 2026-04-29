@@ -13,7 +13,7 @@ import { EstadoPostulacion } from '@superstars/shared';
 import { ArchivoRepository } from './archivo.repository';
 import { PostulacionRepository } from '../postulacion/postulacion.repository';
 import { FormularioService } from '../formulario/formulario.service';
-import { ConcursoAccessService } from '../concurso/concurso-access.service';
+import { ConvocatoriaAccessService } from '../convocatoria/convocatoria-access.service';
 import { EvaluacionRepository } from '../evaluacion/evaluacion.repository';
 import { STORAGE_SERVICE, type StorageService } from '../storage/storage.interface';
 
@@ -31,7 +31,7 @@ export class ArchivoService {
     private readonly archivoRepo: ArchivoRepository,
     private readonly postulacionRepo: PostulacionRepository,
     private readonly formularioService: FormularioService,
-    private readonly concursoAccess: ConcursoAccessService,
+    private readonly convocatoriaAccess: ConvocatoriaAccessService,
     private readonly evaluacionRepo: EvaluacionRepository,
     @Inject(STORAGE_SERVICE) private readonly storage: StorageService,
   ) {}
@@ -48,7 +48,7 @@ export class ArchivoService {
     this.verificarEditable(post.estado);
 
     // Buscar campo en el schema del formulario
-    const formulario = await this.formularioService.findByConcursoId(post.concursoId);
+    const formulario = await this.formularioService.findByConvocatoriaId(post.convocatoriaId);
     const schemaDef = formulario.schemaDefinition as SchemaDefinition;
     const campo = this.findArchivoCampo(schemaDef, fieldId);
 

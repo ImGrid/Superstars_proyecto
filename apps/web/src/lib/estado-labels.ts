@@ -1,5 +1,5 @@
 import {
-  EstadoConcurso,
+  EstadoConvocatoria,
   EstadoPostulacion,
   EstadoPublicacion,
   EstadoCalificacion,
@@ -12,34 +12,34 @@ export interface EstadoConfig {
   className?: string;
 }
 
-// --- Concurso (6 estados) ---
+// --- Convocatoria (6 estados) ---
 
-export const concursoEstadoConfig: Record<EstadoConcurso, EstadoConfig> = {
-  [EstadoConcurso.BORRADOR]: {
+export const convocatoriaEstadoConfig: Record<EstadoConvocatoria, EstadoConfig> = {
+  [EstadoConvocatoria.BORRADOR]: {
     label: "Borrador",
     variant: "secondary",
   },
-  [EstadoConcurso.PUBLICADO]: {
+  [EstadoConvocatoria.PUBLICADO]: {
     label: "Publicado",
     variant: "default",
     className: "bg-success-600 text-white border-transparent",
   },
-  [EstadoConcurso.CERRADO]: {
+  [EstadoConvocatoria.CERRADO]: {
     label: "Cerrado",
     variant: "default",
     className: "bg-warning-600 text-white border-transparent",
   },
-  [EstadoConcurso.EN_EVALUACION]: {
-    label: "En Evaluacion",
+  [EstadoConvocatoria.EN_EVALUACION]: {
+    label: "En Evaluación",
     variant: "default",
     className: "bg-primary-600 text-white border-transparent",
   },
-  [EstadoConcurso.RESULTADOS_LISTOS]: {
+  [EstadoConvocatoria.RESULTADOS_LISTOS]: {
     label: "Resultados Listos",
     variant: "default",
     className: "bg-violet-600 text-white border-transparent",
   },
-  [EstadoConcurso.FINALIZADO]: {
+  [EstadoConvocatoria.FINALIZADO]: {
     label: "Finalizado",
     variant: "default",
     className: "bg-secondary-700 text-white border-transparent",
@@ -68,7 +68,7 @@ export const postulacionEstadoConfig: Record<EstadoPostulacion, EstadoConfig> = 
     variant: "destructive",
   },
   [EstadoPostulacion.EN_EVALUACION]: {
-    label: "En Evaluacion",
+    label: "En Evaluación",
     variant: "default",
     className: "bg-primary-700 text-white border-transparent",
   },
@@ -148,7 +148,7 @@ export const rolConfig: Record<RolUsuario, EstadoConfig> = {
     label: "Administrador",
     variant: "default",
   },
-  [RolUsuario.RESPONSABLE_CONCURSO]: {
+  [RolUsuario.RESPONSABLE_CONVOCATORIA]: {
     label: "Responsable",
     variant: "default",
     className: "bg-primary-700 text-white border-transparent",
@@ -167,11 +167,11 @@ export const rolConfig: Record<RolUsuario, EstadoConfig> = {
 
 // helper para obtener config de cualquier estado
 export function getEstadoConfig(
-  tipo: "concurso" | "postulacion" | "publicacion" | "calificacion" | "rol",
+  tipo: "convocatoria" | "postulacion" | "publicacion" | "calificacion" | "rol",
   valor: string,
 ): EstadoConfig {
   const maps = {
-    concurso: concursoEstadoConfig,
+    convocatoria: convocatoriaEstadoConfig,
     postulacion: postulacionEstadoConfig,
     publicacion: publicacionEstadoConfig,
     calificacion: calificacionEstadoConfig,

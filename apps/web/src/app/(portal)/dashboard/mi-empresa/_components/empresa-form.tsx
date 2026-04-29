@@ -178,7 +178,7 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
           <CardHeader>
             <CardTitle>Persona de contacto</CardTitle>
             <CardDescription>
-              Datos de la persona que realiza la postulacion.
+              Datos de la persona que realiza la postulación.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
@@ -200,9 +200,9 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
               name="contactoTelefono"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Telefono de contacto</FormLabel>
+                  <FormLabel>Teléfono de contacto</FormLabel>
                   <FormControl>
-                    <Input placeholder="Numero de contacto" {...field} value={field.value ?? ""} />
+                    <Input placeholder="Número de contacto" {...field} value={field.value ?? ""} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -213,7 +213,7 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
               name="contactoGenero"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Genero</FormLabel>
+                  <FormLabel>Género</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value ?? ""}>
                     <FormControl>
                       <SelectTrigger className="w-full">
@@ -255,7 +255,7 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
           <CardHeader>
             <CardTitle>Datos legales</CardTitle>
             <CardDescription>
-              Informacion juridica de la empresa.
+              Información jurídica de la empresa.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
@@ -264,9 +264,9 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
               name="razonSocial"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Razon social *</FormLabel>
+                  <FormLabel>Razón social *</FormLabel>
                   <FormControl>
-                    <Input placeholder="Nombre registrado juridicamente" {...field} />
+                    <Input placeholder="Nombre registrado jurídicamente" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -332,7 +332,7 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
           <CardHeader>
             <CardTitle>Datos generales</CardTitle>
             <CardDescription>
-              Informacion sobre la empresa, su ubicacion y actividad.
+              Información sobre la empresa, su ubicación y actividad.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
@@ -341,7 +341,7 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
               name="numeroSocios"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Numero de socios</FormLabel>
+                  <FormLabel>Número de socios</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value ?? ""}>
                     <FormControl>
                       <SelectTrigger className="w-full">
@@ -431,7 +431,7 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
               name="anioFundacion"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Ano de fundacion</FormLabel>
+                  <FormLabel>Año de fundación</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -490,9 +490,9 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
               name="direccion"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Direccion</FormLabel>
+                  <FormLabel>Dirección</FormLabel>
                   <FormControl>
-                    <Input placeholder="Direccion de la empresa" {...field} value={field.value ?? ""} />
+                    <Input placeholder="Dirección de la empresa" {...field} value={field.value ?? ""} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -503,9 +503,9 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
               name="telefono"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Telefono</FormLabel>
+                  <FormLabel>Teléfono</FormLabel>
                   <FormControl>
-                    <Input placeholder="Numero de telefono" {...field} value={field.value ?? ""} />
+                    <Input placeholder="Número de teléfono" {...field} value={field.value ?? ""} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -516,10 +516,10 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
               name="descripcion"
               render={({ field }) => (
                 <FormItem className="sm:col-span-2">
-                  <FormLabel>Descripcion de la empresa</FormLabel>
+                  <FormLabel>Descripción de la empresa</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Explique brevemente a que se dedica su empresa, que necesidad atiende en el mercado y que propuesta innovadora ofrece. (Maximo 200 palabras)"
+                      placeholder="Explique brevemente a qué se dedica su empresa, qué necesidad atiende en el mercado y qué propuesta innovadora ofrece. (Máximo 200 palabras)"
                       rows={4}
                       {...field}
                       value={field.value ?? ""}

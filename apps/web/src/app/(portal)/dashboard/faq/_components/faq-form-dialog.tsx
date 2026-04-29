@@ -36,7 +36,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { createFaq, updateFaq } from "@/lib/api/faq.api";
-import { faqQueries, concursoQueries } from "@/lib/api/query-keys";
+import { faqQueries, convocatoriaQueries } from "@/lib/api/query-keys";
 
 const formSchema = createFaqSchema;
 type FormValues = z.infer<typeof formSchema>;
@@ -44,8 +44,8 @@ type FormValues = z.infer<typeof formSchema>;
 // labels amigables para las categorias
 const CATEGORIA_OPTIONS = [
   { value: "general", label: "General", desc: "Sobre el programa en general" },
-  { value: "participacion", label: "Participacion", desc: "Como inscribirse y requisitos" },
-  { value: "proceso", label: "Proceso", desc: "Evaluacion, resultados y premios" },
+  { value: "participacion", label: "Participación", desc: "Cómo inscribirse y requisitos" },
+  { value: "proceso", label: "Proceso", desc: "Evaluación, resultados y montos" },
 ] as const;
 
 interface FaqFormDialogProps {
@@ -58,8 +58,8 @@ export function FaqFormDialog({ open, onOpenChange, faq }: FaqFormDialogProps) {
   const isEditing = !!faq;
   const queryClient = useQueryClient();
 
-  // lista de concursos para el selector opcional
-  const { data: concursos } = useQuery(concursoQueries.list({ limit: 100 }));
+  // lista de convocatorias para el selector opcional
+  const { data: convocatorias } = useQuery(convocatoriaQueries.list({ limit: 100 }));
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -68,7 +68,7 @@ export function FaqFormDialog({ open, onOpenChange, faq }: FaqFormDialogProps) {
       respuesta: "",
       orden: 0,
       categoria: "general",
-      concursoId: null,
+      convocatoriaId: null,
     },
   });
 
@@ -81,7 +81,7 @@ export function FaqFormDialog({ open, onOpenChange, faq }: FaqFormDialogProps) {
         respuesta: faq.respuesta,
         orden: faq.orden,
         categoria: faq.categoria as CategoriaFaq,
-        concursoId: faq.concursoId,
+        convocatoriaId: faq.convocatoriaId,
       });
     } else {
       form.reset({
@@ -89,7 +89,7 @@ export function FaqFormDialog({ open, onOpenChange, faq }: FaqFormDialogProps) {
         respuesta: "",
         orden: 0,
         categoria: "general",
-        concursoId: null,
+        convocatoriaId: null,
       });
     }
   }, [open, faq, form]);
@@ -175,7 +175,7 @@ export function FaqFormDialog({ open, onOpenChange, faq }: FaqFormDialogProps) {
                 name="categoria"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Categoria</FormLabel>
+                    <FormLabel>Categoría</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -216,13 +216,13 @@ export function FaqFormDialog({ open, onOpenChange, faq }: FaqFormDialogProps) {
               />
             </div>
 
-            {/* concurso especifico opcional */}
+            {/* convocatoria especifico opcional */}
             <FormField
               control={form.control}
-              name="concursoId"
+              name="convocatoriaId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Concurso especifico (opcional)</FormLabel>
+                  <FormLabel>Convocatoria específica (opcional)</FormLabel>
                   <Select
                     onValueChange={(val) =>
                       field.onChange(val === "none" ? null : Number(val))
@@ -231,12 +231,12 @@ export function FaqFormDialog({ open, onOpenChange, faq }: FaqFormDialogProps) {
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Para todos los concursos" />
+                        <SelectValue placeholder="Para todos las convocatorias" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="none">Para todos los concursos</SelectItem>
-                      {concursos?.data.map((c) => (
+                      <SelectItem value="none">Para todos las convocatorias</SelectItem>
+                      {convocatorias?.data.map((c) => (
                         <SelectItem key={c.id} value={c.id.toString()}>
                           {c.nombre}
                         </SelectItem>
@@ -244,7 +244,7 @@ export function FaqFormDialog({ open, onOpenChange, faq }: FaqFormDialogProps) {
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    Si vinculas esta pregunta a un concurso, solo aparecera en la pagina de ese concurso, no en el FAQ general.
+                    Si vinculas esta pregunta a una convocatoria, solo aparecerá en la página de esa convocatoria, no en el FAQ general.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

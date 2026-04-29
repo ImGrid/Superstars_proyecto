@@ -5,7 +5,7 @@ import { TipoNotificacion } from '../enums';
 export const createNotificacionSchema = z.object({
   destinatarioId: z.number().int().positive(),
   remitenteId: z.number().int().positive().optional(),
-  concursoId: z.number().int().positive().optional(),
+  convocatoriaId: z.number().int().positive().optional(),
   postulacionId: z.number().int().positive().optional(),
   tipo: z.nativeEnum(TipoNotificacion),
   asunto: z.string().min(1),

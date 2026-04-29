@@ -65,7 +65,7 @@ function MiEmpresaContent() {
         title="Mi Empresa"
         description={
           isCreating
-            ? "Registra los datos de tu empresa para poder postularte a concursos."
+            ? "Registra los datos de tu empresa para poder postularte a convocatorias."
             : "Actualiza los datos de tu empresa."
         }
       />

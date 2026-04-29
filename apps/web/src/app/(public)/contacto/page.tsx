@@ -190,7 +190,7 @@ export default function ContactoPage() {
                     <Input
                       id="asunto"
                       type="text"
-                      placeholder="Consulta sobre concursos"
+                      placeholder="Consulta sobre convocatorias"
                       aria-invalid={!!errors.asunto}
                       aria-describedby={errors.asunto ? "asunto-error" : undefined}
                       {...register("asunto")}

@@ -13,48 +13,48 @@ import type {
   UpdateNivelEvaluacionDto,
 } from '@superstars/shared';
 import { RubricaRepository } from './rubrica.repository';
-import { ConcursoAccessService } from '../concurso/concurso-access.service';
+import { ConvocatoriaAccessService } from '../convocatoria/convocatoria-access.service';
 
 @Injectable()
 export class RubricaService {
   constructor(
     private readonly rubricaRepo: RubricaRepository,
-    private readonly concursoAccess: ConcursoAccessService,
+    private readonly convocatoriaAccess: ConvocatoriaAccessService,
   ) {}
 
-  // --- Rubrica (1:1 con concurso) ---
+  // --- Rubrica (1:1 con convocatoria) ---
 
-  async findByConcurso(concursoId: number) {
-    const tree = await this.rubricaRepo.findFullTree(concursoId);
+  async findByConvocatoria(convocatoriaId: number) {
+    const tree = await this.rubricaRepo.findFullTree(convocatoriaId);
     if (!tree) {
-      throw new NotFoundException('El concurso no tiene una rubrica configurada');
+      throw new NotFoundException('La convocatoria no tiene una rubrica configurada');
     }
     return tree;
   }
 
-  async create(concursoId: number, dto: CreateRubricaDto) {
-    await this.concursoAccess.verificarEditable(concursoId);
+  async create(convocatoriaId: number, dto: CreateRubricaDto) {
+    await this.convocatoriaAccess.verificarEditable(convocatoriaId);
 
-    // 1:1 con concurso (uq_rubrica_concurso)
-    const existing = await this.rubricaRepo.findByConcursoId(concursoId);
+    // 1:1 con convocatoria (uq_rubrica_convocatoria)
+    const existing = await this.rubricaRepo.findByConvocatoriaId(convocatoriaId);
     if (existing) {
-      throw new ConflictException('El concurso ya tiene una rubrica configurada');
+      throw new ConflictException('La convocatoria ya tiene una rubrica configurada');
     }
 
     return this.rubricaRepo.createRubrica({
-      concursoId,
+      convocatoriaId,
       nombre: dto.nombre,
       descripcion: dto.descripcion,
       puntajeTotal: dto.puntajeTotal.toString(),
     });
   }
 
-  async updateRubrica(concursoId: number, dto: UpdateRubricaDto) {
-    await this.concursoAccess.verificarEditable(concursoId);
+  async updateRubrica(convocatoriaId: number, dto: UpdateRubricaDto) {
+    await this.convocatoriaAccess.verificarEditable(convocatoriaId);
 
-    const rub = await this.rubricaRepo.findByConcursoId(concursoId);
+    const rub = await this.rubricaRepo.findByConvocatoriaId(convocatoriaId);
     if (!rub) {
-      throw new NotFoundException('El concurso no tiene una rubrica configurada');
+      throw new NotFoundException('La convocatoria no tiene una rubrica configurada');
     }
 
     const data: Record<string, unknown> = {};
@@ -69,23 +69,23 @@ export class RubricaService {
     return updated;
   }
 
-  async deleteRubrica(concursoId: number) {
-    await this.concursoAccess.verificarEditable(concursoId);
+  async deleteRubrica(convocatoriaId: number) {
+    await this.convocatoriaAccess.verificarEditable(convocatoriaId);
 
-    const deleted = await this.rubricaRepo.deleteRubrica(concursoId);
+    const deleted = await this.rubricaRepo.deleteRubrica(convocatoriaId);
     if (!deleted) {
-      throw new NotFoundException('El concurso no tiene una rubrica configurada');
+      throw new NotFoundException('La convocatoria no tiene una rubrica configurada');
     }
   }
 
   // --- Criterio ---
 
-  async createCriterio(concursoId: number, dto: CreateCriterioDto) {
-    await this.concursoAccess.verificarEditable(concursoId);
+  async createCriterio(convocatoriaId: number, dto: CreateCriterioDto) {
+    await this.convocatoriaAccess.verificarEditable(convocatoriaId);
 
-    const rub = await this.rubricaRepo.findByConcursoId(concursoId);
+    const rub = await this.rubricaRepo.findByConvocatoriaId(convocatoriaId);
     if (!rub) {
-      throw new NotFoundException('El concurso no tiene una rubrica configurada');
+      throw new NotFoundException('La convocatoria no tiene una rubrica configurada');
     }
 
     return this.rubricaRepo.createCriterio({
@@ -98,9 +98,9 @@ export class RubricaService {
     });
   }
 
-  async updateCriterio(concursoId: number, criterioId: number, dto: UpdateCriterioDto) {
-    await this.concursoAccess.verificarEditable(concursoId);
-    await this.ensureCriterioBelongsToConcurso(criterioId, concursoId);
+  async updateCriterio(convocatoriaId: number, criterioId: number, dto: UpdateCriterioDto) {
+    await this.convocatoriaAccess.verificarEditable(convocatoriaId);
+    await this.ensureCriterioBelongsToConvocatoria(criterioId, convocatoriaId);
 
     const data: Record<string, unknown> = {};
     if (dto.tipo !== undefined) data.tipo = dto.tipo;
@@ -119,9 +119,9 @@ export class RubricaService {
     return updated;
   }
 
-  async deleteCriterio(concursoId: number, criterioId: number) {
-    await this.concursoAccess.verificarEditable(concursoId);
-    await this.ensureCriterioBelongsToConcurso(criterioId, concursoId);
+  async deleteCriterio(convocatoriaId: number, criterioId: number) {
+    await this.convocatoriaAccess.verificarEditable(convocatoriaId);
+    await this.ensureCriterioBelongsToConvocatoria(criterioId, convocatoriaId);
 
     const deleted = await this.rubricaRepo.deleteCriterio(criterioId);
     if (!deleted) throw new NotFoundException('Criterio no encontrado');
@@ -129,11 +129,11 @@ export class RubricaService {
 
   // --- Sub-criterio (creacion atomica con 3 niveles) ---
 
-  async createSubCriterioConNiveles(concursoId: number, dto: CreateSubCriterioConNivelesDto) {
-    await this.concursoAccess.verificarEditable(concursoId);
+  async createSubCriterioConNiveles(convocatoriaId: number, dto: CreateSubCriterioConNivelesDto) {
+    await this.convocatoriaAccess.verificarEditable(convocatoriaId);
 
-    // Verificar que el criterioId pertenece a este concurso
-    await this.ensureCriterioBelongsToConcurso(dto.criterioId, concursoId);
+    // Verificar que el criterioId pertenece a esta convocatoria
+    await this.ensureCriterioBelongsToConvocatoria(dto.criterioId, convocatoriaId);
 
     return this.rubricaRepo.createSubCriterioConNiveles(
       {
@@ -152,9 +152,9 @@ export class RubricaService {
     );
   }
 
-  async updateSubCriterio(concursoId: number, subCriterioId: number, dto: UpdateSubCriterioDto) {
-    await this.concursoAccess.verificarEditable(concursoId);
-    await this.ensureSubCriterioBelongsToConcurso(subCriterioId, concursoId);
+  async updateSubCriterio(convocatoriaId: number, subCriterioId: number, dto: UpdateSubCriterioDto) {
+    await this.convocatoriaAccess.verificarEditable(convocatoriaId);
+    await this.ensureSubCriterioBelongsToConvocatoria(subCriterioId, convocatoriaId);
 
     const data: Record<string, unknown> = {};
     if (dto.nombre !== undefined) data.nombre = dto.nombre;
@@ -163,7 +163,7 @@ export class RubricaService {
     if (dto.orden !== undefined) data.orden = dto.orden;
 
     if (Object.keys(data).length === 0) {
-      const row = await this.rubricaRepo.findSubCriterioByIdAndConcurso(subCriterioId, concursoId);
+      const row = await this.rubricaRepo.findSubCriterioByIdAndConvocatoria(subCriterioId, convocatoriaId);
       return row!.subCriterio;
     }
 
@@ -172,9 +172,9 @@ export class RubricaService {
     return updated;
   }
 
-  async deleteSubCriterio(concursoId: number, subCriterioId: number) {
-    await this.concursoAccess.verificarEditable(concursoId);
-    await this.ensureSubCriterioBelongsToConcurso(subCriterioId, concursoId);
+  async deleteSubCriterio(convocatoriaId: number, subCriterioId: number) {
+    await this.convocatoriaAccess.verificarEditable(convocatoriaId);
+    await this.ensureSubCriterioBelongsToConvocatoria(subCriterioId, convocatoriaId);
 
     const deleted = await this.rubricaRepo.deleteSubCriterio(subCriterioId);
     if (!deleted) throw new NotFoundException('Sub-criterio no encontrado');
@@ -182,9 +182,9 @@ export class RubricaService {
 
   // --- Nivel evaluacion ---
 
-  async updateNivel(concursoId: number, nivelId: number, dto: UpdateNivelEvaluacionDto) {
-    await this.concursoAccess.verificarEditable(concursoId);
-    await this.ensureNivelBelongsToConcurso(nivelId, concursoId);
+  async updateNivel(convocatoriaId: number, nivelId: number, dto: UpdateNivelEvaluacionDto) {
+    await this.convocatoriaAccess.verificarEditable(convocatoriaId);
+    await this.ensureNivelBelongsToConvocatoria(nivelId, convocatoriaId);
 
     const data: Record<string, unknown> = {};
     if (dto.descripcion !== undefined) data.descripcion = dto.descripcion;
@@ -192,7 +192,7 @@ export class RubricaService {
     if (dto.puntajeMax !== undefined) data.puntajeMax = dto.puntajeMax.toString();
 
     if (Object.keys(data).length === 0) {
-      const row = await this.rubricaRepo.findNivelByIdAndConcurso(nivelId, concursoId);
+      const row = await this.rubricaRepo.findNivelByIdAndConvocatoria(nivelId, convocatoriaId);
       return row!.nivelEvaluacion;
     }
 
@@ -201,9 +201,9 @@ export class RubricaService {
     return updated;
   }
 
-  async deleteNivel(concursoId: number, nivelId: number) {
-    await this.concursoAccess.verificarEditable(concursoId);
-    await this.ensureNivelBelongsToConcurso(nivelId, concursoId);
+  async deleteNivel(convocatoriaId: number, nivelId: number) {
+    await this.convocatoriaAccess.verificarEditable(convocatoriaId);
+    await this.ensureNivelBelongsToConvocatoria(nivelId, convocatoriaId);
 
     const deleted = await this.rubricaRepo.deleteNivel(nivelId);
     if (!deleted) throw new NotFoundException('Nivel de evaluacion no encontrado');
@@ -211,12 +211,12 @@ export class RubricaService {
 
   // --- Validacion de completitud (6 reglas cross-entity) ---
 
-  async validar(concursoId: number) {
+  async validar(convocatoriaId: number) {
     const errores: string[] = [];
 
-    const tree = await this.rubricaRepo.findFullTree(concursoId);
+    const tree = await this.rubricaRepo.findFullTree(convocatoriaId);
     if (!tree) {
-      return { completa: false, errores: ['No existe rubrica para este concurso'] };
+      return { completa: false, errores: ['No existe rubrica para esta convocatoria'] };
     }
 
     const criterios = tree.criterios;
@@ -313,24 +313,24 @@ export class RubricaService {
 
   // --- Helpers privados ---
 
-  private async ensureCriterioBelongsToConcurso(criterioId: number, concursoId: number) {
-    const row = await this.rubricaRepo.findCriterioByIdAndConcurso(criterioId, concursoId);
+  private async ensureCriterioBelongsToConvocatoria(criterioId: number, convocatoriaId: number) {
+    const row = await this.rubricaRepo.findCriterioByIdAndConvocatoria(criterioId, convocatoriaId);
     if (!row) {
       throw new NotFoundException('Criterio no encontrado');
     }
     return row;
   }
 
-  private async ensureSubCriterioBelongsToConcurso(subCriterioId: number, concursoId: number) {
-    const row = await this.rubricaRepo.findSubCriterioByIdAndConcurso(subCriterioId, concursoId);
+  private async ensureSubCriterioBelongsToConvocatoria(subCriterioId: number, convocatoriaId: number) {
+    const row = await this.rubricaRepo.findSubCriterioByIdAndConvocatoria(subCriterioId, convocatoriaId);
     if (!row) {
       throw new NotFoundException('Sub-criterio no encontrado');
     }
     return row;
   }
 
-  private async ensureNivelBelongsToConcurso(nivelId: number, concursoId: number) {
-    const row = await this.rubricaRepo.findNivelByIdAndConcurso(nivelId, concursoId);
+  private async ensureNivelBelongsToConvocatoria(nivelId: number, convocatoriaId: number) {
+    const row = await this.rubricaRepo.findNivelByIdAndConvocatoria(nivelId, convocatoriaId);
     if (!row) {
       throw new NotFoundException('Nivel de evaluacion no encontrado');
     }

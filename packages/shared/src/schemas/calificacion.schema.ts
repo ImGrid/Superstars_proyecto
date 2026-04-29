@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { EstadoCalificacion } from '../enums/estado-calificacion.enum';
-import { EstadoConcurso } from '../enums/estado-concurso.enum';
+import { EstadoConvocatoria } from '../enums/estado-convocatoria.enum';
 import { EstadoPostulacion } from '../enums/estado-postulacion.enum';
 
 // Detalle de calificacion por sub-criterio (chk_detalle_puntaje: puntaje >= 0)
@@ -31,7 +31,7 @@ export type SaveCalificacionDto = z.infer<typeof saveCalificacionSchema>;
 export type DevolverCalificacionDto = z.infer<typeof devolverCalificacionSchema>;
 export type AssignEvaluadorPostulacionDto = z.infer<typeof assignEvaluadorPostulacionSchema>;
 
-// GET /concursos/:id/postulaciones/:id/evaluadores-asignados
+// GET /convocatorias/:id/postulaciones/:id/evaluadores-asignados
 export interface AsignacionEvaluadorResponse {
   id: number;
   postulacionId: number;
@@ -42,21 +42,21 @@ export interface AsignacionEvaluadorResponse {
   createdAt: string;
 }
 
-// GET /mis-evaluaciones/concursos
-export interface EvaluadorConcursoItem {
+// GET /mis-evaluaciones/convocatorias
+export interface EvaluadorConvocatoriaItem {
   id: number;
   nombre: string;
   descripcion: string | null;
-  estado: EstadoConcurso;
+  estado: EstadoConvocatoria;
   fechaCierrePostulacion: string;
-  montoPremio: string;
+  monto: string;
   asignadoEn: string;
 }
 
-// GET /mis-evaluaciones/concursos/:id/postulaciones
+// GET /mis-evaluaciones/convocatorias/:id/postulaciones
 export interface PostulacionEvaluableItem {
   id: number;
-  concursoId: number;
+  convocatoriaId: number;
   empresaId: number;
   estado: EstadoPostulacion;
   porcentajeCompletado: string;
@@ -68,11 +68,11 @@ export interface PostulacionEvaluableItem {
   calificacionPuntaje: string | null;
 }
 
-// GET /mis-evaluaciones/concursos/:id/postulaciones/:postId
+// GET /mis-evaluaciones/convocatorias/:id/postulaciones/:postId
 export interface PostulacionDetalleEvaluador {
   postulacion: {
     id: number;
-    concursoId: number;
+    convocatoriaId: number;
     empresaId: number;
     estado: EstadoPostulacion;
     responseData: Record<string, unknown>;
@@ -98,7 +98,7 @@ export interface PostulacionDetalleEvaluador {
   }[];
 }
 
-// GET /concursos/:id/calificaciones (responsable)
+// GET /convocatorias/:id/calificaciones (responsable)
 export interface CalificacionListItem {
   id: number;
   postulacionId: number;
@@ -113,7 +113,7 @@ export interface CalificacionListItem {
   evaluadorNombre: string;
 }
 
-// GET /concursos/:id/calificaciones/:calId/detalle (responsable)
+// GET /convocatorias/:id/calificaciones/:calId/detalle (responsable)
 export interface CalificacionDetalleResponsable {
   calificacion: {
     id: number;
@@ -133,7 +133,7 @@ export interface CalificacionDetalleResponsable {
   }[];
   postulacion: {
     id: number;
-    concursoId: number;
+    convocatoriaId: number;
     empresaId: number;
     estado: EstadoPostulacion;
     responseData: Record<string, unknown>;

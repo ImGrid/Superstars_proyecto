@@ -37,7 +37,7 @@ export class PublicacionController {
 
   // Crear publicacion (borrador), opcionalmente con imagen
   @Post()
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   @UseInterceptors(FileInterceptor('imagen'))
   @HttpCode(HttpStatus.CREATED)
   async create(
@@ -56,7 +56,7 @@ export class PublicacionController {
 
   // Listar publicaciones (admin/responsable)
   @Get()
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   async findAll(@Query() rawQuery: Record<string, string>) {
     const query = listPublicacionesQuerySchema.parse(rawQuery);
     return this.publicacionService.findAll(query);
@@ -66,7 +66,7 @@ export class PublicacionController {
 
   // Listar categorias
   @Get('categorias')
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   async findAllCategorias() {
     return this.publicacionService.findAllCategorias();
   }
@@ -105,14 +105,14 @@ export class PublicacionController {
 
   // Obtener publicacion por ID
   @Get(':id')
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   async findById(@Param('id', ParseIntPipe) id: number) {
     return this.publicacionService.findById(id);
   }
 
   // Actualizar publicacion (solo editable)
   @Patch(':id')
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: Record<string, unknown>,
@@ -123,7 +123,7 @@ export class PublicacionController {
 
   // Eliminar publicacion
   @Delete(':id')
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(@Param('id', ParseIntPipe) id: number) {
     await this.publicacionService.delete(id);
@@ -133,7 +133,7 @@ export class PublicacionController {
 
   // Publicar o programar
   @Post(':id/publicar')
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   async publicar(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: Record<string, unknown>,
@@ -144,21 +144,21 @@ export class PublicacionController {
 
   // Archivar publicacion
   @Post(':id/archivar')
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   async archivar(@Param('id', ParseIntPipe) id: number) {
     return this.publicacionService.archivar(id);
   }
 
   // Republicar publicacion (expirado -> publicado, archivado -> borrador)
   @Post(':id/republicar')
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   async republicar(@Param('id', ParseIntPipe) id: number) {
     return this.publicacionService.republicar(id);
   }
 
   // Cancelar programacion (programado -> borrador)
   @Post(':id/cancelar-programacion')
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   async cancelarProgramacion(@Param('id', ParseIntPipe) id: number) {
     return this.publicacionService.cancelarProgramacion(id);
   }
@@ -167,7 +167,7 @@ export class PublicacionController {
 
   // Subir imagen
   @Post(':id/imagen')
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   @UseInterceptors(FileInterceptor('imagen'))
   async uploadImagen(
     @Param('id', ParseIntPipe) id: number,
@@ -181,7 +181,7 @@ export class PublicacionController {
 
   // Eliminar imagen
   @Delete(':id/imagen')
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   async removeImagen(@Param('id', ParseIntPipe) id: number) {
     return this.publicacionService.removeImagen(id);
   }

@@ -3,7 +3,7 @@ import type { ArchivoResponse } from "@superstars/shared";
 
 // Subir archivo de postulacion (multipart/form-data)
 export function uploadArchivo(
-  concursoId: number,
+  convocatoriaId: number,
   postulacionId: number,
   fieldId: string,
   file: File,
@@ -14,7 +14,7 @@ export function uploadArchivo(
 
   return apiClient
     .post<ArchivoResponse>(
-      `/concursos/${concursoId}/postulaciones/${postulacionId}/archivos`,
+      `/convocatorias/${convocatoriaId}/postulaciones/${postulacionId}/archivos`,
       formData,
       { headers: { "Content-Type": "multipart/form-data" } },
     )
@@ -22,23 +22,23 @@ export function uploadArchivo(
 }
 
 // Listar archivos de una postulacion
-export function listArchivos(concursoId: number, postulacionId: number) {
+export function listArchivos(convocatoriaId: number, postulacionId: number) {
   return apiClient
     .get<ArchivoResponse[]>(
-      `/concursos/${concursoId}/postulaciones/${postulacionId}/archivos`,
+      `/convocatorias/${convocatoriaId}/postulaciones/${postulacionId}/archivos`,
     )
     .then((r) => r.data);
 }
 
 // Descargar archivo (retorna blob)
 export function downloadArchivo(
-  concursoId: number,
+  convocatoriaId: number,
   postulacionId: number,
   archivoId: number,
 ) {
   return apiClient
     .get(
-      `/concursos/${concursoId}/postulaciones/${postulacionId}/archivos/${archivoId}/download`,
+      `/convocatorias/${convocatoriaId}/postulaciones/${postulacionId}/archivos/${archivoId}/download`,
       { responseType: "blob" },
     )
     .then((r) => r.data as Blob);
@@ -46,11 +46,11 @@ export function downloadArchivo(
 
 // Eliminar archivo
 export function deleteArchivo(
-  concursoId: number,
+  convocatoriaId: number,
   postulacionId: number,
   archivoId: number,
 ) {
   return apiClient.delete(
-    `/concursos/${concursoId}/postulaciones/${postulacionId}/archivos/${archivoId}`,
+    `/convocatorias/${convocatoriaId}/postulaciones/${postulacionId}/archivos/${archivoId}`,
   );
 }

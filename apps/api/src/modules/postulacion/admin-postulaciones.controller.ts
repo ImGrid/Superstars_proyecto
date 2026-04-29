@@ -5,14 +5,14 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { PostulacionService } from './postulacion.service';
 
-// endpoint cross-concurso para admin y responsable
+// endpoint cross-convocatoria para admin y responsable
 @Controller('postulaciones')
 export class AdminPostulacionesController {
   constructor(private readonly postulacionService: PostulacionService) {}
 
-  // GET /api/postulaciones?concursoId=6&estado=enviado&page=1&limit=20
+  // GET /api/postulaciones?convocatoriaId=6&estado=enviado&page=1&limit=20
   @Get()
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   async findAll(
     @Query() rawQuery: Record<string, string>,
     @CurrentUser() user: AuthUser,

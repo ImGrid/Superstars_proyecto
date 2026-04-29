@@ -2,7 +2,7 @@ import { apiClient } from "./client";
 import type {
   SaveCalificacionDto,
   DevolverCalificacionDto,
-  EvaluadorConcursoItem,
+  EvaluadorConvocatoriaItem,
   PostulacionEvaluableItem,
   PostulacionDetalleEvaluador,
   CalificacionListItem,
@@ -12,27 +12,27 @@ import type {
 
 // --- Evaluador ---
 
-// concursos donde estoy asignado
-export function listMisConcursos() {
+// convocatorias donde estoy asignado
+export function listMisConvocatorias() {
   return apiClient
-    .get<EvaluadorConcursoItem[]>("/mis-evaluaciones/concursos")
+    .get<EvaluadorConvocatoriaItem[]>("/mis-evaluaciones/convocatorias")
     .then((r) => r.data);
 }
 
-// postulaciones evaluables de un concurso
-export function listPostulacionesEvaluables(concursoId: number) {
+// postulaciones evaluables de una convocatoria
+export function listPostulacionesEvaluables(convocatoriaId: number) {
   return apiClient
     .get<PostulacionEvaluableItem[]>(
-      `/mis-evaluaciones/concursos/${concursoId}/postulaciones`,
+      `/mis-evaluaciones/convocatorias/${convocatoriaId}/postulaciones`,
     )
     .then((r) => r.data);
 }
 
 // detalle de postulacion + mi calificacion
-export function getPostulacionDetalle(concursoId: number, postulacionId: number) {
+export function getPostulacionDetalle(convocatoriaId: number, postulacionId: number) {
   return apiClient
     .get<PostulacionDetalleEvaluador>(
-      `/mis-evaluaciones/concursos/${concursoId}/postulaciones/${postulacionId}`,
+      `/mis-evaluaciones/convocatorias/${convocatoriaId}/postulaciones/${postulacionId}`,
     )
     .then((r) => r.data);
 }
@@ -53,60 +53,60 @@ export function completarCalificacion(postulacionId: number) {
 
 // --- Responsable ---
 
-// listar calificaciones de un concurso
-export function listCalificaciones(concursoId: number) {
+// listar calificaciones de una convocatoria
+export function listCalificaciones(convocatoriaId: number) {
   return apiClient
-    .get<CalificacionListItem[]>(`/concursos/${concursoId}/calificaciones`)
+    .get<CalificacionListItem[]>(`/convocatorias/${convocatoriaId}/calificaciones`)
     .then((r) => r.data);
 }
 
 // detalle de una calificacion (puntajes + postulacion)
-export function getCalificacionDetalle(concursoId: number, calificacionId: number) {
+export function getCalificacionDetalle(convocatoriaId: number, calificacionId: number) {
   return apiClient
     .get<CalificacionDetalleResponsable>(
-      `/concursos/${concursoId}/calificaciones/${calificacionId}/detalle`,
+      `/convocatorias/${convocatoriaId}/calificaciones/${calificacionId}/detalle`,
     )
     .then((r) => r.data);
 }
 
 // aprobar calificacion
-export function aprobarCalificacion(concursoId: number, calificacionId: number) {
+export function aprobarCalificacion(convocatoriaId: number, calificacionId: number) {
   return apiClient
-    .post(`/concursos/${concursoId}/calificaciones/${calificacionId}/aprobar`)
+    .post(`/convocatorias/${convocatoriaId}/calificaciones/${calificacionId}/aprobar`)
     .then((r) => r.data);
 }
 
 // devolver calificacion al evaluador
 export function devolverCalificacion(
-  concursoId: number,
+  convocatoriaId: number,
   calificacionId: number,
   dto: DevolverCalificacionDto,
 ) {
   return apiClient
-    .post(`/concursos/${concursoId}/calificaciones/${calificacionId}/devolver`, dto)
+    .post(`/convocatorias/${convocatoriaId}/calificaciones/${calificacionId}/devolver`, dto)
     .then((r) => r.data);
 }
 
 // --- Asignacion de evaluadores a postulaciones ---
 
 // listar evaluadores asignados a una postulacion
-export function listAsignacionesEvaluador(concursoId: number, postulacionId: number) {
+export function listAsignacionesEvaluador(convocatoriaId: number, postulacionId: number) {
   return apiClient
     .get<AsignacionEvaluadorResponse[]>(
-      `/concursos/${concursoId}/postulaciones/${postulacionId}/evaluadores-asignados`,
+      `/convocatorias/${convocatoriaId}/postulaciones/${postulacionId}/evaluadores-asignados`,
     )
     .then((r) => r.data);
 }
 
 // asignar evaluador a una postulacion
 export function assignEvaluadorPostulacion(
-  concursoId: number,
+  convocatoriaId: number,
   postulacionId: number,
   evaluadorId: number,
 ) {
   return apiClient
     .post(
-      `/concursos/${concursoId}/postulaciones/${postulacionId}/evaluadores-asignados`,
+      `/convocatorias/${convocatoriaId}/postulaciones/${postulacionId}/evaluadores-asignados`,
       { evaluadorId },
     )
     .then((r) => r.data);
@@ -114,13 +114,13 @@ export function assignEvaluadorPostulacion(
 
 // desasignar evaluador de una postulacion
 export function removeAsignacionEvaluador(
-  concursoId: number,
+  convocatoriaId: number,
   postulacionId: number,
   evaluadorId: number,
 ) {
   return apiClient
     .delete(
-      `/concursos/${concursoId}/postulaciones/${postulacionId}/evaluadores-asignados/${evaluadorId}`,
+      `/convocatorias/${convocatoriaId}/postulaciones/${postulacionId}/evaluadores-asignados/${evaluadorId}`,
     )
     .then((r) => r.data);
 }

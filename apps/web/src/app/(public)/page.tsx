@@ -5,7 +5,7 @@ import { Icon } from "@iconify/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ConcursosActivosSection } from "./_components/concursos-activos-section";
+import { ConvocatoriasActivasSection } from "./_components/convocatorias-activas-section";
 import { HeroCarousel } from "./_components/hero-carousel";
 import { SponsorsStrip } from "@/components/public/sponsors-strip";
 
@@ -21,7 +21,7 @@ const steps = [
     icon: "ph:note-pencil-duotone",
     title: "Completa el formulario",
     description:
-      "Llena el formulario dinámico del concurso con tu propuesta de impacto.",
+      "Llena el formulario dinámico de la convocatoria con tu propuesta de impacto.",
   },
   {
     icon: "ph:trophy-duotone",
@@ -70,16 +70,15 @@ export default function HomePage() {
       <section id="nosotros" className="py-20 lg:py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
-            {/* imagen */}
-            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl">
+            {/* banner SUPERSTAR 2026 */}
+            <div className="relative aspect-[3/2] overflow-hidden rounded-2xl">
               <Image
-                src="/images/img2.jpg"
-                alt="Joven sosteniendo una planta - crecimiento y sostenibilidad"
+                src="/images/img5.png"
+                alt="Empresas SUPERSTAR - Buscando impacto sostenible en Bolivia"
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover"
+                className="object-contain"
               />
-              <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-black/5" />
             </div>
 
             {/* texto */}
@@ -88,19 +87,13 @@ export default function HomePage() {
                 Sobre nosotros
               </p>
               <h2 className="mt-2 font-heading text-3xl font-bold text-primary-800 sm:text-4xl">
-                Transformando ideas en realidades sostenibles
+                SUPERSTAR 2026
               </h2>
               <p className="mt-6 text-lg leading-relaxed text-secondary-600">
-                SUPERIMPACT360 es una plataforma de competencias empresariales que
-                busca identificar, visibilizar y apoyar a empresas bolivianas
-                con modelos de negocio innovadores y de alto impacto social y
-                ambiental.
-              </p>
-              <p className="mt-4 leading-relaxed text-secondary-600">
-                Trabajamos junto a organizaciones internacionales como OXFAM,
-                Ayuda en Acción y FUNDES Bolivia para ofrecer a los
-                emprendedores financiamiento, acompañamiento técnico y
-                oportunidades de crecimiento.
+                Impulsar una nueva generación de empresas innovadoras que, desde
+                su modelo de negocio, integren la equidad de género y la acción
+                climática como pilares estratégicos, acelerando la transición
+                hacia economías sostenibles, inclusivas y socialmente justas.
               </p>
               <Button
                 asChild
@@ -153,8 +146,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ===== CONCURSOS ACTIVOS (datos reales del API) ===== */}
-      <ConcursosActivosSection />
+      {/* ===== CONVOCATORIAS ACTIVAS (datos reales del API) ===== */}
+      <ConvocatoriasActivasSection />
 
       {/* ===== HISTORIAS DE EXITO ===== */}
       <section className="bg-secondary-50 py-20 lg:py-28">
@@ -209,7 +202,7 @@ export default function HomePage() {
             Listo para llevar tu empresa al siguiente nivel?
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-primary-200">
-            Registra tu empresa, completa tu propuesta y compite por premios de
+            Registra tu empresa, completa tu propuesta y compite por un monto de
             hasta Bs 58.000. El siguiente caso de éxito puedes ser tú.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
@@ -234,10 +227,10 @@ export default function HomePage() {
           </div>
           <div className="mt-6 flex justify-center gap-6 text-sm text-primary-300">
             <Link
-              href="/concursos"
+              href="/convocatorias"
               className="transition-colors hover:text-orange-400"
             >
-              Ver bases del concurso
+              Ver bases de la convocatoria
             </Link>
             <Link
               href="/contacto"

@@ -15,9 +15,9 @@ export function listPublicFaq() {
     .then((r) => r.data);
 }
 
-export function listPublicFaqByConcurso(concursoId: number) {
+export function listPublicFaqByConvocatoria(convocatoriaId: number) {
   return apiClient
-    .get<FaqResponse[]>(`/public/faq/concurso/${concursoId}`)
+    .get<FaqResponse[]>(`/public/faq/convocatoria/${convocatoriaId}`)
     .then((r) => r.data);
 }
 

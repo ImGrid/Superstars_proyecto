@@ -6,7 +6,7 @@ import { isRoleAllowed, getDefaultRoute } from "@/lib/auth/route-config";
 // rutas que no requieren autenticacion
 const publicPaths = [
   "/",
-  "/concursos",
+  "/convocatorias",
   "/resultados",
   "/noticias",
   "/faq",
@@ -19,7 +19,7 @@ function isPublicPath(pathname: string): boolean {
   if (publicPaths.includes(pathname)) return true;
 
   // sub-rutas publicas
-  if (pathname.startsWith("/concursos/")) return true;
+  if (pathname.startsWith("/convocatorias/")) return true;
   if (pathname.startsWith("/resultados/")) return true;
   if (pathname.startsWith("/noticias/")) return true;
   if (pathname.startsWith("/auth/")) return true;

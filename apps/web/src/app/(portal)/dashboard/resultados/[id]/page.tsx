@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StateBadge } from "@/components/shared/state-badge";
-import { concursoQueries } from "@/lib/api/query-keys";
+import { convocatoriaQueries } from "@/lib/api/query-keys";
 import type { PostulacionRankingItem } from "@superstars/shared";
 
 // colores por posicion en el ranking
@@ -61,16 +61,16 @@ function truncarNombre(nombre: string, max = 20): string {
   return nombre.length > max ? nombre.slice(0, max) + "…" : nombre;
 }
 
-export default function RankingConcursoPage({
+export default function RankingConvocatoriaPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const concursoId = parseInt(id, 10);
+  const convocatoriaId = parseInt(id, 10);
   const router = useRouter();
 
-  const { data, isLoading } = useQuery(concursoQueries.ranking(concursoId));
+  const { data, isLoading } = useQuery(convocatoriaQueries.ranking(convocatoriaId));
 
   if (isLoading) {
     return (
@@ -99,7 +99,7 @@ export default function RankingConcursoPage({
           Resultados
         </Button>
         <p className="text-sm text-secondary-500">
-          No se encontro informacion del concurso.
+          No se encontró información de la convocatoria.
         </p>
       </div>
     );
@@ -133,7 +133,7 @@ export default function RankingConcursoPage({
         <h1 className="font-heading text-2xl font-bold text-secondary-900">
           {data.nombre}
         </h1>
-        <StateBadge tipo="concurso" valor={data.estado} />
+        <StateBadge tipo="convocatoria" valor={data.estado} />
       </div>
 
       {/* stats de resumen */}
@@ -173,7 +173,7 @@ export default function RankingConcursoPage({
         <Card>
           <CardContent className="py-12 text-center">
             <p className="text-sm text-secondary-500">
-              No hay postulaciones calificadas en este concurso.
+              No hay postulaciones calificadas en esta convocatoria.
             </p>
           </CardContent>
         </Card>

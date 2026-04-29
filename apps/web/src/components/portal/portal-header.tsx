@@ -17,7 +17,7 @@ import React from "react";
 const segmentLabels: Record<string, string> = {
   dashboard: "Dashboard",
   usuarios: "Usuarios",
-  concursos: "Concursos",
+  convocatorias: "Convocatorias",
   publicaciones: "Publicaciones",
   "mi-empresa": "Mi Empresa",
   "mis-postulaciones": "Mis Postulaciones",
@@ -27,7 +27,7 @@ const segmentLabels: Record<string, string> = {
 };
 
 function buildBreadcrumbs(pathname: string) {
-  // /dashboard/concursos/5/editar → ["dashboard", "concursos", "5", "editar"]
+  // /dashboard/convocatorias/5/editar → ["dashboard", "convocatorias", "5", "editar"]
   const segments = pathname.split("/").filter(Boolean);
   const crumbs: { label: string; href: string }[] = [];
 

@@ -14,11 +14,11 @@ const portalRoutes: RouteRule[] = [
   // admin: gestion de usuarios
   { path: "/dashboard/usuarios", roles: [RolUsuario.ADMINISTRADOR] },
 
-  // admin + responsable + proponente: concursos (proponente ve solo publicados)
-  { path: "/dashboard/concursos", roles: [RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO, RolUsuario.PROPONENTE] },
-  { path: "/dashboard/publicaciones", roles: [RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO] },
-  { path: "/dashboard/postulaciones", roles: [RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO] },
-  { path: "/dashboard/faq", roles: [RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO] },
+  // admin + responsable + proponente: convocatorias (proponente ve solo publicadas)
+  { path: "/dashboard/convocatorias", roles: [RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA, RolUsuario.PROPONENTE] },
+  { path: "/dashboard/publicaciones", roles: [RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA] },
+  { path: "/dashboard/postulaciones", roles: [RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA] },
+  { path: "/dashboard/faq", roles: [RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA] },
 
   // proponente: empresa y postulaciones propias
   { path: "/dashboard/mi-empresa", roles: [RolUsuario.PROPONENTE] },
@@ -28,7 +28,7 @@ const portalRoutes: RouteRule[] = [
   { path: "/dashboard/mis-evaluaciones", roles: [RolUsuario.EVALUADOR] },
 
   // dashboard principal: todos los autenticados
-  { path: "/dashboard", roles: [RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO, RolUsuario.PROPONENTE, RolUsuario.EVALUADOR] },
+  { path: "/dashboard", roles: [RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA, RolUsuario.PROPONENTE, RolUsuario.EVALUADOR] },
 ];
 
 // verifica si un rol tiene acceso a una ruta del portal
@@ -49,8 +49,8 @@ export function getDefaultRoute(rol: RolUsuario): string {
   switch (rol) {
     case RolUsuario.ADMINISTRADOR:
       return "/dashboard";
-    case RolUsuario.RESPONSABLE_CONCURSO:
-      return "/dashboard/concursos";
+    case RolUsuario.RESPONSABLE_CONVOCATORIA:
+      return "/dashboard/convocatorias";
     case RolUsuario.PROPONENTE:
       return "/dashboard/mis-postulaciones";
     case RolUsuario.EVALUADOR:

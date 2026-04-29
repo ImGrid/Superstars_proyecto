@@ -2,7 +2,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { eq, asc } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/drizzle.provider';
 import type { DrizzleDB } from '../../database/drizzle.provider';
-import { documentoConcurso } from '@superstars/db';
+import { documentoConvocatoria } from '@superstars/db';
 
 @Injectable()
 export class DocumentoRepository {
@@ -11,21 +11,21 @@ export class DocumentoRepository {
   async findById(id: number) {
     const rows = await this.db
       .select()
-      .from(documentoConcurso)
-      .where(eq(documentoConcurso.id, id));
+      .from(documentoConvocatoria)
+      .where(eq(documentoConvocatoria.id, id));
     return rows[0] ?? null;
   }
 
-  async findAllByConcursoId(concursoId: number) {
+  async findAllByConvocatoriaId(convocatoriaId: number) {
     return this.db
       .select()
-      .from(documentoConcurso)
-      .where(eq(documentoConcurso.concursoId, concursoId))
-      .orderBy(asc(documentoConcurso.orden), asc(documentoConcurso.createdAt));
+      .from(documentoConvocatoria)
+      .where(eq(documentoConvocatoria.convocatoriaId, convocatoriaId))
+      .orderBy(asc(documentoConvocatoria.orden), asc(documentoConvocatoria.createdAt));
   }
 
   async create(data: {
-    concursoId: number;
+    convocatoriaId: number;
     nombre: string;
     storageKey: string;
     nombreOriginal: string;
@@ -34,7 +34,7 @@ export class DocumentoRepository {
     orden: number;
   }) {
     const [created] = await this.db
-      .insert(documentoConcurso)
+      .insert(documentoConvocatoria)
       .values(data)
       .returning();
     return created;
@@ -42,18 +42,18 @@ export class DocumentoRepository {
 
   async update(id: number, data: Partial<{ nombre: string; orden: number }>) {
     const [updated] = await this.db
-      .update(documentoConcurso)
+      .update(documentoConvocatoria)
       .set(data)
-      .where(eq(documentoConcurso.id, id))
+      .where(eq(documentoConvocatoria.id, id))
       .returning();
     return updated ?? null;
   }
 
   async delete(id: number): Promise<boolean> {
     const result = await this.db
-      .delete(documentoConcurso)
-      .where(eq(documentoConcurso.id, id))
-      .returning({ id: documentoConcurso.id });
+      .delete(documentoConvocatoria)
+      .where(eq(documentoConvocatoria.id, id))
+      .returning({ id: documentoConvocatoria.id });
     return result.length > 0;
   }
 }

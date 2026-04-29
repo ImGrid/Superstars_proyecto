@@ -3,11 +3,11 @@ import { eq, and, desc, sql } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/drizzle.provider';
 import type { DrizzleDB } from '../../database/drizzle.provider';
 import {
-  evaluadorConcurso,
+  evaluadorConvocatoria,
   asignacionEvaluador,
   calificacion,
   calificacionDetalle,
-  concurso,
+  convocatoria,
   postulacion,
   empresa,
   usuario,
@@ -24,43 +24,43 @@ export class EvaluacionRepository {
 
   // --- Queries del evaluador ---
 
-  // concursos donde el evaluador esta asignado
-  async findConcursosDelEvaluador(evaluadorId: number) {
+  // convocatorias donde el evaluador esta asignado
+  async findConvocatoriasDelEvaluador(evaluadorId: number) {
     return this.db
       .select({
-        id: concurso.id,
-        nombre: concurso.nombre,
-        descripcion: concurso.descripcion,
-        estado: concurso.estado,
-        fechaCierrePostulacion: concurso.fechaCierrePostulacion,
-        montoPremio: concurso.montoPremio,
-        asignadoEn: evaluadorConcurso.createdAt,
+        id: convocatoria.id,
+        nombre: convocatoria.nombre,
+        descripcion: convocatoria.descripcion,
+        estado: convocatoria.estado,
+        fechaCierrePostulacion: convocatoria.fechaCierrePostulacion,
+        monto: convocatoria.monto,
+        asignadoEn: evaluadorConvocatoria.createdAt,
       })
-      .from(evaluadorConcurso)
-      .innerJoin(concurso, eq(evaluadorConcurso.concursoId, concurso.id))
-      .where(eq(evaluadorConcurso.evaluadorId, evaluadorId))
-      .orderBy(desc(evaluadorConcurso.createdAt));
+      .from(evaluadorConvocatoria)
+      .innerJoin(convocatoria, eq(evaluadorConvocatoria.convocatoriaId, convocatoria.id))
+      .where(eq(evaluadorConvocatoria.evaluadorId, evaluadorId))
+      .orderBy(desc(evaluadorConvocatoria.createdAt));
   }
 
-  // verificar que el evaluador esta asignado a un concurso
-  async isEvaluadorDelConcurso(concursoId: number, evaluadorId: number): Promise<boolean> {
+  // verificar que el evaluador esta asignado a una convocatoria
+  async isEvaluadorDeConvocatoria(convocatoriaId: number, evaluadorId: number): Promise<boolean> {
     const rows = await this.db
-      .select({ id: evaluadorConcurso.id })
-      .from(evaluadorConcurso)
+      .select({ id: evaluadorConvocatoria.id })
+      .from(evaluadorConvocatoria)
       .where(and(
-        eq(evaluadorConcurso.concursoId, concursoId),
-        eq(evaluadorConcurso.evaluadorId, evaluadorId),
+        eq(evaluadorConvocatoria.convocatoriaId, convocatoriaId),
+        eq(evaluadorConvocatoria.evaluadorId, evaluadorId),
       ))
       .limit(1);
     return rows.length > 0;
   }
 
-  // postulaciones asignadas al evaluador en un concurso (filtradas por asignacion_evaluador)
-  async findPostulacionesEvaluables(concursoId: number, evaluadorId: number) {
+  // postulaciones asignadas al evaluador en una convocatoria (filtradas por asignacion_evaluador)
+  async findPostulacionesEvaluables(convocatoriaId: number, evaluadorId: number) {
     return this.db
       .select({
         id: postulacion.id,
-        concursoId: postulacion.concursoId,
+        convocatoriaId: postulacion.convocatoriaId,
         empresaId: postulacion.empresaId,
         estado: postulacion.estado,
         porcentajeCompletado: postulacion.porcentajeCompletado,
@@ -81,7 +81,7 @@ export class EvaluacionRepository {
       ))
       .where(and(
         eq(asignacionEvaluador.evaluadorId, evaluadorId),
-        eq(postulacion.concursoId, concursoId),
+        eq(postulacion.convocatoriaId, convocatoriaId),
         sql`${postulacion.estado} IN ('en_evaluacion', 'calificado', 'ganador', 'no_seleccionado')`,
       ))
       .orderBy(desc(postulacion.updatedAt));
@@ -172,8 +172,8 @@ export class EvaluacionRepository {
 
   // --- Queries del responsable ---
 
-  // todas las calificaciones de un concurso (para supervision)
-  async findCalificacionesByConcurso(concursoId: number) {
+  // todas las calificaciones de una convocatoria (para supervision)
+  async findCalificacionesByConvocatoria(convocatoriaId: number) {
     return this.db
       .select({
         id: calificacion.id,
@@ -192,7 +192,7 @@ export class EvaluacionRepository {
       .innerJoin(postulacion, eq(calificacion.postulacionId, postulacion.id))
       .innerJoin(empresa, eq(postulacion.empresaId, empresa.id))
       .innerJoin(usuario, eq(calificacion.evaluadorId, usuario.id))
-      .where(eq(postulacion.concursoId, concursoId))
+      .where(eq(postulacion.convocatoriaId, convocatoriaId))
       .orderBy(desc(calificacion.updatedAt));
   }
 
@@ -265,7 +265,7 @@ export class EvaluacionRepository {
   }
 
   // rangos validos de puntaje por sub-criterio (min del basico, max del avanzado)
-  async findRangosPuntajeByConcurso(concursoId: number) {
+  async findRangosPuntajeByConvocatoria(convocatoriaId: number) {
     return this.db
       .select({
         subCriterioId: subCriterio.id,
@@ -278,17 +278,17 @@ export class EvaluacionRepository {
       .innerJoin(subCriterio, eq(nivelEvaluacion.subCriterioId, subCriterio.id))
       .innerJoin(criterio, eq(subCriterio.criterioId, criterio.id))
       .innerJoin(rubrica, eq(criterio.rubricaId, rubrica.id))
-      .where(eq(rubrica.concursoId, concursoId));
+      .where(eq(rubrica.convocatoriaId, convocatoriaId));
   }
 
-  // contar sub-criterios de la rubrica de un concurso
-  async countSubCriteriosByConcurso(concursoId: number): Promise<number> {
+  // contar sub-criterios de la rubrica de una convocatoria
+  async countSubCriteriosByConvocatoria(convocatoriaId: number): Promise<number> {
     const result = await this.db
       .select({ count: sql<number>`count(*)` })
       .from(subCriterio)
       .innerJoin(criterio, eq(subCriterio.criterioId, criterio.id))
       .innerJoin(rubrica, eq(criterio.rubricaId, rubrica.id))
-      .where(eq(rubrica.concursoId, concursoId));
+      .where(eq(rubrica.convocatoriaId, convocatoriaId));
     return Number(result[0].count);
   }
 

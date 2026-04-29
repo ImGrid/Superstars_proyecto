@@ -11,16 +11,16 @@ type SchemaDefinitionJsonb = { secciones: Array<Record<string, unknown>> };
 export class FormularioRepository {
   constructor(@Inject(DRIZZLE) private readonly db: DrizzleDB) {}
 
-  async findByConcursoId(concursoId: number) {
+  async findByConvocatoriaId(convocatoriaId: number) {
     const rows = await this.db
       .select()
       .from(formularioDinamico)
-      .where(eq(formularioDinamico.concursoId, concursoId));
+      .where(eq(formularioDinamico.convocatoriaId, convocatoriaId));
     return rows[0] ?? null;
   }
 
   async create(data: {
-    concursoId: number;
+    convocatoriaId: number;
     nombre: string;
     descripcion?: string;
     schemaDefinition: SchemaDefinitionJsonb;
@@ -33,7 +33,7 @@ export class FormularioRepository {
   }
 
   async update(
-    concursoId: number,
+    convocatoriaId: number,
     data: Partial<{ nombre: string; descripcion: string; schemaDefinition: SchemaDefinitionJsonb }>,
     expectedVersion: number,
   ) {
@@ -42,17 +42,17 @@ export class FormularioRepository {
       .update(formularioDinamico)
       .set({ ...data, version: sql`version + 1` } as any)
       .where(and(
-        eq(formularioDinamico.concursoId, concursoId),
+        eq(formularioDinamico.convocatoriaId, convocatoriaId),
         eq(formularioDinamico.version, expectedVersion),
       ))
       .returning();
     return updated ?? null;
   }
 
-  async delete(concursoId: number): Promise<boolean> {
+  async delete(convocatoriaId: number): Promise<boolean> {
     const result = await this.db
       .delete(formularioDinamico)
-      .where(eq(formularioDinamico.concursoId, concursoId))
+      .where(eq(formularioDinamico.convocatoriaId, convocatoriaId))
       .returning({ id: formularioDinamico.id });
     return result.length > 0;
   }

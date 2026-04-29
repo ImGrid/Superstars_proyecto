@@ -5,30 +5,30 @@ import type {
   FormularioResponse,
 } from "@superstars/shared";
 
-export function getFormulario(concursoId: number) {
+export function getFormulario(convocatoriaId: number) {
   return apiClient
-    .get<FormularioResponse>(`/concursos/${concursoId}/formulario`)
+    .get<FormularioResponse>(`/convocatorias/${convocatoriaId}/formulario`)
     .then((r) => r.data);
 }
 
 export function createFormulario(
-  concursoId: number,
+  convocatoriaId: number,
   dto: CreateFormularioDto,
 ) {
   return apiClient
-    .post<FormularioResponse>(`/concursos/${concursoId}/formulario`, dto)
+    .post<FormularioResponse>(`/convocatorias/${convocatoriaId}/formulario`, dto)
     .then((r) => r.data);
 }
 
 export function updateFormulario(
-  concursoId: number,
+  convocatoriaId: number,
   dto: UpdateFormularioDto,
 ) {
   return apiClient
-    .put<FormularioResponse>(`/concursos/${concursoId}/formulario`, dto)
+    .put<FormularioResponse>(`/convocatorias/${convocatoriaId}/formulario`, dto)
     .then((r) => r.data);
 }
 
-export function deleteFormulario(concursoId: number) {
-  return apiClient.delete(`/concursos/${concursoId}/formulario`);
+export function deleteFormulario(convocatoriaId: number) {
+  return apiClient.delete(`/convocatorias/${convocatoriaId}/formulario`);
 }

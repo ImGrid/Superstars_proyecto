@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {
-  EstadoConcurso,
+  EstadoConvocatoria,
   EstadoPostulacion,
   RolUsuario,
 } from '@superstars/shared';
@@ -21,52 +21,52 @@ export class DashboardService {
   async getAdminStats(): Promise<AdminDashboardStats> {
     // queries en paralelo (todas son agregaciones independientes)
     const [
-      concursoStats,
+      convocatoriaStats,
       globalCounts,
       usuarioStats,
-      concursosResumen,
+      convocatoriasResumen,
       alertas,
     ] = await Promise.all([
-      this.repo.getAdminConcursoStats(),
+      this.repo.getAdminConvocatoriaStats(),
       this.repo.getAdminGlobalCounts(),
       this.repo.getAdminUsuarioStats(),
-      this.repo.getAdminConcursosActivosResumen(),
+      this.repo.getAdminConvocatoriasActivasResumen(),
       this.repo.getAdminAlertas(),
     ]);
 
-    // total de concursos en estados activos (publicado + cerrado + en_evaluacion + resultados_listos)
-    const totalConcursosActivos =
-      concursoStats.publicado +
-      concursoStats.cerrado +
-      concursoStats.en_evaluacion +
-      concursoStats.resultados_listos;
+    // total de convocatorias en estados activos (publicado + cerrado + en_evaluacion + resultados_listos)
+    const totalConvocatoriasActivas =
+      convocatoriaStats.publicado +
+      convocatoriaStats.cerrado +
+      convocatoriaStats.en_evaluacion +
+      convocatoriaStats.resultados_listos;
 
     return {
-      totalConcursosActivos,
+      totalConvocatoriasActivas,
       totalEmpresas: globalCounts.totalEmpresas,
       totalPostulacionesNoBorrador: globalCounts.totalPostulacionesNoBorrador,
       totalGanadoresHistoricos: globalCounts.totalGanadoresHistoricos,
 
-      concursosPorEstado: {
-        [EstadoConcurso.BORRADOR]: concursoStats.borrador,
-        [EstadoConcurso.PUBLICADO]: concursoStats.publicado,
-        [EstadoConcurso.CERRADO]: concursoStats.cerrado,
-        [EstadoConcurso.EN_EVALUACION]: concursoStats.en_evaluacion,
-        [EstadoConcurso.RESULTADOS_LISTOS]: concursoStats.resultados_listos,
-        [EstadoConcurso.FINALIZADO]: concursoStats.finalizado,
+      convocatoriasPorEstado: {
+        [EstadoConvocatoria.BORRADOR]: convocatoriaStats.borrador,
+        [EstadoConvocatoria.PUBLICADO]: convocatoriaStats.publicado,
+        [EstadoConvocatoria.CERRADO]: convocatoriaStats.cerrado,
+        [EstadoConvocatoria.EN_EVALUACION]: convocatoriaStats.en_evaluacion,
+        [EstadoConvocatoria.RESULTADOS_LISTOS]: convocatoriaStats.resultados_listos,
+        [EstadoConvocatoria.FINALIZADO]: convocatoriaStats.finalizado,
       },
 
       usuariosActivosPorRol: {
         [RolUsuario.ADMINISTRADOR]: usuarioStats.administrador,
-        [RolUsuario.RESPONSABLE_CONCURSO]: usuarioStats.responsable_concurso,
+        [RolUsuario.RESPONSABLE_CONVOCATORIA]: usuarioStats.responsable_convocatoria,
         [RolUsuario.EVALUADOR]: usuarioStats.evaluador,
         [RolUsuario.PROPONENTE]: usuarioStats.proponente,
       },
 
-      concursosActivosResumen: concursosResumen.map((c) => ({
+      convocatoriasActivasResumen: convocatoriasResumen.map((c) => ({
         id: c.id,
         nombre: c.nombre,
-        estado: c.estado as EstadoConcurso,
+        estado: c.estado as EstadoConvocatoria,
         totalPostulaciones: c.totalPostulaciones,
         diasParaCerrar: c.diasParaCerrar,
       })),
@@ -82,13 +82,13 @@ export class DashboardService {
       kpis,
       postPendientes,
       califPendientes,
-      concursosResumen,
+      convocatoriasResumen,
       distribucionRows,
     ] = await Promise.all([
       this.repo.getResponsableKpis(usuarioId),
       this.repo.getResponsablePostulacionesPendientes(usuarioId),
       this.repo.getResponsableCalificacionesPendientes(usuarioId),
-      this.repo.getResponsableConcursosResumen(usuarioId),
+      this.repo.getResponsableConvocatoriasResumen(usuarioId),
       this.repo.getResponsableDistribucionEstados(usuarioId),
     ]);
 
@@ -99,17 +99,17 @@ export class DashboardService {
     }
 
     return {
-      totalMisConcursos: kpis.totalMisConcursos,
-      misConcursosActivos: kpis.misConcursosActivos,
+      totalMisConvocatorias: kpis.totalMisConvocatorias,
+      misConvocatoriasActivas: kpis.misConvocatoriasActivas,
       postulacionesPorRevisar: kpis.postulacionesPorRevisar,
       calificacionesPorAprobar: kpis.calificacionesPorAprobar,
-      concursosProximosACerrar: kpis.concursosProximosACerrar,
+      convocatoriasProximasACerrar: kpis.convocatoriasProximasACerrar,
 
       postulacionesPendientesLista: postPendientes.map((p) => ({
         postulacionId: p.postulacionId,
         empresaNombre: p.empresaNombre,
-        concursoId: p.concursoId,
-        concursoNombre: p.concursoNombre,
+        convocatoriaId: p.convocatoriaId,
+        convocatoriaNombre: p.convocatoriaNombre,
         // fechaEnvio del schema es nullable; el filtro estado=enviado garantiza que no sea null
         fechaEnvio: p.fechaEnvio ?? '',
       })),
@@ -118,17 +118,17 @@ export class DashboardService {
         calificacionId: c.calificacionId,
         postulacionId: c.postulacionId,
         empresaNombre: c.empresaNombre,
-        concursoId: c.concursoId,
-        concursoNombre: c.concursoNombre,
+        convocatoriaId: c.convocatoriaId,
+        convocatoriaNombre: c.convocatoriaNombre,
         evaluadorNombre: c.evaluadorNombre,
         puntajeTotal: c.puntajeTotal,
         fechaCompletada: c.fechaCompletada,
       })),
 
-      misConcursosResumen: concursosResumen.map((c) => ({
+      misConvocatoriasResumen: convocatoriasResumen.map((c) => ({
         id: c.id,
         nombre: c.nombre,
-        estado: c.estado as EstadoConcurso,
+        estado: c.estado as EstadoConvocatoria,
         totalPostulaciones: c.totalPostulaciones,
         postulacionesEnviadas: c.postulacionesEnviadas,
         postulacionesAprobadas: c.postulacionesAprobadas,
@@ -155,11 +155,11 @@ export class DashboardService {
       this.repo.getEvaluadorKpis(evaluadorId),
       this.repo.getEvaluadorPostulacionesPendientes(evaluadorId),
       this.repo.getEvaluadorCalificacionesDevueltas(evaluadorId),
-      this.repo.getEvaluadorProgresoPorConcurso(evaluadorId),
+      this.repo.getEvaluadorProgresoPorConvocatoria(evaluadorId),
     ]);
 
     return {
-      concursosAsignados: kpis.concursosAsignados,
+      convocatoriasAsignadas: kpis.convocatoriasAsignadas,
       postulacionesPorCalificar: kpis.postulacionesPorCalificar,
       calificacionesEnProgreso: kpis.calificacionesEnProgreso,
       calificacionesDevueltas: kpis.calificacionesDevueltas,
@@ -167,8 +167,8 @@ export class DashboardService {
 
       postulacionesPorCalificarLista: pendientes.map((p) => ({
         postulacionId: p.postulacionId,
-        concursoId: p.concursoId,
-        concursoNombre: p.concursoNombre,
+        convocatoriaId: p.convocatoriaId,
+        convocatoriaNombre: p.convocatoriaNombre,
         empresaNombre: p.empresaNombre,
         // Drizzle infiere el enum como string literal union; lo casteamos al enum TS de shared
         estadoCalificacion: p.estadoCalificacion as EstadoCalificacion | null,
@@ -177,15 +177,15 @@ export class DashboardService {
       calificacionesDevueltasLista: devueltas.map((d) => ({
         calificacionId: d.calificacionId,
         postulacionId: d.postulacionId,
-        concursoId: d.concursoId,
-        concursoNombre: d.concursoNombre,
+        convocatoriaId: d.convocatoriaId,
+        convocatoriaNombre: d.convocatoriaNombre,
         empresaNombre: d.empresaNombre,
         comentarioResponsable: d.comentarioResponsable,
       })),
 
-      progresoPorConcurso: progreso.map((p) => ({
-        concursoId: p.concursoId,
-        concursoNombre: p.concursoNombre,
+      progresoPorConvocatoria: progreso.map((p) => ({
+        convocatoriaId: p.convocatoriaId,
+        convocatoriaNombre: p.convocatoriaNombre,
         totalAsignadas: p.totalAsignadas,
         pendientes: p.pendientes,
         enProgreso: p.enProgreso,

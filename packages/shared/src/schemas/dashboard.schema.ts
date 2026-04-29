@@ -1,13 +1,13 @@
 // Tipos de respuesta del dashboard por rol (sin Zod — son responses, no DTOs de input)
-import { EstadoConcurso, EstadoPostulacion, EstadoCalificacion, RolUsuario } from '../enums';
+import { EstadoConvocatoria, EstadoPostulacion, EstadoCalificacion, RolUsuario } from '../enums';
 
 // ====== ADMIN ======
 
-// Resumen de un concurso para el dashboard del admin
-export interface AdminConcursoResumenItem {
+// Resumen de una convocatoria para el dashboard del admin
+export interface AdminConvocatoriaResumenItem {
   id: number;
   nombre: string;
-  estado: EstadoConcurso;
+  estado: EstadoConvocatoria;
   totalPostulaciones: number;
   diasParaCerrar: number | null;
 }
@@ -15,22 +15,22 @@ export interface AdminConcursoResumenItem {
 // Respuesta del endpoint GET /api/dashboard/admin
 export interface AdminDashboardStats {
   // KPIs principales
-  totalConcursosActivos: number;
+  totalConvocatoriasActivas: number;
   totalEmpresas: number;
   totalPostulacionesNoBorrador: number;
   totalGanadoresHistoricos: number;
 
   // Distribuciones para graficos
-  concursosPorEstado: Record<EstadoConcurso, number>;
+  convocatoriasPorEstado: Record<EstadoConvocatoria, number>;
   usuariosActivosPorRol: Record<RolUsuario, number>;
 
   // Resumen accionable
-  concursosActivosResumen: AdminConcursoResumenItem[];
+  convocatoriasActivasResumen: AdminConvocatoriaResumenItem[];
 
   // Alertas operativas
   alertas: {
-    concursosCerradosSinEvaluacion: number;
-    concursosSinResponsable: number;
+    convocatoriasCerradasSinEvaluacion: number;
+    convocatoriasSinResponsable: number;
   };
 }
 
@@ -39,8 +39,8 @@ export interface AdminDashboardStats {
 export interface ResponsablePostulacionPendiente {
   postulacionId: number;
   empresaNombre: string;
-  concursoId: number;
-  concursoNombre: string;
+  convocatoriaId: number;
+  convocatoriaNombre: string;
   fechaEnvio: string;
 }
 
@@ -48,17 +48,17 @@ export interface ResponsableCalificacionPendiente {
   calificacionId: number;
   postulacionId: number;
   empresaNombre: string;
-  concursoId: number;
-  concursoNombre: string;
+  convocatoriaId: number;
+  convocatoriaNombre: string;
   evaluadorNombre: string;
   puntajeTotal: string | null;
   fechaCompletada: string;
 }
 
-export interface ResponsableConcursoResumenItem {
+export interface ResponsableConvocatoriaResumenItem {
   id: number;
   nombre: string;
-  estado: EstadoConcurso;
+  estado: EstadoConvocatoria;
   totalPostulaciones: number;
   postulacionesEnviadas: number;
   postulacionesAprobadas: number;
@@ -70,18 +70,18 @@ export interface ResponsableConcursoResumenItem {
 
 export interface ResponsableDashboardStats {
   // KPIs
-  totalMisConcursos: number;
-  misConcursosActivos: number;
+  totalMisConvocatorias: number;
+  misConvocatoriasActivas: number;
   postulacionesPorRevisar: number;
   calificacionesPorAprobar: number;
-  concursosProximosACerrar: number;
+  convocatoriasProximasACerrar: number;
 
   // Listas accionables
   postulacionesPendientesLista: ResponsablePostulacionPendiente[];
   calificacionesPendientesLista: ResponsableCalificacionPendiente[];
 
-  // Resumen de concursos
-  misConcursosResumen: ResponsableConcursoResumenItem[];
+  // Resumen de convocatorias
+  misConvocatoriasResumen: ResponsableConvocatoriaResumenItem[];
 
   // Distribuciones para graficos
   distribucionEstadosPostulaciones: Record<EstadoPostulacion, number>;
@@ -91,8 +91,8 @@ export interface ResponsableDashboardStats {
 
 export interface EvaluadorPostulacionPendiente {
   postulacionId: number;
-  concursoId: number;
-  concursoNombre: string;
+  convocatoriaId: number;
+  convocatoriaNombre: string;
   empresaNombre: string;
   estadoCalificacion: EstadoCalificacion | null;
 }
@@ -100,15 +100,15 @@ export interface EvaluadorPostulacionPendiente {
 export interface EvaluadorCalificacionDevuelta {
   calificacionId: number;
   postulacionId: number;
-  concursoId: number;
-  concursoNombre: string;
+  convocatoriaId: number;
+  convocatoriaNombre: string;
   empresaNombre: string;
   comentarioResponsable: string | null;
 }
 
-export interface EvaluadorConcursoProgreso {
-  concursoId: number;
-  concursoNombre: string;
+export interface EvaluadorConvocatoriaProgreso {
+  convocatoriaId: number;
+  convocatoriaNombre: string;
   totalAsignadas: number;
   pendientes: number;
   enProgreso: number;
@@ -119,7 +119,7 @@ export interface EvaluadorConcursoProgreso {
 
 export interface EvaluadorDashboardStats {
   // KPIs
-  concursosAsignados: number;
+  convocatoriasAsignadas: number;
   postulacionesPorCalificar: number;
   calificacionesEnProgreso: number;
   calificacionesDevueltas: number;
@@ -129,6 +129,6 @@ export interface EvaluadorDashboardStats {
   postulacionesPorCalificarLista: EvaluadorPostulacionPendiente[];
   calificacionesDevueltasLista: EvaluadorCalificacionDevuelta[];
 
-  // Para grafico de progreso por concurso
-  progresoPorConcurso: EvaluadorConcursoProgreso[];
+  // Para grafico de progreso por convocatoria
+  progresoPorConvocatoria: EvaluadorConvocatoriaProgreso[];
 }

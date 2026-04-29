@@ -18,7 +18,7 @@ import { EstadoPostulacion } from '../enums';
 // GET /postulaciones/:id, PUT /draft, POST /enviar, POST /observar, POST /rechazar
 export interface PostulacionResponse {
   id: number;
-  concursoId: number;
+  convocatoriaId: number;
   empresaId: number;
   estado: EstadoPostulacion;
   responseData: Record<string, unknown>;
@@ -33,10 +33,10 @@ export interface PostulacionResponse {
   empresaRazonSocial: string;
 }
 
-// GET /concursos/:concursoId/postulaciones (lista sin responseData)
+// GET /convocatorias/:convocatoriaId/postulaciones (lista sin responseData)
 export interface PostulacionListItem {
   id: number;
-  concursoId: number;
+  convocatoriaId: number;
   empresaId: number;
   estado: EstadoPostulacion;
   porcentajeCompletado: string;
@@ -49,25 +49,25 @@ export interface PostulacionListItem {
   empresaRazonSocial: string;
   // conteo de calificaciones en estado 'completado' pendientes de revision
   calificacionesPendientes: number;
-  // campos extra del JOIN con concurso (solo en /mis-postulaciones)
-  concursoNombre?: string;
-  concursoEstado?: string;
+  // campos extra del JOIN con convocatoria (solo en /mis-postulaciones)
+  convocatoriaNombre?: string;
+  convocatoriaEstado?: string;
 }
 
-// GET /postulaciones (cross-concurso, admin/responsable)
+// GET /postulaciones (cross-convocatoria, admin/responsable)
 export const listPostulacionesQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
-  concursoId: z.coerce.number().int().positive().optional(),
+  convocatoriaId: z.coerce.number().int().positive().optional(),
   estado: z.string().optional(),
 });
 
 export type ListPostulacionesQueryDto = z.infer<typeof listPostulacionesQuerySchema>;
 
-// item del listado cross-concurso con nombre de empresa y concurso
+// item del listado cross-convocatoria con nombre de empresa y convocatoria
 export interface PostulacionAdminListItem {
   id: number;
-  concursoId: number;
+  convocatoriaId: number;
   empresaId: number;
   estado: EstadoPostulacion;
   porcentajeCompletado: string;
@@ -78,7 +78,7 @@ export interface PostulacionAdminListItem {
   createdAt: string;
   updatedAt: string;
   empresaRazonSocial: string;
-  concursoNombre: string;
+  convocatoriaNombre: string;
   calificacionesPendientes: number;
 }
 

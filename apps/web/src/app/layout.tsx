@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     template: "%s | SUPERIMPACT360",
   },
   description:
-    "Plataforma de competencias empresariales en Bolivia. Postula tu empresa y compite por premios.",
+    "Plataforma de competencias empresariales en Bolivia. Postula tu empresa y compite por un monto.",
 };
 
 export default function RootLayout({

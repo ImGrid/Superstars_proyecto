@@ -12,17 +12,17 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
 import { formatDate, formatMoney } from "@/lib/format";
-import type { PublicConcursoResponse } from "@superstars/shared";
+import type { PublicConvocatoriaResponse } from "@superstars/shared";
 
 export default function ResultadosPage() {
-  // traer concursos anteriores (cerrado, en_evaluacion, resultados_listos, finalizado)
+  // traer convocatorias anteriores (cerrado, en_evaluacion, resultados_listos, finalizado)
   const { data, isLoading } = useQuery(
-    publicQueries.concursos({ page: 1, limit: 50, tipo: "anteriores" }),
+    publicQueries.convocatorias({ page: 1, limit: 50, tipo: "anteriores" }),
   );
 
   // filtrar solo los que tienen resultados publicados
-  const concursosConResultados = (data?.data ?? []).filter(
-    (c: PublicConcursoResponse) => c.fechaPublicacionResultados,
+  const convocatoriasConResultados = (data?.data ?? []).filter(
+    (c: PublicConvocatoriaResponse) => c.fechaPublicacionResultados,
   );
 
   return (
@@ -48,15 +48,15 @@ export default function ResultadosPage() {
                 <Skeleton key={i} className="h-64 w-full rounded-lg" />
               ))}
             </div>
-          ) : concursosConResultados.length === 0 ? (
+          ) : convocatoriasConResultados.length === 0 ? (
             <EmptyState
               icon="ph:trophy-duotone"
               title="Sin resultados publicados"
-              description="Aun no hay resultados publicados. Cuando se finalice un concurso, los ganadores se mostraran aqui."
+              description="Aún no hay resultados publicados. Cuando se finalice una convocatoria, los ganadores se mostrarán aquí."
               action={
                 <Button asChild variant="outline">
-                  <Link href="/concursos">
-                    Ver concursos activos
+                  <Link href="/convocatorias">
+                    Ver convocatorias activas
                     <ArrowRight className="ml-2 size-4" />
                   </Link>
                 </Button>
@@ -64,8 +64,8 @@ export default function ResultadosPage() {
             />
           ) : (
             <div className="space-y-10">
-              {concursosConResultados.map((concurso: PublicConcursoResponse) => (
-                <ConcursoResultadosSection key={concurso.id} concurso={concurso} />
+              {convocatoriasConResultados.map((convocatoria: PublicConvocatoriaResponse) => (
+                <ConvocatoriaResultadosSection key={convocatoria.id} convocatoria={convocatoria} />
               ))}
             </div>
           )}
@@ -75,29 +75,29 @@ export default function ResultadosPage() {
   );
 }
 
-// seccion de resultados por concurso
-function ConcursoResultadosSection({ concurso }: { concurso: PublicConcursoResponse }) {
+// seccion de resultados por convocatoria
+function ConvocatoriaResultadosSection({ convocatoria }: { convocatoria: PublicConvocatoriaResponse }) {
   const { data, isLoading } = useQuery({
-    queryKey: ["public", "concursos", "resultados", concurso.id],
-    queryFn: () => getPublicResultados(concurso.id),
+    queryKey: ["public", "convocatorias", "resultados", convocatoria.id],
+    queryFn: () => getPublicResultados(convocatoria.id),
   });
 
   return (
     <div>
-      {/* encabezado del concurso */}
+      {/* encabezado de la convocatoria */}
       <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="font-heading text-2xl font-bold text-primary-800">
-            {concurso.nombre}
+            {convocatoria.nombre}
           </h2>
-          {concurso.fechaPublicacionResultados && (
+          {convocatoria.fechaPublicacionResultados && (
             <p className="mt-1 text-sm text-secondary-500">
-              Resultados publicados el {formatDate(concurso.fechaPublicacionResultados)}
+              Resultados publicados el {formatDate(convocatoria.fechaPublicacionResultados)}
             </p>
           )}
         </div>
         <Badge variant="secondary" className="w-fit text-sm">
-          Premio: {formatMoney(concurso.montoPremio)}
+          Monto: {formatMoney(convocatoria.monto)}
         </Badge>
       </div>
 

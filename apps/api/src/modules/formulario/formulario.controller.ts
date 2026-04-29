@@ -18,55 +18,55 @@ import {
 import type { CreateFormularioDto, UpdateFormularioDto, AuthUser } from '@superstars/shared';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { CheckConcurso } from '../concurso/decorators/check-concurso.decorator';
+import { CheckConvocatoria } from '../convocatoria/decorators/check-convocatoria.decorator';
 import { FormularioService } from './formulario.service';
 
-@Controller('concursos/:concursoId/formulario')
+@Controller('convocatorias/:convocatoriaId/formulario')
 export class FormularioController {
   constructor(private readonly formularioService: FormularioService) {}
 
-  // Obtener el formulario del concurso
+  // Obtener el formulario de la convocatoria
   @Get()
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO, RolUsuario.PROPONENTE, RolUsuario.EVALUADOR)
-  @CheckConcurso('concursoId')
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA, RolUsuario.PROPONENTE, RolUsuario.EVALUADOR)
+  @CheckConvocatoria('convocatoriaId')
   async find(
-    @Param('concursoId', ParseIntPipe) concursoId: number,
+    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
     @CurrentUser() user: AuthUser,
   ) {
-    return this.formularioService.findByConcursoId(concursoId, user);
+    return this.formularioService.findByConvocatoriaId(convocatoriaId, user);
   }
 
-  // Crear formulario para el concurso (1:1)
+  // Crear formulario para la convocatoria (1:1)
   @Post()
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
-  @CheckConcurso('concursoId')
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
+  @CheckConvocatoria('convocatoriaId')
   @HttpCode(HttpStatus.CREATED)
   async create(
-    @Param('concursoId', ParseIntPipe) concursoId: number,
+    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
     @Body() body: CreateFormularioDto,
   ) {
     const dto = createFormularioSchema.parse(body);
-    return this.formularioService.create(concursoId, dto);
+    return this.formularioService.create(convocatoriaId, dto);
   }
 
   // Actualizar formulario (solo en borrador, optimistic locking por version)
   @Put()
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
-  @CheckConcurso('concursoId')
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
+  @CheckConvocatoria('convocatoriaId')
   async update(
-    @Param('concursoId', ParseIntPipe) concursoId: number,
+    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
     @Body() body: UpdateFormularioDto,
   ) {
     const dto = updateFormularioSchema.parse(body);
-    return this.formularioService.update(concursoId, dto);
+    return this.formularioService.update(convocatoriaId, dto);
   }
 
   // Eliminar formulario (solo en borrador)
   @Delete()
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
-  @CheckConcurso('concursoId')
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
+  @CheckConvocatoria('convocatoriaId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async delete(@Param('concursoId', ParseIntPipe) concursoId: number) {
-    await this.formularioService.delete(concursoId);
+  async delete(@Param('convocatoriaId', ParseIntPipe) convocatoriaId: number) {
+    await this.formularioService.delete(convocatoriaId);
   }
 }

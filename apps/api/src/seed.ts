@@ -31,7 +31,7 @@ function loadEnv(): Record<string, string> {
 
 const USERS = [
   { email: 'admin@superstars.com', password: 'Admin12345678', nombre: 'Administrador', rol: 'administrador' },
-  { email: 'responsable@superstars.com', password: 'Resp12345678', nombre: 'Responsable Concurso', rol: 'responsable_concurso' },
+  { email: 'responsable@superstars.com', password: 'Resp12345678', nombre: 'Responsable Convocatoria', rol: 'responsable_convocatoria' },
   { email: 'evaluador@superstars.com', password: 'Eval12345678', nombre: 'Evaluador', rol: 'evaluador' },
   { email: 'proponente@superstars.com', password: 'Prop12345678', nombre: 'Proponente', rol: 'proponente' },
 ];

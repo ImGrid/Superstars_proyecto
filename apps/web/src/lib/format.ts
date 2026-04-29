@@ -44,7 +44,7 @@ export function formatShortDate(date: string | Date): string {
 }
 
 // formato de moneda boliviana: "Bs. 50.000"
-// el backend almacena montoPremio como string (numeric de postgres)
+// el backend almacena monto como string (numeric de postgres)
 export function formatMoney(amount: string | number): string {
   const num = typeof amount === "string" ? parseFloat(amount) : amount;
   if (isNaN(num)) return "Bs. 0";

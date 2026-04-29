@@ -2,9 +2,9 @@ import { queryOptions } from "@tanstack/react-query";
 import type {
   ListUsuariosQueryDto,
   ListEmpresasQueryDto,
-  ListConcursosQueryDto,
+  ListConvocatoriasQueryDto,
   ListPublicacionesQueryDto,
-  ListPublicConcursosQueryDto,
+  ListPublicConvocatoriasQueryDto,
   ListPublicPublicacionesQueryDto,
   ListFaqQueryDto,
 } from "@superstars/shared";
@@ -12,15 +12,15 @@ import { getMe } from "./auth.api";
 import { listUsuarios, getUsuario } from "./usuario.api";
 import { getMyEmpresa, listEmpresas, getEmpresa } from "./empresa.api";
 import {
-  listConcursos,
-  getConcurso,
+  listConvocatorias,
+  getConvocatoria,
   canPublicar,
   canFinalizar,
   listResponsables,
   listEvaluadores,
   getResumenResultados,
-  getRankingConcurso,
-} from "./concurso.api";
+  getRankingConvocatoria,
+} from "./convocatoria.api";
 import { getFormulario } from "./formulario.api";
 import { listDocumentos } from "./documento.api";
 import {
@@ -38,22 +38,22 @@ import {
   listCategoriasAdmin,
 } from "./publicacion.api";
 import {
-  listPublicConcursos,
-  getPublicConcurso,
+  listPublicConvocatorias,
+  getPublicConvocatoria,
   getPublicResultados,
   listPublicPublicaciones,
   getPublicPublicacion,
   listPublicCategorias,
 } from "./public.api";
 import {
-  listMisConcursos,
+  listMisConvocatorias,
   listPostulacionesEvaluables,
   getPostulacionDetalle,
   listCalificaciones,
   getCalificacionDetalle,
   listAsignacionesEvaluador,
 } from "./evaluacion.api";
-import { listPublicFaq, listFaq, listPublicFaqByConcurso } from "./faq.api";
+import { listPublicFaq, listFaq, listPublicFaqByConvocatoria } from "./faq.api";
 import {
   getAdminDashboard,
   getResponsableDashboard,
@@ -112,77 +112,77 @@ export const empresaQueries = {
     }),
 };
 
-// --- Concursos ---
+// --- Convocatorias ---
 
-export const concursoQueries = {
-  all: () => ["concursos"] as const,
+export const convocatoriaQueries = {
+  all: () => ["convocatorias"] as const,
 
-  list: (filters?: Partial<ListConcursosQueryDto>) =>
+  list: (filters?: Partial<ListConvocatoriasQueryDto>) =>
     queryOptions({
-      queryKey: ["concursos", "list", filters ?? {}] as const,
-      queryFn: () => listConcursos(filters),
+      queryKey: ["convocatorias", "list", filters ?? {}] as const,
+      queryFn: () => listConvocatorias(filters),
     }),
 
   detail: (id: number) =>
     queryOptions({
-      queryKey: ["concursos", "detail", id] as const,
-      queryFn: () => getConcurso(id),
+      queryKey: ["convocatorias", "detail", id] as const,
+      queryFn: () => getConvocatoria(id),
     }),
 
   canPublicar: (id: number) =>
     queryOptions({
-      queryKey: ["concursos", "detail", id, "can-publicar"] as const,
+      queryKey: ["convocatorias", "detail", id, "can-publicar"] as const,
       queryFn: () => canPublicar(id),
     }),
 
   canFinalizar: (id: number) =>
     queryOptions({
-      queryKey: ["concursos", "detail", id, "can-finalizar"] as const,
+      queryKey: ["convocatorias", "detail", id, "can-finalizar"] as const,
       queryFn: () => canFinalizar(id),
     }),
 
-  responsables: (concursoId: number) =>
+  responsables: (convocatoriaId: number) =>
     queryOptions({
-      queryKey: ["concursos", "detail", concursoId, "responsables"] as const,
-      queryFn: () => listResponsables(concursoId),
+      queryKey: ["convocatorias", "detail", convocatoriaId, "responsables"] as const,
+      queryFn: () => listResponsables(convocatoriaId),
     }),
 
-  evaluadores: (concursoId: number) =>
+  evaluadores: (convocatoriaId: number) =>
     queryOptions({
-      queryKey: ["concursos", "detail", concursoId, "evaluadores"] as const,
-      queryFn: () => listEvaluadores(concursoId),
+      queryKey: ["convocatorias", "detail", convocatoriaId, "evaluadores"] as const,
+      queryFn: () => listEvaluadores(convocatoriaId),
     }),
 
   resumenResultados: () =>
     queryOptions({
-      queryKey: ["concursos", "resumen-resultados"] as const,
+      queryKey: ["convocatorias", "resumen-resultados"] as const,
       queryFn: getResumenResultados,
     }),
 
   ranking: (id: number) =>
     queryOptions({
-      queryKey: ["concursos", "ranking", id] as const,
-      queryFn: () => getRankingConcurso(id),
+      queryKey: ["convocatorias", "ranking", id] as const,
+      queryFn: () => getRankingConvocatoria(id),
     }),
 };
 
 // --- Formularios ---
 
 export const formularioQueries = {
-  detail: (concursoId: number) =>
+  detail: (convocatoriaId: number) =>
     queryOptions({
-      queryKey: ["concursos", "detail", concursoId, "formulario"] as const,
-      queryFn: () => getFormulario(concursoId),
+      queryKey: ["convocatorias", "detail", convocatoriaId, "formulario"] as const,
+      queryFn: () => getFormulario(convocatoriaId),
     }),
 };
 
 // --- Documentos ---
 
 export const documentoQueries = {
-  list: (concursoId: number) =>
+  list: (convocatoriaId: number) =>
     queryOptions({
-      queryKey: ["concursos", "detail", concursoId, "documentos"] as const,
-      queryFn: () => listDocumentos(concursoId),
+      queryKey: ["convocatorias", "detail", convocatoriaId, "documentos"] as const,
+      queryFn: () => listDocumentos(convocatoriaId),
     }),
 };
 
@@ -191,10 +191,10 @@ export const documentoQueries = {
 export const postulacionQueries = {
   all: () => ["postulaciones"] as const,
 
-  mine: (concursoId: number) =>
+  mine: (convocatoriaId: number) =>
     queryOptions({
-      queryKey: ["postulaciones", "mine", concursoId] as const,
-      queryFn: () => getMyPostulacion(concursoId),
+      queryKey: ["postulaciones", "mine", convocatoriaId] as const,
+      queryFn: () => getMyPostulacion(convocatoriaId),
     }),
 
   myList: () =>
@@ -203,16 +203,16 @@ export const postulacionQueries = {
       queryFn: listMyPostulaciones,
     }),
 
-  list: (concursoId: number, estado?: string) =>
+  list: (convocatoriaId: number, estado?: string) =>
     queryOptions({
-      queryKey: ["postulaciones", "list", concursoId, estado ?? "all"] as const,
-      queryFn: () => listPostulaciones(concursoId, estado),
+      queryKey: ["postulaciones", "list", convocatoriaId, estado ?? "all"] as const,
+      queryFn: () => listPostulaciones(convocatoriaId, estado),
     }),
 
-  detail: (concursoId: number, id: number) =>
+  detail: (convocatoriaId: number, id: number) =>
     queryOptions({
-      queryKey: ["postulaciones", "detail", concursoId, id] as const,
-      queryFn: () => getPostulacion(concursoId, id),
+      queryKey: ["postulaciones", "detail", convocatoriaId, id] as const,
+      queryFn: () => getPostulacion(convocatoriaId, id),
     }),
 
   adminList: (filters: Record<string, unknown>) =>
@@ -225,37 +225,37 @@ export const postulacionQueries = {
 // --- Archivos ---
 
 export const archivoQueries = {
-  list: (concursoId: number, postulacionId: number) =>
+  list: (convocatoriaId: number, postulacionId: number) =>
     queryOptions({
       queryKey: [
         "archivos",
         "list",
-        concursoId,
+        convocatoriaId,
         postulacionId,
       ] as const,
-      queryFn: () => listArchivos(concursoId, postulacionId),
+      queryFn: () => listArchivos(convocatoriaId, postulacionId),
     }),
 };
 
 // --- Rubrica ---
 
 export const rubricaQueries = {
-  detail: (concursoId: number) =>
+  detail: (convocatoriaId: number) =>
     queryOptions({
-      queryKey: ["concursos", "detail", concursoId, "rubrica"] as const,
-      queryFn: () => getRubrica(concursoId),
+      queryKey: ["convocatorias", "detail", convocatoriaId, "rubrica"] as const,
+      queryFn: () => getRubrica(convocatoriaId),
     }),
 
-  validacion: (concursoId: number) =>
+  validacion: (convocatoriaId: number) =>
     queryOptions({
       queryKey: [
-        "concursos",
+        "convocatorias",
         "detail",
-        concursoId,
+        convocatoriaId,
         "rubrica",
         "validacion",
       ] as const,
-      queryFn: () => validarRubrica(concursoId),
+      queryFn: () => validarRubrica(convocatoriaId),
     }),
 };
 
@@ -286,21 +286,21 @@ export const publicacionQueries = {
 // --- Endpoints publicos (sin auth) ---
 
 export const publicQueries = {
-  concursos: (filters?: Partial<ListPublicConcursosQueryDto>) =>
+  convocatorias: (filters?: Partial<ListPublicConvocatoriasQueryDto>) =>
     queryOptions({
-      queryKey: ["public", "concursos", "list", filters ?? {}] as const,
-      queryFn: () => listPublicConcursos(filters),
+      queryKey: ["public", "convocatorias", "list", filters ?? {}] as const,
+      queryFn: () => listPublicConvocatorias(filters),
     }),
 
-  concursoDetail: (id: number) =>
+  convocatoriaDetail: (id: number) =>
     queryOptions({
-      queryKey: ["public", "concursos", "detail", id] as const,
-      queryFn: () => getPublicConcurso(id),
+      queryKey: ["public", "convocatorias", "detail", id] as const,
+      queryFn: () => getPublicConvocatoria(id),
     }),
 
   resultados: (id: number) =>
     queryOptions({
-      queryKey: ["public", "concursos", "resultados", id] as const,
+      queryKey: ["public", "convocatorias", "resultados", id] as const,
       queryFn: () => getPublicResultados(id),
     }),
 
@@ -328,22 +328,22 @@ export const publicQueries = {
 export const evaluacionQueries = {
   all: () => ["evaluaciones"] as const,
 
-  misConcursos: () =>
+  misConvocatorias: () =>
     queryOptions({
-      queryKey: ["evaluaciones", "mis-concursos"] as const,
-      queryFn: listMisConcursos,
+      queryKey: ["evaluaciones", "mis-convocatorias"] as const,
+      queryFn: listMisConvocatorias,
     }),
 
-  postulaciones: (concursoId: number) =>
+  postulaciones: (convocatoriaId: number) =>
     queryOptions({
-      queryKey: ["evaluaciones", "postulaciones", concursoId] as const,
-      queryFn: () => listPostulacionesEvaluables(concursoId),
+      queryKey: ["evaluaciones", "postulaciones", convocatoriaId] as const,
+      queryFn: () => listPostulacionesEvaluables(convocatoriaId),
     }),
 
-  detalle: (concursoId: number, postulacionId: number) =>
+  detalle: (convocatoriaId: number, postulacionId: number) =>
     queryOptions({
-      queryKey: ["evaluaciones", "detalle", concursoId, postulacionId] as const,
-      queryFn: () => getPostulacionDetalle(concursoId, postulacionId),
+      queryKey: ["evaluaciones", "detalle", convocatoriaId, postulacionId] as const,
+      queryFn: () => getPostulacionDetalle(convocatoriaId, postulacionId),
     }),
 };
 
@@ -352,26 +352,26 @@ export const evaluacionQueries = {
 export const calificacionQueries = {
   all: () => ["calificaciones"] as const,
 
-  list: (concursoId: number) =>
+  list: (convocatoriaId: number) =>
     queryOptions({
-      queryKey: ["calificaciones", "list", concursoId] as const,
-      queryFn: () => listCalificaciones(concursoId),
+      queryKey: ["calificaciones", "list", convocatoriaId] as const,
+      queryFn: () => listCalificaciones(convocatoriaId),
     }),
 
-  detalle: (concursoId: number, calificacionId: number) =>
+  detalle: (convocatoriaId: number, calificacionId: number) =>
     queryOptions({
-      queryKey: ["calificaciones", "detalle", concursoId, calificacionId] as const,
-      queryFn: () => getCalificacionDetalle(concursoId, calificacionId),
+      queryKey: ["calificaciones", "detalle", convocatoriaId, calificacionId] as const,
+      queryFn: () => getCalificacionDetalle(convocatoriaId, calificacionId),
     }),
 };
 
 // --- Asignaciones evaluador-postulacion ---
 
 export const asignacionQueries = {
-  list: (concursoId: number, postulacionId: number) =>
+  list: (convocatoriaId: number, postulacionId: number) =>
     queryOptions({
-      queryKey: ["asignaciones", "list", concursoId, postulacionId] as const,
-      queryFn: () => listAsignacionesEvaluador(concursoId, postulacionId),
+      queryKey: ["asignaciones", "list", convocatoriaId, postulacionId] as const,
+      queryFn: () => listAsignacionesEvaluador(convocatoriaId, postulacionId),
     }),
 };
 
@@ -392,10 +392,10 @@ export const faqQueries = {
       queryFn: listPublicFaq,
     }),
 
-  byConcurso: (concursoId: number) =>
+  byConvocatoria: (convocatoriaId: number) =>
     queryOptions({
-      queryKey: ["public", "faq", "concurso", concursoId] as const,
-      queryFn: () => listPublicFaqByConcurso(concursoId),
+      queryKey: ["public", "faq", "convocatoria", convocatoriaId] as const,
+      queryFn: () => listPublicFaqByConvocatoria(convocatoriaId),
     }),
 };
 

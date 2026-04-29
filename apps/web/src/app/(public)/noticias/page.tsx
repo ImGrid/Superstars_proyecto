@@ -91,7 +91,7 @@ export default function NoticiasPage() {
             <EmptyState
               icon="ph:newspaper-duotone"
               title="No hay publicaciones disponibles"
-              description="Aun no se han publicado noticias. Vuelve pronto para ver las novedades."
+              description="Aún no se han publicado noticias. Vuelve pronto para ver las novedades."
             />
           )}
 

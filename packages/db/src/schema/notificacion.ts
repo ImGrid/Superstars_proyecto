@@ -2,7 +2,7 @@
 import { pgTable, pgEnum, integer, text, boolean, timestamp, foreignKey, check, index } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 import { usuario } from "./auth"
-import { concurso } from "./concurso"
+import { convocatoria } from "./convocatoria"
 import { postulacion } from "./empresa"
 
 export const tipoNotificacion = pgEnum("tipo_notificacion", ['observacion_propuesta', 'rechazo_propuesta', 'asignacion_evaluador', 'devolucion_calificacion', 'propuesta_calificada', 'propuesta_ganadora', 'propuesta_no_seleccionada', 'general'])
@@ -11,7 +11,7 @@ export const notificacionEmail = pgTable("notificacion_email", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity({ name: "notificacion_email_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
 	destinatarioId: integer("destinatario_id").notNull(),
 	remitenteId: integer("remitente_id"),
-	concursoId: integer("concurso_id"),
+	convocatoriaId: integer("convocatoria_id"),
 	postulacionId: integer("postulacion_id"),
 	tipo: tipoNotificacion().notNull(),
 	asunto: text().notNull(),
@@ -34,9 +34,9 @@ export const notificacionEmail = pgTable("notificacion_email", {
 			name: "fk_notificacion_remitente"
 		}).onDelete("set null"),
 	foreignKey({
-			columns: [table.concursoId],
-			foreignColumns: [concurso.id],
-			name: "fk_notificacion_concurso"
+			columns: [table.convocatoriaId],
+			foreignColumns: [convocatoria.id],
+			name: "fk_notificacion_convocatoria"
 		}).onDelete("set null"),
 	foreignKey({
 			columns: [table.postulacionId],

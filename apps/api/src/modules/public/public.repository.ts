@@ -2,34 +2,34 @@ import { Injectable, Inject } from '@nestjs/common';
 import { eq, and, or, ilike, count, desc, isNull, sql, inArray } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/drizzle.provider';
 import type { DrizzleDB } from '../../database/drizzle.provider';
-import { concurso, formularioDinamico, documentoConcurso, publicacion, categoriaPublicacion, postulacion, empresa } from '@superstars/db';
-import { ESTADO_CONCURSO_PUBLICO, EstadoConcurso } from '@superstars/shared';
+import { convocatoria, formularioDinamico, documentoConvocatoria, publicacion, categoriaPublicacion, postulacion, empresa } from '@superstars/db';
+import { ESTADO_CONVOCATORIA_PUBLICO, EstadoConvocatoria } from '@superstars/shared';
 import type { EstadoPublicacion } from '@superstars/shared';
 
 // Columnas seguras para el listado publico (excluye createdBy, topNSistema)
-const publicConcursoColumns = {
-  id: concurso.id,
-  nombre: concurso.nombre,
-  descripcion: concurso.descripcion,
-  bases: concurso.bases,
-  fechaInicioPostulacion: concurso.fechaInicioPostulacion,
-  fechaCierrePostulacion: concurso.fechaCierrePostulacion,
-  fechaAnuncioGanadores: concurso.fechaAnuncioGanadores,
-  fechaCierreEfectiva: concurso.fechaCierreEfectiva,
-  montoPremio: concurso.montoPremio,
-  numeroGanadores: concurso.numeroGanadores,
-  departamentos: concurso.departamentos,
-  estado: concurso.estado,
-  fechaPublicacionResultados: concurso.fechaPublicacionResultados,
-  createdAt: concurso.createdAt,
-  updatedAt: concurso.updatedAt,
+const publicConvocatoriaColumns = {
+  id: convocatoria.id,
+  nombre: convocatoria.nombre,
+  descripcion: convocatoria.descripcion,
+  bases: convocatoria.bases,
+  fechaInicioPostulacion: convocatoria.fechaInicioPostulacion,
+  fechaCierrePostulacion: convocatoria.fechaCierrePostulacion,
+  fechaAnuncioGanadores: convocatoria.fechaAnuncioGanadores,
+  fechaCierreEfectiva: convocatoria.fechaCierreEfectiva,
+  monto: convocatoria.monto,
+  numeroGanadores: convocatoria.numeroGanadores,
+  departamentos: convocatoria.departamentos,
+  estado: convocatoria.estado,
+  fechaPublicacionResultados: convocatoria.fechaPublicacionResultados,
+  createdAt: convocatoria.createdAt,
+  updatedAt: convocatoria.updatedAt,
 } as const;
 
-export interface FindPublicConcursosParams {
+export interface FindPublicConvocatoriasParams {
   page: number;
   limit: number;
   search?: string;
-  tipo: 'activos' | 'anteriores';
+  tipo: 'activas' | 'anteriores';
 }
 
 export interface FindPublicPublicacionesParams {
@@ -43,29 +43,29 @@ export interface FindPublicPublicacionesParams {
 export class PublicRepository {
   constructor(@Inject(DRIZZLE) private readonly db: DrizzleDB) {}
 
-  async findPublicConcursos(params: FindPublicConcursosParams) {
+  async findPublicConvocatorias(params: FindPublicConvocatoriasParams) {
     const { page, limit, search, tipo } = params;
     const offset = (page - 1) * limit;
 
-    // activos = publicado, anteriores = cerrado/en_evaluacion/finalizado
+    // activas = publicado, anteriores = cerrado/en_evaluacion/finalizado
     const estadosAnteriores = [
-      EstadoConcurso.CERRADO as 'cerrado',
-      EstadoConcurso.EN_EVALUACION as 'en_evaluacion',
-      EstadoConcurso.RESULTADOS_LISTOS as 'resultados_listos',
-      EstadoConcurso.FINALIZADO as 'finalizado',
+      EstadoConvocatoria.CERRADO as 'cerrado',
+      EstadoConvocatoria.EN_EVALUACION as 'en_evaluacion',
+      EstadoConvocatoria.RESULTADOS_LISTOS as 'resultados_listos',
+      EstadoConvocatoria.FINALIZADO as 'finalizado',
     ];
 
     const conditions = [
-      tipo === 'activos'
-        ? eq(concurso.estado, ESTADO_CONCURSO_PUBLICO)
-        : inArray(concurso.estado, estadosAnteriores),
+      tipo === 'activas'
+        ? eq(convocatoria.estado, ESTADO_CONVOCATORIA_PUBLICO)
+        : inArray(convocatoria.estado, estadosAnteriores),
     ];
 
     if (search) {
       conditions.push(
         or(
-          ilike(concurso.nombre, `%${search}%`),
-          ilike(concurso.descripcion, `%${search}%`),
+          ilike(convocatoria.nombre, `%${search}%`),
+          ilike(convocatoria.descripcion, `%${search}%`),
         )!,
       );
     }
@@ -73,24 +73,24 @@ export class PublicRepository {
     const where = and(...conditions);
 
     const [data, totalResult] = await Promise.all([
-      this.db.select(publicConcursoColumns).from(concurso).where(where)
-        .orderBy(desc(concurso.createdAt))
+      this.db.select(publicConvocatoriaColumns).from(convocatoria).where(where)
+        .orderBy(desc(convocatoria.createdAt))
         .limit(limit).offset(offset),
-      this.db.select({ count: count() }).from(concurso).where(where),
+      this.db.select({ count: count() }).from(convocatoria).where(where),
     ]);
 
     return { data, total: Number(totalResult[0].count) };
   }
 
-  async findPublicConcursoById(id: number) {
+  async findPublicConvocatoriaById(id: number) {
     const rows = await this.db
-      .select(publicConcursoColumns)
-      .from(concurso)
-      .where(eq(concurso.id, id));
+      .select(publicConvocatoriaColumns)
+      .from(convocatoria)
+      .where(eq(convocatoria.id, id));
     return rows[0] ?? null;
   }
 
-  async findFormularioByConcursoId(concursoId: number) {
+  async findFormularioByConvocatoriaId(convocatoriaId: number) {
     const rows = await this.db
       .select({
         id: formularioDinamico.id,
@@ -100,24 +100,24 @@ export class PublicRepository {
         version: formularioDinamico.version,
       })
       .from(formularioDinamico)
-      .where(eq(formularioDinamico.concursoId, concursoId));
+      .where(eq(formularioDinamico.convocatoriaId, convocatoriaId));
     return rows[0] ?? null;
   }
 
-  // Documentos del concurso (solo metadata, sin storageKey)
-  async findDocumentosByConcursoId(concursoId: number) {
+  // Documentos de la convocatoria (solo metadata, sin storageKey)
+  async findDocumentosByConvocatoriaId(convocatoriaId: number) {
     return this.db
       .select({
-        id: documentoConcurso.id,
-        nombre: documentoConcurso.nombre,
-        nombreOriginal: documentoConcurso.nombreOriginal,
-        mimeType: documentoConcurso.mimeType,
-        tamanoBytes: documentoConcurso.tamanoBytes,
-        orden: documentoConcurso.orden,
+        id: documentoConvocatoria.id,
+        nombre: documentoConvocatoria.nombre,
+        nombreOriginal: documentoConvocatoria.nombreOriginal,
+        mimeType: documentoConvocatoria.mimeType,
+        tamanoBytes: documentoConvocatoria.tamanoBytes,
+        orden: documentoConvocatoria.orden,
       })
-      .from(documentoConcurso)
-      .where(eq(documentoConcurso.concursoId, concursoId))
-      .orderBy(documentoConcurso.orden, documentoConcurso.id);
+      .from(documentoConvocatoria)
+      .where(eq(documentoConvocatoria.convocatoriaId, convocatoriaId))
+      .orderBy(documentoConvocatoria.orden, documentoConvocatoria.id);
   }
 
   // --- Publicaciones publicas ---
@@ -209,8 +209,8 @@ export class PublicRepository {
     return this.db.select().from(categoriaPublicacion).orderBy(categoriaPublicacion.nombre);
   }
 
-  // ganadores de un concurso (solo datos publicos)
-  async findGanadores(concursoId: number) {
+  // ganadores de una convocatoria (solo datos publicos)
+  async findGanadores(convocatoriaId: number) {
     return this.db
       .select({
         empresaNombre: empresa.razonSocial,
@@ -219,7 +219,7 @@ export class PublicRepository {
       .from(postulacion)
       .innerJoin(empresa, eq(postulacion.empresaId, empresa.id))
       .where(and(
-        eq(postulacion.concursoId, concursoId),
+        eq(postulacion.convocatoriaId, convocatoriaId),
         eq(postulacion.estado, 'ganador' as any),
       ))
       .orderBy(postulacion.posicionFinal);

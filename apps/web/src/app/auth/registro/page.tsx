@@ -45,7 +45,7 @@ function RegistroForm() {
           Crear Cuenta
         </h1>
         <p className="mt-1 text-sm text-secondary-500">
-          Registra tu empresa para postular a concursos
+          Registra tu empresa para postular a convocatorias
         </p>
       </div>
 

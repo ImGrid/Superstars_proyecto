@@ -94,7 +94,7 @@ export function PostulacionCard({ postulacion }: PostulacionCardProps) {
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="text-base leading-tight line-clamp-2">
-            {postulacion.concursoNombre ?? `Concurso #${postulacion.concursoId}`}
+            {postulacion.convocatoriaNombre ?? `Convocatoria #${postulacion.convocatoriaId}`}
           </CardTitle>
           <StateBadge tipo="postulacion" valor={postulacion.estado} />
         </div>
@@ -149,7 +149,7 @@ export function PostulacionCard({ postulacion }: PostulacionCardProps) {
             variant={action.variant}
             className="w-full gap-2"
             onClick={() =>
-              router.push(`/dashboard/concursos/${postulacion.concursoId}`)
+              router.push(`/dashboard/convocatorias/${postulacion.convocatoriaId}`)
             }
           >
             {action.icon}

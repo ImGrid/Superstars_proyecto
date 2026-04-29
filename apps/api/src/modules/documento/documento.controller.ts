@@ -20,23 +20,23 @@ import { RolUsuario, updateDocumentoSchema } from '@superstars/shared';
 import type { UpdateDocumentoDto, AuthUser } from '@superstars/shared';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { CheckConcurso } from '../concurso/decorators/check-concurso.decorator';
+import { CheckConvocatoria } from '../convocatoria/decorators/check-convocatoria.decorator';
 import { DocumentoService } from './documento.service';
 
-@Controller('concursos/:concursoId/documentos')
+@Controller('convocatorias/:convocatoriaId/documentos')
 export class DocumentoController {
   constructor(private readonly documentoService: DocumentoService) {}
 
   // Subir documento (multipart/form-data con campo "file" + "nombre" + "orden" opcional)
   @Post()
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
-  @CheckConcurso('concursoId')
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
+  @CheckConvocatoria('convocatoriaId')
   @UseInterceptors(FileInterceptor('file', {
     limits: { fileSize: 20 * 1024 * 1024 },
   }))
   @HttpCode(HttpStatus.CREATED)
   async upload(
-    @Param('concursoId', ParseIntPipe) concursoId: number,
+    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
     @Body('nombre') nombre: string,
     @Body('orden') orden: string | undefined,
     @UploadedFile() file: Express.Multer.File,
@@ -53,7 +53,7 @@ export class DocumentoController {
       orden: orden !== undefined ? Number(orden) : undefined,
     };
 
-    return this.documentoService.upload(concursoId, dto, {
+    return this.documentoService.upload(convocatoriaId, dto, {
       originalname: file.originalname,
       mimetype: file.mimetype,
       size: file.size,
@@ -61,27 +61,27 @@ export class DocumentoController {
     });
   }
 
-  // Listar documentos del concurso (service valida acceso por rol)
+  // Listar documentos de la convocatoria (service valida acceso por rol)
   @Get()
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO, RolUsuario.PROPONENTE)
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA, RolUsuario.PROPONENTE)
   async findAll(
-    @Param('concursoId', ParseIntPipe) concursoId: number,
+    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
     @CurrentUser() user: AuthUser,
   ) {
-    return this.documentoService.findAllByConcurso(concursoId, user);
+    return this.documentoService.findAllByConvocatoria(convocatoriaId, user);
   }
 
   // Descargar documento (service valida acceso por rol)
   @Get(':id/download')
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO, RolUsuario.PROPONENTE)
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA, RolUsuario.PROPONENTE)
   async download(
-    @Param('concursoId', ParseIntPipe) concursoId: number,
+    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() user: AuthUser,
     @Res() res: Response,
   ) {
     const { buffer, mimeType, nombreOriginal } = await this.documentoService.download(
-      id, concursoId, user,
+      id, convocatoriaId, user,
     );
 
     res.set({
@@ -94,26 +94,26 @@ export class DocumentoController {
 
   // Actualizar metadatos (nombre, orden) - JSON body
   @Put(':id')
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
-  @CheckConcurso('concursoId')
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
+  @CheckConvocatoria('convocatoriaId')
   async update(
-    @Param('concursoId', ParseIntPipe) concursoId: number,
+    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
     @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateDocumentoDto,
   ) {
     const dto = updateDocumentoSchema.parse(body);
-    return this.documentoService.update(id, concursoId, dto);
+    return this.documentoService.update(id, convocatoriaId, dto);
   }
 
   // Eliminar documento + archivo fisico
   @Delete(':id')
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
-  @CheckConcurso('concursoId')
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
+  @CheckConvocatoria('convocatoriaId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(
-    @Param('concursoId', ParseIntPipe) concursoId: number,
+    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    await this.documentoService.delete(id, concursoId);
+    await this.documentoService.delete(id, convocatoriaId);
   }
 }

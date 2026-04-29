@@ -2,7 +2,7 @@
 import { pgTable, pgEnum, unique, integer, text, boolean, timestamp, foreignKey, index, check } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
-export const rolUsuario = pgEnum("rol_usuario", ['administrador', 'responsable_concurso', 'proponente', 'evaluador'])
+export const rolUsuario = pgEnum("rol_usuario", ['administrador', 'responsable_convocatoria', 'proponente', 'evaluador'])
 
 export const usuario = pgTable("usuario", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity({ name: "usuario_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),

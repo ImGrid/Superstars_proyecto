@@ -43,28 +43,28 @@ export {
 } from './empresa.schema';
 
 export {
-  createConcursoSchema,
-  updateConcursoSchema,
-  updateFechasConcursoSchema,
-  listConcursosQuerySchema,
+  createConvocatoriaSchema,
+  updateConvocatoriaSchema,
+  updateFechasConvocatoriaSchema,
+  listConvocatoriasQuerySchema,
   assignResponsableSchema,
   assignEvaluadorSchema,
   seleccionarGanadoresSchema,
-  type CreateConcursoDto,
-  type UpdateConcursoDto,
-  type UpdateFechasConcursoDto,
-  type ListConcursosQueryDto,
+  type CreateConvocatoriaDto,
+  type UpdateConvocatoriaDto,
+  type UpdateFechasConvocatoriaDto,
+  type ListConvocatoriasQueryDto,
   type AssignResponsableDto,
   type AssignEvaluadorDto,
   type SeleccionarGanadoresDto,
-  type ConcursoResponse,
+  type ConvocatoriaResponse,
   type ResponsableResponse,
-  type EvaluadorConcursoResponse,
+  type EvaluadorConvocatoriaResponse,
   type CanPublicarResponse,
-  type ConcursoResultadosResumenItem,
+  type ConvocatoriaResultadosResumenItem,
   type PostulacionRankingItem,
-  type ConcursoRankingResponse,
-} from './concurso.schema';
+  type ConvocatoriaRankingResponse,
+} from './convocatoria.schema';
 
 export {
   tipoCampoSchema,
@@ -146,7 +146,7 @@ export {
   type DevolverCalificacionDto,
   type AssignEvaluadorPostulacionDto,
   type AsignacionEvaluadorResponse,
-  type EvaluadorConcursoItem,
+  type EvaluadorConvocatoriaItem,
   type PostulacionEvaluableItem,
   type PostulacionDetalleEvaluador,
   type CalificacionListItem,
@@ -159,10 +159,10 @@ export {
 } from './notificacion.schema';
 
 export {
-  listPublicConcursosQuerySchema,
-  type ListPublicConcursosQueryDto,
-  type PublicConcursoResponse,
-  type PublicConcursoDetailResponse,
+  listPublicConvocatoriasQuerySchema,
+  type ListPublicConvocatoriasQueryDto,
+  type PublicConvocatoriaResponse,
+  type PublicConvocatoriaDetailResponse,
   type PublicDocumentoResponse,
   type PublicPublicacionListItem,
   type PublicPublicacionResponse,
@@ -199,14 +199,14 @@ export {
 } from './faq.schema';
 
 export {
-  type AdminConcursoResumenItem,
+  type AdminConvocatoriaResumenItem,
   type AdminDashboardStats,
   type ResponsablePostulacionPendiente,
   type ResponsableCalificacionPendiente,
-  type ResponsableConcursoResumenItem,
+  type ResponsableConvocatoriaResumenItem,
   type ResponsableDashboardStats,
   type EvaluadorPostulacionPendiente,
   type EvaluadorCalificacionDevuelta,
-  type EvaluadorConcursoProgreso,
+  type EvaluadorConvocatoriaProgreso,
   type EvaluadorDashboardStats,
 } from './dashboard.schema';

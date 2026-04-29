@@ -17,7 +17,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/shared/page-header";
 import { useAuth } from "@/hooks/use-auth";
-import { postulacionQueries, empresaQueries, concursoQueries } from "@/lib/api/query-keys";
+import { postulacionQueries, empresaQueries, convocatoriaQueries } from "@/lib/api/query-keys";
 import { AdminDashboard } from "./_components/admin-dashboard";
 import { ResponsableDashboard } from "./_components/responsable-dashboard";
 import { EvaluadorDashboard } from "./_components/evaluador-dashboard";
@@ -43,7 +43,7 @@ export default function DashboardPage() {
     return <AdminDashboard nombre={user.nombre} />;
   }
 
-  if (user.rol === RolUsuario.RESPONSABLE_CONCURSO) {
+  if (user.rol === RolUsuario.RESPONSABLE_CONVOCATORIA) {
     return <ResponsableDashboard nombre={user.nombre} />;
   }
 
@@ -67,13 +67,13 @@ function DashboardProponente({ nombre }: { nombre: string }) {
     ...empresaQueries.me(),
     retry: false,
   });
-  const { data: concursosData, isLoading: loadingConc } = useQuery(
-    concursoQueries.list({ page: 1, limit: 1 }),
+  const { data: convocatoriasData, isLoading: loadingConc } = useQuery(
+    convocatoriaQueries.list({ page: 1, limit: 1 }),
   );
 
   // contadores de postulaciones por estado
   const counts = getPostulacionCounts(postulaciones ?? []);
-  const totalConcursos = concursosData?.total ?? 0;
+  const totalConvocatorias = convocatoriasData?.total ?? 0;
   const hasEmpresa = !!empresa;
 
   return (
@@ -92,7 +92,7 @@ function DashboardProponente({ nombre }: { nombre: string }) {
               Registra tu empresa para poder postularte
             </p>
             <p className="mt-0.5 text-sm text-amber-700">
-              Necesitas completar los datos de tu empresa antes de postularte a un concurso.
+              Necesitas completar los datos de tu empresa antes de postularte a una convocatoria.
             </p>
             <Button
               variant="outline"
@@ -109,20 +109,20 @@ function DashboardProponente({ nombre }: { nombre: string }) {
 
       {/* cards resumen */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {/* concursos disponibles */}
+        {/* convocatorias disponibles */}
         <SummaryCard
-          title="Concursos disponibles"
-          value={loadingConc ? null : String(totalConcursos)}
-          description="Concursos abiertos para postularte"
+          title="Convocatorias disponibles"
+          value={loadingConc ? null : String(totalConvocatorias)}
+          description="Convocatorias abiertas para postularte"
           icon={<Icon icon="ph:trophy-duotone" className="size-5 text-primary-600" />}
           action={
             <Button
               variant="ghost"
               size="sm"
               className="gap-1"
-              onClick={() => router.push("/dashboard/concursos")}
+              onClick={() => router.push("/dashboard/convocatorias")}
             >
-              Ver concursos
+              Ver convocatorias
               <ArrowRight className="size-3" />
             </Button>
           }

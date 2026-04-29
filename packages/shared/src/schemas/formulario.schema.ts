@@ -194,7 +194,7 @@ export const createFormularioSchema = z.object({
   schemaDefinition: schemaDefinitionSchema,
 });
 
-// Actualizar formulario (solo en estado borrador del concurso)
+// Actualizar formulario (solo en estado borrador de la convocatoria)
 export const updateFormularioSchema = z.object({
   nombre: z.string().min(1).optional(),
   descripcion: z.string().optional(),
@@ -214,10 +214,10 @@ export type ColumnaTabla = z.infer<typeof columnaTablaSchema>;
 export type FilaFijaTabla = z.infer<typeof filaFijaSchema>;
 export type AutoRelleno = z.infer<typeof autoRellenoSchema>;
 
-// GET /concursos/:concursoId/formulario, POST, PUT
+// GET /convocatorias/:convocatoriaId/formulario, POST, PUT
 export interface FormularioResponse {
   id: number;
-  concursoId: number;
+  convocatoriaId: number;
   nombre: string;
   descripcion: string | null;
   schemaDefinition: SchemaDefinition;

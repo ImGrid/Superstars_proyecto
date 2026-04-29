@@ -22,22 +22,22 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { Public } from '../auth/decorators/public.decorator';
 import { FaqService } from './faq.service';
 
-// Endpoints publicos: GET /api/public/faq y GET /api/public/faq/concurso/:id
+// Endpoints publicos: GET /api/public/faq y GET /api/public/faq/convocatoria/:id
 @Public()
 @Controller('public/faq')
 export class FaqPublicController {
   constructor(private readonly faqService: FaqService) {}
 
-  // Preguntas generales (sin concurso asignado), agrupables por categoria en el frontend
+  // Preguntas generales (sin convocatoria asignada), agrupables por categoria en el frontend
   @Get()
   async findAllPublic() {
     return this.faqService.findAllPublic();
   }
 
-  // Preguntas especificas de un concurso (para mostrar en la pagina del concurso)
-  @Get('concurso/:id')
-  async findByConcurso(@Param('id', ParseIntPipe) id: number) {
-    return this.faqService.findByConcursoId(id);
+  // Preguntas especificas de una convocatoria (para mostrar en la pagina de la convocatoria)
+  @Get('convocatoria/:id')
+  async findByConvocatoria(@Param('id', ParseIntPipe) id: number) {
+    return this.faqService.findByConvocatoriaId(id);
   }
 }
 
@@ -48,7 +48,7 @@ export class FaqAdminController {
 
   // Listar con paginacion y filtros opcionales (admin/responsable)
   @Get()
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   async findAll(@Query() rawQuery: Record<string, string>) {
     const query = listFaqQuerySchema.parse(rawQuery);
     return this.faqService.findAll(query);
@@ -56,14 +56,14 @@ export class FaqAdminController {
 
   // Obtener por ID (admin/responsable)
   @Get(':id')
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   async findById(@Param('id', ParseIntPipe) id: number) {
     return this.faqService.findById(id);
   }
 
   // Crear (admin/responsable)
   @Post()
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() body: CreateFaqDto) {
     const dto = createFaqSchema.parse(body);
@@ -72,7 +72,7 @@ export class FaqAdminController {
 
   // Actualizar (admin/responsable)
   @Patch(':id')
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateFaqDto,
@@ -83,7 +83,7 @@ export class FaqAdminController {
 
   // Eliminar (admin/responsable)
   @Delete(':id')
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO)
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(@Param('id', ParseIntPipe) id: number) {
     await this.faqService.delete(id);

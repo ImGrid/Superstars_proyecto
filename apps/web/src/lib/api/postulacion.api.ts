@@ -12,34 +12,34 @@ import type {
 // --- Proponente ---
 
 // Guardar borrador (crea o actualiza)
-export function saveDraft(concursoId: number, dto: SavePostulacionDraftDto) {
+export function saveDraft(convocatoriaId: number, dto: SavePostulacionDraftDto) {
   return apiClient
     .put<PostulacionResponse>(
-      `/concursos/${concursoId}/postulaciones/me/draft`,
+      `/convocatorias/${convocatoriaId}/postulaciones/me/draft`,
       dto,
     )
     .then((r) => r.data);
 }
 
 // Enviar postulacion
-export function submitPostulacion(concursoId: number) {
+export function submitPostulacion(convocatoriaId: number) {
   return apiClient
     .post<PostulacionResponse>(
-      `/concursos/${concursoId}/postulaciones/me/enviar`,
+      `/convocatorias/${convocatoriaId}/postulaciones/me/enviar`,
     )
     .then((r) => r.data);
 }
 
-// Obtener mi postulacion para un concurso
-export function getMyPostulacion(concursoId: number) {
+// Obtener mi postulacion para una convocatoria
+export function getMyPostulacion(convocatoriaId: number) {
   return apiClient
     .get<PostulacionResponse>(
-      `/concursos/${concursoId}/postulaciones/me`,
+      `/convocatorias/${convocatoriaId}/postulaciones/me`,
     )
     .then((r) => r.data);
 }
 
-// Listar todas mis postulaciones (cross-concurso)
+// Listar todas mis postulaciones (cross-convocatoria)
 export function listMyPostulaciones() {
   return apiClient
     .get<PostulacionListItem[]>("/mis-postulaciones")
@@ -48,60 +48,60 @@ export function listMyPostulaciones() {
 
 // --- Responsable / Admin ---
 
-// Listar postulaciones cross-concurso (paginado, con nombre empresa y concurso)
+// Listar postulaciones cross-convocatoria (paginado, con nombre empresa y convocatoria)
 export function listPostulacionesAdmin(params?: Partial<ListPostulacionesQueryDto>) {
   return apiClient
     .get<PaginatedResponse<PostulacionAdminListItem>>("/postulaciones", { params })
     .then((r) => r.data);
 }
 
-// Listar postulaciones de un concurso
-export function listPostulaciones(concursoId: number, estado?: string) {
+// Listar postulaciones de una convocatoria
+export function listPostulaciones(convocatoriaId: number, estado?: string) {
   return apiClient
     .get<PostulacionListItem[]>(
-      `/concursos/${concursoId}/postulaciones`,
+      `/convocatorias/${convocatoriaId}/postulaciones`,
       { params: estado ? { estado } : undefined },
     )
     .then((r) => r.data);
 }
 
 // Detalle de una postulacion
-export function getPostulacion(concursoId: number, id: number) {
+export function getPostulacion(convocatoriaId: number, id: number) {
   return apiClient
     .get<PostulacionResponse>(
-      `/concursos/${concursoId}/postulaciones/${id}`,
+      `/convocatorias/${convocatoriaId}/postulaciones/${id}`,
     )
     .then((r) => r.data);
 }
 
 // Observar postulacion (devolver con comentarios)
 export function observarPostulacion(
-  concursoId: number,
+  convocatoriaId: number,
   id: number,
   dto: ObservarPostulacionDto,
 ) {
   return apiClient
     .post<PostulacionResponse>(
-      `/concursos/${concursoId}/postulaciones/${id}/observar`,
+      `/convocatorias/${convocatoriaId}/postulaciones/${id}/observar`,
       dto,
     )
     .then((r) => r.data);
 }
 
 // Rechazar postulacion
-export function rechazarPostulacion(concursoId: number, id: number) {
+export function rechazarPostulacion(convocatoriaId: number, id: number) {
   return apiClient
     .post<PostulacionResponse>(
-      `/concursos/${concursoId}/postulaciones/${id}/rechazar`,
+      `/convocatorias/${convocatoriaId}/postulaciones/${id}/rechazar`,
     )
     .then((r) => r.data);
 }
 
 // Aprobar postulacion para evaluacion (enviado → en_evaluacion)
-export function aprobarPostulacion(concursoId: number, id: number) {
+export function aprobarPostulacion(convocatoriaId: number, id: number) {
   return apiClient
     .post<PostulacionResponse>(
-      `/concursos/${concursoId}/postulaciones/${id}/aprobar`,
+      `/convocatorias/${convocatoriaId}/postulaciones/${id}/aprobar`,
     )
     .then((r) => r.data);
 }

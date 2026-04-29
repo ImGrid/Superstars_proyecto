@@ -1,13 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import type { ListPublicConcursosQueryDto, ListPublicPublicacionesQueryDto, PaginatedResponse } from '@superstars/shared';
+import type { ListPublicConvocatoriasQueryDto, ListPublicPublicacionesQueryDto, PaginatedResponse } from '@superstars/shared';
 import { PublicRepository } from './public.repository';
 
 @Injectable()
 export class PublicService {
   constructor(private readonly publicRepo: PublicRepository) {}
 
-  async findConcursos(query: ListPublicConcursosQueryDto): Promise<PaginatedResponse<unknown>> {
-    const { data, total } = await this.publicRepo.findPublicConcursos(query);
+  async findConvocatorias(query: ListPublicConvocatoriasQueryDto): Promise<PaginatedResponse<unknown>> {
+    const { data, total } = await this.publicRepo.findPublicConvocatorias(query);
     const totalPages = Math.ceil(total / query.limit);
 
     return {
@@ -25,43 +25,43 @@ export class PublicService {
   ];
 
   async findResultados(id: number) {
-    const concurso = await this.publicRepo.findPublicConcursoById(id);
-    if (!concurso) {
-      throw new NotFoundException('Concurso no encontrado');
+    const convocatoria = await this.publicRepo.findPublicConvocatoriaById(id);
+    if (!convocatoria) {
+      throw new NotFoundException('Convocatoria no encontrada');
     }
 
-    // solo mostrar resultados de concursos finalizados con resultados publicados
-    if (!concurso.fechaPublicacionResultados) {
+    // solo mostrar resultados de convocatorias finalizadas con resultados publicados
+    if (!convocatoria.fechaPublicacionResultados) {
       throw new NotFoundException('Resultados no disponibles');
     }
 
     const ganadores = await this.publicRepo.findGanadores(id);
 
     return {
-      concursoNombre: concurso.nombre,
-      fechaPublicacionResultados: concurso.fechaPublicacionResultados,
+      convocatoriaNombre: convocatoria.nombre,
+      fechaPublicacionResultados: convocatoria.fechaPublicacionResultados,
       ganadores,
     };
   }
 
-  async findConcursoById(id: number) {
-    const concurso = await this.publicRepo.findPublicConcursoById(id);
-    if (!concurso) {
-      throw new NotFoundException('Concurso no encontrado');
+  async findConvocatoriaById(id: number) {
+    const convocatoria = await this.publicRepo.findPublicConvocatoriaById(id);
+    if (!convocatoria) {
+      throw new NotFoundException('Convocatoria no encontrada');
     }
 
-    // solo mostrar concursos que ya fueron publicados (no borradores)
-    if (!this.estadosPublicos.includes(concurso.estado)) {
-      throw new NotFoundException('Concurso no encontrado');
+    // solo mostrar convocatorias que ya fueron publicadas (no borradores)
+    if (!this.estadosPublicos.includes(convocatoria.estado)) {
+      throw new NotFoundException('Convocatoria no encontrada');
     }
 
     // Incluir formulario y documentos si existen
     const [formulario, documentos] = await Promise.all([
-      this.publicRepo.findFormularioByConcursoId(id),
-      this.publicRepo.findDocumentosByConcursoId(id),
+      this.publicRepo.findFormularioByConvocatoriaId(id),
+      this.publicRepo.findDocumentosByConvocatoriaId(id),
     ]);
 
-    return { ...concurso, formulario, documentos };
+    return { ...convocatoria, formulario, documentos };
   }
 
   // --- Publicaciones publicas ---

@@ -10,7 +10,7 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter'
 import { AuthModule } from './modules/auth/auth.module';
 import { UsuarioModule } from './modules/usuario/usuario.module';
 import { EmpresaModule } from './modules/empresa/empresa.module';
-import { ConcursoModule } from './modules/concurso/concurso.module';
+import { ConvocatoriaModule } from './modules/convocatoria/convocatoria.module';
 import { FormularioModule } from './modules/formulario/formulario.module';
 import { DocumentoModule } from './modules/documento/documento.module';
 import { PostulacionModule } from './modules/postulacion/postulacion.module';
@@ -68,13 +68,13 @@ import { NotificacionModule } from './modules/notificacion/notificacion.module';
     // Gestion de empresas
     EmpresaModule,
 
-    // Gestion de concursos
-    ConcursoModule,
+    // Gestion de convocatorias
+    ConvocatoriaModule,
 
-    // Formularios dinamicos (sub-recurso de concurso)
+    // Formularios dinamicos (sub-recurso de convocatoria)
     FormularioModule,
 
-    // Documentos del concurso (bases, guias, plantillas)
+    // Documentos de la convocatoria (bases, guias, plantillas)
     DocumentoModule,
 
     // Postulaciones de empresas

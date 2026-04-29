@@ -20,7 +20,7 @@ interface NavLink {
 // links de navegacion del sitio publico
 const navLinks: NavLink[] = [
   { label: "Inicio", href: "/" },
-  { label: "Concursos", href: "/concursos" },
+  { label: "Convocatorias", href: "/convocatorias" },
   { label: "Noticias", href: "/noticias" },
   { label: "Resultados", href: "/resultados" },
   { label: "FAQ", href: "/faq" },
@@ -28,7 +28,7 @@ const navLinks: NavLink[] = [
 ];
 
 // rutas con hero oscuro donde el navbar inicia transparente
-const darkHeroRoutes = ["/", "/concursos", "/noticias", "/faq"];
+const darkHeroRoutes = ["/", "/convocatorias", "/noticias", "/faq"];
 
 export function PublicNavbar() {
   const pathname = usePathname();

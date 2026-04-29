@@ -9,7 +9,7 @@ import { Icon } from "@iconify/react";
 import type {
   ListPostulacionesQueryDto,
   PostulacionAdminListItem,
-  ConcursoResponse,
+  ConvocatoriaResponse,
 } from "@superstars/shared";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,7 @@ import { DataTable, type Column } from "@/components/shared/data-table";
 import { StateBadge } from "@/components/shared/state-badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import { TableSkeleton } from "@/components/shared/loading-skeleton";
-import { postulacionQueries, concursoQueries } from "@/lib/api/query-keys";
+import { postulacionQueries, convocatoriaQueries } from "@/lib/api/query-keys";
 import { formatShortDate, formatPercent } from "@/lib/format";
 
 // opciones de filtro por estado
@@ -56,10 +56,10 @@ const columns: Column<PostulacionAdminListItem>[] = [
     ),
   },
   {
-    key: "concurso",
-    header: "Concurso",
+    key: "convocatoria",
+    header: "Convocatoria",
     cell: (row) => (
-      <span className="text-secondary-600 text-sm">{row.concursoNombre}</span>
+      <span className="text-secondary-600 text-sm">{row.convocatoriaNombre}</span>
     ),
   },
   {
@@ -109,14 +109,14 @@ const columns: Column<PostulacionAdminListItem>[] = [
     cell: (row) => (
       <div className="flex items-center justify-end gap-1">
         <Button asChild variant="ghost" size="sm" className="gap-1">
-          <Link href={`/dashboard/concursos/${row.concursoId}/postulaciones/${row.id}`}>
+          <Link href={`/dashboard/convocatorias/${row.convocatoriaId}/postulaciones/${row.id}`}>
             <Eye className="size-3.5" />
             Ver detalle
           </Link>
         </Button>
         {row.calificacionesPendientes > 0 && (
           <Button asChild variant="ghost" size="sm" className="gap-1 text-blue-600">
-            <Link href={`/dashboard/concursos/${row.concursoId}/postulaciones/${row.id}`}>
+            <Link href={`/dashboard/convocatorias/${row.convocatoriaId}/postulaciones/${row.id}`}>
               <Icon icon="ph:clipboard-text-duotone" className="size-3.5" />
               {row.calificacionesPendientes} por revisar
             </Link>
@@ -145,7 +145,7 @@ function PostulacionesContent() {
       page: parseAsInteger.withDefault(1),
       limit: parseAsInteger.withDefault(20),
       estado: parseAsString.withDefault(ALL),
-      concursoId: parseAsString.withDefault(ALL),
+      convocatoriaId: parseAsString.withDefault(ALL),
     },
     { history: "push" },
   );
@@ -156,17 +156,17 @@ function PostulacionesContent() {
     limit: filters.limit,
   };
   if (filters.estado !== ALL) apiParams.estado = filters.estado;
-  if (filters.concursoId !== ALL) apiParams.concursoId = Number(filters.concursoId);
+  if (filters.convocatoriaId !== ALL) apiParams.convocatoriaId = Number(filters.convocatoriaId);
 
   // cargar postulaciones
   const { data, isLoading } = useQuery(
     postulacionQueries.adminList(apiParams),
   );
 
-  // cargar concursos para el filtro (sin paginacion, solo lista)
-  const { data: concursosData } = useQuery(concursoQueries.list());
+  // cargar convocatorias para el filtro (sin paginacion, solo lista)
+  const { data: convocatoriasData } = useQuery(convocatoriaQueries.list());
 
-  const concursos = concursosData?.data ?? [];
+  const convocatorias = convocatoriasData?.data ?? [];
   const postulaciones = data?.data ?? [];
   const total = data?.total ?? 0;
 
@@ -179,22 +179,22 @@ function PostulacionesContent() {
     <div className="space-y-6">
       <PageHeader
         title="Postulaciones"
-        description="Revisa las postulaciones recibidas en los concursos."
+        description="Revisa las postulaciones recibidas en las convocatorias."
       />
 
       {/* filtros */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        {/* filtro por concurso */}
+        {/* filtro por convocatoria */}
         <Select
-          value={filters.concursoId}
-          onValueChange={(v) => updateFilter("concursoId", v)}
+          value={filters.convocatoriaId}
+          onValueChange={(v) => updateFilter("convocatoriaId", v)}
         >
           <SelectTrigger className="w-full sm:w-64">
-            <SelectValue placeholder="Todos los concursos" />
+            <SelectValue placeholder="Todos las convocatorias" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={ALL}>Todos los concursos</SelectItem>
-            {concursos.map((c: ConcursoResponse) => (
+            <SelectItem value={ALL}>Todos las convocatorias</SelectItem>
+            {convocatorias.map((c: ConvocatoriaResponse) => (
               <SelectItem key={c.id} value={String(c.id)}>
                 {c.nombre}
               </SelectItem>
@@ -237,7 +237,7 @@ function PostulacionesContent() {
             icon="ph:file-text-duotone"
             title="No hay postulaciones"
             description={
-              filters.estado !== ALL || filters.concursoId !== ALL
+              filters.estado !== ALL || filters.convocatoriaId !== ALL
                 ? "No hay postulaciones con los filtros seleccionados."
                 : "Aun no se han recibido postulaciones."
             }

@@ -21,7 +21,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { ArchivoService } from './archivo.service';
 
-@Controller('concursos/:concursoId/postulaciones/:postulacionId/archivos')
+@Controller('convocatorias/:convocatoriaId/postulaciones/:postulacionId/archivos')
 export class ArchivoController {
   constructor(private readonly archivoService: ArchivoService) {}
 
@@ -55,7 +55,7 @@ export class ArchivoController {
 
   // Listar archivos de una postulacion (proponente solo su propia postulacion)
   @Get()
-  @Roles(RolUsuario.PROPONENTE, RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO, RolUsuario.EVALUADOR)
+  @Roles(RolUsuario.PROPONENTE, RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA, RolUsuario.EVALUADOR)
   async findAll(
     @Param('postulacionId', ParseIntPipe) postulacionId: number,
     @CurrentUser() user: AuthUser,
@@ -65,7 +65,7 @@ export class ArchivoController {
 
   // Descargar archivo
   @Get(':archivoId/download')
-  @Roles(RolUsuario.PROPONENTE, RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONCURSO, RolUsuario.EVALUADOR)
+  @Roles(RolUsuario.PROPONENTE, RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA, RolUsuario.EVALUADOR)
   async download(
     @Param('archivoId', ParseIntPipe) archivoId: number,
     @CurrentUser() user: AuthUser,

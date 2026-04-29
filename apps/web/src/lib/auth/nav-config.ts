@@ -12,16 +12,16 @@ const navByRole: Record<RolUsuario, NavItem[]> = {
   [RolUsuario.ADMINISTRADOR]: [
     { label: "Dashboard", href: "/dashboard", icon: "ph:squares-four-duotone" },
     { label: "Usuarios", href: "/dashboard/usuarios", icon: "ph:users-three-duotone" },
-    { label: "Concursos", href: "/dashboard/concursos", icon: "ph:trophy-duotone" },
+    { label: "Convocatorias", href: "/dashboard/convocatorias", icon: "ph:trophy-duotone" },
     { label: "Postulaciones", href: "/dashboard/postulaciones", icon: "ph:file-text-duotone" },
     { label: "Resultados", href: "/dashboard/resultados", icon: "ph:chart-line-up-duotone" },
     { label: "Publicaciones", href: "/dashboard/publicaciones", icon: "ph:newspaper-duotone" },
     { label: "FAQ", href: "/dashboard/faq", icon: "ph:question-duotone" },
   ],
 
-  [RolUsuario.RESPONSABLE_CONCURSO]: [
+  [RolUsuario.RESPONSABLE_CONVOCATORIA]: [
     { label: "Dashboard", href: "/dashboard", icon: "ph:squares-four-duotone" },
-    { label: "Concursos", href: "/dashboard/concursos", icon: "ph:trophy-duotone" },
+    { label: "Convocatorias", href: "/dashboard/convocatorias", icon: "ph:trophy-duotone" },
     { label: "Postulaciones", href: "/dashboard/postulaciones", icon: "ph:file-text-duotone" },
     { label: "Resultados", href: "/dashboard/resultados", icon: "ph:chart-line-up-duotone" },
     { label: "Publicaciones", href: "/dashboard/publicaciones", icon: "ph:newspaper-duotone" },
@@ -30,7 +30,7 @@ const navByRole: Record<RolUsuario, NavItem[]> = {
 
   [RolUsuario.PROPONENTE]: [
     { label: "Dashboard", href: "/dashboard", icon: "ph:squares-four-duotone" },
-    { label: "Concursos", href: "/dashboard/concursos", icon: "ph:trophy-duotone" },
+    { label: "Convocatorias", href: "/dashboard/convocatorias", icon: "ph:trophy-duotone" },
     { label: "Mi Empresa", href: "/dashboard/mi-empresa", icon: "ph:building-office-duotone" },
     { label: "Mis Postulaciones", href: "/dashboard/mis-postulaciones", icon: "ph:file-text-duotone" },
   ],

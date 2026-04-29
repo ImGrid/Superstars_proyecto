@@ -1,21 +1,21 @@
 import { z } from 'zod';
 
-// Query params para listar concursos publicos
-export const listPublicConcursosQuerySchema = z.object({
+// Query params para listar convocatorias publicas
+export const listPublicConvocatoriasQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(50).default(12),
   search: z.string().trim().optional(),
-  // activos = publicado, anteriores = cerrado/en_evaluacion/finalizado
-  tipo: z.enum(['activos', 'anteriores']).default('activos'),
+  // activas = publicado, anteriores = cerrado/en_evaluacion/finalizado
+  tipo: z.enum(['activas', 'anteriores']).default('activas'),
 });
 
-export type ListPublicConcursosQueryDto = z.infer<typeof listPublicConcursosQuerySchema>;
+export type ListPublicConvocatoriasQueryDto = z.infer<typeof listPublicConvocatoriasQuerySchema>;
 
-import { EstadoConcurso } from '../enums';
+import { EstadoConvocatoria } from '../enums';
 import type { SchemaDefinition } from './formulario.schema';
 
-// GET /public/concursos (excluye createdBy y topNSistema)
-export interface PublicConcursoResponse {
+// GET /public/convocatorias (excluye createdBy y topNSistema)
+export interface PublicConvocatoriaResponse {
   id: number;
   nombre: string;
   descripcion: string | null;
@@ -24,10 +24,10 @@ export interface PublicConcursoResponse {
   fechaCierrePostulacion: string;
   fechaAnuncioGanadores: string | null;
   fechaCierreEfectiva: string | null;
-  montoPremio: string;
+  monto: string;
   numeroGanadores: number;
   departamentos: string[];
-  estado: EstadoConcurso;
+  estado: EstadoConvocatoria;
   fechaPublicacionResultados: string | null;
   createdAt: string;
   updatedAt: string;
@@ -43,8 +43,8 @@ export interface PublicDocumentoResponse {
   orden: number;
 }
 
-// GET /public/concursos/:id (incluye formulario y documentos)
-export interface PublicConcursoDetailResponse extends PublicConcursoResponse {
+// GET /public/convocatorias/:id (incluye formulario y documentos)
+export interface PublicConvocatoriaDetailResponse extends PublicConvocatoriaResponse {
   formulario: {
     id: number;
     nombre: string;
@@ -55,14 +55,14 @@ export interface PublicConcursoDetailResponse extends PublicConcursoResponse {
   documentos: PublicDocumentoResponse[];
 }
 
-// GET /public/concursos/:id/resultados
+// GET /public/convocatorias/:id/resultados
 export interface PublicResultadoGanador {
   empresaNombre: string;
   posicionFinal: number;
 }
 
 export interface PublicResultadosResponse {
-  concursoNombre: string;
+  convocatoriaNombre: string;
   fechaPublicacionResultados: string;
   ganadores: PublicResultadoGanador[];
 }

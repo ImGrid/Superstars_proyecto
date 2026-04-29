@@ -77,14 +77,14 @@ function MisPostulacionesContent() {
     <div className="space-y-6">
       <PageHeader
         title="Mis Postulaciones"
-        description="Revisa el estado de tus postulaciones a concursos."
+        description="Revisa el estado de tus postulaciones a convocatorias."
         action={
           <Button
             variant="outline"
-            onClick={() => router.push("/dashboard/concursos")}
+            onClick={() => router.push("/dashboard/convocatorias")}
           >
             <Icon icon="ph:trophy-duotone" className="size-4" />
-            Ver concursos
+            Ver convocatorias
           </Button>
         }
       />
@@ -93,12 +93,12 @@ function MisPostulacionesContent() {
       {postulaciones.length === 0 && (
         <EmptyState
           icon="ph:file-text-duotone"
-          title="Aun no tienes postulaciones"
-          description="Explora los concursos disponibles y postulate a los que apliquen para tu empresa."
+          title="Aún no tienes postulaciones"
+          description="Explora las convocatorias disponibles y postúlate a las que apliquen para tu empresa."
           action={
-            <Button onClick={() => router.push("/dashboard/concursos")}>
+            <Button onClick={() => router.push("/dashboard/convocatorias")}>
               <Icon icon="ph:trophy-duotone" className="size-4" />
-              Ver concursos disponibles
+              Ver convocatorias disponibles
             </Button>
           }
         />

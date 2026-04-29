@@ -16,13 +16,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/shared/page-header";
 import { StateBadge } from "@/components/shared/state-badge";
 import { EmptyState } from "@/components/shared/empty-state";
-import { concursoQueries } from "@/lib/api/query-keys";
+import { convocatoriaQueries } from "@/lib/api/query-keys";
 import { formatMoney } from "@/lib/format";
-import type { ConcursoResultadosResumenItem } from "@superstars/shared";
+import type { ConvocatoriaResultadosResumenItem } from "@superstars/shared";
 
 export default function ResultadosPage() {
   const router = useRouter();
-  const { data, isLoading } = useQuery(concursoQueries.resumenResultados());
+  const { data, isLoading } = useQuery(convocatoriaQueries.resumenResultados());
 
   if (isLoading) {
     return (
@@ -41,14 +41,14 @@ export default function ResultadosPage() {
     );
   }
 
-  const concursos = data ?? [];
+  const convocatorias = data ?? [];
 
   // contadores para el resumen superior
-  const enEvaluacion = concursos.filter(
+  const enEvaluacion = convocatorias.filter(
     (c) => c.estado === "en_evaluacion" || c.estado === "resultados_listos",
   ).length;
-  const finalizados = concursos.filter((c) => c.estado === "finalizado").length;
-  const totalCalificadas = concursos.reduce(
+  const finalizados = convocatorias.filter((c) => c.estado === "finalizado").length;
+  const totalCalificadas = convocatorias.reduce(
     (sum, c) => sum + c.totalCalificadas,
     0,
   );
@@ -57,7 +57,7 @@ export default function ResultadosPage() {
     <div className="space-y-6">
       <PageHeader
         title="Resultados"
-        description="Seguimiento de concursos en evaluacion y resultados"
+        description="Seguimiento de convocatorias en evaluacion y resultados"
       />
 
       {/* resumen global */}
@@ -79,21 +79,21 @@ export default function ResultadosPage() {
         />
       </div>
 
-      {/* lista de concursos */}
-      {concursos.length === 0 ? (
+      {/* lista de convocatorias */}
+      {convocatorias.length === 0 ? (
         <EmptyState
           icon="ph:chart-line-up-duotone"
-          title="Sin concursos en seguimiento"
-          description="No hay concursos en evaluacion o con resultados publicados."
+          title="Sin convocatorias en seguimiento"
+          description="No hay convocatorias en evaluacion o con resultados publicados."
         />
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
-          {concursos.map((concurso) => (
-            <ConcursoCard
-              key={concurso.id}
-              concurso={concurso}
+          {convocatorias.map(convocatoria => (
+            <ConvocatoriaCard
+              key={convocatoria.id}
+              convocatoria={convocatoria}
               onVerRanking={() =>
-                router.push(`/dashboard/resultados/${concurso.id}`)
+                router.push(`/dashboard/resultados/${convocatoria.id}`)
               }
             />
           ))}
@@ -103,18 +103,18 @@ export default function ResultadosPage() {
   );
 }
 
-// card individual por concurso
-function ConcursoCard({
-  concurso,
+// card individual por convocatoria
+function ConvocatoriaCard({
+  convocatoria,
   onVerRanking,
 }: {
-  concurso: ConcursoResultadosResumenItem;
+  convocatoria: ConvocatoriaResultadosResumenItem;
   onVerRanking: () => void;
 }) {
   const progreso =
-    concurso.totalPostulaciones > 0
+    convocatoria.totalPostulaciones > 0
       ? Math.round(
-          (concurso.totalCalificadas / concurso.totalPostulaciones) * 100,
+          (convocatoria.totalCalificadas / convocatoria.totalPostulaciones) * 100,
         )
       : 0;
 
@@ -123,12 +123,12 @@ function ConcursoCard({
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="text-base leading-snug">
-            {concurso.nombre}
+            {convocatoria.nombre}
           </CardTitle>
-          <StateBadge tipo="concurso" valor={concurso.estado} />
+          <StateBadge tipo="convocatoria" valor={convocatoria.estado} />
         </div>
         <p className="text-sm text-secondary-500">
-          Premio: {formatMoney(concurso.montoPremio)}
+          Monto: {formatMoney(convocatoria.monto)}
         </p>
       </CardHeader>
 
@@ -138,7 +138,7 @@ function ConcursoCard({
           <div className="mb-1 flex items-center justify-between text-sm">
             <span className="text-secondary-600">Postulaciones calificadas</span>
             <span className="font-medium text-secondary-900">
-              {concurso.totalCalificadas} / {concurso.totalPostulaciones}
+              {convocatoria.totalCalificadas} / {convocatoria.totalPostulaciones}
             </span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-secondary-100">
@@ -150,23 +150,23 @@ function ConcursoCard({
         </div>
 
         {/* puntaje promedio */}
-        {concurso.promedioCalificadas !== null && (
+        {convocatoria.promedioCalificadas !== null && (
           <div className="flex items-center gap-2 text-sm">
             <Icon icon="ph:star-duotone" className="size-4 text-amber-500" />
             <span className="text-secondary-600">Promedio:</span>
             <span className="font-semibold text-secondary-900">
-              {concurso.promedioCalificadas.toFixed(1)} pts
+              {convocatoria.promedioCalificadas.toFixed(1)} pts
             </span>
           </div>
         )}
 
         {/* ganadores si los hay */}
-        {concurso.totalGanadores > 0 && (
+        {convocatoria.totalGanadores > 0 && (
           <div className="flex items-center gap-2 text-sm">
             <Icon icon="ph:trophy-duotone" className="size-4 text-amber-500" />
             <span className="text-secondary-600">Ganadores seleccionados:</span>
             <span className="font-semibold text-secondary-900">
-              {concurso.totalGanadores}
+              {convocatoria.totalGanadores}
             </span>
           </div>
         )}

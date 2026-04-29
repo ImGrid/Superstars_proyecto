@@ -35,7 +35,7 @@ import { UsuarioActions } from "./_components/usuario-actions";
 const rolOptions = [
   { value: "all", label: "Todos los roles" },
   { value: RolUsuario.ADMINISTRADOR, label: "Administrador" },
-  { value: RolUsuario.RESPONSABLE_CONCURSO, label: "Responsable" },
+  { value: RolUsuario.RESPONSABLE_CONVOCATORIA, label: "Responsable" },
   { value: RolUsuario.PROPONENTE, label: "Proponente" },
   { value: RolUsuario.EVALUADOR, label: "Evaluador" },
 ];

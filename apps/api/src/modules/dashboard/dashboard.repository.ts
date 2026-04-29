@@ -3,9 +3,9 @@ import { eq, and, sql, desc, asc, isNull, inArray, ne, count } from 'drizzle-orm
 import { DRIZZLE } from '../../database/drizzle.provider';
 import type { DrizzleDB } from '../../database/drizzle.provider';
 import {
-  concurso,
-  responsableConcurso,
-  evaluadorConcurso,
+  convocatoria,
+  responsableConvocatoria,
+  evaluadorConvocatoria,
   asignacionEvaluador,
   postulacion,
   empresa,
@@ -13,7 +13,7 @@ import {
   calificacion,
 } from '@superstars/db';
 
-// estados que cuentan como concurso "activo" para los KPIs
+// estados que cuentan como convocatoria "activa" para los KPIs
 const ESTADOS_ACTIVOS = ['publicado', 'cerrado', 'en_evaluacion', 'resultados_listos'] as const;
 
 // estados de postulacion que cuentan como "aprobada" (paso por la revision del responsable)
@@ -25,18 +25,18 @@ export class DashboardRepository {
 
   // ============== ADMIN ==============
 
-  // KPIs globales del admin: counts por estado de concurso, postulaciones, ganadores
-  async getAdminConcursoStats() {
+  // KPIs globales del admin: counts por estado de convocatoria, postulaciones, ganadores
+  async getAdminConvocatoriaStats() {
     const [row] = await this.db
       .select({
-        borrador: sql<number>`count(*) filter (where ${concurso.estado} = 'borrador')`.mapWith(Number),
-        publicado: sql<number>`count(*) filter (where ${concurso.estado} = 'publicado')`.mapWith(Number),
-        cerrado: sql<number>`count(*) filter (where ${concurso.estado} = 'cerrado')`.mapWith(Number),
-        en_evaluacion: sql<number>`count(*) filter (where ${concurso.estado} = 'en_evaluacion')`.mapWith(Number),
-        resultados_listos: sql<number>`count(*) filter (where ${concurso.estado} = 'resultados_listos')`.mapWith(Number),
-        finalizado: sql<number>`count(*) filter (where ${concurso.estado} = 'finalizado')`.mapWith(Number),
+        borrador: sql<number>`count(*) filter (where ${convocatoria.estado} = 'borrador')`.mapWith(Number),
+        publicado: sql<number>`count(*) filter (where ${convocatoria.estado} = 'publicado')`.mapWith(Number),
+        cerrado: sql<number>`count(*) filter (where ${convocatoria.estado} = 'cerrado')`.mapWith(Number),
+        en_evaluacion: sql<number>`count(*) filter (where ${convocatoria.estado} = 'en_evaluacion')`.mapWith(Number),
+        resultados_listos: sql<number>`count(*) filter (where ${convocatoria.estado} = 'resultados_listos')`.mapWith(Number),
+        finalizado: sql<number>`count(*) filter (where ${convocatoria.estado} = 'finalizado')`.mapWith(Number),
       })
-      .from(concurso);
+      .from(convocatoria);
     return row;
   }
 
@@ -65,7 +65,7 @@ export class DashboardRepository {
     const [row] = await this.db
       .select({
         administrador: sql<number>`count(*) filter (where ${usuario.rol} = 'administrador')`.mapWith(Number),
-        responsable_concurso: sql<number>`count(*) filter (where ${usuario.rol} = 'responsable_concurso')`.mapWith(Number),
+        responsable_convocatoria: sql<number>`count(*) filter (where ${usuario.rol} = 'responsable_convocatoria')`.mapWith(Number),
         evaluador: sql<number>`count(*) filter (where ${usuario.rol} = 'evaluador')`.mapWith(Number),
         proponente: sql<number>`count(*) filter (where ${usuario.rol} = 'proponente')`.mapWith(Number),
       })
@@ -74,96 +74,96 @@ export class DashboardRepository {
     return row;
   }
 
-  // resumen de los concursos activos: id, nombre, estado, total postulaciones, dias para cerrar
-  async getAdminConcursosActivosResumen() {
+  // resumen de las convocatorias activas: id, nombre, estado, total postulaciones, dias para cerrar
+  async getAdminConvocatoriasActivasResumen() {
     return this.db
       .select({
-        id: concurso.id,
-        nombre: concurso.nombre,
-        estado: concurso.estado,
-        // postulaciones del concurso (no borradores)
+        id: convocatoria.id,
+        nombre: convocatoria.nombre,
+        estado: convocatoria.estado,
+        // postulaciones de la convocatoria (no borradores)
         totalPostulaciones: sql<number>`(
           select count(*) from postulacion p
-          where p.concurso_id = ${concurso.id} and p.estado != 'borrador'
+          where p.convocatoria_id = ${convocatoria.id} and p.estado != 'borrador'
         )`.mapWith(Number),
         // dias hasta el cierre real (efectiva si existe, si no la original). Solo aplica si esta publicado
         diasParaCerrar: sql<number | null>`case
-          when ${concurso.estado} = 'publicado' then
-            (coalesce(${concurso.fechaCierreEfectiva}, ${concurso.fechaCierrePostulacion}) - current_date)::int
+          when ${convocatoria.estado} = 'publicado' then
+            (coalesce(${convocatoria.fechaCierreEfectiva}, ${convocatoria.fechaCierrePostulacion}) - current_date)::int
           else null
         end`,
       })
-      .from(concurso)
-      .where(inArray(concurso.estado, [...ESTADOS_ACTIVOS]))
-      .orderBy(asc(sql`coalesce(${concurso.fechaCierreEfectiva}, ${concurso.fechaCierrePostulacion})`));
+      .from(convocatoria)
+      .where(inArray(convocatoria.estado, [...ESTADOS_ACTIVOS]))
+      .orderBy(asc(sql`coalesce(${convocatoria.fechaCierreEfectiva}, ${convocatoria.fechaCierrePostulacion})`));
   }
 
   // alertas operativas para el admin
   async getAdminAlertas() {
-    // concursos en cerrado que aun no se llevaron a evaluacion
+    // convocatorias en cerrado que aun no se llevaron a evaluacion
     const [cerradoSinEval] = await this.db
       .select({ count: count() })
-      .from(concurso)
-      .where(eq(concurso.estado, 'cerrado'));
+      .from(convocatoria)
+      .where(eq(convocatoria.estado, 'cerrado'));
 
-    // concursos en borrador o publicado sin responsable asignado
+    // convocatorias en borrador o publicado sin responsable asignado
     const [sinResponsable] = await this.db
       .select({ count: count() })
-      .from(concurso)
+      .from(convocatoria)
       .where(and(
-        inArray(concurso.estado, ['borrador', 'publicado']),
-        sql`not exists (select 1 from ${responsableConcurso} rc where rc.concurso_id = ${concurso.id})`,
+        inArray(convocatoria.estado, ['borrador', 'publicado']),
+        sql`not exists (select 1 from ${responsableConvocatoria} rc where rc.convocatoria_id = ${convocatoria.id})`,
       ));
 
     return {
-      concursosCerradosSinEvaluacion: Number(cerradoSinEval.count),
-      concursosSinResponsable: Number(sinResponsable.count),
+      convocatoriasCerradasSinEvaluacion: Number(cerradoSinEval.count),
+      convocatoriasSinResponsable: Number(sinResponsable.count),
     };
   }
 
   // ============== RESPONSABLE ==============
 
-  // KPIs principales para un responsable: cuenta sus concursos y trabajo pendiente
+  // KPIs principales para un responsable: cuenta sus convocatorias y trabajo pendiente
   async getResponsableKpis(usuarioId: number) {
-    // mis concursos: total y activos
-    const [misConcursos] = await this.db
+    // mis convocatorias: total y activas
+    const [misConvocatorias] = await this.db
       .select({
         total: count(),
-        activos: sql<number>`count(*) filter (where ${concurso.estado} in ('publicado', 'cerrado', 'en_evaluacion', 'resultados_listos'))`.mapWith(Number),
+        activos: sql<number>`count(*) filter (where ${convocatoria.estado} in ('publicado', 'cerrado', 'en_evaluacion', 'resultados_listos'))`.mapWith(Number),
         proximosACerrar: sql<number>`count(*) filter (
-          where ${concurso.estado} = 'publicado'
-          and coalesce(${concurso.fechaCierreEfectiva}, ${concurso.fechaCierrePostulacion}) <= current_date + interval '7 days'
+          where ${convocatoria.estado} = 'publicado'
+          and coalesce(${convocatoria.fechaCierreEfectiva}, ${convocatoria.fechaCierrePostulacion}) <= current_date + interval '7 days'
         )`.mapWith(Number),
       })
-      .from(concurso)
-      .innerJoin(responsableConcurso, eq(responsableConcurso.concursoId, concurso.id))
-      .where(eq(responsableConcurso.usuarioId, usuarioId));
+      .from(convocatoria)
+      .innerJoin(responsableConvocatoria, eq(responsableConvocatoria.convocatoriaId, convocatoria.id))
+      .where(eq(responsableConvocatoria.usuarioId, usuarioId));
 
-    // postulaciones por revisar (estado=enviado en mis concursos)
+    // postulaciones por revisar (estado=enviado en mis convocatorias)
     const [postPorRevisar] = await this.db
       .select({ count: count() })
       .from(postulacion)
-      .innerJoin(responsableConcurso, eq(responsableConcurso.concursoId, postulacion.concursoId))
+      .innerJoin(responsableConvocatoria, eq(responsableConvocatoria.convocatoriaId, postulacion.convocatoriaId))
       .where(and(
-        eq(responsableConcurso.usuarioId, usuarioId),
+        eq(responsableConvocatoria.usuarioId, usuarioId),
         eq(postulacion.estado, 'enviado'),
       ));
 
-    // calificaciones por aprobar (estado=completado en mis concursos)
+    // calificaciones por aprobar (estado=completado en mis convocatorias)
     const [califPorAprobar] = await this.db
       .select({ count: count() })
       .from(calificacion)
       .innerJoin(postulacion, eq(postulacion.id, calificacion.postulacionId))
-      .innerJoin(responsableConcurso, eq(responsableConcurso.concursoId, postulacion.concursoId))
+      .innerJoin(responsableConvocatoria, eq(responsableConvocatoria.convocatoriaId, postulacion.convocatoriaId))
       .where(and(
-        eq(responsableConcurso.usuarioId, usuarioId),
+        eq(responsableConvocatoria.usuarioId, usuarioId),
         eq(calificacion.estado, 'completado'),
       ));
 
     return {
-      totalMisConcursos: Number(misConcursos.total),
-      misConcursosActivos: misConcursos.activos,
-      concursosProximosACerrar: misConcursos.proximosACerrar,
+      totalMisConvocatorias: Number(misConvocatorias.total),
+      misConvocatoriasActivas: misConvocatorias.activos,
+      convocatoriasProximasACerrar: misConvocatorias.proximosACerrar,
       postulacionesPorRevisar: Number(postPorRevisar.count),
       calificacionesPorAprobar: Number(califPorAprobar.count),
     };
@@ -175,16 +175,16 @@ export class DashboardRepository {
       .select({
         postulacionId: postulacion.id,
         empresaNombre: empresa.razonSocial,
-        concursoId: concurso.id,
-        concursoNombre: concurso.nombre,
+        convocatoriaId: convocatoria.id,
+        convocatoriaNombre: convocatoria.nombre,
         fechaEnvio: postulacion.fechaEnvio,
       })
       .from(postulacion)
       .innerJoin(empresa, eq(empresa.id, postulacion.empresaId))
-      .innerJoin(concurso, eq(concurso.id, postulacion.concursoId))
-      .innerJoin(responsableConcurso, eq(responsableConcurso.concursoId, concurso.id))
+      .innerJoin(convocatoria, eq(convocatoria.id, postulacion.convocatoriaId))
+      .innerJoin(responsableConvocatoria, eq(responsableConvocatoria.convocatoriaId, convocatoria.id))
       .where(and(
-        eq(responsableConcurso.usuarioId, usuarioId),
+        eq(responsableConvocatoria.usuarioId, usuarioId),
         eq(postulacion.estado, 'enviado'),
       ))
       .orderBy(asc(postulacion.fechaEnvio))
@@ -198,8 +198,8 @@ export class DashboardRepository {
         calificacionId: calificacion.id,
         postulacionId: postulacion.id,
         empresaNombre: empresa.razonSocial,
-        concursoId: concurso.id,
-        concursoNombre: concurso.nombre,
+        convocatoriaId: convocatoria.id,
+        convocatoriaNombre: convocatoria.nombre,
         evaluadorNombre: usuario.nombre,
         puntajeTotal: calificacion.puntajeTotal,
         fechaCompletada: calificacion.updatedAt,
@@ -207,63 +207,63 @@ export class DashboardRepository {
       .from(calificacion)
       .innerJoin(postulacion, eq(postulacion.id, calificacion.postulacionId))
       .innerJoin(empresa, eq(empresa.id, postulacion.empresaId))
-      .innerJoin(concurso, eq(concurso.id, postulacion.concursoId))
+      .innerJoin(convocatoria, eq(convocatoria.id, postulacion.convocatoriaId))
       .innerJoin(usuario, eq(usuario.id, calificacion.evaluadorId))
-      .innerJoin(responsableConcurso, eq(responsableConcurso.concursoId, concurso.id))
+      .innerJoin(responsableConvocatoria, eq(responsableConvocatoria.convocatoriaId, convocatoria.id))
       .where(and(
-        eq(responsableConcurso.usuarioId, usuarioId),
+        eq(responsableConvocatoria.usuarioId, usuarioId),
         eq(calificacion.estado, 'completado'),
       ))
       .orderBy(asc(calificacion.updatedAt))
       .limit(10);
   }
 
-  // resumen completo de los concursos del responsable con counts agregados
-  async getResponsableConcursosResumen(usuarioId: number) {
+  // resumen completo de las convocatorias del responsable con counts agregados
+  async getResponsableConvocatoriasResumen(usuarioId: number) {
     return this.db
       .select({
-        id: concurso.id,
-        nombre: concurso.nombre,
-        estado: concurso.estado,
-        fechaCierrePostulacion: concurso.fechaCierrePostulacion,
-        fechaCierreEfectiva: concurso.fechaCierreEfectiva,
-        // postulaciones del concurso por estado
+        id: convocatoria.id,
+        nombre: convocatoria.nombre,
+        estado: convocatoria.estado,
+        fechaCierrePostulacion: convocatoria.fechaCierrePostulacion,
+        fechaCierreEfectiva: convocatoria.fechaCierreEfectiva,
+        // postulaciones de la convocatoria por estado
         totalPostulaciones: sql<number>`(
           select count(*) from postulacion p
-          where p.concurso_id = ${concurso.id} and p.estado != 'borrador'
+          where p.convocatoria_id = ${convocatoria.id} and p.estado != 'borrador'
         )`.mapWith(Number),
         postulacionesEnviadas: sql<number>`(
           select count(*) from postulacion p
-          where p.concurso_id = ${concurso.id} and p.estado = 'enviado'
+          where p.convocatoria_id = ${convocatoria.id} and p.estado = 'enviado'
         )`.mapWith(Number),
         postulacionesAprobadas: sql<number>`(
           select count(*) from postulacion p
-          where p.concurso_id = ${concurso.id}
+          where p.convocatoria_id = ${convocatoria.id}
           and p.estado in ('en_evaluacion', 'calificado', 'ganador', 'no_seleccionado')
         )`.mapWith(Number),
         totalCalificaciones: sql<number>`(
           select count(*) from calificacion c
           inner join postulacion p on p.id = c.postulacion_id
-          where p.concurso_id = ${concurso.id}
+          where p.convocatoria_id = ${convocatoria.id}
         )`.mapWith(Number),
         calificacionesAprobadas: sql<number>`(
           select count(*) from calificacion c
           inner join postulacion p on p.id = c.postulacion_id
-          where p.concurso_id = ${concurso.id} and c.estado = 'aprobado'
+          where p.convocatoria_id = ${convocatoria.id} and c.estado = 'aprobado'
         )`.mapWith(Number),
         diasParaCerrar: sql<number | null>`case
-          when ${concurso.estado} = 'publicado' then
-            (coalesce(${concurso.fechaCierreEfectiva}, ${concurso.fechaCierrePostulacion}) - current_date)::int
+          when ${convocatoria.estado} = 'publicado' then
+            (coalesce(${convocatoria.fechaCierreEfectiva}, ${convocatoria.fechaCierrePostulacion}) - current_date)::int
           else null
         end`,
       })
-      .from(concurso)
-      .innerJoin(responsableConcurso, eq(responsableConcurso.concursoId, concurso.id))
-      .where(eq(responsableConcurso.usuarioId, usuarioId))
-      .orderBy(desc(concurso.createdAt));
+      .from(convocatoria)
+      .innerJoin(responsableConvocatoria, eq(responsableConvocatoria.convocatoriaId, convocatoria.id))
+      .where(eq(responsableConvocatoria.usuarioId, usuarioId))
+      .orderBy(desc(convocatoria.createdAt));
   }
 
-  // distribucion de estados de postulaciones en los concursos del responsable
+  // distribucion de estados de postulaciones en las convocatorias del responsable
   async getResponsableDistribucionEstados(usuarioId: number) {
     return this.db
       .select({
@@ -271,8 +271,8 @@ export class DashboardRepository {
         total: count(),
       })
       .from(postulacion)
-      .innerJoin(responsableConcurso, eq(responsableConcurso.concursoId, postulacion.concursoId))
-      .where(eq(responsableConcurso.usuarioId, usuarioId))
+      .innerJoin(responsableConvocatoria, eq(responsableConvocatoria.convocatoriaId, postulacion.convocatoriaId))
+      .where(eq(responsableConvocatoria.usuarioId, usuarioId))
       .groupBy(postulacion.estado);
   }
 
@@ -280,11 +280,11 @@ export class DashboardRepository {
 
   // KPIs principales para un evaluador
   async getEvaluadorKpis(evaluadorId: number) {
-    // concursos asignados
-    const [concursosRow] = await this.db
+    // convocatorias asignadas
+    const [convocatoriasRow] = await this.db
       .select({ count: count() })
-      .from(evaluadorConcurso)
-      .where(eq(evaluadorConcurso.evaluadorId, evaluadorId));
+      .from(evaluadorConvocatoria)
+      .where(eq(evaluadorConvocatoria.evaluadorId, evaluadorId));
 
     // postulaciones asignadas pendientes de calificar (sin calificacion completada/aprobada)
     const [pendientesRow] = await this.db
@@ -314,7 +314,7 @@ export class DashboardRepository {
       .where(eq(calificacion.evaluadorId, evaluadorId));
 
     return {
-      concursosAsignados: Number(concursosRow.count),
+      convocatoriasAsignadas: Number(convocatoriasRow.count),
       postulacionesPorCalificar: Number(pendientesRow.count),
       calificacionesEnProgreso: estadoCounts.enProgreso,
       calificacionesCompletadas: estadoCounts.completadas,
@@ -328,15 +328,15 @@ export class DashboardRepository {
     return this.db
       .select({
         postulacionId: postulacion.id,
-        concursoId: concurso.id,
-        concursoNombre: concurso.nombre,
+        convocatoriaId: convocatoria.id,
+        convocatoriaNombre: convocatoria.nombre,
         empresaNombre: empresa.razonSocial,
         estadoCalificacion: calificacion.estado,
       })
       .from(asignacionEvaluador)
       .innerJoin(postulacion, eq(postulacion.id, asignacionEvaluador.postulacionId))
       .innerJoin(empresa, eq(empresa.id, postulacion.empresaId))
-      .innerJoin(concurso, eq(concurso.id, postulacion.concursoId))
+      .innerJoin(convocatoria, eq(convocatoria.id, postulacion.convocatoriaId))
       .leftJoin(calificacion, and(
         eq(calificacion.postulacionId, asignacionEvaluador.postulacionId),
         eq(calificacion.evaluadorId, asignacionEvaluador.evaluadorId),
@@ -356,15 +356,15 @@ export class DashboardRepository {
       .select({
         calificacionId: calificacion.id,
         postulacionId: postulacion.id,
-        concursoId: concurso.id,
-        concursoNombre: concurso.nombre,
+        convocatoriaId: convocatoria.id,
+        convocatoriaNombre: convocatoria.nombre,
         empresaNombre: empresa.razonSocial,
         comentarioResponsable: calificacion.comentarioResponsable,
       })
       .from(calificacion)
       .innerJoin(postulacion, eq(postulacion.id, calificacion.postulacionId))
       .innerJoin(empresa, eq(empresa.id, postulacion.empresaId))
-      .innerJoin(concurso, eq(concurso.id, postulacion.concursoId))
+      .innerJoin(convocatoria, eq(convocatoria.id, postulacion.convocatoriaId))
       .where(and(
         eq(calificacion.evaluadorId, evaluadorId),
         eq(calificacion.estado, 'devuelto'),
@@ -372,47 +372,47 @@ export class DashboardRepository {
       .orderBy(desc(calificacion.updatedAt));
   }
 
-  // progreso por concurso asignado: counts agregados de calificaciones por estado
-  async getEvaluadorProgresoPorConcurso(evaluadorId: number) {
+  // progreso por convocatoria asignada: counts agregados de calificaciones por estado
+  async getEvaluadorProgresoPorConvocatoria(evaluadorId: number) {
     return this.db
       .select({
-        concursoId: concurso.id,
-        concursoNombre: concurso.nombre,
+        convocatoriaId: convocatoria.id,
+        convocatoriaNombre: convocatoria.nombre,
         totalAsignadas: sql<number>`(
           select count(*) from asignacion_evaluador ae
           inner join postulacion p on p.id = ae.postulacion_id
-          where ae.evaluador_id = ${evaluadorId} and p.concurso_id = ${concurso.id}
+          where ae.evaluador_id = ${evaluadorId} and p.convocatoria_id = ${convocatoria.id}
         )`.mapWith(Number),
         pendientes: sql<number>`(
           select count(*) from asignacion_evaluador ae
           inner join postulacion p on p.id = ae.postulacion_id
           left join calificacion c on c.postulacion_id = p.id and c.evaluador_id = ae.evaluador_id
-          where ae.evaluador_id = ${evaluadorId} and p.concurso_id = ${concurso.id} and c.id is null
+          where ae.evaluador_id = ${evaluadorId} and p.convocatoria_id = ${convocatoria.id} and c.id is null
         )`.mapWith(Number),
         enProgreso: sql<number>`(
           select count(*) from calificacion c
           inner join postulacion p on p.id = c.postulacion_id
-          where c.evaluador_id = ${evaluadorId} and p.concurso_id = ${concurso.id} and c.estado = 'en_progreso'
+          where c.evaluador_id = ${evaluadorId} and p.convocatoria_id = ${convocatoria.id} and c.estado = 'en_progreso'
         )`.mapWith(Number),
         completadas: sql<number>`(
           select count(*) from calificacion c
           inner join postulacion p on p.id = c.postulacion_id
-          where c.evaluador_id = ${evaluadorId} and p.concurso_id = ${concurso.id} and c.estado = 'completado'
+          where c.evaluador_id = ${evaluadorId} and p.convocatoria_id = ${convocatoria.id} and c.estado = 'completado'
         )`.mapWith(Number),
         aprobadas: sql<number>`(
           select count(*) from calificacion c
           inner join postulacion p on p.id = c.postulacion_id
-          where c.evaluador_id = ${evaluadorId} and p.concurso_id = ${concurso.id} and c.estado = 'aprobado'
+          where c.evaluador_id = ${evaluadorId} and p.convocatoria_id = ${convocatoria.id} and c.estado = 'aprobado'
         )`.mapWith(Number),
         devueltas: sql<number>`(
           select count(*) from calificacion c
           inner join postulacion p on p.id = c.postulacion_id
-          where c.evaluador_id = ${evaluadorId} and p.concurso_id = ${concurso.id} and c.estado = 'devuelto'
+          where c.evaluador_id = ${evaluadorId} and p.convocatoria_id = ${convocatoria.id} and c.estado = 'devuelto'
         )`.mapWith(Number),
       })
-      .from(evaluadorConcurso)
-      .innerJoin(concurso, eq(concurso.id, evaluadorConcurso.concursoId))
-      .where(eq(evaluadorConcurso.evaluadorId, evaluadorId))
-      .orderBy(desc(concurso.createdAt));
+      .from(evaluadorConvocatoria)
+      .innerJoin(convocatoria, eq(convocatoria.id, evaluadorConvocatoria.convocatoriaId))
+      .where(eq(evaluadorConvocatoria.evaluadorId, evaluadorId))
+      .orderBy(desc(convocatoria.createdAt));
   }
 }

@@ -11,11 +11,11 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
-import { EstadoConcurso } from "@superstars/shared";
+import { EstadoConvocatoria } from "@superstars/shared";
 import type {
   ResponsablePostulacionPendiente,
   ResponsableCalificacionPendiente,
-  ResponsableConcursoResumenItem,
+  ResponsableConvocatoriaResumenItem,
 } from "@superstars/shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -103,7 +103,7 @@ export function ResponsableDashboard({ nombre }: Props) {
 
   // alertas a mostrar arriba (solo aparecen si hay algo concreto que avisar)
   const tieneAlertasUrgentes =
-    data.concursosProximosACerrar > 0 ||
+    data.convocatoriasProximasACerrar > 0 ||
     data.postulacionesPendientesLista.some((p) => daysSince(p.fechaEnvio) >= 7);
 
   // descripcion contextual del header segun el trabajo pendiente total
@@ -124,7 +124,7 @@ export function ResponsableDashboard({ nombre }: Props) {
       {/* alertas urgentes solo si hay algo accionable */}
       {tieneAlertasUrgentes && (
         <AlertasUrgentes
-          concursosProximos={data.concursosProximosACerrar}
+          convocatoriasProximas={data.convocatoriasProximasACerrar}
           postulacionesViejas={
             data.postulacionesPendientesLista.filter(
               (p) => daysSince(p.fechaEnvio) >= 7,
@@ -136,16 +136,16 @@ export function ResponsableDashboard({ nombre }: Props) {
       {/* KPIs */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
-          title="Mis concursos"
-          value={data.totalMisConcursos}
+          title="Mis convocatorias"
+          value={data.totalMisConvocatorias}
           description={
-            data.misConcursosActivos > 0
-              ? `${data.misConcursosActivos} ${data.misConcursosActivos === 1 ? "activo" : "activos"}`
+            data.misConvocatoriasActivas > 0
+              ? `${data.misConvocatoriasActivas} ${data.misConvocatoriasActivas === 1 ? "activo" : "activas"}`
               : "Ninguno activo"
           }
           icon={<Icon icon="ph:trophy-duotone" className="size-5" />}
           accent="primary"
-          href="/dashboard/concursos"
+          href="/dashboard/convocatorias"
         />
         <KpiCard
           title="Por revisar"
@@ -163,10 +163,10 @@ export function ResponsableDashboard({ nombre }: Props) {
         />
         <KpiCard
           title="Próximos cierres"
-          value={data.concursosProximosACerrar}
-          description="Concursos cierran en 7 días"
+          value={data.convocatoriasProximasACerrar}
+          description="Convocatorias cierran en 7 días"
           icon={<Icon icon="ph:clock-countdown-duotone" className="size-5" />}
-          accent={data.concursosProximosACerrar > 0 ? "error" : "primary"}
+          accent={data.convocatoriasProximasACerrar > 0 ? "error" : "primary"}
         />
       </div>
 
@@ -176,8 +176,8 @@ export function ResponsableDashboard({ nombre }: Props) {
         <CalificacionesPendientesCard items={data.calificacionesPendientesLista} />
       </div>
 
-      {/* mis concursos en curso (cards) */}
-      <ConcursosResumenSection items={data.misConcursosResumen} />
+      {/* mis convocatorias en curso (cards) */}
+      <ConvocatoriasResumenSection items={data.misConvocatoriasResumen} />
 
       {/* grafico de distribucion */}
       {distribucionData.length > 0 && (
@@ -227,16 +227,16 @@ export function ResponsableDashboard({ nombre }: Props) {
 
 // banda de alertas urgentes (solo si hay algo)
 function AlertasUrgentes({
-  concursosProximos,
+  convocatoriasProximas,
   postulacionesViejas,
 }: {
-  concursosProximos: number;
+  convocatoriasProximas: number;
   postulacionesViejas: number;
 }) {
   const mensajes: string[] = [];
-  if (concursosProximos > 0) {
+  if (convocatoriasProximas > 0) {
     mensajes.push(
-      `${concursosProximos} ${concursosProximos === 1 ? "concurso cierra" : "concursos cierran"} esta semana`,
+      `${convocatoriasProximas} ${convocatoriasProximas === 1 ? "convocatoria cierra" : "convocatorias cierran"} esta semana`,
     );
   }
   if (postulacionesViejas > 0) {
@@ -291,7 +291,7 @@ function PostulacionesPendientesCard({
               return (
                 <Link
                   key={p.postulacionId}
-                  href={`/dashboard/concursos/${p.concursoId}/postulaciones/${p.postulacionId}`}
+                  href={`/dashboard/convocatorias/${p.convocatoriaId}/postulaciones/${p.postulacionId}`}
                   className="flex items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-secondary-50"
                 >
                   <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-100">
@@ -305,7 +305,7 @@ function PostulacionesPendientesCard({
                       {p.empresaNombre}
                     </p>
                     <p className="truncate text-xs text-secondary-500">
-                      {p.concursoNombre}
+                      {p.convocatoriaNombre}
                     </p>
                   </div>
                   <div className="shrink-0">{urgenciaBadge(dias)}</div>
@@ -353,7 +353,7 @@ function CalificacionesPendientesCard({
               return (
                 <Link
                   key={c.calificacionId}
-                  href={`/dashboard/concursos/${c.concursoId}/postulaciones/${c.postulacionId}/calificaciones/${c.calificacionId}`}
+                  href={`/dashboard/convocatorias/${c.convocatoriaId}/postulaciones/${c.postulacionId}/calificaciones/${c.calificacionId}`}
                   className="flex items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-secondary-50"
                 >
                   <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-100">
@@ -376,7 +376,7 @@ function CalificacionesPendientesCard({
               );
             })}
             <Link
-              href="/dashboard/concursos"
+              href="/dashboard/convocatorias"
               className="block pt-1 text-center text-sm font-medium text-primary-700 hover:text-primary-800"
             >
               Ver todas →
@@ -388,11 +388,11 @@ function CalificacionesPendientesCard({
   );
 }
 
-// resumen de mis concursos como cards con barras de progreso
-function ConcursosResumenSection({
+// resumen de mis convocatorias como cards con barras de progreso
+function ConvocatoriasResumenSection({
   items,
 }: {
-  items: ResponsableConcursoResumenItem[];
+  items: ResponsableConvocatoriaResumenItem[];
 }) {
   if (items.length === 0) {
     return (
@@ -400,11 +400,11 @@ function ConcursosResumenSection({
         <CardContent className="py-12">
           <EmptyTaskState
             icon="ph:trophy-duotone"
-            title="No tenés concursos asignados"
-            description="Cuando un administrador te asigne como responsable de un concurso, aparecerá aquí."
+            title="No tenés convocatorias asignadas"
+            description="Cuando un administrador te asigne como responsable de una convocatoria, aparecerá aquí."
             action={
               <Button asChild variant="outline" size="sm">
-                <Link href="/dashboard/concursos">Ver concursos</Link>
+                <Link href="/dashboard/convocatorias">Ver convocatorias</Link>
               </Button>
             }
           />
@@ -416,47 +416,47 @@ function ConcursosResumenSection({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Mis concursos</CardTitle>
+        <CardTitle className="text-base">Mis convocatorias</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-4 sm:grid-cols-2">
         {items.map((c) => (
-          <ConcursoMiniCard key={c.id} concurso={c} />
+          <ConvocatoriaMiniCard key={c.id} convocatoria={c} />
         ))}
       </CardContent>
     </Card>
   );
 }
 
-// card individual de concurso con progreso de postulaciones y calificaciones
-function ConcursoMiniCard({
-  concurso,
+// card individual de convocatoria con progreso de postulaciones y calificaciones
+function ConvocatoriaMiniCard({
+  convocatoria,
 }: {
-  concurso: ResponsableConcursoResumenItem;
+  convocatoria: ResponsableConvocatoriaResumenItem;
 }) {
   const progresoPost =
-    concurso.totalPostulaciones > 0
+    convocatoria.totalPostulaciones > 0
       ? Math.round(
-          (concurso.postulacionesAprobadas / concurso.totalPostulaciones) * 100,
+          (convocatoria.postulacionesAprobadas / convocatoria.totalPostulaciones) * 100,
         )
       : 0;
   const progresoCalif =
-    concurso.totalCalificaciones > 0
+    convocatoria.totalCalificaciones > 0
       ? Math.round(
-          (concurso.calificacionesAprobadas / concurso.totalCalificaciones) *
+          (convocatoria.calificacionesAprobadas / convocatoria.totalCalificaciones) *
             100,
         )
       : 0;
 
   return (
     <Link
-      href={`/dashboard/concursos/${concurso.id}`}
+      href={`/dashboard/convocatorias/${convocatoria.id}`}
       className="block rounded-lg border p-4 transition-colors hover:bg-secondary-50"
     >
       <div className="flex items-start justify-between gap-2">
         <h3 className="line-clamp-2 text-sm font-semibold text-secondary-900">
-          {concurso.nombre}
+          {convocatoria.nombre}
         </h3>
-        <StateBadge tipo="concurso" valor={concurso.estado as EstadoConcurso} />
+        <StateBadge tipo="convocatoria" valor={convocatoria.estado as EstadoConvocatoria} />
       </div>
 
       <div className="mt-3 space-y-2 text-xs">
@@ -465,19 +465,19 @@ function ConcursoMiniCard({
           <div className="mb-1 flex items-center justify-between">
             <span className="text-secondary-600">Postulaciones aprobadas</span>
             <span className="font-medium text-secondary-900">
-              {concurso.postulacionesAprobadas}/{concurso.totalPostulaciones}
+              {convocatoria.postulacionesAprobadas}/{convocatoria.totalPostulaciones}
             </span>
           </div>
           <ProgressBar value={progresoPost} />
         </div>
 
         {/* progreso calificaciones (solo si ya hay alguna) */}
-        {concurso.totalCalificaciones > 0 && (
+        {convocatoria.totalCalificaciones > 0 && (
           <div>
             <div className="mb-1 flex items-center justify-between">
               <span className="text-secondary-600">Calificaciones aprobadas</span>
               <span className="font-medium text-secondary-900">
-                {concurso.calificacionesAprobadas}/{concurso.totalCalificaciones}
+                {convocatoria.calificacionesAprobadas}/{convocatoria.totalCalificaciones}
               </span>
             </div>
             <ProgressBar value={progresoCalif} accent="success" />
@@ -487,15 +487,15 @@ function ConcursoMiniCard({
 
       <div className="mt-3 flex items-center justify-between text-xs text-secondary-500">
         <span>
-          {concurso.diasParaCerrar !== null
-            ? concurso.diasParaCerrar > 0
-              ? `Cierra en ${concurso.diasParaCerrar} días`
+          {convocatoria.diasParaCerrar !== null
+            ? convocatoria.diasParaCerrar > 0
+              ? `Cierra en ${convocatoria.diasParaCerrar} días`
               : "Cerrado"
-            : `Cierre: ${formatShortMonth(concurso.fechaCierreReal)}`}
+            : `Cierre: ${formatShortMonth(convocatoria.fechaCierreReal)}`}
         </span>
-        {concurso.postulacionesEnviadas > 0 && (
+        {convocatoria.postulacionesEnviadas > 0 && (
           <Badge className="border-transparent bg-warning-100 text-warning-700">
-            {concurso.postulacionesEnviadas} sin revisar
+            {convocatoria.postulacionesEnviadas} sin revisar
           </Badge>
         )}
       </div>

@@ -1,7 +1,7 @@
-import { EstadoConcurso, EstadoPostulacion, EstadoCalificacion, EstadoPublicacion } from '../enums';
+import { EstadoConvocatoria, EstadoPostulacion, EstadoCalificacion, EstadoPublicacion } from '../enums';
 
-// Estados de concurso
-export const ESTADOS_CONCURSO = Object.values(EstadoConcurso);
+// Estados de convocatoria
+export const ESTADOS_CONVOCATORIA = Object.values(EstadoConvocatoria);
 
 // Estados de postulación
 export const ESTADOS_POSTULACION = Object.values(EstadoPostulacion);
@@ -13,8 +13,8 @@ export const ESTADOS_POSTULACION_TERMINALES = [
   EstadoPostulacion.NO_SELECCIONADO,
 ] as const;
 
-// Estado visible en la web pública (solo concursos abiertos para postular)
-export const ESTADO_CONCURSO_PUBLICO = EstadoConcurso.PUBLICADO;
+// Estado visible en la web pública (solo convocatorias abiertas para postular)
+export const ESTADO_CONVOCATORIA_PUBLICO = EstadoConvocatoria.PUBLICADO;
 
 // Estados de calificación
 export const ESTADOS_CALIFICACION = Object.values(EstadoCalificacion);

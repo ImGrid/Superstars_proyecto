@@ -6,7 +6,7 @@ import { Icon } from "@iconify/react";
 import type {
   EvaluadorPostulacionPendiente,
   EvaluadorCalificacionDevuelta,
-  EvaluadorConcursoProgreso,
+  EvaluadorConvocatoriaProgreso,
 } from "@superstars/shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -50,8 +50,8 @@ export function EvaluadorDashboard({ nombre }: Props) {
       {/* KPIs (3 cards) */}
       <div className="grid gap-4 sm:grid-cols-3">
         <KpiCard
-          title="Concursos asignados"
-          value={data.concursosAsignados}
+          title="Convocatorias asignadas"
+          value={data.convocatoriasAsignadas}
           description="Donde sos evaluador"
           icon={<Icon icon="ph:trophy-duotone" className="size-5" />}
           accent="primary"
@@ -76,9 +76,9 @@ export function EvaluadorDashboard({ nombre }: Props) {
       {/* trabajo pendiente: lista de postulaciones por calificar */}
       <PostulacionesPorCalificarCard items={data.postulacionesPorCalificarLista} />
 
-      {/* progreso por concurso (gráfico de barras inline) */}
-      {data.progresoPorConcurso.length > 0 && (
-        <ProgresoPorConcursoCard items={data.progresoPorConcurso} />
+      {/* progreso por convocatoria (gráfico de barras inline) */}
+      {data.progresoPorConvocatoria.length > 0 && (
+        <ProgresoPorConvocatoriaCard items={data.progresoPorConvocatoria} />
       )}
     </div>
   );
@@ -115,14 +115,14 @@ function DevolucionesAlerta({
                 className="rounded-md border border-warning-200 bg-white p-3"
               >
                 <Link
-                  href={`/dashboard/mis-evaluaciones/${c.concursoId}/${c.postulacionId}`}
+                  href={`/dashboard/mis-evaluaciones/${c.convocatoriaId}/${c.postulacionId}`}
                   className="block"
                 >
                   <p className="text-sm font-medium text-secondary-900">
                     {c.empresaNombre}
                   </p>
                   <p className="text-xs text-secondary-500">
-                    {c.concursoNombre}
+                    {c.convocatoriaNombre}
                   </p>
                   {c.comentarioResponsable && (
                     <p className="mt-1.5 line-clamp-2 text-xs italic text-secondary-700">
@@ -174,7 +174,7 @@ function PostulacionesPorCalificarCard({
             {items.map((p) => (
               <Link
                 key={p.postulacionId}
-                href={`/dashboard/mis-evaluaciones/${p.concursoId}/${p.postulacionId}`}
+                href={`/dashboard/mis-evaluaciones/${p.convocatoriaId}/${p.postulacionId}`}
                 className="flex items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-secondary-50"
               >
                 <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-100">
@@ -188,7 +188,7 @@ function PostulacionesPorCalificarCard({
                     {p.empresaNombre}
                   </p>
                   <p className="truncate text-xs text-secondary-500">
-                    {p.concursoNombre}
+                    {p.convocatoriaNombre}
                   </p>
                 </div>
                 <div className="shrink-0">
@@ -223,11 +223,11 @@ function PostulacionesPorCalificarCard({
   );
 }
 
-// progreso por concurso: barlist (mejor que un grafico para listas chicas)
-function ProgresoPorConcursoCard({
+// progreso por convocatoria: barlist (mejor que un grafico para listas chicas)
+function ProgresoPorConvocatoriaCard({
   items,
 }: {
-  items: EvaluadorConcursoProgreso[];
+  items: EvaluadorConvocatoriaProgreso[];
 }) {
   // calcular el maximo para que las barras sean comparativas
   const maxAsignadas = Math.max(...items.map((i) => i.totalAsignadas), 1);
@@ -235,7 +235,7 @@ function ProgresoPorConcursoCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Mi progreso por concurso</CardTitle>
+        <CardTitle className="text-base">Mi progreso por convocatoria</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {items.map((c) => {
@@ -247,10 +247,10 @@ function ProgresoPorConcursoCard({
           const anchoBarra = (c.totalAsignadas / maxAsignadas) * 100;
 
           return (
-            <div key={c.concursoId}>
+            <div key={c.convocatoriaId}>
               <div className="mb-1.5 flex items-center justify-between text-sm">
                 <span className="truncate font-medium text-secondary-900">
-                  {c.concursoNombre}
+                  {c.convocatoriaNombre}
                 </span>
                 <span className="ml-2 shrink-0 text-secondary-600">
                   {completadas}/{c.totalAsignadas}
