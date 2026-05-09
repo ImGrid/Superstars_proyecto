@@ -9,6 +9,7 @@ import type {
   PublicPublicacionResponse,
   PublicResultadosResponse,
   CategoriaPublicacionResponse,
+  PublicHistoriaExitoItem,
 } from "@superstars/shared";
 
 // --- Convocatorias publicas ---
@@ -63,5 +64,13 @@ export function listPublicCategorias() {
     .get<CategoriaPublicacionResponse[]>(
       "/public/publicaciones/categorias",
     )
+    .then((r) => r.data);
+}
+
+// --- Historias de exito publicas (landing) ---
+
+export function listPublicHistoriasExito() {
+  return apiClient
+    .get<PublicHistoriaExitoItem[]>("/public/historias-exito")
     .then((r) => r.data);
 }

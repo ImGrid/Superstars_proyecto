@@ -19,7 +19,7 @@ export const registerSchema = z.object({
 // Verificacion del codigo de 6 digitos enviado al email
 export const verifyEmailSchema = z.object({
   email: z.string().email(),
-  codigo: z.string().regex(/^\d{6}$/, 'El codigo debe ser de 6 digitos numericos'),
+  codigo: z.string().regex(/^\d{6}$/, 'El código debe ser de 6 dígitos numéricos'),
 });
 
 // Reenvio del codigo de verificacion. Solo necesita el email (anti-enumeration:
@@ -38,7 +38,7 @@ export const forgotPasswordSchema = z.object({
 // (misma politica de password que registro: min 8 caracteres)
 export const resetPasswordSchema = z.object({
   email: z.string().email(),
-  codigo: z.string().regex(/^\d{6}$/, 'El codigo debe ser de 6 digitos numericos'),
+  codigo: z.string().regex(/^\d{6}$/, 'El código debe ser de 6 dígitos numéricos'),
   nuevaPassword: z.string().min(8),
 });
 

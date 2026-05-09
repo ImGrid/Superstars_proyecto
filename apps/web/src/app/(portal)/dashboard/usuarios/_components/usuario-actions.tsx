@@ -75,7 +75,7 @@ export function UsuarioActions({ usuario }: UsuarioActionsProps) {
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         title="Eliminar usuario"
-        description={`Se eliminara permanentemente a "${usuario.nombre}". Si tiene datos asociados, considera desactivarlo en su lugar.`}
+        description={`Se eliminará permanentemente a "${usuario.nombre}". Si tiene datos asociados, considera desactivarlo en su lugar.`}
         confirmLabel="Eliminar"
         onConfirm={() => deleteMutation.mutate()}
         isLoading={deleteMutation.isPending}

@@ -199,7 +199,7 @@ export function PublicacionImageUpload({
         open={removeOpen}
         onOpenChange={setRemoveOpen}
         title="Eliminar imagen"
-        description="Se eliminara la imagen de portada de esta publicacion."
+        description="Se eliminará la imagen de portada de esta publicación."
         confirmLabel="Eliminar"
         onConfirm={() => removeMutation.mutate()}
         isLoading={removeMutation.isPending}

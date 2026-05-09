@@ -294,7 +294,7 @@ export default function PostulacionDetallePage({ params }: PageProps) {
                               }
                             >
                               {c.estado === EstadoCalificacion.EN_PROGRESO && "En progreso"}
-                              {c.estado === EstadoCalificacion.COMPLETADO && "Pendiente de revision"}
+                              {c.estado === EstadoCalificacion.COMPLETADO && "Pendiente de revisión"}
                               {c.estado === EstadoCalificacion.APROBADO && "Aprobado"}
                               {c.estado === EstadoCalificacion.DEVUELTO && "Devuelto"}
                             </Badge>

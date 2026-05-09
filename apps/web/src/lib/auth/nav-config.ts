@@ -16,6 +16,7 @@ const navByRole: Record<RolUsuario, NavItem[]> = {
     { label: "Postulaciones", href: "/dashboard/postulaciones", icon: "ph:file-text-duotone" },
     { label: "Resultados", href: "/dashboard/resultados", icon: "ph:chart-line-up-duotone" },
     { label: "Publicaciones", href: "/dashboard/publicaciones", icon: "ph:newspaper-duotone" },
+    { label: "Historias de éxito", href: "/dashboard/historias-exito", icon: "ph:sparkle-duotone" },
     { label: "FAQ", href: "/dashboard/faq", icon: "ph:question-duotone" },
   ],
 

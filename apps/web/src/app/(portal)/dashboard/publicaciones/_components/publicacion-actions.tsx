@@ -87,14 +87,14 @@ export function PublicacionActions({ publicacion }: PublicacionActionsProps) {
 
   function onError(error: any) {
     const msg =
-      error.response?.data?.message ?? "Error al realizar la accion";
+      error.response?.data?.message ?? "Error al realizar la acción";
     toast.error(Array.isArray(msg) ? msg[0] : msg);
   }
 
   const deleteMutation = useMutation({
     mutationFn: () => deletePublicacion(publicacion.id),
     onSuccess: () => {
-      onSuccess("Publicacion eliminada correctamente");
+      onSuccess("Publicación eliminada correctamente");
       setDeleteOpen(false);
     },
     onError: (error: any) => {
@@ -106,7 +106,7 @@ export function PublicacionActions({ publicacion }: PublicacionActionsProps) {
   const publicarMutation = useMutation({
     mutationFn: () => publicarPublicacion(publicacion.id),
     onSuccess: () => {
-      onSuccess("Publicacion publicada correctamente");
+      onSuccess("Publicación publicada correctamente");
       setPublicarOpen(false);
     },
     onError: (error: any) => {
@@ -121,7 +121,7 @@ export function PublicacionActions({ publicacion }: PublicacionActionsProps) {
         fechaPublicacion: new Date(fechaProgramada).toISOString(),
       }),
     onSuccess: () => {
-      onSuccess("Publicacion programada correctamente");
+      onSuccess("Publicación programada correctamente");
       setProgramarOpen(false);
       setFechaProgramada("");
     },
@@ -134,7 +134,7 @@ export function PublicacionActions({ publicacion }: PublicacionActionsProps) {
   const archivarMutation = useMutation({
     mutationFn: () => archivarPublicacion(publicacion.id),
     onSuccess: () => {
-      onSuccess("Publicacion archivada correctamente");
+      onSuccess("Publicación archivada correctamente");
       setArchivarOpen(false);
     },
     onError: (error: any) => {
@@ -146,7 +146,7 @@ export function PublicacionActions({ publicacion }: PublicacionActionsProps) {
   const republicarMutation = useMutation({
     mutationFn: () => republicarPublicacion(publicacion.id),
     onSuccess: () => {
-      onSuccess("Publicacion republicada correctamente");
+      onSuccess("Publicación republicada correctamente");
       setRepublicarOpen(false);
     },
     onError: (error: any) => {

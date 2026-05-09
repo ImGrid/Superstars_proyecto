@@ -90,7 +90,7 @@ export const SeccionItem = memo(function SeccionItem({
               value={seccion.titulo}
               onChange={handleTituloChange}
               className="h-8 max-w-xs font-semibold text-secondary-900"
-              placeholder="Titulo de la seccion"
+              placeholder="Título de la sección"
             />
           ) : (
             <span className="text-sm font-semibold text-secondary-900">

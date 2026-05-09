@@ -286,8 +286,10 @@ const camposEmpresa: FormField[] = [
   {
     id: 'empresa_tipo_registros',
     tipo: 'seleccion_unica',
-    etiqueta: 'Registros productivos y financieros',
-    descripcion: '¿Su empresa cuenta con registros productivos y financieros?',
+    // La pregunta clara va como etiqueta para que el usuario la lea ANTES del input.
+    // NN/G: la etiqueta tiene mayor peso visual que la descripcion; cuando la
+    // descripcion es la pregunta real, no debe quedar debajo del input como hint.
+    etiqueta: '¿Tu empresa lleva registros productivos y financieros?',
     requerido: true,
     orden: 18,
     fijo: true,
@@ -299,8 +301,7 @@ const camposEmpresa: FormField[] = [
   {
     id: 'empresa_metodo_registros',
     tipo: 'seleccion_unica',
-    etiqueta: 'Método de elaboración de registros',
-    descripcion: '¿Cómo son elaborados sus registros?',
+    etiqueta: '¿Cómo elaboras tus registros?',
     requerido: true,
     orden: 19,
     fijo: true,

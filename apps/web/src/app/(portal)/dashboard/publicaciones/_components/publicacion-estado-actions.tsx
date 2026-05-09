@@ -169,7 +169,7 @@ function BorradorActions({
     onSuccess: () => {
       setPublicarOpen(false);
       setFechaExpiracionPublicar("");
-      onSuccess("Publicacion publicada correctamente");
+      onSuccess("Publicación publicada correctamente");
     },
     onError: (error) => {
       setPublicarOpen(false);
@@ -189,7 +189,7 @@ function BorradorActions({
       setProgramarOpen(false);
       setFechaProgramada("");
       setFechaExpiracionProgramar("");
-      onSuccess("Publicacion programada correctamente");
+      onSuccess("Publicación programada correctamente");
     },
     onError: (error) => {
       setProgramarOpen(false);

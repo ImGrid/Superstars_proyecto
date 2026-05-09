@@ -23,6 +23,7 @@ import { EvaluacionModule } from './modules/evaluacion/evaluacion.module';
 import { FaqModule } from './modules/faq/faq.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { NotificacionModule } from './modules/notificacion/notificacion.module';
+import { HistoriaExitoModule } from './modules/historia-exito/historia-exito.module';
 
 @Module({
   imports: [
@@ -91,6 +92,9 @@ import { NotificacionModule } from './modules/notificacion/notificacion.module';
 
     // Publicaciones (noticias, historias)
     PublicacionModule,
+
+    // Historias de exito (seccion landing publica)
+    HistoriaExitoModule,
 
     // Evaluacion (calificacion de postulaciones por jurados)
     EvaluacionModule,

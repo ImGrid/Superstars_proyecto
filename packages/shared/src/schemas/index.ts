@@ -47,6 +47,7 @@ export {
   updateConvocatoriaSchema,
   updateFechasConvocatoriaSchema,
   listConvocatoriasQuerySchema,
+  tipoListadoProponenteSchema,
   assignResponsableSchema,
   assignEvaluadorSchema,
   seleccionarGanadoresSchema,
@@ -54,6 +55,7 @@ export {
   type UpdateConvocatoriaDto,
   type UpdateFechasConvocatoriaDto,
   type ListConvocatoriasQueryDto,
+  type TipoListadoProponente,
   type AssignResponsableDto,
   type AssignEvaluadorDto,
   type SeleccionarGanadoresDto,
@@ -199,6 +201,21 @@ export {
 } from './faq.schema';
 
 export {
+  createHistoriaExitoSchema,
+  updateHistoriaExitoSchema,
+  toggleActivaHistoriaExitoSchema,
+  reorderHistoriasExitoSchema,
+  listHistoriasExitoQuerySchema,
+  type CreateHistoriaExitoDto,
+  type UpdateHistoriaExitoDto,
+  type ToggleActivaHistoriaExitoDto,
+  type ReorderHistoriasExitoDto,
+  type ListHistoriasExitoQueryDto,
+  type HistoriaExitoResponse,
+  type PublicHistoriaExitoItem,
+} from './historia-exito.schema';
+
+export {
   type AdminConvocatoriaResumenItem,
   type AdminDashboardStats,
   type ResponsablePostulacionPendiente,
@@ -209,4 +226,6 @@ export {
   type EvaluadorCalificacionDevuelta,
   type EvaluadorConvocatoriaProgreso,
   type EvaluadorDashboardStats,
+  type ProponenteConvocatoriaAbiertaItem,
+  type ProponenteDashboardStats,
 } from './dashboard.schema';

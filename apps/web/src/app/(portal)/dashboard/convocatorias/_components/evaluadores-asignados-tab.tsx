@@ -98,7 +98,7 @@ export function EvaluadoresAsignadosTab({
     mutationFn: (evaluadorId: number) =>
       assignEvaluadorPostulacion(convocatoriaId, postulacionId, evaluadorId),
     onSuccess: () => {
-      toast.success("Evaluador asignado a esta postulacion");
+      toast.success("Evaluador asignado a esta postulación");
       invalidar();
       setSelectedUserId("");
     },
@@ -115,7 +115,7 @@ export function EvaluadoresAsignadosTab({
     mutationFn: (evaluadorId: number) =>
       removeAsignacionEvaluador(convocatoriaId, postulacionId, evaluadorId),
     onSuccess: () => {
-      toast.success("Evaluador removido de esta postulacion");
+      toast.success("Evaluador removido de esta postulación");
       invalidar();
       setDeleteTarget(null);
     },
@@ -173,7 +173,7 @@ export function EvaluadoresAsignadosTab({
                 <SelectItem value="_empty" disabled>
                   {totalPool === 0
                     ? "No hay evaluadores en la convocatoria"
-                    : "Todos los evaluadores ya estan asignados"}
+                    : "Todos los evaluadores ya están asignados"}
                 </SelectItem>
               ) : (
                 disponibles.map((ev) => (
@@ -202,7 +202,7 @@ export function EvaluadoresAsignadosTab({
           <EmptyState
             icon="ph:user-check-duotone"
             title="Sin evaluadores asignados"
-            description="Asigna evaluadores de la convocatoria para que califiquen esta postulacion."
+            description="Asigna evaluadores de la convocatoria para que califiquen esta postulación."
           />
         ) : (
           <div className="rounded-md border">
@@ -211,7 +211,7 @@ export function EvaluadoresAsignadosTab({
                 <TableRow>
                   <TableHead>Evaluador</TableHead>
                   <TableHead>Email</TableHead>
-                  <TableHead>Estado calificacion</TableHead>
+                  <TableHead>Estado calificación</TableHead>
                   <TableHead>Asignado el</TableHead>
                   <TableHead className="w-12" />
                 </TableRow>
@@ -287,7 +287,7 @@ function CalificacionEstadoBadge({ calif }: { calif?: CalificacionListItem }) {
 
   const labels: Record<string, string> = {
     [EstadoCalificacion.EN_PROGRESO]: "En progreso",
-    [EstadoCalificacion.COMPLETADO]: "Pendiente revision",
+    [EstadoCalificacion.COMPLETADO]: "Pendiente revisión",
     [EstadoCalificacion.APROBADO]: "Aprobado",
     [EstadoCalificacion.DEVUELTO]: "Devuelto",
   };

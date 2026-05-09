@@ -8,6 +8,7 @@ import type {
   AdminDashboardStats,
   ResponsableDashboardStats,
   EvaluadorDashboardStats,
+  ProponenteDashboardStats,
   EstadoCalificacion,
 } from '@superstars/shared';
 import { DashboardRepository } from './dashboard.repository';
@@ -192,6 +193,62 @@ export class DashboardService {
         completadas: p.completadas,
         aprobadas: p.aprobadas,
         devueltas: p.devueltas,
+      })),
+    };
+  }
+
+  // ============== PROPONENTE ==============
+
+  async getProponenteStats(usuarioId: number): Promise<ProponenteDashboardStats> {
+    const kpis = await this.repo.getProponenteKpis(usuarioId);
+
+    // si no tiene empresa, no hay postulaciones que distribuir, ni resumen relevante.
+    // devolvemos un payload coherente que el frontend usa para mostrar la alerta de
+    // "registra tu empresa".
+    if (!kpis.empresaId) {
+      return {
+        convocatoriasAbiertas: kpis.convocatoriasAbiertas,
+        convocatoriasAnteriores: kpis.convocatoriasAnteriores,
+        totalMisPostulaciones: 0,
+        postulacionesObservadas: 0,
+        misPostulacionesPorEstado: this.emptyPostulacionRecord(),
+        tieneEmpresa: false,
+        empresaRazonSocial: null,
+        convocatoriasAbiertasResumen: [],
+      };
+    }
+
+    const [distribucionRows, abiertasResumen] = await Promise.all([
+      this.repo.getProponenteDistribucionEstados(kpis.empresaId),
+      this.repo.getProponenteConvocatoriasAbiertasResumen(kpis.empresaId),
+    ]);
+
+    const distribucion = this.emptyPostulacionRecord();
+    for (const row of distribucionRows) {
+      distribucion[row.estado as EstadoPostulacion] = Number(row.total);
+    }
+
+    const totalMisPostulaciones = distribucionRows.reduce(
+      (acc, row) => acc + Number(row.total),
+      0,
+    );
+
+    return {
+      convocatoriasAbiertas: kpis.convocatoriasAbiertas,
+      convocatoriasAnteriores: kpis.convocatoriasAnteriores,
+      totalMisPostulaciones,
+      postulacionesObservadas: distribucion[EstadoPostulacion.OBSERVADO],
+      misPostulacionesPorEstado: distribucion,
+      tieneEmpresa: true,
+      empresaRazonSocial: kpis.empresaRazonSocial,
+      convocatoriasAbiertasResumen: abiertasResumen.map((c) => ({
+        id: c.id,
+        nombre: c.nombre,
+        fechaCierreReal: c.fechaCierreEfectiva ?? c.fechaCierrePostulacion,
+        diasParaCerrar: c.diasParaCerrar,
+        monto: c.monto,
+        numeroGanadores: c.numeroGanadores,
+        yaPostule: c.yaPostule,
       })),
     };
   }

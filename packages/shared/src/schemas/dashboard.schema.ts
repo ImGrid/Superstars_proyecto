@@ -87,6 +87,38 @@ export interface ResponsableDashboardStats {
   distribucionEstadosPostulaciones: Record<EstadoPostulacion, number>;
 }
 
+// ====== PROPONENTE ======
+
+// Item de convocatoria abierta listo para postular (snapshot ligero para el dashboard)
+export interface ProponenteConvocatoriaAbiertaItem {
+  id: number;
+  nombre: string;
+  fechaCierreReal: string;
+  diasParaCerrar: number;
+  monto: string;
+  numeroGanadores: number;
+  yaPostule: boolean;
+}
+
+// Respuesta del endpoint GET /api/dashboard/proponente
+export interface ProponenteDashboardStats {
+  // KPIs principales
+  convocatoriasAbiertas: number;
+  convocatoriasAnteriores: number;
+  totalMisPostulaciones: number;
+  postulacionesObservadas: number;
+
+  // Distribucion de mis postulaciones por estado
+  misPostulacionesPorEstado: Record<EstadoPostulacion, number>;
+
+  // Datos del perfil de empresa para alertas
+  tieneEmpresa: boolean;
+  empresaRazonSocial: string | null;
+
+  // Resumen de las convocatorias abiertas mas relevantes (top N por cierre)
+  convocatoriasAbiertasResumen: ProponenteConvocatoriaAbiertaItem[];
+}
+
 // ====== EVALUADOR ======
 
 export interface EvaluadorPostulacionPendiente {

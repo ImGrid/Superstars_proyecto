@@ -18,11 +18,8 @@ import {
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import type { FieldRendererProps } from "./field-props";
-
-// valor especial para la opcion "Otra"
-const OTRA_VALUE = "__otra__";
+import { OTRA_VALUE, getOtraFieldId, OtraInput } from "./otra-input";
 
 export const SeleccionUnicaField = memo(function SeleccionUnicaField({
   campo,
@@ -31,7 +28,7 @@ export const SeleccionUnicaField = memo(function SeleccionUnicaField({
   if (campo.tipo !== "seleccion_unica") return null;
 
   const { opciones, permiteOtra, display } = campo;
-  const otraFieldId = `${campo.id}__otra`;
+  const otraFieldId = getOtraFieldId(campo.id);
 
   // dropdown mode
   if (display === "dropdown") {
@@ -75,16 +72,7 @@ export const SeleccionUnicaField = memo(function SeleccionUnicaField({
                 </SelectContent>
               </Select>
               {/* campo de texto para "Otra" */}
-              {permiteOtra && isOtra && (
-                <Input
-                  placeholder="Especifique..."
-                  className="mt-2"
-                  value={(form.watch(otraFieldId) as string) ?? ""}
-                  onChange={(e) =>
-                    form.setValue(otraFieldId, e.target.value, { shouldDirty: true })
-                  }
-                />
-              )}
+              {permiteOtra && isOtra && <OtraInput name={otraFieldId} />}
               {campo.descripcion && (
                 <FormDescription>{campo.descripcion}</FormDescription>
               )}
@@ -139,16 +127,7 @@ export const SeleccionUnicaField = memo(function SeleccionUnicaField({
                 )}
               </RadioGroup>
             </FormControl>
-            {permiteOtra && isOtra && (
-              <Input
-                placeholder="Especifique..."
-                className="mt-2"
-                value={(form.watch(otraFieldId) as string) ?? ""}
-                onChange={(e) =>
-                  form.setValue(otraFieldId, e.target.value, { shouldDirty: true })
-                }
-              />
-            )}
+            {permiteOtra && isOtra && <OtraInput name={otraFieldId} />}
             {campo.descripcion && (
               <FormDescription>{campo.descripcion}</FormDescription>
             )}

@@ -1,5 +1,6 @@
 import { z, type ZodTypeAny } from 'zod';
 import type { SchemaDefinition, FormField } from '../schemas/formulario.schema';
+import { countWords } from './word-count';
 
 export type ValidationMode = 'draft' | 'submit';
 
@@ -55,15 +56,15 @@ function buildFieldValidator(campo: FormField, mode: ValidationMode = 'submit'):
       if (campo.maxPalabras) {
         const max = campo.maxPalabras;
         return z.string().min(1, 'Campo obligatorio').refine(
-          (val) => val.split(/\s+/).filter(Boolean).length <= max,
-          { message: `Maximo ${max} palabras` },
+          (val) => countWords(val) <= max,
+          { message: `Máximo ${max} palabras` },
         );
       }
       return z.string().min(1, 'Campo obligatorio');
     }
 
     case 'numerico': {
-      let n = z.number({ invalid_type_error: 'Debe ser un numero' });
+      let n = z.number({ invalid_type_error: 'Debe ser un número' });
       if (campo.min !== undefined) n = n.min(campo.min);
       if (campo.max !== undefined) n = n.max(campo.max);
       return n;
@@ -72,7 +73,7 @@ function buildFieldValidator(campo: FormField, mode: ValidationMode = 'submit'):
     case 'seleccion_unica': {
       if (campo.permiteOtra) {
         // Acepta cualquier string (opciones definidas + "__otra__")
-        return z.string().min(1, 'Seleccione una opcion');
+        return z.string().min(1, 'Seleccione una opción');
       }
       const valores = campo.opciones.map(o => o.valor) as [string, ...string[]];
       return z.enum(valores);
@@ -99,7 +100,7 @@ function buildFieldValidator(campo: FormField, mode: ValidationMode = 'submit'):
         if (col.tipo === 'numerico') {
           colValidator = mode === 'draft'
             ? z.union([z.number(), z.string()])
-            : z.union([z.number(), z.string().regex(/^-?\d+(\.\d+)?$/, 'Debe ser un numero')]);
+            : z.union([z.number(), z.string().regex(/^-?\d+(\.\d+)?$/, 'Debe ser un número')]);
         } else {
           colValidator = z.string();
         }

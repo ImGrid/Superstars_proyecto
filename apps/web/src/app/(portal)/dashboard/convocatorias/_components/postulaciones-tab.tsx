@@ -225,10 +225,10 @@ export function PostulacionesTab({ convocatoriaId, estadoConvocatoria, numeroGan
             <Icon icon="ph:trophy-duotone" className="size-5 text-amber-600 shrink-0" />
             <div className="flex-1">
               <p className="text-sm font-medium text-amber-800">
-                Todas las postulaciones estan calificadas
+                Todas las postulaciones están calificadas
               </p>
               <p className="text-xs text-amber-600">
-                Selecciona hasta {numeroGanadores} ganador{numeroGanadores !== 1 ? "es" : ""} en la tabla y confirma la seleccion.
+                Selecciona hasta {numeroGanadores} ganador{numeroGanadores !== 1 ? "es" : ""} en la tabla y confirma la selección.
               </p>
             </div>
             <Button
@@ -265,7 +265,7 @@ export function PostulacionesTab({ convocatoriaId, estadoConvocatoria, numeroGan
                   <TableHead>Estado</TableHead>
                   <TableHead>Completado</TableHead>
                   <TableHead>Evaluadores</TableHead>
-                  <TableHead>Fecha envio</TableHead>
+                  <TableHead>Fecha envío</TableHead>
                   <TableHead>Puntaje</TableHead>
                   <TableHead className="text-right">Acciones</TableHead>
                 </TableRow>
@@ -307,7 +307,7 @@ export function PostulacionesTab({ convocatoriaId, estadoConvocatoria, numeroGan
                   size="sm"
                   onClick={() => setSelectedIds(new Set())}
                 >
-                  Limpiar seleccion
+                  Limpiar selección
                 </Button>
                 <Button
                   size="sm"
@@ -326,14 +326,14 @@ export function PostulacionesTab({ convocatoriaId, estadoConvocatoria, numeroGan
         <ConfirmDialog
           open={confirmOpen}
           onOpenChange={setConfirmOpen}
-          title="Confirmar seleccion de ganadores"
+          title="Confirmar selección de ganadores"
           description={
-            `Se seleccionaran ${selectedIds.size} ganador${selectedIds.size !== 1 ? "es" : ""}:\n\n` +
+            `Se seleccionarán ${selectedIds.size} ganador${selectedIds.size !== 1 ? "es" : ""}:\n\n` +
             seleccionadosInfo.join("\n") +
             (noSeleccionadosCount > 0
-              ? `\n\nLas ${noSeleccionadosCount} postulacion${noSeleccionadosCount !== 1 ? "es" : ""} restante${noSeleccionadosCount !== 1 ? "s" : ""} seran marcadas como no seleccionadas.`
+              ? `\n\nLas ${noSeleccionadosCount} postulación${noSeleccionadosCount !== 1 ? "es" : ""} restante${noSeleccionadosCount !== 1 ? "s" : ""} serán marcadas como no seleccionadas.`
               : "") +
-            "\n\nEsta accion no se puede deshacer."
+            "\n\nEsta acción no se puede deshacer."
           }
           confirmLabel="Confirmar ganadores"
           onConfirm={() => seleccionarMutation.mutate()}

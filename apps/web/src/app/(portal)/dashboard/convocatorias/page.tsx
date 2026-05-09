@@ -207,7 +207,7 @@ function ConvocatoriasAdminContent() {
             title="No se encontraron convocatorias"
             description={
               debouncedSearch || filters.estado !== ALL
-                ? "Intenta ajustar los filtros de busqueda."
+                ? "Intenta ajustar los filtros de búsqueda."
                 : "Crea la primera convocatoria para comenzar."
             }
             action={

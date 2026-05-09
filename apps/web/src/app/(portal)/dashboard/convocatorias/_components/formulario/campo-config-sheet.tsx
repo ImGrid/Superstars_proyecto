@@ -112,7 +112,7 @@ export function CampoConfigSheet({ campo, open, onOpenChange, onApply }: CampoCo
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="campo-descripcion">Descripcion (opcional)</Label>
+              <Label htmlFor="campo-descripcion">Descripción (opcional)</Label>
               <Input
                 id="campo-descripcion"
                 value={local.descripcion ?? ""}

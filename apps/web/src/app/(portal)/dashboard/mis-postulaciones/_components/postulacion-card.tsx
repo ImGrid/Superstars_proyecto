@@ -55,13 +55,13 @@ function getMainAction(estado: EstadoPostulacion): {
   switch (estado) {
     case EstadoPostulacion.BORRADOR:
       return {
-        label: "Continuar postulacion",
+        label: "Continuar postulación",
         icon: <FileEdit className="size-4" />,
         variant: "default",
       };
     case EstadoPostulacion.OBSERVADO:
       return {
-        label: "Corregir postulacion",
+        label: "Corregir postulación",
         icon: <Icon icon="ph:warning-duotone" className="size-4" />,
         variant: "default",
       };

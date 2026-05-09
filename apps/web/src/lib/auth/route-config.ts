@@ -14,6 +14,9 @@ const portalRoutes: RouteRule[] = [
   // admin: gestion de usuarios
   { path: "/dashboard/usuarios", roles: [RolUsuario.ADMINISTRADOR] },
 
+  // admin: historias de exito mostradas en la landing publica
+  { path: "/dashboard/historias-exito", roles: [RolUsuario.ADMINISTRADOR] },
+
   // admin + responsable + proponente: convocatorias (proponente ve solo publicadas)
   { path: "/dashboard/convocatorias", roles: [RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA, RolUsuario.PROPONENTE] },
   { path: "/dashboard/publicaciones", roles: [RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA] },

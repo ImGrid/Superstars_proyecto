@@ -154,14 +154,14 @@ export default function RankingConvocatoriaPage({
         />
         <MiniStat
           icon={<TrendingUp className="size-5 text-success-600" />}
-          label="Puntaje maximo"
+          label="Puntaje máximo"
           value={
             data.maxPuntaje !== null ? `${data.maxPuntaje.toFixed(1)} pts` : "—"
           }
         />
         <MiniStat
           icon={<TrendingDown className="size-5 text-secondary-400" />}
-          label="Puntaje minimo"
+          label="Puntaje mínimo"
           value={
             data.minPuntaje !== null ? `${data.minPuntaje.toFixed(1)} pts` : "—"
           }

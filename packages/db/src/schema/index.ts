@@ -7,3 +7,4 @@ export * from './calificacion';
 export * from './notificacion';
 export * from './publicacion';
 export * from './faq';
+export * from './historia-exito';

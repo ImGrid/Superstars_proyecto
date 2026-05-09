@@ -415,4 +415,84 @@ export class DashboardRepository {
       .where(eq(evaluadorConvocatoria.evaluadorId, evaluadorId))
       .orderBy(desc(convocatoria.createdAt));
   }
+
+  // ============== PROPONENTE ==============
+
+  // KPIs del dashboard del proponente. Las dos cuentas de convocatorias se alinean
+  // con la misma definicion de dominio que verificarConvocatoriaAbierta() en el
+  // modulo postulacion: abierta <=> estado='publicado' y fecha_cierre vigente.
+  // Incluimos el chequeo de fecha en SQL para que un job de cierre que se atrase
+  // no infle el contador de "abiertas".
+  async getProponenteKpis(usuarioId: number) {
+    // empresa del proponente (para resolver "ya postule" y mostrar el nombre)
+    const [empresaRow] = await this.db
+      .select({ id: empresa.id, razonSocial: empresa.razonSocial })
+      .from(empresa)
+      .where(eq(empresa.usuarioId, usuarioId))
+      .limit(1);
+
+    const empresaId = empresaRow?.id ?? null;
+
+    // counts de convocatorias por categoria visible al proponente
+    const [convStats] = await this.db
+      .select({
+        abiertas: sql<number>`count(*) filter (
+          where ${convocatoria.estado} = 'publicado'
+          and coalesce(${convocatoria.fechaCierreEfectiva}, ${convocatoria.fechaCierrePostulacion}) >= current_date
+        )`.mapWith(Number),
+        anteriores: sql<number>`count(*) filter (
+          where ${convocatoria.estado} in ('cerrado', 'en_evaluacion', 'resultados_listos', 'finalizado')
+        )`.mapWith(Number),
+      })
+      .from(convocatoria);
+
+    return {
+      empresaId,
+      empresaRazonSocial: empresaRow?.razonSocial ?? null,
+      convocatoriasAbiertas: convStats.abiertas,
+      convocatoriasAnteriores: convStats.anteriores,
+    };
+  }
+
+  // distribucion de las postulaciones del proponente por estado
+  async getProponenteDistribucionEstados(empresaId: number) {
+    return this.db
+      .select({ estado: postulacion.estado, total: count() })
+      .from(postulacion)
+      .where(eq(postulacion.empresaId, empresaId))
+      .groupBy(postulacion.estado);
+  }
+
+  // top 5 convocatorias abiertas mas urgentes (por fecha de cierre real ascendente).
+  // Si el proponente tiene empresa, marcamos yaPostule cuando exista postulacion
+  // suya en cualquier estado distinto de borrador (borrador no impide volver
+  // a entrar, pero los demas estados sí cuentan como "ya entre al flujo")
+  async getProponenteConvocatoriasAbiertasResumen(empresaId: number | null) {
+    return this.db
+      .select({
+        id: convocatoria.id,
+        nombre: convocatoria.nombre,
+        fechaCierrePostulacion: convocatoria.fechaCierrePostulacion,
+        fechaCierreEfectiva: convocatoria.fechaCierreEfectiva,
+        monto: convocatoria.monto,
+        numeroGanadores: convocatoria.numeroGanadores,
+        diasParaCerrar: sql<number>`(
+          coalesce(${convocatoria.fechaCierreEfectiva}, ${convocatoria.fechaCierrePostulacion}) - current_date
+        )::int`.mapWith(Number),
+        yaPostule: empresaId === null
+          ? sql<boolean>`false`.mapWith(Boolean)
+          : sql<boolean>`exists (
+              select 1 from postulacion p
+              where p.convocatoria_id = ${convocatoria.id}
+                and p.empresa_id = ${empresaId}
+            )`.mapWith(Boolean),
+      })
+      .from(convocatoria)
+      .where(and(
+        eq(convocatoria.estado, 'publicado'),
+        sql`coalesce(${convocatoria.fechaCierreEfectiva}, ${convocatoria.fechaCierrePostulacion}) >= current_date`,
+      ))
+      .orderBy(asc(sql`coalesce(${convocatoria.fechaCierreEfectiva}, ${convocatoria.fechaCierrePostulacion})`))
+      .limit(5);
+  }
 }

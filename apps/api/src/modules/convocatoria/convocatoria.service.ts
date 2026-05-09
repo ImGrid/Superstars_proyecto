@@ -74,8 +74,10 @@ export class ConvocatoriaService {
     let result: { data: unknown[]; total: number };
 
     if (user.rol === RolUsuario.PROPONENTE) {
-      // Proponente ve todas las convocatorias excepto borradores
-      result = await this.convocatoriaRepo.findAllExcludeEstado(query, EstadoConvocatoria.BORRADOR);
+      // Proponente: filtra entre abiertas (publicado), anteriores (cerrado/en_evaluacion/
+      // resultados_listos/finalizado) o todas las visibles. tipo=undefined preserva
+      // compat para selectores que quieren todas las visibles.
+      result = await this.convocatoriaRepo.findAllVisiblesParaProponente(query, query.tipo);
     } else if (user.rol === RolUsuario.ADMINISTRADOR) {
       result = await this.convocatoriaRepo.findAll(query);
     } else {

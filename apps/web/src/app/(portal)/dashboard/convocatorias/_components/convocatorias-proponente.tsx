@@ -3,12 +3,13 @@
 import { Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
-import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
-import type { ListConvocatoriasQueryDto } from "@superstars/shared";
+import { useQueryStates, parseAsInteger, parseAsString, parseAsStringLiteral } from "nuqs";
+import type { ListConvocatoriasQueryDto, TipoListadoProponente } from "@superstars/shared";
 import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { convocatoriaQueries } from "@/lib/api/query-keys";
 import { useDebounce } from "@/hooks/use-debounce";
 import { ConvocatoriaCard } from "./convocatoria-card";
@@ -31,6 +32,8 @@ function CardsSkeleton() {
   );
 }
 
+const TIPOS = ["abiertas", "anteriores"] as const satisfies readonly TipoListadoProponente[];
+
 export function ConvocatoriasProponente() {
   return (
     <Suspense fallback={<CardsSkeleton />}>
@@ -40,9 +43,12 @@ export function ConvocatoriasProponente() {
 }
 
 function ConvocatoriasProponenteContent() {
-  // filtros (sin estado, proponente solo ve publicados)
+  // filtros: tipo separa abiertas (estado=publicado y fecha vigente) de anteriores
+  // (cerrado/en_evaluacion/resultados_listos/finalizado). El backend aplica el
+  // filtro real, ver convocatoria.repository.ts findAllVisiblesParaProponente
   const [filters, setFilters] = useQueryStates(
     {
+      tipo: parseAsStringLiteral(TIPOS).withDefault("abiertas"),
       page: parseAsInteger.withDefault(1),
       limit: parseAsInteger.withDefault(12),
       search: parseAsString.withDefault(""),
@@ -52,8 +58,8 @@ function ConvocatoriasProponenteContent() {
 
   const debouncedSearch = useDebounce(filters.search, 300);
 
-  // params para la API (backend fuerza estado=publicado para proponente)
   const apiParams: Record<string, unknown> = {
+    tipo: filters.tipo,
     page: filters.page,
     limit: filters.limit,
   };
@@ -67,22 +73,42 @@ function ConvocatoriasProponenteContent() {
   const total = data?.total ?? 0;
   const totalPages = data?.totalPages ?? 1;
 
+  const esAbiertas = filters.tipo === "abiertas";
+
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Convocatorias disponibles"
-        description="Explora las convocatorias abiertas y postúlate a las que apliquen para tu empresa."
+        title="Convocatorias"
+        description={
+          esAbiertas
+            ? "Postúlate a las convocatorias abiertas que apliquen para tu empresa."
+            : "Convocatorias previas: cerradas, en evaluación o finalizadas."
+        }
       />
 
-      {/* barra de busqueda */}
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-secondary-400" />
-        <Input
-          placeholder="Buscar convocatorias..."
-          value={filters.search}
-          onChange={(e) => setFilters({ search: e.target.value, page: 1 })}
-          className="pl-9"
-        />
+      {/* tabs activos / anteriores + busqueda */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <Tabs
+          value={filters.tipo}
+          onValueChange={(v) =>
+            setFilters({ tipo: v as TipoListadoProponente, page: 1 })
+          }
+        >
+          <TabsList>
+            <TabsTrigger value="abiertas">Abiertas</TabsTrigger>
+            <TabsTrigger value="anteriores">Anteriores</TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        <div className="relative w-full max-w-md">
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-secondary-400" />
+          <Input
+            placeholder="Buscar convocatorias..."
+            value={filters.search}
+            onChange={(e) => setFilters({ search: e.target.value, page: 1 })}
+            className="pl-9"
+          />
+        </div>
       </div>
 
       {/* cargando */}
@@ -92,11 +118,13 @@ function ConvocatoriasProponenteContent() {
       {!isLoading && convocatorias.length === 0 && (
         <EmptyState
           icon="ph:trophy-duotone"
-          title="No hay convocatorias disponibles"
+          title={esAbiertas ? "No hay convocatorias abiertas" : "No hay convocatorias anteriores"}
           description={
             debouncedSearch
-              ? "No se encontraron convocatorias con ese criterio de busqueda."
-              : "Por el momento no hay convocatorias abiertas. Vuelve a revisar pronto."
+              ? "No se encontraron convocatorias con ese criterio de búsqueda."
+              : esAbiertas
+                ? "Por el momento no hay convocatorias abiertas para postular. Vuelve a revisar pronto."
+                : "Aun no se han cerrado convocatorias anteriores."
           }
         />
       )}
@@ -114,7 +142,7 @@ function ConvocatoriasProponenteContent() {
           {totalPages > 1 && (
             <div className="flex items-center justify-between pt-2">
               <p className="text-sm text-secondary-500">
-                {total} convocatoria{total !== 1 && "s"} disponible{total !== 1 && "s"}
+                {total} convocatoria{total !== 1 && "s"}
               </p>
               <div className="flex items-center gap-2">
                 <button

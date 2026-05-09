@@ -15,18 +15,18 @@ export function validateSchema(schema: SchemaDefinition): BuilderWarning[] {
   for (const sec of schema.secciones) {
     // ids de seccion duplicados
     if (allSecIds.has(sec.id)) {
-      warnings.push({ itemId: sec.id, message: "ID de seccion duplicado", severity: "error" });
+      warnings.push({ itemId: sec.id, message: "ID de sección duplicado", severity: "error" });
     }
     allSecIds.add(sec.id);
 
     // seccion sin titulo
     if (!sec.titulo.trim()) {
-      warnings.push({ itemId: sec.id, message: "La seccion no tiene titulo", severity: "error" });
+      warnings.push({ itemId: sec.id, message: "La sección no tiene título", severity: "error" });
     }
 
     // seccion sin campos
     if (sec.campos.length === 0) {
-      warnings.push({ itemId: sec.id, message: "La seccion no tiene campos", severity: "warning" });
+      warnings.push({ itemId: sec.id, message: "La sección no tiene campos", severity: "warning" });
     }
 
     for (const campo of sec.campos) {
@@ -48,7 +48,7 @@ export function validateSchema(schema: SchemaDefinition): BuilderWarning[] {
       ) {
         warnings.push({
           itemId: campo.id,
-          message: "La seleccion necesita al menos 2 opciones",
+          message: "La selección necesita al menos 2 opciones",
           severity: "error",
         });
       }

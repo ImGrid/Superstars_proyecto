@@ -33,3 +33,4 @@ superstars_backup_*.sql
 *.sql.bak
 backup_*.sql
 preview_*.html
+backups/

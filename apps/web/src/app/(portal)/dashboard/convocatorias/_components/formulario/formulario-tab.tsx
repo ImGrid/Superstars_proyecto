@@ -118,7 +118,7 @@ export function FormularioTab({ convocatoriaId, estadoConvocatoria }: Formulario
           <EmptyState
             icon="ph:file-text-duotone"
             title="Sin formulario"
-            description="Esta convocatoria no tiene un formulario de postulacion configurado."
+            description="Esta convocatoria no tiene un formulario de postulación configurado."
             action={
               canEdit ? (
                 <Button onClick={() => setCreateOpen(true)}>
@@ -201,7 +201,7 @@ export function FormularioTab({ convocatoriaId, estadoConvocatoria }: Formulario
             open={deleteOpen}
             onOpenChange={setDeleteOpen}
             title="Eliminar formulario"
-            description="Se eliminara permanentemente el formulario y todas sus secciones y campos. Esta accion no se puede deshacer."
+            description="Se eliminará permanentemente el formulario y todas sus secciones y campos. Esta acción no se puede deshacer."
             confirmLabel="Eliminar"
             onConfirm={() => deleteMutation.mutate()}
             isLoading={deleteMutation.isPending}

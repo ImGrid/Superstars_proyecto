@@ -57,14 +57,14 @@ export default function ResultadosPage() {
     <div className="space-y-6">
       <PageHeader
         title="Resultados"
-        description="Seguimiento de convocatorias en evaluacion y resultados"
+        description="Seguimiento de convocatorias en evaluación y resultados"
       />
 
       {/* resumen global */}
       <div className="grid gap-4 sm:grid-cols-3">
         <MiniStat
           icon={<Icon icon="ph:chart-line-up-duotone" className="size-5 text-primary-600" />}
-          label="En evaluacion"
+          label="En evaluación"
           value={String(enEvaluacion)}
         />
         <MiniStat
@@ -84,7 +84,7 @@ export default function ResultadosPage() {
         <EmptyState
           icon="ph:chart-line-up-duotone"
           title="Sin convocatorias en seguimiento"
-          description="No hay convocatorias en evaluacion o con resultados publicados."
+          description="No hay convocatorias en evaluación o con resultados publicados."
         />
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">

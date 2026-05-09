@@ -4,8 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { Icon } from "@iconify/react";
-import { RolUsuario, EstadoPostulacion } from "@superstars/shared";
-import type { PostulacionListItem } from "@superstars/shared";
+import { RolUsuario } from "@superstars/shared";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,7 +16,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/shared/page-header";
 import { useAuth } from "@/hooks/use-auth";
-import { postulacionQueries, empresaQueries, convocatoriaQueries } from "@/lib/api/query-keys";
+import { dashboardQueries } from "@/lib/api/query-keys";
 import { AdminDashboard } from "./_components/admin-dashboard";
 import { ResponsableDashboard } from "./_components/responsable-dashboard";
 import { EvaluadorDashboard } from "./_components/evaluador-dashboard";
@@ -55,36 +54,22 @@ export default function DashboardPage() {
   return <DashboardProponente nombre={user.nombre} />;
 }
 
-// dashboard especifico para proponente (sin cambios respecto a la version previa)
+// dashboard del proponente: lee KPIs ya filtrados desde /api/dashboard/proponente
+// (convocatorias abiertas reales, postulaciones por estado, alerta de empresa)
 function DashboardProponente({ nombre }: { nombre: string }) {
   const router = useRouter();
 
-  // cargar datos en paralelo
-  const { data: postulaciones, isLoading: loadingPost } = useQuery(
-    postulacionQueries.myList(),
-  );
-  const { data: empresa, isLoading: loadingEmp } = useQuery({
-    ...empresaQueries.me(),
-    retry: false,
-  });
-  const { data: convocatoriasData, isLoading: loadingConc } = useQuery(
-    convocatoriaQueries.list({ page: 1, limit: 1 }),
-  );
-
-  // contadores de postulaciones por estado
-  const counts = getPostulacionCounts(postulaciones ?? []);
-  const totalConvocatorias = convocatoriasData?.total ?? 0;
-  const hasEmpresa = !!empresa;
+  const { data: stats, isLoading } = useQuery(dashboardQueries.proponente());
 
   return (
     <div className="space-y-6">
       <PageHeader
         title={`Hola, ${nombre}`}
-        description="Este es tu panel de control. Aqui puedes ver el resumen de tu actividad."
+        description="Este es tu panel de control. Aquí puedes ver el resumen de tu actividad."
       />
 
       {/* alerta si no tiene empresa */}
-      {!loadingEmp && !hasEmpresa && (
+      {!isLoading && stats && !stats.tieneEmpresa && (
         <div className="flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4">
           <Icon icon="ph:warning-duotone" className="mt-0.5 size-5 shrink-0 text-amber-600" />
           <div>
@@ -109,11 +94,15 @@ function DashboardProponente({ nombre }: { nombre: string }) {
 
       {/* cards resumen */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {/* convocatorias disponibles */}
+        {/* convocatorias abiertas (estado=publicado + fecha vigente) */}
         <SummaryCard
-          title="Convocatorias disponibles"
-          value={loadingConc ? null : String(totalConvocatorias)}
-          description="Convocatorias abiertas para postularte"
+          title="Convocatorias abiertas"
+          value={isLoading ? null : String(stats?.convocatoriasAbiertas ?? 0)}
+          description={
+            stats && stats.convocatoriasAnteriores > 0
+              ? `Postulaciones abiertas ahora · ${stats.convocatoriasAnteriores} anterior${stats.convocatoriasAnteriores !== 1 ? "es" : ""}`
+              : "Postulaciones abiertas ahora"
+          }
           icon={<Icon icon="ph:trophy-duotone" className="size-5 text-primary-600" />}
           action={
             <Button
@@ -131,10 +120,10 @@ function DashboardProponente({ nombre }: { nombre: string }) {
         {/* mis postulaciones */}
         <SummaryCard
           title="Mis postulaciones"
-          value={loadingPost ? null : String(postulaciones?.length ?? 0)}
+          value={isLoading ? null : String(stats?.totalMisPostulaciones ?? 0)}
           description={
-            counts.borrador > 0
-              ? `${counts.borrador} en borrador`
+            stats && stats.misPostulacionesPorEstado.borrador > 0
+              ? `${stats.misPostulacionesPorEstado.borrador} en borrador`
               : "Total de postulaciones"
           }
           icon={<Icon icon="ph:file-text-duotone" className="size-5 text-primary-600" />}
@@ -154,8 +143,14 @@ function DashboardProponente({ nombre }: { nombre: string }) {
         {/* mi empresa */}
         <SummaryCard
           title="Mi empresa"
-          value={loadingEmp ? null : (hasEmpresa ? empresa.razonSocial ?? "Registrada" : "Sin registrar")}
-          description={hasEmpresa ? "Datos de empresa completos" : "Completa el registro"}
+          value={
+            isLoading
+              ? null
+              : stats?.tieneEmpresa
+                ? stats.empresaRazonSocial ?? "Registrada"
+                : "Sin registrar"
+          }
+          description={stats?.tieneEmpresa ? "Datos de empresa completos" : "Completa el registro"}
           icon={<Icon icon="ph:building-office-duotone" className="size-5 text-primary-600" />}
           action={
             <Button
@@ -164,7 +159,7 @@ function DashboardProponente({ nombre }: { nombre: string }) {
               className="gap-1"
               onClick={() => router.push("/dashboard/mi-empresa")}
             >
-              {hasEmpresa ? "Ver empresa" : "Registrar"}
+              {stats?.tieneEmpresa ? "Ver empresa" : "Registrar"}
               <ArrowRight className="size-3" />
             </Button>
           }
@@ -172,12 +167,13 @@ function DashboardProponente({ nombre }: { nombre: string }) {
       </div>
 
       {/* alertas de postulaciones observadas */}
-      {counts.observado > 0 && (
+      {stats && stats.postulacionesObservadas > 0 && (
         <div className="flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4">
           <Icon icon="ph:warning-duotone" className="mt-0.5 size-5 shrink-0 text-amber-600" />
           <div>
             <p className="text-sm font-medium text-amber-800">
-              Tienes {counts.observado} postulacion{counts.observado !== 1 && "es"} con observaciones
+              Tienes {stats.postulacionesObservadas} postulacion
+              {stats.postulacionesObservadas !== 1 && "es"} con observaciones
             </p>
             <p className="mt-0.5 text-sm text-amber-700">
               Un responsable ha revisado tu postulacion y solicita cambios. Revisa las observaciones y corrige.
@@ -232,20 +228,3 @@ function SummaryCard({
   );
 }
 
-// contadores de postulaciones por estado
-function getPostulacionCounts(postulaciones: PostulacionListItem[]) {
-  return {
-    borrador: postulaciones.filter(
-      (p) => p.estado === EstadoPostulacion.BORRADOR,
-    ).length,
-    enviado: postulaciones.filter(
-      (p) => p.estado === EstadoPostulacion.ENVIADO,
-    ).length,
-    observado: postulaciones.filter(
-      (p) => p.estado === EstadoPostulacion.OBSERVADO,
-    ).length,
-    ganador: postulaciones.filter(
-      (p) => p.estado === EstadoPostulacion.GANADOR,
-    ).length,
-  };
-}

@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { FieldRendererProps } from "./field-props";
+import { OTRA_VALUE, getOtraFieldId, OtraInput } from "./otra-input";
 
 export const SeleccionMultipleField = memo(function SeleccionMultipleField({
   campo,
@@ -18,7 +19,8 @@ export const SeleccionMultipleField = memo(function SeleccionMultipleField({
 }: FieldRendererProps) {
   if (campo.tipo !== "seleccion_multiple") return null;
 
-  const { opciones } = campo;
+  const { opciones, permiteOtra } = campo;
+  const otraFieldId = getOtraFieldId(campo.id);
 
   return (
     <FormField
@@ -26,6 +28,7 @@ export const SeleccionMultipleField = memo(function SeleccionMultipleField({
       name={campo.id}
       render={({ field }) => {
         const selected = (field.value as string[]) ?? [];
+        const isOtra = selected.includes(OTRA_VALUE);
 
         return (
           <FormItem>
@@ -53,8 +56,28 @@ export const SeleccionMultipleField = memo(function SeleccionMultipleField({
                     {opt.label}
                   </label>
                 ))}
+                {/* casilla "Otra" cuando el responsable lo activo */}
+                {permiteOtra && (
+                  <label className="flex items-center gap-2 text-sm cursor-pointer">
+                    <Checkbox
+                      checked={isOtra}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          field.onChange([...selected, OTRA_VALUE]);
+                        } else {
+                          // al desmarcar "Otra", limpiar tambien el sub-campo de texto
+                          field.onChange(selected.filter((v) => v !== OTRA_VALUE));
+                          form.setValue(otraFieldId, undefined);
+                        }
+                      }}
+                    />
+                    Otra
+                  </label>
+                )}
               </div>
             </FormControl>
+            {/* input para escribir el valor libre cuando "Otra" esta marcada */}
+            {permiteOtra && isOtra && <OtraInput name={otraFieldId} />}
             {campo.descripcion && (
               <FormDescription>{campo.descripcion}</FormDescription>
             )}

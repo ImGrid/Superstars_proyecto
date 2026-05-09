@@ -58,7 +58,7 @@ const convocatoriaFormSchema = z.object({
   fechaInicioPostulacion: z.string().min(1, "La fecha de inicio es obligatoria"),
   fechaCierrePostulacion: z.string().min(1, "La fecha de cierre es obligatoria"),
   fechaAnuncioGanadores: z.string().optional(),
-  monto: z.number({ invalid_type_error: "Ingresa un monto valido" }).positive("El monto debe ser mayor a 0"),
+  monto: z.number({ invalid_type_error: "Ingresa un monto válido" }).positive("El monto debe ser mayor a 0"),
   numeroGanadores: z.number().int().positive().default(3),
   topNSistema: z.number().int().positive().default(5),
   departamentos: z.array(z.string()).min(1, "Selecciona al menos un departamento"),

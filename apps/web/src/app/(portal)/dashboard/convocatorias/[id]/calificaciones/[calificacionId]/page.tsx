@@ -134,7 +134,7 @@ export default function RevisionCalificacionPage({ params }: PageProps) {
   if (!data || !rubrica) {
     return (
       <Alert variant="destructive">
-        <AlertDescription>No se pudo cargar la informacion.</AlertDescription>
+        <AlertDescription>No se pudo cargar la información.</AlertDescription>
       </Alert>
     );
   }
@@ -161,7 +161,7 @@ export default function RevisionCalificacionPage({ params }: PageProps) {
         </Button>
         <div className="flex-1 min-w-0">
           <h1 className="font-heading text-lg font-bold text-secondary-900 truncate">
-            Revision de calificacion
+            Revisión de calificación
           </h1>
           <div className="flex items-center gap-2 text-xs text-secondary-500">
             <User className="size-3" />
@@ -181,7 +181,7 @@ export default function RevisionCalificacionPage({ params }: PageProps) {
               }
             >
               {calif.estado === EstadoCalificacion.EN_PROGRESO && "En progreso"}
-              {calif.estado === EstadoCalificacion.COMPLETADO && "Pendiente de revision"}
+              {calif.estado === EstadoCalificacion.COMPLETADO && "Pendiente de revisión"}
               {calif.estado === EstadoCalificacion.APROBADO && "Aprobado"}
               {calif.estado === EstadoCalificacion.DEVUELTO && "Devuelto"}
             </Badge>
@@ -212,7 +212,7 @@ export default function RevisionCalificacionPage({ params }: PageProps) {
               ) : (
                 <Icon icon="ph:check-circle-duotone"className="size-3.5" />
               )}
-              Aprobar calificacion
+              Aprobar calificación
             </Button>
           </div>
         )}
@@ -260,7 +260,7 @@ export default function RevisionCalificacionPage({ params }: PageProps) {
           <ResizablePanel defaultSize={45} minSize={30}>
             <div className="h-full overflow-y-auto p-4 bg-secondary-50/30">
               <h2 className="mb-3 text-sm font-semibold text-secondary-700 uppercase tracking-wide">
-                Calificacion del evaluador
+                Calificación del evaluador
               </h2>
 
               <div className="space-y-4">
@@ -315,7 +315,7 @@ export default function RevisionCalificacionPage({ params }: PageProps) {
                                         : "bg-emerald-50 text-emerald-600"
                                   }`}
                                 >
-                                  {n.nivel === "basico" ? "Basico" : n.nivel === "intermedio" ? "Intermedio" : "Avanzado"}{" "}
+                                  {n.nivel === "basico" ? "Básico" : n.nivel === "intermedio" ? "Intermedio" : "Avanzado"}{" "}
                                   {n.puntajeMin}-{n.puntajeMax}
                                 </span>
                               ))}
@@ -360,9 +360,9 @@ export default function RevisionCalificacionPage({ params }: PageProps) {
       <Dialog open={devolverOpen} onOpenChange={setDevolverOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Devolver calificacion</DialogTitle>
+            <DialogTitle>Devolver calificación</DialogTitle>
             <DialogDescription>
-              Explica al evaluador por que debe revisar su calificacion.
+              Explica al evaluador por qué debe revisar su calificación.
             </DialogDescription>
           </DialogHeader>
           <Textarea

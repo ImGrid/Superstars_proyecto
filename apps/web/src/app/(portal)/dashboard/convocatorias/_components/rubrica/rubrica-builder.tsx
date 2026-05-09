@@ -86,7 +86,7 @@ export function RubricaBuilder({
               </TooltipTrigger>
               <TooltipContent side="bottom" className="max-w-sm">
                 {validacion.completa ? (
-                  <p>La rubrica esta completa y lista para publicar</p>
+                  <p>La rúbrica está completa y lista para publicar</p>
                 ) : (
                   <ul className="space-y-1 text-xs">
                     {validacion.errores.map((err, i) => (

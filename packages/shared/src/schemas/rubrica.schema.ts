@@ -33,7 +33,7 @@ export const createNivelEvaluacionSchema = z.object({
   puntajeMax: z.number().min(0),
 }).refine(
   (data) => data.puntajeMax >= data.puntajeMin,
-  { message: 'El puntaje maximo debe ser mayor o igual al minimo', path: ['puntajeMax'] },
+  { message: 'El puntaje máximo debe ser mayor o igual al mínimo', path: ['puntajeMax'] },
 );
 
 // Crear sub-criterio con 3 niveles atomicamente (ruta flat, criterioId en body)
@@ -51,7 +51,7 @@ export const createSubCriterioConNivelesSchema = z.object({
       && tipos.includes(NivelEnum.INTERMEDIO)
       && tipos.includes(NivelEnum.AVANZADO);
   },
-  { message: 'Debe incluir exactamente un nivel basico, intermedio y avanzado', path: ['niveles'] },
+  { message: 'Debe incluir exactamente un nivel básico, intermedio y avanzado', path: ['niveles'] },
 );
 
 export const updateRubricaSchema = createRubricaSchema.partial();
@@ -70,7 +70,7 @@ export const updateNivelEvaluacionSchema = z.object({
     }
     return true;
   },
-  { message: 'El puntaje maximo debe ser mayor o igual al minimo', path: ['puntajeMax'] },
+  { message: 'El puntaje máximo debe ser mayor o igual al mínimo', path: ['puntajeMax'] },
 );
 
 export type CreateRubricaDto = z.infer<typeof createRubricaSchema>;

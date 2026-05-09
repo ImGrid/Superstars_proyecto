@@ -248,7 +248,11 @@ function PostularFormContent({
   const canSubmit = porcentaje >= 100;
 
   return (
-    <div className="space-y-6">
+    // max-w-3xl mantiene el formulario en una columna legible (~768px). Investigación
+    // NN/G + Baymard recomienda evitar layouts muy anchos: la lectura vertical mejora
+    // y el espacio sobrante a la derecha (queja del cliente) desaparece sin necesidad
+    // de forzar multi-columna (que aumenta errores y abandono según Baymard 2023).
+    <div className="max-w-3xl mx-auto space-y-6">
       {/* header */}
       <div className="flex items-center gap-3">
         <Button
@@ -260,7 +264,7 @@ function PostularFormContent({
         </Button>
         <div className="flex-1">
           <h1 className="font-heading text-xl font-bold text-secondary-900">
-            Formulario de postulacion
+            Formulario de postulación
           </h1>
           <p className="text-sm text-secondary-500">
             Completa todas las secciones para enviar tu propuesta.
@@ -307,16 +311,27 @@ function PostularFormContent({
           ) : (
             <Card>
               <CardContent className="space-y-6 pt-6">
-                {/* titulo de la seccion */}
-                <div>
-                  <h2 className="font-heading text-lg font-semibold text-secondary-900">
-                    {secciones[currentStep].titulo}
-                  </h2>
-                  {secciones[currentStep].descripcion && (
-                    <p className="mt-1 text-sm text-secondary-500">
-                      {secciones[currentStep].descripcion}
+                {/* titulo de la seccion con icono identificador */}
+                <div className="flex items-start gap-3 pb-2 border-b border-secondary-100">
+                  <span className="size-10 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center shrink-0">
+                    <Icon
+                      icon={iconParaSeccion(secciones[currentStep].id)}
+                      className="size-5"
+                    />
+                  </span>
+                  <div className="flex-1">
+                    <h2 className="font-heading text-lg font-semibold text-secondary-900">
+                      {secciones[currentStep].titulo}
+                    </h2>
+                    {secciones[currentStep].descripcion && (
+                      <p className="mt-0.5 text-sm text-secondary-500">
+                        {secciones[currentStep].descripcion}
+                      </p>
+                    )}
+                    <p className="mt-1 text-xs text-secondary-400">
+                      Los campos con <span className="text-red-500">*</span> son obligatorios.
                     </p>
-                  )}
+                  </div>
                 </div>
 
                 {/* campos de la seccion actual */}
@@ -360,4 +375,18 @@ function PostularFormContent({
       )}
     </div>
   );
+}
+
+// Map de seccion.id → icono Phosphor. Las dos secciones del template default son
+// fijas (sec_contacto y sec_empresa); para secciones custom que el responsable
+// agregue, devolvemos un icono generico de "lista" para no romper la UI.
+function iconParaSeccion(seccionId: string): string {
+  switch (seccionId) {
+    case "sec_contacto":
+      return "ph:user-circle-duotone";
+    case "sec_empresa":
+      return "ph:buildings-duotone";
+    default:
+      return "ph:list-bullets-duotone";
+  }
 }

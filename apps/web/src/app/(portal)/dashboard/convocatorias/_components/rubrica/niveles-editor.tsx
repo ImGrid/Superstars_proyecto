@@ -24,7 +24,7 @@ const nivelConfig: Record<
   { label: string; color: string }
 > = {
   [NivelEnum.BASICO]: {
-    label: "Basico",
+    label: "Básico",
     color: "border-amber-200 bg-amber-50/50",
   },
   [NivelEnum.INTERMEDIO]: {

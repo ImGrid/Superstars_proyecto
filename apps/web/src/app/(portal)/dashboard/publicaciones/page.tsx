@@ -145,7 +145,7 @@ function PublicacionesContent() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-secondary-400" />
           <Input
-            placeholder="Buscar por titulo..."
+            placeholder="Buscar por título..."
             value={filters.search}
             onChange={(e) => updateFilter("search", e.target.value)}
             className="pl-9"
@@ -184,8 +184,8 @@ function PublicacionesContent() {
             title="No se encontraron publicaciones"
             description={
               debouncedSearch || filters.estado !== ALL
-                ? "Intenta ajustar los filtros de busqueda."
-                : "Crea la primera publicacion para comenzar."
+                ? "Intenta ajustar los filtros de búsqueda."
+                : "Crea la primera publicación para comenzar."
             }
             action={
               !debouncedSearch && filters.estado === ALL ? (

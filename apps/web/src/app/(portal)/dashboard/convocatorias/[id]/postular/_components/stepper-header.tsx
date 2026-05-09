@@ -85,7 +85,7 @@ export const StepperHeader = memo(function StepperHeader({
             >
               {secciones.length + 1}
             </span>
-            <span className="hidden sm:inline">Revision</span>
+            <span className="hidden sm:inline">Revisión</span>
           </button>
         </li>
       </ol>

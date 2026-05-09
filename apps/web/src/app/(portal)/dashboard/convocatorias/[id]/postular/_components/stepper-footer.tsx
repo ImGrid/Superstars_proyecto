@@ -61,7 +61,7 @@ export const StepperFooter = memo(function StepperFooter({
           ) : (
             <Save className="size-4" />
           )}
-          Guardar borrador
+          Guardar y seguir después
         </Button>
       </div>
 
@@ -80,7 +80,7 @@ export const StepperFooter = memo(function StepperFooter({
             ) : (
               <Send className="size-4" />
             )}
-            Enviar postulacion
+            Enviar postulación
           </Button>
         ) : (
           <Button
@@ -89,7 +89,7 @@ export const StepperFooter = memo(function StepperFooter({
             disabled={isBusy}
             className="gap-1"
           >
-            {isLastSectionStep ? "Ir a revision" : "Siguiente"}
+            {isLastSectionStep ? "Ir a revisión" : "Continuar"}
             <ArrowRight className="size-4" />
           </Button>
         )}

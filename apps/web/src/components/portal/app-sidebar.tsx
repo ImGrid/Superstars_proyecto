@@ -63,7 +63,7 @@ export function AppSidebar() {
       {/* navegacion por rol */}
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navegacion</SidebarGroupLabel>
+          <SidebarGroupLabel>Navegación</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {isLoading
@@ -152,7 +152,7 @@ export function AppSidebar() {
                     disabled={logoutMutation.isPending}
                   >
                     <LogOut className="mr-2 size-4" />
-                    {logoutMutation.isPending ? "Cerrando..." : "Cerrar sesion"}
+                    {logoutMutation.isPending ? "Cerrando..." : "Cerrar sesión"}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

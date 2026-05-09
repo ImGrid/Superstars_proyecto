@@ -75,7 +75,7 @@ function buildTimelinePhases(convocatoria: {
       icon: FileSearch,
     },
     {
-      label: convocatoria.fechaCierreEfectiva ? "Cierre postulaciones (extendido)" : "Cierre postulaciones",
+      label: convocatoria.fechaCierreEfectiva ? "Cierre de postulaciones (extendido)" : "Cierre de postulaciones",
       date: fechaCierreReal,
       icon: Clock,
     },
@@ -162,7 +162,7 @@ export default function ConvocatoriaDetallePage({
         <EmptyState
           icon="ph:trophy-duotone"
           title="Convocatoria no encontrada"
-          description="La convocatoria que buscas no existe o no esta disponible."
+          description="La convocatoria que buscas no existe o no está disponible."
           action={
             <Button asChild variant="outline">
               <Link href="/convocatorias">

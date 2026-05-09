@@ -22,7 +22,7 @@ const CATEGORIA_BADGE: Record<string, { label: string; className: string }> = {
     className: "bg-blue-100 text-blue-700 border-blue-200",
   },
   participacion: {
-    label: "Participacion",
+    label: "Participación",
     className: "bg-green-100 text-green-700 border-green-200",
   },
   proceso: {
@@ -122,7 +122,7 @@ function FaqContent() {
     <div className="space-y-6">
       <PageHeader
         title="Preguntas frecuentes"
-        description="Gestiona las preguntas del FAQ general y las especificas de cada convocatoria."
+        description="Gestiona las preguntas del FAQ general y las específicas de cada convocatoria."
         action={
           <Button onClick={() => setCreateOpen(true)}>
             <Plus className="size-4" />

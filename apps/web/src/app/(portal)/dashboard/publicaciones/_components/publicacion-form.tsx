@@ -46,7 +46,7 @@ import { PublicacionEstadoActions } from "./publicacion-estado-actions";
 
 // schema local para el formulario
 const publicacionFormSchema = z.object({
-  titulo: z.string().min(1, "El titulo es obligatorio").max(300),
+  titulo: z.string().min(1, "El título es obligatorio").max(300),
   contenido: z
     .string()
     .min(1, "El contenido es obligatorio")
@@ -157,13 +157,13 @@ export function PublicacionForm({ initialData }: PublicacionFormProps) {
     mutationFn: (dto: CreatePublicacionDto) =>
       createPublicacion(dto, imagenFile ?? undefined),
     onSuccess: () => {
-      toast.success("Publicacion creada correctamente");
+      toast.success("Publicación creada correctamente");
       queryClient.invalidateQueries({ queryKey: publicacionQueries.all() });
       router.push("/dashboard/publicaciones");
     },
     onError: (error: any) => {
       const msg =
-        error.response?.data?.message ?? "Error al crear la publicacion";
+        error.response?.data?.message ?? "Error al crear la publicación";
       toast.error(Array.isArray(msg) ? msg[0] : msg);
     },
   });
@@ -173,7 +173,7 @@ export function PublicacionForm({ initialData }: PublicacionFormProps) {
     mutationFn: (dto: UpdatePublicacionDto) =>
       updatePublicacion(initialData!.id, dto),
     onSuccess: () => {
-      toast.success("Publicacion actualizada correctamente");
+      toast.success("Publicación actualizada correctamente");
       queryClient.invalidateQueries({ queryKey: publicacionQueries.all() });
       queryClient.invalidateQueries({
         queryKey: publicacionQueries.detail(initialData!.id).queryKey,
@@ -181,7 +181,7 @@ export function PublicacionForm({ initialData }: PublicacionFormProps) {
     },
     onError: (error: any) => {
       const msg =
-        error.response?.data?.message ?? "Error al actualizar la publicacion";
+        error.response?.data?.message ?? "Error al actualizar la publicación";
       toast.error(Array.isArray(msg) ? msg[0] : msg);
     },
   });
@@ -219,10 +219,10 @@ export function PublicacionForm({ initialData }: PublicacionFormProps) {
                   name="titulo"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Titulo *</FormLabel>
+                      <FormLabel>Título *</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Titulo de la publicacion"
+                          placeholder="Título de la publicación"
                           {...field}
                         />
                       </FormControl>
@@ -240,7 +240,7 @@ export function PublicacionForm({ initialData }: PublicacionFormProps) {
                         content={field.value}
                         onChange={field.onChange}
                         onBlur={field.onBlur}
-                        placeholder="Escribe el contenido de la publicacion..."
+                        placeholder="Escribe el contenido de la publicación..."
                       />
                       <FormMessage />
                     </FormItem>
@@ -255,7 +255,7 @@ export function PublicacionForm({ initialData }: PublicacionFormProps) {
             {/* card estado y acciones */}
             <Card>
               <CardHeader>
-                <CardTitle>Publicacion</CardTitle>
+                <CardTitle>Publicación</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* estado actual */}
@@ -280,7 +280,7 @@ export function PublicacionForm({ initialData }: PublicacionFormProps) {
                   name="categoriaId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Categoria</FormLabel>
+                      <FormLabel>Categoría</FormLabel>
                       <Select
                         value={
                           field.value != null
@@ -293,12 +293,12 @@ export function PublicacionForm({ initialData }: PublicacionFormProps) {
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Sin categoria" />
+                            <SelectValue placeholder="Sin categoría" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           <SelectItem value={NO_CATEGORIA}>
-                            Sin categoria
+                            Sin categoría
                           </SelectItem>
                           {categorias?.map((cat) => (
                             <SelectItem key={cat.id} value={String(cat.id)}>

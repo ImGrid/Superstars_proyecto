@@ -33,11 +33,18 @@ export const updateConvocatoriaSchema = z.object({
   departamentos: z.array(z.string()).min(1).optional(),
 });
 
+// Tipos de listado para el proponente: separa "abiertas para postular" de "anteriores"
+// (cerrado/en_evaluacion/resultados_listos/finalizado). admin/responsable lo ignoran.
+export const tipoListadoProponenteSchema = z.enum(['abiertas', 'anteriores']);
+export type TipoListadoProponente = z.infer<typeof tipoListadoProponenteSchema>;
+
 // Query params para listar convocatorias
 export const listConvocatoriasQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
   estado: z.nativeEnum(EstadoConvocatoria).optional(),
+  // tipo solo aplica al rol proponente: filtra entre abiertas y anteriores
+  tipo: tipoListadoProponenteSchema.optional(),
   search: z.string().min(1).optional(),
 });
 

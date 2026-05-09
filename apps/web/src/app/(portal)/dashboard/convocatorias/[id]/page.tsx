@@ -13,7 +13,7 @@ import {
   Download,
 } from "lucide-react";
 import { Icon } from "@iconify/react";
-import { EstadoConvocatoria, EstadoPostulacion, RolUsuario } from "@superstars/shared";
+import { EstadoConvocatoria, EstadoPostulacion, RolUsuario, isConvocatoriaAbierta } from "@superstars/shared";
 import { isAxiosError } from "axios";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -120,7 +120,10 @@ function ConvocatoriaDetailProponente({
 }) {
   const fechaCierreReal = data.fechaCierreEfectiva ?? data.fechaCierrePostulacion;
   const dias = getDiasRestantes(fechaCierreReal);
-  const isAbierto = dias >= 0;
+  // abierta = estado=publicado + fecha vigente. Misma definicion que verificarConvocatoriaAbierta()
+  // en el backend para que el CTA refleje la regla real (un en_evaluacion con fecha
+  // futura no debe invitar a postular).
+  const isAbierto = isConvocatoriaAbierta(data);
   const plazoExtendido = !!data.fechaCierreEfectiva;
 
   // consultar si el proponente ya tiene postulacion para esta convocatoria
@@ -248,6 +251,7 @@ function ConvocatoriaDetailProponente({
             convocatoriaId={convocatoriaId}
             miPostulacion={miPostulacion}
             isAbierto={isAbierto}
+            estadoConvocatoria={data.estado as EstadoConvocatoria}
             router={router}
           />
         )}
@@ -267,11 +271,11 @@ function ConvocatoriaDetailProponente({
           </CardHeader>
           <CardContent className="space-y-4">
             <InfoRow
-              label="Inicio de postulacion"
+              label="Inicio de postulación"
               value={formatDate(data.fechaInicioPostulacion)}
             />
             <InfoRow
-              label="Cierre de postulacion"
+              label="Cierre de postulación"
               value={
                 plazoExtendido
                   ? `${formatDate(fechaCierreReal)} (extendido)`
@@ -464,7 +468,7 @@ function ConvocatoriaDetailAdmin({
           <TabsTrigger value="responsables">Responsables</TabsTrigger>
           <TabsTrigger value="documentos">Documentos</TabsTrigger>
           <TabsTrigger value="formulario">Formulario</TabsTrigger>
-          <TabsTrigger value="rubrica">Rubrica</TabsTrigger>
+          <TabsTrigger value="rubrica">Rúbrica</TabsTrigger>
           <TabsTrigger value="evaluadores">Evaluadores</TabsTrigger>
           <TabsTrigger value="postulaciones">Postulaciones</TabsTrigger>
         </TabsList>
@@ -493,11 +497,11 @@ function ConvocatoriaDetailAdmin({
               </CardHeader>
               <CardContent className="space-y-4">
                 <InfoRow
-                  label="Inicio postulacion"
+                  label="Inicio postulación"
                   value={formatDate(data.fechaInicioPostulacion)}
                 />
                 <InfoRow
-                  label="Cierre postulacion"
+                  label="Cierre postulación"
                   value={formatDate(data.fechaCierrePostulacion)}
                 />
                 {data.fechaCierreEfectiva && (
@@ -581,24 +585,65 @@ function ConvocatoriaDetailAdmin({
   );
 }
 
+// motivo legible para el proponente cuando una convocatoria no admite postulaciones.
+// !isAbierto puede deberse a fecha vencida (estado todavia 'publicado' antes del cron)
+// o a que la convocatoria avanzo de etapa. Damos un mensaje especifico para cada caso.
+function motivoNoPostulable(estado: EstadoConvocatoria): string {
+  switch (estado) {
+    case EstadoConvocatoria.PUBLICADO:
+      return "El plazo de postulación ya cerró.";
+    case EstadoConvocatoria.CERRADO:
+      return "La convocatoria cerró y está a la espera de revisión.";
+    case EstadoConvocatoria.EN_EVALUACION:
+      return "La convocatoria está en proceso de evaluación.";
+    case EstadoConvocatoria.RESULTADOS_LISTOS:
+      return "Los resultados ya están listos para publicarse.";
+    case EstadoConvocatoria.FINALIZADO:
+      return "La convocatoria ya finalizo.";
+    default:
+      return "La convocatoria no acepta postulaciones en este momento.";
+  }
+}
+
 // CTA inteligente segun estado de postulacion
 function PostulacionCTA({
   convocatoriaId,
   miPostulacion,
   isAbierto,
+  estadoConvocatoria,
   router,
 }: {
   convocatoriaId: number;
   miPostulacion: any;
   isAbierto: boolean;
+  estadoConvocatoria: EstadoConvocatoria;
   router: ReturnType<typeof useRouter>;
 }) {
   // la ruta destino para el formulario (aun no implementada)
   const postularHref = `/dashboard/convocatorias/${convocatoriaId}/postular`;
 
-  // sin postulacion: mostrar CTA solo si la convocatoria esta abierto
+  // sin postulacion + convocatoria no abierta: explicar por que no hay CTA en
+  // lugar de retornar null silenciosamente (el proponente puede llegar via link
+  // directo sin saber que la convocatoria ya cerro o esta en evaluacion)
+  if (!miPostulacion && !isAbierto) {
+    const motivo = motivoNoPostulable(estadoConvocatoria);
+    return (
+      <Card className="border-secondary-200">
+        <CardContent className="flex items-start gap-3 py-6">
+          <Icon icon="ph:info-duotone" className="mt-0.5 size-5 shrink-0 text-secondary-500" />
+          <div>
+            <p className="font-semibold text-secondary-900">
+              Esta convocatoria no acepta nuevas postulaciones
+            </p>
+            <p className="mt-0.5 text-sm text-secondary-600">{motivo}</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // sin postulacion + convocatoria abierta: invitar a postular
   if (!miPostulacion) {
-    if (!isAbierto) return null;
     return (
       <Card className="border-primary-200 bg-primary-50/50">
         <CardContent className="flex flex-col items-center gap-3 py-6 sm:flex-row sm:justify-between">
@@ -616,7 +661,7 @@ function PostulacionCTA({
             onClick={() => router.push(postularHref)}
           >
             <Icon icon="ph:file-text-duotone"className="size-4" />
-            Iniciar postulacion
+            Empezar mi postulación
           </Button>
         </CardContent>
       </Card>
@@ -645,7 +690,7 @@ function PostulacionCTA({
             onClick={() => router.push(postularHref)}
           >
             <Icon icon="ph:file-text-duotone"className="size-4" />
-            Continuar postulacion
+            Continuar mi postulación
           </Button>
         </CardContent>
       </Card>
@@ -682,7 +727,7 @@ function PostulacionCTA({
               onClick={() => router.push(postularHref)}
             >
               <Icon icon="ph:file-text-duotone"className="size-4" />
-              Corregir postulacion
+              Corregir mi postulación
             </Button>
           </div>
         </CardContent>

@@ -181,6 +181,14 @@ function FieldValue({
       return (
         <div className="flex flex-wrap gap-1.5">
           {arr.map((v) => {
+            // valor centinela "__otra__": mostrar el texto libre del sub-campo
+            if (v === "__otra__") {
+              return (
+                <Badge key={v} variant="secondary" className="text-xs font-normal">
+                  Otra: {otraValue ?? ""}
+                </Badge>
+              );
+            }
             const opt = campo.opciones.find((o) => o.valor === v);
             return (
               <Badge key={v} variant="secondary" className="text-xs font-normal">

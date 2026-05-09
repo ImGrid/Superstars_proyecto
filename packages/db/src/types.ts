@@ -7,6 +7,7 @@ import {
 	evaluadorConvocatoria, asignacionEvaluador, calificacion, calificacionDetalle,
 	notificacionEmail,
 	preguntaFrecuente,
+	historiaExito,
 } from "./schema";
 
 // Tipos Select (lectura)
@@ -31,6 +32,7 @@ export type Calificacion = InferSelectModel<typeof calificacion>;
 export type CalificacionDetalle = InferSelectModel<typeof calificacionDetalle>;
 export type NotificacionEmail = InferSelectModel<typeof notificacionEmail>;
 export type PreguntaFrecuente = InferSelectModel<typeof preguntaFrecuente>;
+export type HistoriaExito = InferSelectModel<typeof historiaExito>;
 
 // Tipos Insert (escritura)
 export type NewUsuario = InferInsertModel<typeof usuario>;
@@ -54,3 +56,4 @@ export type NewCalificacion = InferInsertModel<typeof calificacion>;
 export type NewCalificacionDetalle = InferInsertModel<typeof calificacionDetalle>;
 export type NewNotificacionEmail = InferInsertModel<typeof notificacionEmail>;
 export type NewPreguntaFrecuente = InferInsertModel<typeof preguntaFrecuente>;
+export type NewHistoriaExito = InferInsertModel<typeof historiaExito>;

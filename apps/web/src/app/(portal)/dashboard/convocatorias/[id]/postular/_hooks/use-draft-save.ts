@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { UseFormReturn } from "react-hook-form";
+import type { PostulacionResponse } from "@superstars/shared";
 import { saveDraft } from "@/lib/api/postulacion.api";
 import { postulacionQueries } from "@/lib/api/query-keys";
 
@@ -55,12 +56,21 @@ export function useDraftSave(
   const mutation = useMutation({
     mutationFn: (responseData: Record<string, unknown>) =>
       saveDraft(convocatoriaId, { responseData: cleanResponseData(responseData) }),
-    onSuccess: () => {
+    onSuccess: (postulacionGuardada: PostulacionResponse) => {
       // limpiar errores del servidor cuando el guardado es exitoso
       form.clearErrors();
-      queryClient.invalidateQueries({
-        queryKey: postulacionQueries.mine(convocatoriaId).queryKey,
-      });
+      // El backend ya nos devolvio la postulacion actualizada en la respuesta del PUT;
+      // sembramos el cache con esos datos directamente en lugar de invalidar la query.
+      // invalidate dispararia un refetch (GET /me) que, en la primera vez (cuando la query
+      // venia de un 404), pone isLoading=true y desmonta PostularFormContent — perdiendo
+      // el currentStep (bug "Siguiente no avanza al primer click"). setQueryData mantiene
+      // los datos sincronizados sin refetch ni isLoading=true.
+      queryClient.setQueryData(
+        postulacionQueries.mine(convocatoriaId).queryKey,
+        postulacionGuardada,
+      );
+      // El listado cross-convocatoria sigue invalidandose: ahi sí queremos refetch
+      // para que la nueva postulacion (o su porcentajeCompletado) aparezca al instante.
       queryClient.invalidateQueries({
         queryKey: ["postulaciones", "my-list"],
       });

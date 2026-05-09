@@ -66,7 +66,7 @@ export default function PostulacionesEvaluadorPage({ params }: PageProps) {
         </Button>
         <PageHeader
           title="Postulaciones a evaluar"
-          description="Selecciona una postulacion para calificar."
+          description="Selecciona una postulación para calificar."
         />
       </div>
 
@@ -90,11 +90,11 @@ export default function PostulacionesEvaluadorPage({ params }: PageProps) {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Empresa</TableHead>
-                    <TableHead>Estado postulacion</TableHead>
-                    <TableHead>Mi calificacion</TableHead>
+                    <TableHead>Estado postulación</TableHead>
+                    <TableHead>Mi calificación</TableHead>
                     <TableHead>Puntaje</TableHead>
                     <TableHead>Enviado</TableHead>
-                    <TableHead className="text-right">Accion</TableHead>
+                    <TableHead className="text-right">Acción</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

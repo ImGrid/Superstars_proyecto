@@ -30,7 +30,7 @@ export const publicarPublicacionSchema = z.object({
     }
     return true;
   },
-  { message: 'La fecha de expiracion debe ser posterior a la fecha de publicacion' },
+  { message: 'La fecha de expiración debe ser posterior a la fecha de publicación' },
 );
 
 // Query params para listar publicaciones (admin)

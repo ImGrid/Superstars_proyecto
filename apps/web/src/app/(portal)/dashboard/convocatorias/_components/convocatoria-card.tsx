@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Calendar, MapPin, DollarSign, Clock, ArrowRight } from "lucide-react";
+import { isConvocatoriaAbierta } from "@superstars/shared";
 import type { ConvocatoriaResponse } from "@superstars/shared";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,26 +13,25 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { StateBadge } from "@/components/shared/state-badge";
 import { formatMoney, formatDate, getDiasRestantes } from "@/lib/format";
 
 interface ConvocatoriaCardProps {
   convocatoria: ConvocatoriaResponse;
 }
 
-// badge de dias restantes con color segun urgencia
-function DiasRestantesBadge({ fecha }: { fecha: string }) {
-  const dias = getDiasRestantes(fecha);
-
-  if (dias < 0) {
-    return (
-      <Badge variant="secondary" className="gap-1 text-xs">
-        <Clock className="size-3" />
-        Cerrado
-      </Badge>
-    );
+// badge superior: dias restantes solo cuando la convocatoria esta realmente abierta;
+// para los demas estados (cerrado, en_evaluacion, resultados_listos, finalizado)
+// reusamos StateBadge para no inducir al proponente a creer que puede postular
+function HeaderBadge({ convocatoria }: { convocatoria: ConvocatoriaResponse }) {
+  if (!isConvocatoriaAbierta(convocatoria)) {
+    return <StateBadge tipo="convocatoria" valor={convocatoria.estado} />;
   }
 
-  // color por urgencia
+  // abierta: countdown coloreado por urgencia (la fecha vigente puede ser la efectiva)
+  const cierre = convocatoria.fechaCierreEfectiva ?? convocatoria.fechaCierrePostulacion;
+  const dias = getDiasRestantes(cierre);
+
   let className = "gap-1 text-xs ";
   if (dias <= 3) {
     className += "bg-red-100 text-red-700 border-red-200";
@@ -63,7 +63,7 @@ export function ConvocatoriaCard({ convocatoria }: ConvocatoriaCardProps) {
           <CardTitle className="text-lg leading-tight line-clamp-2">
             {convocatoria.nombre}
           </CardTitle>
-          <DiasRestantesBadge fecha={convocatoria.fechaCierrePostulacion} />
+          <HeaderBadge convocatoria={convocatoria} />
         </div>
         {convocatoria.descripcion && (
           <p className="mt-1 text-sm text-secondary-500 line-clamp-2">

@@ -114,7 +114,7 @@ export function FormBuilder({ convocatoriaId, formulario, canEdit }: FormBuilder
     // validacion Zod autoritativa
     const result = schemaDefinitionSchema.safeParse(schema);
     if (!result.success) {
-      const firstError = result.error.errors[0]?.message ?? "Schema invalido";
+      const firstError = result.error.errors[0]?.message ?? "Schema inválido";
       toast.error(firstError);
       return;
     }

@@ -200,7 +200,7 @@ export function AddSubCriterioDialog({
 
           {/* nivel basico */}
           <NivelInput
-            label="Basico"
+            label="Básico"
             color="text-amber-700 bg-amber-50 border-amber-200"
             minVal={bMin}
             maxVal={bMax}
@@ -208,7 +208,7 @@ export function AddSubCriterioDialog({
             onMinChange={setBMin}
             onMaxChange={setBMax}
             onDescChange={setDescBasico}
-            placeholder="Descripcion del nivel basico..."
+            placeholder="Descripción del nivel básico..."
           />
 
           {/* nivel intermedio */}
@@ -221,7 +221,7 @@ export function AddSubCriterioDialog({
             onMinChange={setIMin}
             onMaxChange={setIMax}
             onDescChange={setDescIntermedio}
-            placeholder="Descripcion del nivel intermedio..."
+            placeholder="Descripción del nivel intermedio..."
           />
 
           {/* nivel avanzado */}
@@ -234,7 +234,7 @@ export function AddSubCriterioDialog({
             onMinChange={setAMin}
             onMaxChange={setAMax}
             onDescChange={setDescAvanzado}
-            placeholder="Descripcion del nivel avanzado..."
+            placeholder="Descripción del nivel avanzado..."
           />
         </div>
 

@@ -7,6 +7,7 @@ import type {
   ListPublicConvocatoriasQueryDto,
   ListPublicPublicacionesQueryDto,
   ListFaqQueryDto,
+  ListHistoriasExitoQueryDto,
 } from "@superstars/shared";
 import { getMe } from "./auth.api";
 import { listUsuarios, getUsuario } from "./usuario.api";
@@ -44,7 +45,12 @@ import {
   listPublicPublicaciones,
   getPublicPublicacion,
   listPublicCategorias,
+  listPublicHistoriasExito,
 } from "./public.api";
+import {
+  listHistoriasExito,
+  getHistoriaExito,
+} from "./historia-exito.api";
 import {
   listMisConvocatorias,
   listPostulacionesEvaluables,
@@ -58,6 +64,7 @@ import {
   getAdminDashboard,
   getResponsableDashboard,
   getEvaluadorDashboard,
+  getProponenteDashboard,
 } from "./dashboard.api";
 
 // --- Auth ---
@@ -283,6 +290,24 @@ export const publicacionQueries = {
     }),
 };
 
+// --- Historias de exito (admin) ---
+
+export const historiaExitoQueries = {
+  all: () => ["historias-exito"] as const,
+
+  list: (filters?: Partial<ListHistoriasExitoQueryDto>) =>
+    queryOptions({
+      queryKey: ["historias-exito", "list", filters ?? {}] as const,
+      queryFn: () => listHistoriasExito(filters),
+    }),
+
+  detail: (id: number) =>
+    queryOptions({
+      queryKey: ["historias-exito", "detail", id] as const,
+      queryFn: () => getHistoriaExito(id),
+    }),
+};
+
 // --- Endpoints publicos (sin auth) ---
 
 export const publicQueries = {
@@ -320,6 +345,12 @@ export const publicQueries = {
     queryOptions({
       queryKey: ["public", "publicaciones", "categorias"] as const,
       queryFn: listPublicCategorias,
+    }),
+
+  historiasExito: () =>
+    queryOptions({
+      queryKey: ["public", "historias-exito"] as const,
+      queryFn: listPublicHistoriasExito,
     }),
 };
 
@@ -421,6 +452,13 @@ export const dashboardQueries = {
     queryOptions({
       queryKey: ["dashboard", "evaluador"] as const,
       queryFn: getEvaluadorDashboard,
+      staleTime: 30 * 1000,
+    }),
+
+  proponente: () =>
+    queryOptions({
+      queryKey: ["dashboard", "proponente"] as const,
+      queryFn: getProponenteDashboard,
       staleTime: 30 * 1000,
     }),
 };

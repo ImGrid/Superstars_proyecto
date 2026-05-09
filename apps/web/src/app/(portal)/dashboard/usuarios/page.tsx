@@ -220,7 +220,7 @@ function UsuariosContent() {
             title="No se encontraron usuarios"
             description={
               debouncedSearch || filters.rol !== ALL || filters.activo !== ALL
-                ? "Intenta ajustar los filtros de busqueda."
+                ? "Intenta ajustar los filtros de búsqueda."
                 : "Crea el primer usuario para comenzar."
             }
             action={

@@ -1,5 +1,11 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { eq, ne, and, or, ilike, count, desc, sql, inArray } from 'drizzle-orm';
+import { eq, and, or, ilike, count, desc, sql, inArray } from 'drizzle-orm';
+import {
+  ESTADOS_CONVOCATORIA_VISIBLE_PROPONENTE,
+  ESTADOS_CONVOCATORIA_ANTERIORES_PROPONENTE,
+  ESTADO_CONVOCATORIA_PUBLICO,
+  type TipoListadoProponente,
+} from '@superstars/shared';
 import { DRIZZLE } from '../../database/drizzle.provider';
 import type { DrizzleDB } from '../../database/drizzle.provider';
 import {
@@ -66,12 +72,28 @@ export class ConvocatoriaRepository {
     return { data, total: Number(totalResult[0].count) };
   }
 
-  // Listar convocatorias excluyendo un estado (para proponente: excluir borrador)
-  async findAllExcludeEstado(params: FindAllConvocatoriasParams, excludeEstado: EstadoConvocatoria) {
+  // Listado de convocatorias visibles para un proponente.
+  // - tipo='abiertas'   : solo PUBLICADO (postulables)
+  // - tipo='anteriores' : CERRADO/EN_EVALUACION/RESULTADOS_LISTOS/FINALIZADO
+  // - tipo undefined    : todas las visibles (no borrador). Mantiene compat. para
+  //                       casos donde el cliente quiere todas (ej. selector de filtros)
+  async findAllVisiblesParaProponente(
+    params: FindAllConvocatoriasParams,
+    tipo?: TipoListadoProponente,
+  ) {
     const { page, limit, search } = params;
     const offset = (page - 1) * limit;
 
-    const conditions = [ne(convocatoria.estado, excludeEstado as EstadoConvocatoria)];
+    const estadosVisibles =
+      tipo === 'abiertas'
+        ? [ESTADO_CONVOCATORIA_PUBLICO]
+        : tipo === 'anteriores'
+          ? [...ESTADOS_CONVOCATORIA_ANTERIORES_PROPONENTE]
+          : [...ESTADOS_CONVOCATORIA_VISIBLE_PROPONENTE];
+
+    const conditions = [
+      inArray(convocatoria.estado, estadosVisibles as unknown as EstadoConvocatoria[]),
+    ];
     if (search) {
       conditions.push(
         or(

@@ -3,10 +3,9 @@ import Link from "next/link";
 import { ArrowRight, ChevronRight } from "lucide-react";
 import { Icon } from "@iconify/react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { ConvocatoriasActivasSection } from "./_components/convocatorias-activas-section";
 import { HeroCarousel } from "./_components/hero-carousel";
+import { HistoriasExitoSection } from "./_components/historias-exito-section";
 import { SponsorsStrip } from "@/components/public/sponsors-strip";
 
 // pasos de "como funciona" - iconos de Phosphor duotone via Iconify
@@ -31,31 +30,6 @@ const steps = [
   },
 ];
 
-
-// historias de éxito placeholder
-const stories = [
-  {
-    image: "/images/img1.jpg",
-    category: "Manufactura",
-    title: "Taller Textil Innovador",
-    description:
-      "Dos emprendedoras transformaron su taller de costura en una empresa de moda sostenible con impacto comunitario.",
-  },
-  {
-    image: "/images/img3.jpg",
-    category: "Tecnología",
-    title: "Emprendedora Digital",
-    description:
-      "Desde su hogar, esta emprendedora construyó una plataforma digital que conecta productores locales con mercados internacionales.",
-  },
-  {
-    image: "/images/img4.jpg",
-    category: "Medio Ambiente",
-    title: "Reciclaje Inteligente",
-    description:
-      "Un proyecto de economía circular que convierte residuos plásticos en materiales de construcción accesibles.",
-  },
-];
 
 export default function HomePage() {
   return (
@@ -149,50 +123,8 @@ export default function HomePage() {
       {/* ===== CONVOCATORIAS ACTIVAS (datos reales del API) ===== */}
       <ConvocatoriasActivasSection />
 
-      {/* ===== HISTORIAS DE EXITO ===== */}
-      <section className="bg-secondary-50 py-20 lg:py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="text-sm font-semibold tracking-wider text-orange-600 uppercase">
-              Casos de éxito
-            </p>
-            <h2 className="mt-2 font-heading text-3xl font-bold text-primary-800 sm:text-4xl">
-              Historias que inspiran
-            </h2>
-            <p className="mt-4 text-lg text-secondary-600">
-              Conoce las empresas que transformaron sus ideas en negocios
-              sostenibles y exitosos.
-            </p>
-          </div>
-
-          <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {stories.map((story) => (
-              <Card key={story.title} className="overflow-hidden transition-shadow hover:shadow-md">
-                <div className="relative aspect-[16/10] overflow-hidden">
-                  <Image
-                    src={story.image}
-                    alt={story.title}
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    className="object-cover transition-transform duration-300 hover:scale-105"
-                  />
-                </div>
-                <CardContent className="p-6">
-                  <Badge className="mb-2 bg-primary-50 text-primary-700">
-                    {story.category}
-                  </Badge>
-                  <h3 className="font-heading text-lg font-bold text-primary-800">
-                    {story.title}
-                  </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-secondary-600">
-                    {story.description}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* ===== HISTORIAS DE EXITO (datos reales del API) ===== */}
+      <HistoriasExitoSection />
 
       {/* ===== CTA FINAL ===== */}
       <section className="bg-primary-700 py-20 lg:py-28">

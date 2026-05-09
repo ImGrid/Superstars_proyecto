@@ -34,4 +34,13 @@ export class DashboardController {
   async getEvaluador(@CurrentUser() user: AuthUser) {
     return this.dashboardService.getEvaluadorStats(user.id);
   }
+
+  // GET /api/dashboard/proponente
+  // KPIs del proponente: convocatorias abiertas reales (estado=publicado + fecha
+  // vigente), distribucion de mis postulaciones, alerta de empresa pendiente
+  @Get('proponente')
+  @Roles(RolUsuario.PROPONENTE)
+  async getProponente(@CurrentUser() user: AuthUser) {
+    return this.dashboardService.getProponenteStats(user.id);
+  }
 }

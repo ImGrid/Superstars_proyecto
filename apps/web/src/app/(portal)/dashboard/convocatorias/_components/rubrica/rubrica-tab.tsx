@@ -70,7 +70,7 @@ export function RubricaTab({ convocatoriaId, estadoConvocatoria }: RubricaTabPro
       setNombre("");
     },
     onError: (error: any) => {
-      const msg = error.response?.data?.message ?? "Error al crear la rubrica";
+      const msg = error.response?.data?.message ?? "Error al crear la rúbrica";
       toast.error(Array.isArray(msg) ? msg[0] : msg);
     },
   });
@@ -79,7 +79,7 @@ export function RubricaTab({ convocatoriaId, estadoConvocatoria }: RubricaTabPro
   const deleteMutation = useMutation({
     mutationFn: () => deleteRubrica(convocatoriaId),
     onSuccess: () => {
-      toast.success("Rubrica eliminada");
+      toast.success("Rúbrica eliminada");
       queryClient.invalidateQueries({
         queryKey: rubricaQueries.detail(convocatoriaId).queryKey,
       });
@@ -87,7 +87,7 @@ export function RubricaTab({ convocatoriaId, estadoConvocatoria }: RubricaTabPro
     },
     onError: (error: any) => {
       const msg =
-        error.response?.data?.message ?? "Error al eliminar la rubrica";
+        error.response?.data?.message ?? "Error al eliminar la rúbrica";
       toast.error(Array.isArray(msg) ? msg[0] : msg);
     },
   });
@@ -115,13 +115,13 @@ export function RubricaTab({ convocatoriaId, estadoConvocatoria }: RubricaTabPro
         <CardContent className="py-8">
           <EmptyState
             icon="ph:clipboard-text-duotone"
-            title="Sin rubrica"
-            description="Esta convocatoria no tiene una rubrica de evaluacion configurada."
+            title="Sin rúbrica"
+            description="Esta convocatoria no tiene una rúbrica de evaluación configurada."
             action={
               canEdit ? (
                 <Button onClick={() => setCreateOpen(true)}>
                   <Plus className="size-4" />
-                  Crear rubrica
+                  Crear rúbrica
                 </Button>
               ) : undefined
             }
@@ -131,17 +131,17 @@ export function RubricaTab({ convocatoriaId, estadoConvocatoria }: RubricaTabPro
           <Dialog open={createOpen} onOpenChange={setCreateOpen}>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Crear rubrica de evaluacion</DialogTitle>
+                <DialogTitle>Crear rúbrica de evaluación</DialogTitle>
                 <DialogDescription>
-                  Define el nombre de la rubrica. Se creara con un puntaje total
-                  de 100 puntos. Luego podras agregar criterios y sub-criterios.
+                  Define el nombre de la rúbrica. Se creará con un puntaje total
+                  de 100 puntos. Luego podrás agregar criterios y sub-criterios.
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-2">
-                <Label htmlFor="rub-nombre">Nombre de la rubrica</Label>
+                <Label htmlFor="rub-nombre">Nombre de la rúbrica</Label>
                 <Input
                   id="rub-nombre"
-                  placeholder="Ej: Rubrica de evaluacion 2026"
+                  placeholder="Ej: Rúbrica de evaluación 2026"
                   value={nombre}
                   onChange={(e) => setNombre(e.target.value)}
                   onKeyDown={(e) => {
@@ -199,8 +199,8 @@ export function RubricaTab({ convocatoriaId, estadoConvocatoria }: RubricaTabPro
           <ConfirmDialog
             open={deleteOpen}
             onOpenChange={setDeleteOpen}
-            title="Eliminar rubrica"
-            description="Se eliminara permanentemente la rubrica con todos sus criterios, sub-criterios y niveles. Esta accion no se puede deshacer."
+            title="Eliminar rúbrica"
+            description="Se eliminará permanentemente la rúbrica con todos sus criterios, sub-criterios y niveles. Esta acción no se puede deshacer."
             confirmLabel="Eliminar"
             onConfirm={() => deleteMutation.mutate()}
             isLoading={deleteMutation.isPending}
