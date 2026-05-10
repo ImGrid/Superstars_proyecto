@@ -55,10 +55,13 @@ export interface PostulacionListItem {
 }
 
 // GET /postulaciones (cross-convocatoria, admin/responsable)
+// empresaId es opcional: lo usa la pagina de detalle de empresa (admin) para
+// listar las postulaciones que esa empresa hizo a traves del tiempo.
 export const listPostulacionesQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
   convocatoriaId: z.coerce.number().int().positive().optional(),
+  empresaId: z.coerce.number().int().positive().optional(),
   estado: z.string().optional(),
 });
 

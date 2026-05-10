@@ -20,6 +20,7 @@ const publicConvocatoriaColumns = {
   numeroGanadores: convocatoria.numeroGanadores,
   departamentos: convocatoria.departamentos,
   estado: convocatoria.estado,
+  imagenKey: convocatoria.imagenKey,
   fechaPublicacionResultados: convocatoria.fechaPublicacionResultados,
   createdAt: convocatoria.createdAt,
   updatedAt: convocatoria.updatedAt,

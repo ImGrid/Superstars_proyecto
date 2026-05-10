@@ -91,7 +91,10 @@ export function AppSidebar() {
                           className="h-10"
                         >
                           <Link href={item.href}>
-                            <Icon icon={item.icon} className="size-5" />
+                            {/* !size-5 fuerza 20px sobre la regla [&>svg]:size-4
+                                del componente UI compartido. El bang es necesario
+                                porque el selector & > svg tiene mayor especificidad. */}
+                            <Icon icon={item.icon} className="!size-5" />
                             <span className="text-base">{item.label}</span>
                           </Link>
                         </SidebarMenuButton>

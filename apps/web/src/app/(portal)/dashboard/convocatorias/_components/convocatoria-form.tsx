@@ -7,6 +7,7 @@ import { z } from "zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Loader2, Save } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { toast } from "sonner";
 import {
   type CreateConvocatoriaDto,
@@ -172,6 +173,23 @@ export function ConvocatoriaForm({ initialData }: ConvocatoriaFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {/* aviso informativo solo en modo crear: la imagen se sube despues de
+            crear la convocatoria, desde el tab General del detalle. Lo evitamos
+            en edicion porque ahi el responsable ya tiene acceso a esa pestana. */}
+        {!isEditing && (
+          <div className="flex items-start gap-3 rounded-lg border border-primary-200 bg-primary-50/60 px-4 py-3 text-sm text-primary-900">
+            <Icon
+              icon="ph:image-duotone"
+              className="mt-0.5 size-5 shrink-0 text-primary-600"
+            />
+            <p>
+              Después de crear la convocatoria podrás subir su imagen de portada
+              desde la página de detalles. Es opcional y se puede agregar o cambiar
+              en cualquier momento.
+            </p>
+          </div>
+        )}
+
         {/* seccion 1: informacion basica */}
         <Card>
           <CardHeader>

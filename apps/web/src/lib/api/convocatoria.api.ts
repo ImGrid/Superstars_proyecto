@@ -152,3 +152,28 @@ export function getRankingConvocatoria(id: number) {
     .get<ConvocatoriaRankingResponse>(`/convocatorias/${id}/ranking`)
     .then((r) => r.data);
 }
+
+// --- Imagen de portada ---
+
+// URL publica para mostrar la imagen como src de <img>. El backend sirve el binario
+// con cache de 24h, por lo que se puede usar directamente sin auth.
+export function getConvocatoriaImagenUrl(id: number): string {
+  return `${process.env.NEXT_PUBLIC_API_URL}/convocatorias/${id}/imagen`;
+}
+
+export function uploadImagenConvocatoria(id: number, file: File) {
+  const formData = new FormData();
+  formData.append("imagen", file);
+
+  return apiClient
+    .post<ConvocatoriaResponse>(`/convocatorias/${id}/imagen`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+    .then((r) => r.data);
+}
+
+export function removeImagenConvocatoria(id: number) {
+  return apiClient
+    .delete<ConvocatoriaResponse>(`/convocatorias/${id}/imagen`)
+    .then((r) => r.data);
+}

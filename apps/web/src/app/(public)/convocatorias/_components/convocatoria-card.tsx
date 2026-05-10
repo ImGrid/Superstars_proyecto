@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { StateBadge } from "@/components/shared/state-badge";
 import { formatMoney, getDiasRestantes, formatShortMonth } from "@/lib/format";
+import { getConvocatoriaImagenUrl } from "@/lib/api/convocatoria.api";
 import type { PublicConvocatoriaResponse } from "@superstars/shared";
 
 interface ConvocatoriaCardProps {
@@ -48,9 +49,21 @@ export function ConvocatoriaCard({ convocatoria }: ConvocatoriaCardProps) {
   return (
     <Link href={`/convocatorias/${convocatoria.id}`}>
       <Card className="group overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
-        {/* header con gradiente */}
-        <div className="relative flex h-28 items-center justify-center bg-gradient-to-r from-primary-700 via-primary-600 to-orange-500">
-          <Icon icon="ph:trophy-duotone" className="size-14 text-white/15" />
+        {/* header: imagen subida por el responsable o fallback con icono trofeo
+            sobre fondo azul institucional plano */}
+        <div className="relative h-28 w-full overflow-hidden bg-primary-700">
+          {convocatoria.imagenKey ? (
+            <img
+              src={`${getConvocatoriaImagenUrl(convocatoria.id)}?v=${encodeURIComponent(convocatoria.imagenKey)}`}
+              alt={convocatoria.nombre}
+              loading="lazy"
+              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center">
+              <Icon icon="ph:trophy-duotone" className="size-14 text-white/30" />
+            </div>
+          )}
           <div className="absolute top-3 right-3">
             <StateBadge tipo="convocatoria" valor={convocatoria.estado} />
           </div>

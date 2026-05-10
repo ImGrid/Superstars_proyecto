@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Icon } from "@iconify/react";
 import { publicQueries, faqQueries } from "@/lib/api/query-keys";
+import { getConvocatoriaImagenUrl } from "@/lib/api/convocatoria.api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -203,6 +204,18 @@ export default function ConvocatoriaDetallePage({
   return (
     <div className="pt-28 pb-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* banner de portada cuando la convocatoria tiene imagen.
+            Si no hay imagen no se muestra nada y se conserva el layout original. */}
+        {convocatoria.imagenKey && (
+          <div className="mb-8 overflow-hidden rounded-2xl bg-primary-700 shadow-sm">
+            <img
+              src={`${getConvocatoriaImagenUrl(convocatoriaId)}?v=${encodeURIComponent(convocatoria.imagenKey)}`}
+              alt={convocatoria.nombre}
+              className="aspect-[21/9] w-full object-cover sm:aspect-[24/9]"
+            />
+          </div>
+        )}
+
         {/* sidebar mobile (antes de contenido principal) */}
         <div className="mb-8 lg:hidden">
           <SidebarCard

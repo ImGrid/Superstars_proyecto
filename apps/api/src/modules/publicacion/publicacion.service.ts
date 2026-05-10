@@ -21,12 +21,11 @@ import { PublicacionRepository } from './publicacion.repository';
 import { PublicacionStateMachine } from './publicacion.state-machine';
 import type { PublicacionEvent } from './publicacion.state-machine';
 import { STORAGE_SERVICE, type StorageService } from '../storage/storage.interface';
-
-// Config de imagen de portada
-const IMAGE_CONFIG = {
-  maxSizeBytes: 5 * 1024 * 1024,
-  allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
-};
+import {
+  IMAGE_CONFIG,
+  IMAGE_ERROR_MESSAGES,
+  resolveMimeFromExt,
+} from '../../common/constants/image.constants';
 
 // Estados en los que se puede editar contenido (todos menos expirado)
 const ESTADOS_EDITABLES = [
@@ -179,16 +178,12 @@ export class PublicacionService {
 
     // Validar tipo MIME
     if (!IMAGE_CONFIG.allowedMimeTypes.includes(file.mimetype)) {
-      throw new BadRequestException(
-        `Tipo de imagen "${file.mimetype}" no permitido. Permitidos: ${IMAGE_CONFIG.allowedMimeTypes.join(', ')}`,
-      );
+      throw new BadRequestException(IMAGE_ERROR_MESSAGES.invalidMime);
     }
 
     // Validar tamaño
     if (file.size > IMAGE_CONFIG.maxSizeBytes) {
-      throw new BadRequestException(
-        `La imagen excede el tamaño máximo de ${IMAGE_CONFIG.maxSizeBytes / (1024 * 1024)} MB`,
-      );
+      throw new BadRequestException(IMAGE_ERROR_MESSAGES.exceedsMaxSize);
     }
 
     // Borrar imagen anterior si existe
@@ -211,14 +206,7 @@ export class PublicacionService {
     }
 
     const buffer = await this.storage.download(pub.imagenDestacadaKey);
-    const ext = extname(pub.imagenDestacadaKey).toLowerCase();
-    const mimeMap: Record<string, string> = {
-      '.jpg': 'image/jpeg',
-      '.jpeg': 'image/jpeg',
-      '.png': 'image/png',
-      '.webp': 'image/webp',
-    };
-    const mimeType = mimeMap[ext] || 'application/octet-stream';
+    const mimeType = resolveMimeFromExt(extname(pub.imagenDestacadaKey));
 
     return { buffer, mimeType };
   }

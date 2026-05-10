@@ -19,6 +19,7 @@ export const convocatoria = pgTable("convocatoria", {
 	topNSistema: integer("top_n_sistema").default(5).notNull(),
 	departamentos: text().array().notNull(),
 	estado: estadoConvocatoria().default('borrador').notNull(),
+	imagenKey: text("imagen_key"),
 	fechaPublicacionResultados: timestamp("fecha_publicacion_resultados", { withTimezone: true, mode: 'string' }),
 	createdBy: integer("created_by").notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),

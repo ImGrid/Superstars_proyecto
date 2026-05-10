@@ -41,6 +41,7 @@ import { PostulacionesTab } from "../_components/postulaciones-tab";
 import { EvaluadoresTab } from "../_components/evaluadores-tab";
 import { RubricaTab } from "../_components/rubrica/rubrica-tab";
 import { ModificarFechasDialog } from "../_components/modificar-fechas-dialog";
+import { ConvocatoriaImagenCard } from "../_components/convocatoria-imagen-card";
 
 interface ConvocatoriaDetailPageProps {
   params: Promise<{ id: string }>;
@@ -554,6 +555,12 @@ function ConvocatoriaDetailAdmin({
                 </CardContent>
               </Card>
             )}
+
+            {/* imagen de portada: editable en cualquier estado */}
+            <ConvocatoriaImagenCard
+              convocatoriaId={convocatoriaId}
+              imagenKey={data.imagenKey ?? null}
+            />
           </div>
         </TabsContent>
 

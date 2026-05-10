@@ -185,6 +185,7 @@ export class ConvocatoriaRepository {
     numeroGanadores: number;
     topNSistema: number;
     departamentos: string[];
+    imagenKey: string | null;
   }>) {
     const [updated] = await this.db
       .update(convocatoria)

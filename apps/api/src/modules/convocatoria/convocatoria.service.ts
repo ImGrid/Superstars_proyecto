@@ -6,6 +6,8 @@ import {
   Inject,
   forwardRef,
 } from '@nestjs/common';
+import { randomUUID } from 'crypto';
+import { extname } from 'path';
 import type {
   CreateConvocatoriaDto,
   UpdateConvocatoriaDto,
@@ -20,6 +22,12 @@ import { ConvocatoriaRepository } from './convocatoria.repository';
 import { ConvocatoriaStateMachine } from './convocatoria.state-machine';
 import type { ConvocatoriaEvent } from './convocatoria.state-machine';
 import { RubricaService } from '../rubrica/rubrica.service';
+import { STORAGE_SERVICE, type StorageService } from '../storage/storage.interface';
+import {
+  IMAGE_CONFIG,
+  IMAGE_ERROR_MESSAGES,
+  resolveMimeFromExt,
+} from '../../common/constants/image.constants';
 
 @Injectable()
 export class ConvocatoriaService {
@@ -29,6 +37,7 @@ export class ConvocatoriaService {
     private readonly convocatoriaRepo: ConvocatoriaRepository,
     @Inject(forwardRef(() => RubricaService))
     private readonly rubricaService: RubricaService,
+    @Inject(STORAGE_SERVICE) private readonly storage: StorageService,
   ) {}
 
   // --- CRUD ---
@@ -117,6 +126,11 @@ export class ConvocatoriaService {
 
     const deleted = await this.convocatoriaRepo.delete(id);
     if (!deleted) throw new NotFoundException('Convocatoria no encontrada');
+
+    // Borrar la imagen del storage si existia (best-effort, no romper si falla)
+    if (c.imagenKey) {
+      await this.storage.delete(c.imagenKey).catch(() => {});
+    }
   }
 
   // --- Transiciones de estado ---
@@ -480,6 +494,79 @@ export class ConvocatoriaService {
         fechaEnvio: r.fechaEnvio,
       })),
     };
+  }
+
+  // --- Imagen de portada ---
+  // La imagen se sube despues de crear la convocatoria (no en el POST inicial).
+  // Se permite cambiarla en cualquier estado (incluso publicada o finalizada),
+  // porque es solo presentacion visual y no compromete las reglas del concurso.
+
+  async uploadImagen(id: number, file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException(IMAGE_ERROR_MESSAGES.fileMissing);
+    }
+    const c = await this.ensureExists(id);
+
+    // Validar tipo MIME
+    if (!IMAGE_CONFIG.allowedMimeTypes.includes(file.mimetype)) {
+      throw new BadRequestException(IMAGE_ERROR_MESSAGES.invalidMime);
+    }
+
+    // Validar tamano
+    if (file.size > IMAGE_CONFIG.maxSizeBytes) {
+      throw new BadRequestException(IMAGE_ERROR_MESSAGES.exceedsMaxSize);
+    }
+
+    // Subir la imagen nueva primero (clave unica para evitar colisiones)
+    const ext = extname(file.originalname).toLowerCase();
+    const newKey = `convocatorias/${id}/${randomUUID()}${ext}`;
+    await this.storage.upload(newKey, file.buffer);
+
+    try {
+      const updated = await this.convocatoriaRepo.update(id, { imagenKey: newKey });
+      if (!updated) {
+        // No deberia pasar (ensureExists ya valido) pero por seguridad
+        await this.storage.delete(newKey).catch(() => {});
+        throw new NotFoundException('Convocatoria no encontrada');
+      }
+      // Borrar la imagen anterior despues del UPDATE exitoso (best-effort)
+      if (c.imagenKey) {
+        await this.storage.delete(c.imagenKey).catch(() => {});
+      }
+      return updated;
+    } catch (err) {
+      // Si el UPDATE falla, limpiar la imagen huerfana
+      await this.storage.delete(newKey).catch(() => {});
+      throw err;
+    }
+  }
+
+  async downloadImagen(id: number): Promise<{ buffer: Buffer; mimeType: string }> {
+    const c = await this.ensureExists(id);
+    if (!c.imagenKey) {
+      throw new NotFoundException('Esta convocatoria no tiene imagen de portada.');
+    }
+
+    const buffer = await this.storage.download(c.imagenKey);
+    const mimeType = resolveMimeFromExt(extname(c.imagenKey));
+
+    return { buffer, mimeType };
+  }
+
+  async removeImagen(id: number) {
+    const c = await this.ensureExists(id);
+    if (!c.imagenKey) {
+      throw new NotFoundException('Esta convocatoria no tiene imagen de portada.');
+    }
+
+    // Persistir el cambio en BD primero (si falla, la imagen sigue accesible)
+    const updated = await this.convocatoriaRepo.update(id, { imagenKey: null });
+    if (!updated) throw new NotFoundException('Convocatoria no encontrada');
+
+    // Borrar el archivo del storage (best-effort)
+    await this.storage.delete(c.imagenKey).catch(() => {});
+
+    return updated;
   }
 
   // --- Helpers privados ---

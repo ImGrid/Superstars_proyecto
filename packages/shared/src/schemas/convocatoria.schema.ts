@@ -86,6 +86,7 @@ export interface ConvocatoriaResponse {
   topNSistema: number;
   departamentos: string[];
   estado: EstadoConvocatoria;
+  imagenKey: string | null;
   fechaPublicacionResultados: string | null;
   createdBy: number;
   createdAt: string;

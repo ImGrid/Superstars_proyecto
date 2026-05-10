@@ -36,11 +36,8 @@ import {
   cambiarImagenHistoriaExito,
 } from "@/lib/api/historia-exito.api";
 import { historiaExitoQueries } from "@/lib/api/query-keys";
+import { IMAGE_INPUT_ACCEPT, validateImageFile } from "@/lib/image-validation";
 import { EmpresaCombobox } from "./empresa-combobox";
-
-// limites de imagen (mismos que backend)
-const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
 // schema del formulario: extiende el del backend agregando reglas de UX
 const formSchema = createHistoriaExitoSchema;
@@ -113,12 +110,9 @@ export function HistoriaFormDialog({
   }, [previewUrl]);
 
   function validateAndSetFile(file: File) {
-    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
-      toast.error("Solo se permiten imágenes JPEG, PNG o WebP.");
-      return;
-    }
-    if (file.size > MAX_IMAGE_SIZE) {
-      toast.error("La imagen no puede superar los 5 MB.");
+    const error = validateImageFile(file);
+    if (error) {
+      toast.error(error);
       return;
     }
     setImagenFile(file);
@@ -329,7 +323,7 @@ export function HistoriaFormDialog({
                   ref={fileInputRef}
                   type="file"
                   className="hidden"
-                  accept="image/jpeg,image/png,image/webp"
+                  accept={IMAGE_INPUT_ACCEPT}
                   onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) validateAndSetFile(file);

@@ -28,6 +28,7 @@ export interface PublicConvocatoriaResponse {
   numeroGanadores: number;
   departamentos: string[];
   estado: EstadoConvocatoria;
+  imagenKey: string | null;
   fechaPublicacionResultados: string | null;
   createdAt: string;
   updatedAt: string;

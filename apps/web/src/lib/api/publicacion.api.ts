@@ -95,6 +95,12 @@ export function listCategoriasAdmin() {
 
 // --- Imagen de portada ---
 
+// URL publica para mostrar la imagen como src de <img>. El backend sirve el binario
+// con cache de 24h, por lo que se puede usar directamente sin auth.
+export function getPublicacionImagenUrl(id: number): string {
+  return `${process.env.NEXT_PUBLIC_API_URL}/publicaciones/${id}/imagen`;
+}
+
 export function uploadImagenPublicacion(id: number, file: File) {
   const formData = new FormData();
   formData.append("imagen", file);

@@ -187,15 +187,19 @@ export class PostulacionRepository {
     page: number;
     limit: number;
     convocatoriaId?: number;
+    empresaId?: number;
     estado?: string;
     responsableUsuarioId?: number;
   }) {
-    const { page, limit, convocatoriaId, estado, responsableUsuarioId } = params;
+    const { page, limit, convocatoriaId, empresaId, estado, responsableUsuarioId } = params;
     const offset = (page - 1) * limit;
 
     const conditions = [];
     if (convocatoriaId) {
       conditions.push(eq(postulacion.convocatoriaId, convocatoriaId));
+    }
+    if (empresaId) {
+      conditions.push(eq(postulacion.empresaId, empresaId));
     }
     if (estado) {
       conditions.push(eq(postulacion.estado, estado as EstadoPostulacion));

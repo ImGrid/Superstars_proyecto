@@ -19,18 +19,11 @@ import type {
 } from '@superstars/shared';
 import { HistoriaExitoRepository } from './historia-exito.repository';
 import { STORAGE_SERVICE, type StorageService } from '../storage/storage.interface';
-
-// Limites de imagen (mismos que publicacion para consistencia)
-const IMAGE_CONFIG = {
-  maxSizeBytes: 5 * 1024 * 1024,
-  allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
-  mimeMap: {
-    '.jpg': 'image/jpeg',
-    '.jpeg': 'image/jpeg',
-    '.png': 'image/png',
-    '.webp': 'image/webp',
-  } as Record<string, string>,
-};
+import {
+  IMAGE_CONFIG,
+  IMAGE_ERROR_MESSAGES,
+  resolveMimeFromExt,
+} from '../../common/constants/image.constants';
 
 // Cap de historias activas mostradas en la landing
 const MAX_ACTIVAS = 6;
@@ -247,8 +240,7 @@ export class HistoriaExitoService {
   async downloadImagen(id: number): Promise<{ buffer: Buffer; mimeType: string }> {
     const found = await this.ensureExists(id);
     const buffer = await this.storage.download(found.imagenKey);
-    const ext = extname(found.imagenKey).toLowerCase();
-    const mimeType = IMAGE_CONFIG.mimeMap[ext] || 'application/octet-stream';
+    const mimeType = resolveMimeFromExt(extname(found.imagenKey));
     return { buffer, mimeType };
   }
 
@@ -264,14 +256,10 @@ export class HistoriaExitoService {
 
   private validarImagen(file: Express.Multer.File): void {
     if (!IMAGE_CONFIG.allowedMimeTypes.includes(file.mimetype)) {
-      throw new BadRequestException(
-        'El tipo de imagen no es válido. Permitidos: JPEG, PNG, WebP.',
-      );
+      throw new BadRequestException(IMAGE_ERROR_MESSAGES.invalidMime);
     }
     if (file.size > IMAGE_CONFIG.maxSizeBytes) {
-      throw new BadRequestException(
-        `La imagen no puede superar los ${IMAGE_CONFIG.maxSizeBytes / (1024 * 1024)} MB.`,
-      );
+      throw new BadRequestException(IMAGE_ERROR_MESSAGES.exceedsMaxSize);
     }
   }
 }

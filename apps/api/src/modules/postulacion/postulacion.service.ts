@@ -124,7 +124,7 @@ export class PostulacionService {
     query: ListPostulacionesQueryDto,
     user: AuthUser,
   ): Promise<PaginatedResponse<unknown>> {
-    const { page, limit, convocatoriaId, estado } = query;
+    const { page, limit, convocatoriaId, empresaId, estado } = query;
 
     // responsable solo ve postulaciones de sus convocatorias asignadas
     const responsableUsuarioId =
@@ -134,6 +134,7 @@ export class PostulacionService {
       page,
       limit,
       convocatoriaId,
+      empresaId,
       estado,
       responsableUsuarioId,
     });

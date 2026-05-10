@@ -7,10 +7,15 @@ import {
   Body,
   Param,
   Query,
+  Res,
   ParseIntPipe,
   HttpCode,
   HttpStatus,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import type { Response } from 'express';
 import {
   RolUsuario,
   createConvocatoriaSchema,
@@ -23,9 +28,11 @@ import {
 } from '@superstars/shared';
 import type { AuthUser, CreateConvocatoriaDto, UpdateConvocatoriaDto, UpdateFechasConvocatoriaDto, SeleccionarGanadoresDto } from '@superstars/shared';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { Public } from '../auth/decorators/public.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { CheckConvocatoria } from './decorators/check-convocatoria.decorator';
 import { ConvocatoriaService } from './convocatoria.service';
+import { IMAGE_PUBLIC_CACHE_HEADERS } from '../../common/constants/image.constants';
 
 @Controller('convocatorias')
 export class ConvocatoriaController {
@@ -248,5 +255,45 @@ export class ConvocatoriaController {
   @CheckConvocatoria('id')
   async getRanking(@Param('id', ParseIntPipe) id: number) {
     return this.convocatoriaService.getRankingConvocatoria(id);
+  }
+
+  // --- Imagen de portada ---
+  // Se permite cambiar/eliminar la imagen en cualquier estado (incluso publicada
+  // o finalizada): es solo presentacion visual y no compromete las reglas del concurso.
+
+  // Servir imagen de portada (publico, sin autenticacion)
+  // El navegador la usa directamente como src de <img>, por eso responde el binario
+  @Get(':id/imagen')
+  @Public()
+  async getImagen(
+    @Param('id', ParseIntPipe) id: number,
+    @Res() res: Response,
+  ) {
+    const { buffer, mimeType } = await this.convocatoriaService.downloadImagen(id);
+    res.set({
+      'Content-Type': mimeType,
+      ...IMAGE_PUBLIC_CACHE_HEADERS,
+    });
+    res.send(buffer);
+  }
+
+  // Subir o reemplazar la imagen de portada (admin o responsable de la convocatoria)
+  @Post(':id/imagen')
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
+  @CheckConvocatoria('id')
+  @UseInterceptors(FileInterceptor('imagen'))
+  async uploadImagen(
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.convocatoriaService.uploadImagen(id, file);
+  }
+
+  // Eliminar la imagen de portada (admin o responsable de la convocatoria)
+  @Delete(':id/imagen')
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
+  @CheckConvocatoria('id')
+  async removeImagen(@Param('id', ParseIntPipe) id: number) {
+    return this.convocatoriaService.removeImagen(id);
   }
 }
