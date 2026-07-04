@@ -11,7 +11,12 @@ export const tiposCampoFormulario = [
   'archivo',
   'si_no',
   'texto_url',
+  'informativo',
 ] as const;
+
+// Variantes visuales del campo informativo (solo presentacion, no captura dato)
+export const variantesInformativo = ['parrafo', 'subtitulo', 'nota', 'advertencia', 'detalle'] as const;
+export const varianteInformativoSchema = z.enum(variantesInformativo);
 
 export const tipoCampoSchema = z.enum(tiposCampoFormulario);
 
@@ -90,7 +95,9 @@ const campoSeleccionUnicaSchema = z.object({
 const campoSeleccionMultipleSchema = z.object({
   ...campoBase,
   tipo: z.literal('seleccion_multiple'),
-  opciones: z.array(opcionSchema).min(2),
+  // min(1): un grupo de una sola casilla es un opt-in valido (ej. un ambito con
+  // un unico enunciado). seleccion_unica si exige min(2) (un radio de 1 no aplica).
+  opciones: z.array(opcionSchema).min(1),
   permiteOtra: z.boolean().default(false),
   minSelecciones: z.number().int().min(0).optional(),
   maxSelecciones: z.number().int().positive().optional(),
@@ -126,6 +133,21 @@ const campoTextoUrlSchema = z.object({
   placeholder: z.string().optional(),
 });
 
+// Campo informativo: solo presentacion (texto/HTML de solo lectura). NO captura
+// dato, NO entra en response_data, NUNCA es requerido. `etiqueta` es opcional
+// (el texto va en `contenido`); en la variante `detalle` sirve como resumen visible.
+const campoInformativoSchema = z.object({
+  ...campoBase,
+  // El informativo no captura dato: etiqueta y requerido son opcionales
+  // (requerido nunca aplica; se mantiene en el tipo para el acceso al union).
+  etiqueta: z.string().optional(),
+  requerido: z.boolean().optional(),
+  tipo: z.literal('informativo'),
+  variante: varianteInformativoSchema.default('parrafo'),
+  // Texto plano o HTML sanitizado (se sanitiza en el backend al guardar)
+  contenido: z.string().min(1),
+});
+
 // Union discriminada por "tipo" (O(1) routing, errores claros)
 export const formFieldSchema = z.discriminatedUnion('tipo', [
   campoTextoCortoSchema,
@@ -137,6 +159,7 @@ export const formFieldSchema = z.discriminatedUnion('tipo', [
   campoArchivoSchema,
   campoSiNoSchema,
   campoTextoUrlSchema,
+  campoInformativoSchema,
 ]);
 
 // Seccion del formulario (contiene sus campos anidados)
@@ -213,11 +236,20 @@ export type OpcionCampo = z.infer<typeof opcionSchema>;
 export type ColumnaTabla = z.infer<typeof columnaTablaSchema>;
 export type FilaFijaTabla = z.infer<typeof filaFijaSchema>;
 export type AutoRelleno = z.infer<typeof autoRellenoSchema>;
+export type VarianteInformativo = z.infer<typeof varianteInformativoSchema>;
 
-// GET /convocatorias/:convocatoriaId/formulario, POST, PUT
+// Distingue campos de DATO (capturan respuesta del postulante) de los de
+// PRESENTACION (informativo). Fuente unica de verdad: la usan el validador de
+// respuestas, el calculo de % completado y el render. Un campo informativo no
+// genera clave en response_data, no valida y no cuenta para la completitud.
+export function esCampoDeDato(campo: FormField): boolean {
+  return campo.tipo !== 'informativo';
+}
+
+// GET /convocatorias/:convocatoriaId/categorias/:categoriaId/formulario, POST, PUT
 export interface FormularioResponse {
   id: number;
-  convocatoriaId: number;
+  categoriaId: number;
   nombre: string;
   descripcion: string | null;
   schemaDefinition: SchemaDefinition;

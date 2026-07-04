@@ -33,31 +33,36 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { CheckConvocatoria } from '../convocatoria/decorators/check-convocatoria.decorator';
 import { RubricaService } from './rubrica.service';
 
-@Controller('convocatorias/:convocatoriaId/rubrica')
+// La rubrica es 1:1 con la categoria. Ruta anidada: convocatoria (guard de propiedad) + categoria (recurso).
+@Controller('convocatorias/:convocatoriaId/categorias/:categoriaId/rubrica')
 export class RubricaController {
   constructor(private readonly rubricaService: RubricaService) {}
 
-  // === RUBRICA (1:1 con convocatoria) ===
+  // === RUBRICA (1:1 con categoria) ===
 
   // Obtener rubrica con arbol completo (criterios + sub-criterios + niveles)
   @Get()
   @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA, RolUsuario.EVALUADOR)
   @CheckConvocatoria('convocatoriaId')
-  async find(@Param('convocatoriaId', ParseIntPipe) convocatoriaId: number) {
-    return this.rubricaService.findByConvocatoria(convocatoriaId);
+  async find(
+    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
+    @Param('categoriaId', ParseIntPipe) categoriaId: number,
+  ) {
+    return this.rubricaService.findByCategoria(convocatoriaId, categoriaId);
   }
 
-  // Crear rubrica para la convocatoria
+  // Crear rubrica para la categoria
   @Post()
   @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   @CheckConvocatoria('convocatoriaId')
   @HttpCode(HttpStatus.CREATED)
   async create(
     @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
+    @Param('categoriaId', ParseIntPipe) categoriaId: number,
     @Body() body: CreateRubricaDto,
   ) {
     const dto = createRubricaSchema.parse(body);
-    return this.rubricaService.create(convocatoriaId, dto);
+    return this.rubricaService.create(convocatoriaId, categoriaId, dto);
   }
 
   // Actualizar rubrica (nombre, descripcion, puntajeTotal)
@@ -66,10 +71,11 @@ export class RubricaController {
   @CheckConvocatoria('convocatoriaId')
   async update(
     @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
+    @Param('categoriaId', ParseIntPipe) categoriaId: number,
     @Body() body: UpdateRubricaDto,
   ) {
     const dto = updateRubricaSchema.parse(body);
-    return this.rubricaService.updateRubrica(convocatoriaId, dto);
+    return this.rubricaService.updateRubrica(convocatoriaId, categoriaId, dto);
   }
 
   // Eliminar rubrica (cascade elimina criterios, sub-criterios, niveles)
@@ -77,8 +83,11 @@ export class RubricaController {
   @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   @CheckConvocatoria('convocatoriaId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteRubrica(@Param('convocatoriaId', ParseIntPipe) convocatoriaId: number) {
-    await this.rubricaService.deleteRubrica(convocatoriaId);
+  async deleteRubrica(
+    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
+    @Param('categoriaId', ParseIntPipe) categoriaId: number,
+  ) {
+    await this.rubricaService.deleteRubrica(convocatoriaId, categoriaId);
   }
 
   // === CRITERIOS ===
@@ -90,10 +99,11 @@ export class RubricaController {
   @HttpCode(HttpStatus.CREATED)
   async createCriterio(
     @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
+    @Param('categoriaId', ParseIntPipe) categoriaId: number,
     @Body() body: CreateCriterioDto,
   ) {
     const dto = createCriterioSchema.parse(body);
-    return this.rubricaService.createCriterio(convocatoriaId, dto);
+    return this.rubricaService.createCriterio(convocatoriaId, categoriaId, dto);
   }
 
   // Actualizar criterio
@@ -102,11 +112,12 @@ export class RubricaController {
   @CheckConvocatoria('convocatoriaId')
   async updateCriterio(
     @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
+    @Param('categoriaId', ParseIntPipe) categoriaId: number,
     @Param('criterioId', ParseIntPipe) criterioId: number,
     @Body() body: UpdateCriterioDto,
   ) {
     const dto = updateCriterioSchema.parse(body);
-    return this.rubricaService.updateCriterio(convocatoriaId, criterioId, dto);
+    return this.rubricaService.updateCriterio(convocatoriaId, categoriaId, criterioId, dto);
   }
 
   // Eliminar criterio (cascade elimina sub-criterios y niveles)
@@ -116,9 +127,10 @@ export class RubricaController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteCriterio(
     @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
+    @Param('categoriaId', ParseIntPipe) categoriaId: number,
     @Param('criterioId', ParseIntPipe) criterioId: number,
   ) {
-    await this.rubricaService.deleteCriterio(convocatoriaId, criterioId);
+    await this.rubricaService.deleteCriterio(convocatoriaId, categoriaId, criterioId);
   }
 
   // === SUB-CRITERIOS (flat, criterioId en body) ===
@@ -130,10 +142,11 @@ export class RubricaController {
   @HttpCode(HttpStatus.CREATED)
   async createSubCriterio(
     @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
+    @Param('categoriaId', ParseIntPipe) categoriaId: number,
     @Body() body: CreateSubCriterioConNivelesDto,
   ) {
     const dto = createSubCriterioConNivelesSchema.parse(body);
-    return this.rubricaService.createSubCriterioConNiveles(convocatoriaId, dto);
+    return this.rubricaService.createSubCriterioConNiveles(convocatoriaId, categoriaId, dto);
   }
 
   // Actualizar sub-criterio (solo campos del sub-criterio, no niveles)
@@ -142,11 +155,12 @@ export class RubricaController {
   @CheckConvocatoria('convocatoriaId')
   async updateSubCriterio(
     @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
+    @Param('categoriaId', ParseIntPipe) categoriaId: number,
     @Param('subCriterioId', ParseIntPipe) subCriterioId: number,
     @Body() body: UpdateSubCriterioDto,
   ) {
     const dto = updateSubCriterioSchema.parse(body);
-    return this.rubricaService.updateSubCriterio(convocatoriaId, subCriterioId, dto);
+    return this.rubricaService.updateSubCriterio(convocatoriaId, categoriaId, subCriterioId, dto);
   }
 
   // Eliminar sub-criterio (cascade elimina niveles)
@@ -156,9 +170,10 @@ export class RubricaController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteSubCriterio(
     @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
+    @Param('categoriaId', ParseIntPipe) categoriaId: number,
     @Param('subCriterioId', ParseIntPipe) subCriterioId: number,
   ) {
-    await this.rubricaService.deleteSubCriterio(convocatoriaId, subCriterioId);
+    await this.rubricaService.deleteSubCriterio(convocatoriaId, categoriaId, subCriterioId);
   }
 
   // === NIVELES (flat, actualizacion/eliminacion individual) ===
@@ -169,11 +184,12 @@ export class RubricaController {
   @CheckConvocatoria('convocatoriaId')
   async updateNivel(
     @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
+    @Param('categoriaId', ParseIntPipe) categoriaId: number,
     @Param('nivelId', ParseIntPipe) nivelId: number,
     @Body() body: UpdateNivelEvaluacionDto,
   ) {
     const dto = updateNivelEvaluacionSchema.parse(body);
-    return this.rubricaService.updateNivel(convocatoriaId, nivelId, dto);
+    return this.rubricaService.updateNivel(convocatoriaId, categoriaId, nivelId, dto);
   }
 
   // Eliminar nivel individual
@@ -183,18 +199,22 @@ export class RubricaController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteNivel(
     @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
+    @Param('categoriaId', ParseIntPipe) categoriaId: number,
     @Param('nivelId', ParseIntPipe) nivelId: number,
   ) {
-    await this.rubricaService.deleteNivel(convocatoriaId, nivelId);
+    await this.rubricaService.deleteNivel(convocatoriaId, categoriaId, nivelId);
   }
 
   // === VALIDACION ===
 
-  // Validar completitud de la rubrica (6 reglas cross-entity)
+  // Validar completitud de la rubrica de la categoria (6 reglas cross-entity)
   @Get('validar')
   @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   @CheckConvocatoria('convocatoriaId')
-  async validar(@Param('convocatoriaId', ParseIntPipe) convocatoriaId: number) {
-    return this.rubricaService.validar(convocatoriaId);
+  async validar(
+    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
+    @Param('categoriaId', ParseIntPipe) categoriaId: number,
+  ) {
+    return this.rubricaService.validar(convocatoriaId, categoriaId);
   }
 }

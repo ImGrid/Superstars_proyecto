@@ -1,9 +1,9 @@
 import { relations } from "drizzle-orm/relations";
 import { usuario, sesionRefreshToken } from "./schema/auth";
-import { convocatoria, responsableConvocatoria, documentoConvocatoria, formularioDinamico } from "./schema/convocatoria";
+import { convocatoria, categoriaConvocatoria, responsableConvocatoria, documentoCategoria, formularioDinamico } from "./schema/convocatoria";
 import { empresa, postulacion, archivoPostulacion } from "./schema/empresa";
 import { rubrica, criterio, subCriterio, nivelEvaluacion } from "./schema/rubrica";
-import { evaluadorConvocatoria, asignacionEvaluador, calificacion, calificacionDetalle } from "./schema/calificacion";
+import { evaluadorCategoria, asignacionEvaluador, calificacion, calificacionDetalle } from "./schema/calificacion";
 import { notificacionEmail } from "./schema/notificacion";
 import { preguntaFrecuente } from "./schema/faq";
 
@@ -19,11 +19,11 @@ export const usuarioRelations = relations(usuario, ({many}) => ({
 	empresas: many(empresa),
 	convocatorias: many(convocatoria),
 	responsableConvocatorias: many(responsableConvocatoria),
-	evaluadorConvocatorias_evaluadorId: many(evaluadorConvocatoria, {
-		relationName: "evaluadorConvocatoria_evaluadorId_usuario_id"
+	evaluadorCategorias_evaluadorId: many(evaluadorCategoria, {
+		relationName: "evaluadorCategoria_evaluadorId_usuario_id"
 	}),
-	evaluadorConvocatorias_asignadoPor: many(evaluadorConvocatoria, {
-		relationName: "evaluadorConvocatoria_asignadoPor_usuario_id"
+	evaluadorCategorias_asignadoPor: many(evaluadorCategoria, {
+		relationName: "evaluadorCategoria_asignadoPor_usuario_id"
 	}),
 	asignacionEvaluadors_evaluadorId: many(asignacionEvaluador, {
 		relationName: "asignacionEvaluador_evaluadorId_usuario_id"
@@ -46,14 +46,23 @@ export const convocatoriaRelations = relations(convocatoria, ({one, many}) => ({
 		fields: [convocatoria.createdBy],
 		references: [usuario.id]
 	}),
+	categoriaConvocatorias: many(categoriaConvocatoria),
 	responsableConvocatorias: many(responsableConvocatoria),
-	evaluadorConvocatorias: many(evaluadorConvocatoria),
-	documentoConvocatorias: many(documentoConvocatoria),
-	formularioDinamicos: many(formularioDinamico),
 	postulacions: many(postulacion),
-	rubricas: many(rubrica),
 	notificacionEmails: many(notificacionEmail),
 	preguntaFrecuentes: many(preguntaFrecuente),
+}));
+
+export const categoriaConvocatoriaRelations = relations(categoriaConvocatoria, ({one, many}) => ({
+	convocatoria: one(convocatoria, {
+		fields: [categoriaConvocatoria.convocatoriaId],
+		references: [convocatoria.id]
+	}),
+	formularioDinamicos: many(formularioDinamico),
+	rubricas: many(rubrica),
+	documentoCategorias: many(documentoCategoria),
+	evaluadorCategorias: many(evaluadorCategoria),
+	postulacions: many(postulacion),
 }));
 
 export const responsableConvocatoriaRelations = relations(responsableConvocatoria, ({one}) => ({
@@ -67,34 +76,34 @@ export const responsableConvocatoriaRelations = relations(responsableConvocatori
 	}),
 }));
 
-export const evaluadorConvocatoriaRelations = relations(evaluadorConvocatoria, ({one}) => ({
-	convocatoria: one(convocatoria, {
-		fields: [evaluadorConvocatoria.convocatoriaId],
-		references: [convocatoria.id]
+export const evaluadorCategoriaRelations = relations(evaluadorCategoria, ({one}) => ({
+	categoriaConvocatoria: one(categoriaConvocatoria, {
+		fields: [evaluadorCategoria.categoriaId],
+		references: [categoriaConvocatoria.id]
 	}),
 	usuario_evaluadorId: one(usuario, {
-		fields: [evaluadorConvocatoria.evaluadorId],
+		fields: [evaluadorCategoria.evaluadorId],
 		references: [usuario.id],
-		relationName: "evaluadorConvocatoria_evaluadorId_usuario_id"
+		relationName: "evaluadorCategoria_evaluadorId_usuario_id"
 	}),
 	usuario_asignadoPor: one(usuario, {
-		fields: [evaluadorConvocatoria.asignadoPor],
+		fields: [evaluadorCategoria.asignadoPor],
 		references: [usuario.id],
-		relationName: "evaluadorConvocatoria_asignadoPor_usuario_id"
+		relationName: "evaluadorCategoria_asignadoPor_usuario_id"
 	}),
 }));
 
-export const documentoConvocatoriaRelations = relations(documentoConvocatoria, ({one}) => ({
-	convocatoria: one(convocatoria, {
-		fields: [documentoConvocatoria.convocatoriaId],
-		references: [convocatoria.id]
+export const documentoCategoriaRelations = relations(documentoCategoria, ({one}) => ({
+	categoriaConvocatoria: one(categoriaConvocatoria, {
+		fields: [documentoCategoria.categoriaId],
+		references: [categoriaConvocatoria.id]
 	}),
 }));
 
 export const formularioDinamicoRelations = relations(formularioDinamico, ({one}) => ({
-	convocatoria: one(convocatoria, {
-		fields: [formularioDinamico.convocatoriaId],
-		references: [convocatoria.id]
+	categoriaConvocatoria: one(categoriaConvocatoria, {
+		fields: [formularioDinamico.categoriaId],
+		references: [categoriaConvocatoria.id]
 	}),
 }));
 
@@ -102,6 +111,10 @@ export const postulacionRelations = relations(postulacion, ({one, many}) => ({
 	convocatoria: one(convocatoria, {
 		fields: [postulacion.convocatoriaId],
 		references: [convocatoria.id]
+	}),
+	categoriaConvocatoria: one(categoriaConvocatoria, {
+		fields: [postulacion.categoriaId],
+		references: [categoriaConvocatoria.id]
 	}),
 	empresa: one(empresa, {
 		fields: [postulacion.empresaId],
@@ -121,9 +134,9 @@ export const archivoPostulacionRelations = relations(archivoPostulacion, ({one})
 }));
 
 export const rubricaRelations = relations(rubrica, ({one, many}) => ({
-	convocatoria: one(convocatoria, {
-		fields: [rubrica.convocatoriaId],
-		references: [convocatoria.id]
+	categoriaConvocatoria: one(categoriaConvocatoria, {
+		fields: [rubrica.categoriaId],
+		references: [categoriaConvocatoria.id]
 	}),
 	criterios: many(criterio),
 }));

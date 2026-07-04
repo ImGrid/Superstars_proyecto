@@ -27,35 +27,35 @@ import { EvaluacionService } from './evaluacion.service';
 export class EvaluacionEvaluadorController {
   constructor(private readonly evaluacionService: EvaluacionService) {}
 
-  // convocatorias donde estoy asignado como evaluador
-  @Get('convocatorias')
+  // categorias donde soy jurado
+  @Get('categorias')
   @Roles(RolUsuario.EVALUADOR)
-  async findMisConvocatorias(@CurrentUser() user: AuthUser) {
-    return this.evaluacionService.findMisConvocatorias(user.id);
+  async findMisCategorias(@CurrentUser() user: AuthUser) {
+    return this.evaluacionService.findMisCategorias(user.id);
   }
 
-  // postulaciones evaluables de una convocatoria
-  @Get('convocatorias/:convocatoriaId/postulaciones')
+  // postulaciones que me asignaron en una categoria
+  @Get('categorias/:categoriaId/postulaciones')
   @Roles(RolUsuario.EVALUADOR)
   async findPostulaciones(
-    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
+    @Param('categoriaId', ParseIntPipe) categoriaId: number,
     @CurrentUser() user: AuthUser,
   ) {
-    return this.evaluacionService.findPostulacionesEvaluables(convocatoriaId, user.id);
+    return this.evaluacionService.findPostulacionesEvaluables(categoriaId, user.id);
   }
 
   // detalle de una postulacion (propuesta + mi calificacion)
-  @Get('convocatorias/:convocatoriaId/postulaciones/:postulacionId')
+  @Get('categorias/:categoriaId/postulaciones/:postulacionId')
   @Roles(RolUsuario.EVALUADOR)
   async findPostulacionDetalle(
-    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
+    @Param('categoriaId', ParseIntPipe) categoriaId: number,
     @Param('postulacionId', ParseIntPipe) postulacionId: number,
     @CurrentUser() user: AuthUser,
   ) {
-    return this.evaluacionService.findPostulacionDetalle(convocatoriaId, postulacionId, user.id);
+    return this.evaluacionService.findPostulacionDetalle(categoriaId, postulacionId, user.id);
   }
 
-  // guardar calificacion (parcial o completa)
+  // guardar calificacion (parcial o completa). La categoria se deriva de la postulacion.
   @Put('calificaciones/:postulacionId')
   @Roles(RolUsuario.EVALUADOR)
   async saveCalificacion(
@@ -64,9 +64,7 @@ export class EvaluacionEvaluadorController {
     @CurrentUser() user: AuthUser,
   ) {
     const dto = saveCalificacionSchema.parse(body);
-    // obtener convocatoriaId de la postulacion
-    const post = await this.evaluacionService.findPostulacionParaConvocatoriaId(postulacionId);
-    return this.evaluacionService.saveCalificacion(post.convocatoriaId, postulacionId, user.id, dto);
+    return this.evaluacionService.saveCalificacion(postulacionId, user.id, dto);
   }
 
   // completar calificacion (enviar para revision)
@@ -77,8 +75,7 @@ export class EvaluacionEvaluadorController {
     @Param('postulacionId', ParseIntPipe) postulacionId: number,
     @CurrentUser() user: AuthUser,
   ) {
-    const post = await this.evaluacionService.findPostulacionParaConvocatoriaId(postulacionId);
-    return this.evaluacionService.completarCalificacion(post.convocatoriaId, postulacionId, user.id);
+    return this.evaluacionService.completarCalificacion(postulacionId, user.id);
   }
 }
 
@@ -102,9 +99,10 @@ export class EvaluacionResponsableController {
   @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   @CheckConvocatoria('convocatoriaId')
   async findDetalle(
+    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
     @Param('calificacionId', ParseIntPipe) calificacionId: number,
   ) {
-    return this.evaluacionService.findCalificacionDetalle(calificacionId);
+    return this.evaluacionService.findCalificacionDetalle(convocatoriaId, calificacionId);
   }
 
   // aprobar calificacion
@@ -113,9 +111,10 @@ export class EvaluacionResponsableController {
   @CheckConvocatoria('convocatoriaId')
   @HttpCode(HttpStatus.OK)
   async aprobar(
+    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
     @Param('calificacionId', ParseIntPipe) calificacionId: number,
   ) {
-    return this.evaluacionService.aprobarCalificacion(calificacionId);
+    return this.evaluacionService.aprobarCalificacion(convocatoriaId, calificacionId);
   }
 
   // devolver calificacion al evaluador
@@ -124,11 +123,12 @@ export class EvaluacionResponsableController {
   @CheckConvocatoria('convocatoriaId')
   @HttpCode(HttpStatus.OK)
   async devolver(
+    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
     @Param('calificacionId', ParseIntPipe) calificacionId: number,
     @Body() body: DevolverCalificacionDto,
   ) {
     const dto = devolverCalificacionSchema.parse(body);
-    return this.evaluacionService.devolverCalificacion(calificacionId, dto);
+    return this.evaluacionService.devolverCalificacion(convocatoriaId, calificacionId, dto);
   }
 }
 
@@ -142,9 +142,10 @@ export class AsignacionEvaluadorController {
   @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   @CheckConvocatoria('convocatoriaId')
   async findAll(
+    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
     @Param('postulacionId', ParseIntPipe) postulacionId: number,
   ) {
-    return this.evaluacionService.findAsignacionesByPostulacion(postulacionId);
+    return this.evaluacionService.findAsignacionesByPostulacion(convocatoriaId, postulacionId);
   }
 
   // asignar evaluador a una postulacion

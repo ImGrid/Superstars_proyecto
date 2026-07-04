@@ -122,7 +122,7 @@ export interface CriterioResponse {
 // POST /rubrica, PUT /rubrica (sin relaciones)
 export interface RubricaResponse {
   id: number;
-  convocatoriaId: number;
+  categoriaId: number;
   nombre: string;
   descripcion: string | null;
   puntajeTotal: string;

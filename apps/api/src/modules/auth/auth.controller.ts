@@ -45,6 +45,10 @@ import {
   RATE_LIMIT_REGISTER_EMAIL_DAY_TTL_MS,
   RATE_LIMIT_VERIFY_IP_LIMIT,
   RATE_LIMIT_VERIFY_IP_TTL_MS,
+  RATE_LIMIT_LOGIN_IP_LIMIT,
+  RATE_LIMIT_LOGIN_IP_TTL_MS,
+  RATE_LIMIT_LOGIN_EMAIL_LIMIT,
+  RATE_LIMIT_LOGIN_EMAIL_TTL_MS,
 } from './auth.constants';
 
 @Controller('auth')
@@ -220,6 +224,21 @@ export class AuthController {
   }
 
   @Public()
+  @UseGuards(AuthRateLimitGuard)
+  @AuthRateLimit([
+    {
+      prefix: 'login-ip',
+      by: 'ip',
+      limit: RATE_LIMIT_LOGIN_IP_LIMIT,
+      ttl: RATE_LIMIT_LOGIN_IP_TTL_MS,
+    },
+    {
+      prefix: 'login-email',
+      by: 'email',
+      limit: RATE_LIMIT_LOGIN_EMAIL_LIMIT,
+      ttl: RATE_LIMIT_LOGIN_EMAIL_TTL_MS,
+    },
+  ])
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(

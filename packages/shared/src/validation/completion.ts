@@ -1,4 +1,5 @@
 import type { SchemaDefinition } from '../schemas/formulario.schema';
+import { esCampoDeDato } from '../schemas/formulario.schema';
 
 // Calcula el porcentaje de completado basado en campos requeridos llenos
 export function calculateCompletionPercentage(
@@ -6,7 +7,9 @@ export function calculateCompletionPercentage(
   responseData: Record<string, unknown>,
 ): number {
   const allCampos = schema.secciones.flatMap(s => s.campos);
-  const requiredFields = allCampos.filter(c => c.requerido);
+  // Excluir campos informativos incondicionalmente (aunque por bug llegaran
+  // como requerido: no son dato y bloquearian el 100% para siempre)
+  const requiredFields = allCampos.filter(c => esCampoDeDato(c) && c.requerido);
 
   if (requiredFields.length === 0) return 100;
 

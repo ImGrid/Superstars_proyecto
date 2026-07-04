@@ -1,7 +1,9 @@
 import { z } from 'zod';
 
-// Guardar borrador de postulacion (response_data es JSONB flexible)
+// Guardar borrador de postulacion (response_data es JSONB flexible).
+// categoriaId: el proponente elige la categoria al iniciar; una vez creada no se puede cambiar.
 export const savePostulacionDraftSchema = z.object({
+  categoriaId: z.number().int().positive(),
   responseData: z.record(z.string(), z.unknown()),
 });
 
@@ -19,6 +21,7 @@ import { EstadoPostulacion } from '../enums';
 export interface PostulacionResponse {
   id: number;
   convocatoriaId: number;
+  categoriaId: number;
   empresaId: number;
   estado: EstadoPostulacion;
   responseData: Record<string, unknown>;
@@ -37,6 +40,7 @@ export interface PostulacionResponse {
 export interface PostulacionListItem {
   id: number;
   convocatoriaId: number;
+  categoriaId: number;
   empresaId: number;
   estado: EstadoPostulacion;
   porcentajeCompletado: string;
@@ -61,6 +65,7 @@ export const listPostulacionesQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
   convocatoriaId: z.coerce.number().int().positive().optional(),
+  categoriaId: z.coerce.number().int().positive().optional(),
   empresaId: z.coerce.number().int().positive().optional(),
   estado: z.string().optional(),
 });
@@ -71,6 +76,7 @@ export type ListPostulacionesQueryDto = z.infer<typeof listPostulacionesQuerySch
 export interface PostulacionAdminListItem {
   id: number;
   convocatoriaId: number;
+  categoriaId: number;
   empresaId: number;
   estado: EstadoPostulacion;
   porcentajeCompletado: string;

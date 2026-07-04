@@ -1,39 +1,39 @@
-// Bloque Calificacion: evaluador_convocatoria, asignacion_evaluador, calificacion, calificacion_detalle
+// Bloque Calificacion: evaluador_categoria, asignacion_evaluador, calificacion, calificacion_detalle
 import { pgTable, pgEnum, unique, integer, text, timestamp, foreignKey, check, numeric, index } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 import { usuario } from "./auth"
-import { convocatoria } from "./convocatoria"
+import { categoriaConvocatoria } from "./convocatoria"
 import { postulacion } from "./empresa"
 import { subCriterio } from "./rubrica"
 
 export const estadoCalificacion = pgEnum("estado_calificacion", ['en_progreso', 'completado', 'aprobado', 'devuelto'])
 
-// evaluadores asignados a una convocatoria (no a postulaciones individuales)
-export const evaluadorConvocatoria = pgTable("evaluador_convocatoria", {
-	id: integer().primaryKey().generatedAlwaysAsIdentity({ name: "evaluador_convocatoria_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
-	convocatoriaId: integer("convocatoria_id").notNull(),
+// pool de evaluadores por categoria (no por postulacion individual)
+export const evaluadorCategoria = pgTable("evaluador_categoria", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity({ name: "evaluador_categoria_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
+	categoriaId: integer("categoria_id").notNull(),
 	evaluadorId: integer("evaluador_id").notNull(),
 	asignadoPor: integer("asignado_por").notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
-	index("idx_evaluador_convocatoria_convocatoria_id").using("btree", table.convocatoriaId.asc().nullsLast().op("int4_ops")),
-	index("idx_evaluador_convocatoria_evaluador_id").using("btree", table.evaluadorId.asc().nullsLast().op("int4_ops")),
+	index("idx_evaluador_categoria_evaluador_id").using("btree", table.evaluadorId.asc().nullsLast().op("int4_ops")),
 	foreignKey({
-			columns: [table.convocatoriaId],
-			foreignColumns: [convocatoria.id],
-			name: "fk_evaluador_convocatoria_convocatoria"
+			columns: [table.categoriaId],
+			foreignColumns: [categoriaConvocatoria.id],
+			name: "fk_evaluador_categoria_categoria"
 		}).onDelete("cascade"),
 	foreignKey({
 			columns: [table.evaluadorId],
 			foreignColumns: [usuario.id],
-			name: "fk_evaluador_convocatoria_evaluador"
+			name: "fk_evaluador_categoria_evaluador"
 		}).onDelete("restrict"),
 	foreignKey({
 			columns: [table.asignadoPor],
 			foreignColumns: [usuario.id],
-			name: "fk_evaluador_convocatoria_asignado_por"
+			name: "fk_evaluador_categoria_asignado_por"
 		}).onDelete("restrict"),
-	unique("uq_evaluador_convocatoria").on(table.convocatoriaId, table.evaluadorId),
+	// el uq (categoria_id lider) tambien sirve el listado del pool de una categoria
+	unique("uq_evaluador_categoria").on(table.categoriaId, table.evaluadorId),
 ]);
 
 // asignacion de evaluadores a postulaciones individuales (nivel 2)

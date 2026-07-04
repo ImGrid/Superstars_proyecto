@@ -23,7 +23,6 @@ import {
   updateFechasConvocatoriaSchema,
   listConvocatoriasQuerySchema,
   assignResponsableSchema,
-  assignEvaluadorSchema,
   seleccionarGanadoresSchema,
 } from '@superstars/shared';
 import type { AuthUser, CreateConvocatoriaDto, UpdateConvocatoriaDto, UpdateFechasConvocatoriaDto, SeleccionarGanadoresDto } from '@superstars/shared';
@@ -149,16 +148,18 @@ export class ConvocatoriaController {
     return this.convocatoriaService.iniciarEvaluacion(id);
   }
 
-  // Seleccionar ganadores (en_evaluacion -> resultados_listos)
-  @Post(':id/seleccionar-ganadores')
+  // Seleccionar ganadores de una categoria (la convocatoria avanza a
+  // resultados_listos cuando TODAS sus categorias quedan resueltas)
+  @Post(':id/categorias/:categoriaId/seleccionar-ganadores')
   @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   @CheckConvocatoria('id')
   async seleccionarGanadores(
     @Param('id', ParseIntPipe) id: number,
+    @Param('categoriaId', ParseIntPipe) categoriaId: number,
     @Body() body: SeleccionarGanadoresDto,
   ) {
     const dto = seleccionarGanadoresSchema.parse(body);
-    return this.convocatoriaService.seleccionarGanadores(id, dto);
+    return this.convocatoriaService.seleccionarGanadores(id, categoriaId, dto);
   }
 
   // Verificar si se puede publicar resultados
@@ -213,48 +214,17 @@ export class ConvocatoriaController {
     await this.convocatoriaService.removeResponsable(id, userId);
   }
 
-  // --- Evaluadores ---
+  // Nota: el pool de evaluadores se gestiona por categoria (ver CategoriaController).
 
-  // listar evaluadores asignados a la convocatoria
-  @Get(':id/evaluadores')
+  // Ranking de postulaciones de una categoria (admin/responsable)
+  @Get(':id/categorias/:categoriaId/ranking')
   @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   @CheckConvocatoria('id')
-  async findEvaluadores(@Param('id', ParseIntPipe) id: number) {
-    return this.convocatoriaService.findEvaluadores(id);
-  }
-
-  // asignar evaluador a la convocatoria
-  @Post(':id/evaluadores')
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
-  @CheckConvocatoria('id')
-  @HttpCode(HttpStatus.CREATED)
-  async addEvaluador(
+  async getRanking(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: { evaluadorId: number },
-    @CurrentUser() user: AuthUser,
+    @Param('categoriaId', ParseIntPipe) categoriaId: number,
   ) {
-    const dto = assignEvaluadorSchema.parse(body);
-    return this.convocatoriaService.addEvaluador(id, dto.evaluadorId, user.id);
-  }
-
-  // remover evaluador de la convocatoria
-  @Delete(':id/evaluadores/:evaluadorId')
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
-  @CheckConvocatoria('id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async removeEvaluador(
-    @Param('id', ParseIntPipe) id: number,
-    @Param('evaluadorId', ParseIntPipe) evaluadorId: number,
-  ) {
-    await this.convocatoriaService.removeEvaluador(id, evaluadorId);
-  }
-
-  // Ranking de postulaciones de una convocatoria (admin/responsable)
-  @Get(':id/ranking')
-  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
-  @CheckConvocatoria('id')
-  async getRanking(@Param('id', ParseIntPipe) id: number) {
-    return this.convocatoriaService.getRankingConvocatoria(id);
+    return this.convocatoriaService.getRankingCategoria(id, categoriaId);
   }
 
   // --- Imagen de portada ---

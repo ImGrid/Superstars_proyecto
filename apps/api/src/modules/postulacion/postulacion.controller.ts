@@ -73,16 +73,24 @@ export class PostulacionController {
   async findAll(
     @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
     @Query('estado') estado?: string,
+    @Query('categoriaId') categoriaId?: string,
   ) {
-    return this.postulacionService.findAllByConvocatoria(convocatoriaId, estado);
+    return this.postulacionService.findAllByConvocatoria(
+      convocatoriaId,
+      estado,
+      categoriaId !== undefined ? Number(categoriaId) : undefined,
+    );
   }
 
   // Detalle de una postulacion (con responseData)
   @Get(':id')
   @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   @CheckConvocatoria('convocatoriaId')
-  async findById(@Param('id', ParseIntPipe) id: number) {
-    return this.postulacionService.findById(id);
+  async findById(
+    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.postulacionService.findById(convocatoriaId, id);
   }
 
   // Observar postulacion (devolver al proponente con comentarios)
@@ -91,11 +99,12 @@ export class PostulacionController {
   @CheckConvocatoria('convocatoriaId')
   @HttpCode(HttpStatus.OK)
   async observar(
+    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
     @Param('id', ParseIntPipe) id: number,
     @Body() body: ObservarPostulacionDto,
   ) {
     const dto = observarPostulacionSchema.parse(body);
-    return this.postulacionService.observar(id, dto);
+    return this.postulacionService.observar(convocatoriaId, id, dto);
   }
 
   // Rechazar postulacion (estado final)
@@ -103,8 +112,11 @@ export class PostulacionController {
   @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   @CheckConvocatoria('convocatoriaId')
   @HttpCode(HttpStatus.OK)
-  async rechazar(@Param('id', ParseIntPipe) id: number) {
-    return this.postulacionService.rechazar(id);
+  async rechazar(
+    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.postulacionService.rechazar(convocatoriaId, id);
   }
 
   // Aprobar postulacion para evaluacion (enviado → en_evaluacion)
@@ -112,8 +124,11 @@ export class PostulacionController {
   @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   @CheckConvocatoria('convocatoriaId')
   @HttpCode(HttpStatus.OK)
-  async aprobar(@Param('id', ParseIntPipe) id: number) {
-    return this.postulacionService.aprobar(id);
+  async aprobar(
+    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.postulacionService.aprobar(convocatoriaId, id);
   }
 
 }

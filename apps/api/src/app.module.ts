@@ -11,6 +11,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsuarioModule } from './modules/usuario/usuario.module';
 import { EmpresaModule } from './modules/empresa/empresa.module';
 import { ConvocatoriaModule } from './modules/convocatoria/convocatoria.module';
+import { CategoriaModule } from './modules/categoria/categoria.module';
 import { FormularioModule } from './modules/formulario/formulario.module';
 import { DocumentoModule } from './modules/documento/documento.module';
 import { PostulacionModule } from './modules/postulacion/postulacion.module';
@@ -72,7 +73,10 @@ import { HistoriaExitoModule } from './modules/historia-exito/historia-exito.mod
     // Gestion de convocatorias
     ConvocatoriaModule,
 
-    // Formularios dinamicos (sub-recurso de convocatoria)
+    // Categorias dentro de una convocatoria (formulario, rubrica, docs, jurado por categoria)
+    CategoriaModule,
+
+    // Formularios dinamicos (sub-recurso de categoria)
     FormularioModule,
 
     // Documentos de la convocatoria (bases, guias, plantillas)

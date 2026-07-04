@@ -76,3 +76,36 @@ export const OPCIONES_METODO_REGISTROS = [
   { valor: 'sistemas', label: 'Se tienen sistemas (Contables - Productivos)' },
   { valor: 'ninguno', label: 'Ninguno' },
 ] as const;
+
+// Relacion comercial con el mercado — texto LITERAL del PDF (pregunta 18).
+// Reemplaza a OPCIONES_RELACION_COMERCIAL (jerga B2B/B2C que no esta en el PDF).
+// Cat 1: seleccion unica, 3 opciones.
+export const OPCIONES_RELACION_COMERCIAL_CAT1 = [
+  { valor: 'consumidores_directos', label: 'Consumidores directos' },
+  { valor: 'empresas_materia_prima', label: 'Empresas que compran materia prima – producto final' },
+  { valor: 'ambos', label: 'Ambos' },
+] as const;
+
+// Cat 2: agrega Intermediarios (+ permiteOtra para "Otros" del PDF).
+export const OPCIONES_RELACION_COMERCIAL_CAT2 = [
+  { valor: 'consumidores_directos', label: 'Consumidores directos' },
+  { valor: 'empresas_materia_prima', label: 'Empresas que compran materia prima - producto final' },
+  { valor: 'ambos', label: 'Ambos' },
+  { valor: 'intermediarios', label: 'Intermediarios' },
+] as const;
+
+// --- Opciones especificas de Categoria 2 (Agricultura Sostenible) ---
+
+// Cat 2, pregunta 8: Tipo de Unidad Economica (+ permiteOtra para "Otra").
+export const OPCIONES_TIPO_ORGANIZACION_CAT2 = [
+  { valor: 'asociacion', label: 'Asociación' },
+  { valor: 'emprendimiento', label: 'Emprendimiento' },
+] as const;
+
+// Cat 2, pregunta 11: Rubro (+ permiteOtra para "Otro"); agrega Agroindustria.
+export const OPCIONES_RUBRO_CAT2 = [
+  { valor: 'industria', label: 'Industria' },
+  { valor: 'servicios', label: 'Servicios' },
+  { valor: 'comercio', label: 'Comercio' },
+  { valor: 'agroindustria', label: 'Agroindustria y Producción Agrícola' },
+] as const;

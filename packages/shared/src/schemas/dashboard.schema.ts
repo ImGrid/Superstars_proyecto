@@ -95,7 +95,10 @@ export interface ProponenteConvocatoriaAbiertaItem {
   nombre: string;
   fechaCierreReal: string;
   diasParaCerrar: number;
-  monto: string;
+  // rango de premios entre las categorias de la convocatoria (null si aun no tiene categorias)
+  montoMin: string | null;
+  montoMax: string | null;
+  // total de ganadores sumando todas las categorias
   numeroGanadores: number;
   yaPostule: boolean;
 }

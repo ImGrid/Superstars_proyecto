@@ -21,32 +21,36 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { CheckConvocatoria } from '../convocatoria/decorators/check-convocatoria.decorator';
 import { FormularioService } from './formulario.service';
 
-@Controller('convocatorias/:convocatoriaId/formulario')
+// El formulario es 1:1 con la categoria. La ruta anidada lleva la convocatoria
+// (para el guard de propiedad @CheckConvocatoria) y la categoria (el recurso).
+@Controller('convocatorias/:convocatoriaId/categorias/:categoriaId/formulario')
 export class FormularioController {
   constructor(private readonly formularioService: FormularioService) {}
 
-  // Obtener el formulario de la convocatoria
+  // Obtener el formulario de la categoria
   @Get()
   @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA, RolUsuario.PROPONENTE, RolUsuario.EVALUADOR)
   @CheckConvocatoria('convocatoriaId')
   async find(
     @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
+    @Param('categoriaId', ParseIntPipe) categoriaId: number,
     @CurrentUser() user: AuthUser,
   ) {
-    return this.formularioService.findByConvocatoriaId(convocatoriaId, user);
+    return this.formularioService.find(convocatoriaId, categoriaId, user);
   }
 
-  // Crear formulario para la convocatoria (1:1)
+  // Crear formulario para la categoria (1:1)
   @Post()
   @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   @CheckConvocatoria('convocatoriaId')
   @HttpCode(HttpStatus.CREATED)
   async create(
     @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
+    @Param('categoriaId', ParseIntPipe) categoriaId: number,
     @Body() body: CreateFormularioDto,
   ) {
     const dto = createFormularioSchema.parse(body);
-    return this.formularioService.create(convocatoriaId, dto);
+    return this.formularioService.create(convocatoriaId, categoriaId, dto);
   }
 
   // Actualizar formulario (solo en borrador, optimistic locking por version)
@@ -55,10 +59,11 @@ export class FormularioController {
   @CheckConvocatoria('convocatoriaId')
   async update(
     @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
+    @Param('categoriaId', ParseIntPipe) categoriaId: number,
     @Body() body: UpdateFormularioDto,
   ) {
     const dto = updateFormularioSchema.parse(body);
-    return this.formularioService.update(convocatoriaId, dto);
+    return this.formularioService.update(convocatoriaId, categoriaId, dto);
   }
 
   // Eliminar formulario (solo en borrador)
@@ -66,7 +71,10 @@ export class FormularioController {
   @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   @CheckConvocatoria('convocatoriaId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async delete(@Param('convocatoriaId', ParseIntPipe) convocatoriaId: number) {
-    await this.formularioService.delete(convocatoriaId);
+  async delete(
+    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
+    @Param('categoriaId', ParseIntPipe) categoriaId: number,
+  ) {
+    await this.formularioService.delete(convocatoriaId, categoriaId);
   }
 }

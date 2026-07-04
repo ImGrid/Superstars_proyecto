@@ -17,11 +17,12 @@ import type {
   PaginatedResponse,
   AuthUser,
 } from '@superstars/shared';
-import { RolUsuario, EstadoConvocatoria } from '@superstars/shared';
+import { RolUsuario, EstadoConvocatoria, CATEGORIAS_DEFAULT } from '@superstars/shared';
 import { ConvocatoriaRepository } from './convocatoria.repository';
 import { ConvocatoriaStateMachine } from './convocatoria.state-machine';
 import type { ConvocatoriaEvent } from './convocatoria.state-machine';
 import { RubricaService } from '../rubrica/rubrica.service';
+import { CategoriaService } from '../categoria/categoria.service';
 import { STORAGE_SERVICE, type StorageService } from '../storage/storage.interface';
 import {
   IMAGE_CONFIG,
@@ -37,32 +38,40 @@ export class ConvocatoriaService {
     private readonly convocatoriaRepo: ConvocatoriaRepository,
     @Inject(forwardRef(() => RubricaService))
     private readonly rubricaService: RubricaService,
+    private readonly categoriaService: CategoriaService,
     @Inject(STORAGE_SERVICE) private readonly storage: StorageService,
   ) {}
 
   // --- CRUD ---
 
   async create(dto: CreateConvocatoriaDto, user: AuthUser) {
-    const created = await this.convocatoriaRepo.create({
-      nombre: dto.nombre,
-      descripcion: dto.descripcion,
-      bases: dto.bases,
-      fechaInicioPostulacion: dto.fechaInicioPostulacion,
-      fechaCierrePostulacion: dto.fechaCierrePostulacion,
-      fechaAnuncioGanadores: dto.fechaAnuncioGanadores,
-      monto: dto.monto.toString(),
-      numeroGanadores: dto.numeroGanadores,
-      topNSistema: dto.topNSistema,
-      departamentos: dto.departamentos,
-      createdBy: user.id,
-    });
+    // SB-6: la convocatoria nace con sus categorias por defecto + sus formularios
+    // (plantillas fieles a los PDF). Si un responsable la crea, se auto-asigna.
+    // Todo transaccional: o se crea la convocatoria completa, o nada.
+    const responsableUserId =
+      user.rol === RolUsuario.RESPONSABLE_CONVOCATORIA ? user.id : null;
 
-    // Si un responsable crea la convocatoria, auto-asignarse
-    if (user.rol === RolUsuario.RESPONSABLE_CONVOCATORIA) {
-      await this.convocatoriaRepo.addResponsable(created.id, user.id);
-    }
-
-    return created;
+    return this.convocatoriaRepo.createConCategorias(
+      {
+        nombre: dto.nombre,
+        descripcion: dto.descripcion,
+        fechaInicioPostulacion: dto.fechaInicioPostulacion,
+        fechaCierrePostulacion: dto.fechaCierrePostulacion,
+        fechaAnuncioGanadores: dto.fechaAnuncioGanadores,
+        departamentos: dto.departamentos,
+        createdBy: user.id,
+      },
+      responsableUserId,
+      CATEGORIAS_DEFAULT.map((c) => ({
+        nombre: c.nombre,
+        monto: c.monto,
+        numeroGanadores: c.numeroGanadores,
+        topNSistema: c.topNSistema,
+        orden: c.orden,
+        formularioNombre: c.formularioNombre,
+        schemaDefinition: c.schemaDefinition,
+      })),
+    );
   }
 
   async findById(id: number, user?: AuthUser) {
@@ -106,13 +115,7 @@ export class ConvocatoriaService {
       throw new ConflictException('Solo se puede editar una convocatoria en estado borrador');
     }
 
-    // Convertir monto a string si viene en el dto
-    const data: Record<string, unknown> = { ...dto };
-    if (dto.monto !== undefined) {
-      data.monto = dto.monto.toString();
-    }
-
-    const updated = await this.convocatoriaRepo.update(id, data);
+    const updated = await this.convocatoriaRepo.update(id, dto);
     if (!updated) throw new NotFoundException('Convocatoria no encontrada');
     return updated;
   }
@@ -155,16 +158,22 @@ export class ConvocatoriaService {
       errors.push('La convocatoria debe tener al menos un responsable asignado');
     }
 
-    // Debe tener formulario dinamico
-    const hasForm = await this.convocatoriaRepo.hasFormulario(convocatoriaId);
-    if (!hasForm) {
-      errors.push('La convocatoria debe tener un formulario de postulacion configurado');
+    // Cada categoria debe tener su formulario y su rubrica completa (6 reglas)
+    const categorias = await this.categoriaService.findByConvocatoria(convocatoriaId);
+    if (categorias.length === 0) {
+      errors.push('La convocatoria debe tener al menos una categoría');
     }
 
-    // Validar rubrica completa (6 reglas)
-    const rubricaResult = await this.rubricaService.validar(convocatoriaId);
-    if (!rubricaResult.completa) {
-      errors.push(...rubricaResult.errores);
+    for (const cat of categorias) {
+      const hasForm = await this.convocatoriaRepo.hasFormulario(cat.id);
+      if (!hasForm) {
+        errors.push(`La categoría "${cat.nombre}" no tiene un formulario de postulación configurado`);
+      }
+
+      const rubricaResult = await this.rubricaService.validar(convocatoriaId, cat.id);
+      if (!rubricaResult.completa) {
+        errors.push(...rubricaResult.errores.map((e) => `[${cat.nombre}] ${e}`));
+      }
     }
 
     return errors;
@@ -197,73 +206,78 @@ export class ConvocatoriaService {
     return this.executeTransition(convocatoriaId, 'iniciar_evaluacion');
   }
 
-  // Seleccionar ganadores (batch: en_evaluacion -> resultados_listos)
-  async seleccionarGanadores(convocatoriaId: number, dto: SeleccionarGanadoresDto) {
+  // Seleccionar ganadores de UNA categoria. No transiciona la convocatoria salvo
+  // que esta sea la ultima categoria en resolverse (fan-in -> resultados_listos).
+  async seleccionarGanadores(convocatoriaId: number, categoriaId: number, dto: SeleccionarGanadoresDto) {
     const c = await this.ensureExists(convocatoriaId);
+    const categoria = await this.categoriaService.verificarPerteneceAConvocatoria(categoriaId, convocatoriaId);
 
-    if (!this.stateMachine.canTransition(c.estado, 'seleccionar_ganadores')) {
+    // solo se seleccionan ganadores mientras la convocatoria esta en evaluacion
+    if (c.estado !== EstadoConvocatoria.EN_EVALUACION) {
       throw new ConflictException(
-        `No se puede seleccionar ganadores desde el estado "${c.estado}"`,
+        `No se pueden seleccionar ganadores en el estado "${c.estado}"`,
       );
     }
 
-    // validar que no haya postulaciones pendientes de evaluacion
-    const pendientes = await this.convocatoriaRepo.countPostulacionesPendientes(convocatoriaId);
+    // no debe quedar ninguna postulacion en evaluacion en esta categoria
+    const pendientes = await this.convocatoriaRepo.countPostulacionesPendientes(categoriaId);
     if (pendientes > 0) {
       throw new BadRequestException(
-        `Hay ${pendientes} postulacion(es) aun en evaluacion. Todas deben estar calificadas.`,
+        `Hay ${pendientes} postulación(es) aún en evaluación en esta categoría. Todas deben estar calificadas.`,
       );
     }
 
-    // validar que no haya calificaciones sin aprobar
-    const califNoAprobadas = await this.convocatoriaRepo.countCalificacionesNoAprobadas(convocatoriaId);
+    // no debe haber calificaciones sin aprobar en esta categoria
+    const califNoAprobadas = await this.convocatoriaRepo.countCalificacionesNoAprobadas(categoriaId);
     if (califNoAprobadas > 0) {
       throw new BadRequestException(
-        `Hay ${califNoAprobadas} calificacion(es) no aprobadas. Todas deben estar aprobadas.`,
+        `Hay ${califNoAprobadas} calificación(es) no aprobadas en esta categoría. Todas deben estar aprobadas.`,
       );
     }
 
-    // verificar que las postulaciones calificadas existen
-    const calificadas = await this.convocatoriaRepo.findPostulacionesCalificadas(convocatoriaId);
+    // debe haber postulaciones calificadas en la categoria
+    const calificadas = await this.convocatoriaRepo.findPostulacionesCalificadas(categoriaId);
     if (calificadas.length === 0) {
-      throw new BadRequestException('No hay postulaciones calificadas para seleccionar ganadores');
+      throw new BadRequestException('No hay postulaciones calificadas para seleccionar ganadores en esta categoría');
     }
 
-    // validar que los IDs de ganadores pertenecen a postulaciones calificadas de la convocatoria
+    // los ganadorIds deben ser postulaciones calificadas de ESTA categoria
     const idsCalificadas = new Set(calificadas.map(p => p.id));
     const idsInvalidos = dto.ganadorIds.filter((id: number) => !idsCalificadas.has(id));
     if (idsInvalidos.length > 0) {
       throw new BadRequestException(
-        `Las postulaciones [${idsInvalidos.join(', ')}] no estan calificadas o no pertenecen a esta convocatoria`,
+        `Las postulaciones [${idsInvalidos.join(', ')}] no están calificadas o no pertenecen a esta categoría`,
       );
     }
 
-    // validar cantidad de ganadores vs numero_ganadores de la convocatoria
-    if (dto.ganadorIds.length > c.numeroGanadores) {
+    // no exceder el numero de ganadores configurado en la categoria
+    if (dto.ganadorIds.length > categoria.numeroGanadores) {
       throw new BadRequestException(
-        `Se seleccionaron ${dto.ganadorIds.length} ganadores pero el maximo permitido es ${c.numeroGanadores}`,
+        `Se seleccionaron ${dto.ganadorIds.length} ganadores pero el máximo de la categoría es ${categoria.numeroGanadores}`,
       );
     }
 
-    // ejecutar todo en transaccion
-    // 1. calcular ranking
-    await this.convocatoriaRepo.calcularRanking(convocatoriaId);
+    // 1. ranking dentro de la categoria (DENSE_RANK)
+    await this.convocatoriaRepo.calcularRanking(categoriaId);
     // 2. marcar ganadores
     await this.convocatoriaRepo.marcarGanadores(dto.ganadorIds);
-    // 3. marcar no seleccionados
-    await this.convocatoriaRepo.marcarNoSeleccionados(convocatoriaId, dto.ganadorIds);
-    // 4. transicionar convocatoria a resultados_listos
-    const updated = await this.convocatoriaRepo.updateEstado(
-      convocatoriaId,
-      EstadoConvocatoria.EN_EVALUACION,
-      EstadoConvocatoria.RESULTADOS_LISTOS,
-    );
+    // 3. marcar el resto de calificadas de la categoria como no seleccionadas
+    await this.convocatoriaRepo.marcarNoSeleccionados(categoriaId, dto.ganadorIds);
+    // 4. marcar la categoria como resuelta
+    await this.categoriaService.marcarGanadoresSeleccionados(categoriaId);
 
-    if (!updated) {
-      throw new ConflictException('No se pudo cambiar el estado (concurrencia detectada)');
+    // 5. fan-in: si TODAS las categorias estan resueltas, avanzar la convocatoria
+    const noResueltas = await this.categoriaService.countCategoriasNoResueltas(convocatoriaId);
+    if (noResueltas === 0) {
+      await this.convocatoriaRepo.updateEstado(
+        convocatoriaId,
+        EstadoConvocatoria.EN_EVALUACION,
+        EstadoConvocatoria.RESULTADOS_LISTOS,
+      );
     }
 
-    return updated;
+    // devolver el ranking resultante de la categoria
+    return this.getRankingCategoria(convocatoriaId, categoriaId);
   }
 
   // Verificar requisitos para publicar resultados
@@ -280,16 +294,10 @@ export class ConvocatoriaService {
       return errors;
     }
 
-    // debe haber al menos 1 ganador
-    const numGanadores = await this.convocatoriaRepo.countGanadores(convocatoriaId);
-    if (numGanadores === 0) {
-      errors.push('No se han seleccionado ganadores');
-    }
-
-    // no deben quedar postulaciones calificadas sin decidir
-    const sinDecidir = await this.convocatoriaRepo.countCalificadasSinDecidir(convocatoriaId);
-    if (sinDecidir > 0) {
-      errors.push(`Hay ${sinDecidir} postulacion(es) calificadas sin decidir (ganador/no seleccionado)`);
+    // todas las categorias deben tener sus ganadores seleccionados (resueltas)
+    const noResueltas = await this.categoriaService.countCategoriasNoResueltas(convocatoriaId);
+    if (noResueltas > 0) {
+      errors.push(`Hay ${noResueltas} categoría(s) sin ganadores seleccionados`);
     }
 
     return errors;
@@ -351,40 +359,6 @@ export class ConvocatoriaService {
     const removed = await this.convocatoriaRepo.removeResponsable(convocatoriaId, usuarioId);
     if (!removed) {
       throw new NotFoundException('El usuario no es responsable de esta convocatoria');
-    }
-  }
-
-  // --- Evaluadores de la convocatoria ---
-
-  async findEvaluadores(convocatoriaId: number) {
-    await this.ensureExists(convocatoriaId);
-    return this.convocatoriaRepo.findEvaluadores(convocatoriaId);
-  }
-
-  async addEvaluador(convocatoriaId: number, evaluadorId: number, asignadoPor: number) {
-    await this.ensureExists(convocatoriaId);
-
-    try {
-      return await this.convocatoriaRepo.addEvaluador(convocatoriaId, evaluadorId, asignadoPor);
-    } catch (error: unknown) {
-      const pgCode = (error as any)?.cause?.code ?? (error as any)?.code;
-      // UNIQUE violation: ya es evaluador
-      if (pgCode === '23505') {
-        throw new ConflictException('El usuario ya es evaluador de esta convocatoria');
-      }
-      // FK violation: usuario no existe
-      if (pgCode === '23503') {
-        throw new NotFoundException('Usuario no encontrado');
-      }
-      throw error;
-    }
-  }
-
-  async removeEvaluador(convocatoriaId: number, evaluadorId: number) {
-    await this.ensureExists(convocatoriaId);
-    const removed = await this.convocatoriaRepo.removeEvaluador(convocatoriaId, evaluadorId);
-    if (!removed) {
-      throw new NotFoundException('El usuario no es evaluador de esta convocatoria');
     }
   }
 
@@ -457,12 +431,11 @@ export class ConvocatoriaService {
     }));
   }
 
-  // ranking completo de postulaciones de una convocatoria
-  async getRankingConvocatoria(convocatoriaId: number) {
-    const c = await this.convocatoriaRepo.findById(convocatoriaId);
-    if (!c) throw new NotFoundException('Convocatoria no encontrada');
+  // ranking de postulaciones de UNA categoria
+  async getRankingCategoria(convocatoriaId: number, categoriaId: number) {
+    const categoria = await this.categoriaService.verificarPerteneceAConvocatoria(categoriaId, convocatoriaId);
 
-    const rows = await this.convocatoriaRepo.findRankingPostulaciones(convocatoriaId);
+    const rows = await this.convocatoriaRepo.findRankingPostulaciones(categoriaId);
 
     // calcular estadisticas de puntajes
     const puntajes = rows
@@ -476,11 +449,12 @@ export class ConvocatoriaService {
     const minPuntaje = puntajes.length > 0 ? Math.min(...puntajes) : null;
 
     return {
-      id: c.id,
-      nombre: c.nombre,
-      estado: c.estado,
-      monto: c.monto,
-      numeroGanadores: c.numeroGanadores,
+      categoriaId: categoria.id,
+      categoriaNombre: categoria.nombre,
+      convocatoriaId,
+      monto: categoria.monto,
+      numeroGanadores: categoria.numeroGanadores,
+      resuelta: categoria.fechaSeleccionGanadores !== null,
       totalCalificadas: rows.length,
       promedioCalificadas,
       maxPuntaje,

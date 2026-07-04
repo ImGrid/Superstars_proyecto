@@ -2,7 +2,7 @@
 import { pgTable, pgEnum, unique, integer, text, timestamp, foreignKey, check, numeric, index, bigint, jsonb, date } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 import { usuario } from "./auth"
-import { convocatoria } from "./convocatoria"
+import { convocatoria, categoriaConvocatoria } from "./convocatoria"
 
 export const estadoPostulacion = pgEnum("estado_postulacion", ['borrador', 'enviado', 'observado', 'rechazado', 'en_evaluacion', 'calificado', 'ganador', 'no_seleccionado'])
 
@@ -49,6 +49,7 @@ export const empresa = pgTable("empresa", {
 export const postulacion = pgTable("postulacion", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity({ name: "postulacion_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
 	convocatoriaId: integer("convocatoria_id").notNull(),
+	categoriaId: integer("categoria_id").notNull(),
 	empresaId: integer("empresa_id").notNull(),
 	estado: estadoPostulacion().default('borrador').notNull(),
 	responseData: jsonb("response_data").$type<Record<string, unknown>>().default({}).notNull(),
@@ -62,17 +63,26 @@ export const postulacion = pgTable("postulacion", {
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
 	index("idx_postulacion_convocatoria_estado").using("btree", table.convocatoriaId.asc().nullsLast().op("enum_ops"), table.estado.asc().nullsLast().op("enum_ops")),
+	// evaluacion, ranking y seleccion de ganadores filtran por categoria
+	index("idx_postulacion_categoria_estado").using("btree", table.categoriaId.asc().nullsLast().op("int4_ops"), table.estado.asc().nullsLast().op("enum_ops")),
 	index("idx_postulacion_empresa_id").using("btree", table.empresaId.asc().nullsLast().op("int4_ops")),
 	foreignKey({
 			columns: [table.convocatoriaId],
 			foreignColumns: [convocatoria.id],
 			name: "fk_postulacion_convocatoria"
 		}).onDelete("restrict"),
+	// FK compuesta: garantiza que la categoria pertenece a la convocatoria indicada
+	foreignKey({
+			columns: [table.convocatoriaId, table.categoriaId],
+			foreignColumns: [categoriaConvocatoria.convocatoriaId, categoriaConvocatoria.id],
+			name: "fk_postulacion_categoria"
+		}).onDelete("restrict"),
 	foreignKey({
 			columns: [table.empresaId],
 			foreignColumns: [empresa.id],
 			name: "fk_postulacion_empresa"
 		}).onDelete("restrict"),
+	// una empresa solo puede postular a una categoria por convocatoria
 	unique("uq_postulacion_convocatoria_empresa").on(table.convocatoriaId, table.empresaId),
 	check("chk_postulacion_porcentaje", sql`(porcentaje_completado >= (0)::numeric) AND (porcentaje_completado <= (100)::numeric)`),
 	check("chk_postulacion_puntaje", sql`(puntaje_final IS NULL) OR (puntaje_final >= (0)::numeric)`),

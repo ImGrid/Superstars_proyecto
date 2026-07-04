@@ -3,7 +3,6 @@ import {
   NotFoundException,
   BadRequestException,
   ConflictException,
-  ForbiddenException,
 } from '@nestjs/common';
 import type {
   SavePostulacionDraftDto,
@@ -24,6 +23,7 @@ import { PostulacionRepository } from './postulacion.repository';
 import { PostulacionStateMachine } from './postulacion.state-machine';
 import { FormularioService } from '../formulario/formulario.service';
 import { ConvocatoriaRepository } from '../convocatoria/convocatoria.repository';
+import { CategoriaService } from '../categoria/categoria.service';
 
 @Injectable()
 export class PostulacionService {
@@ -33,6 +33,7 @@ export class PostulacionService {
     private readonly postulacionRepo: PostulacionRepository,
     private readonly formularioService: FormularioService,
     private readonly convocatoriaRepo: ConvocatoriaRepository,
+    private readonly categoriaService: CategoriaService,
   ) {}
 
   // --- Proponente ---
@@ -42,14 +43,28 @@ export class PostulacionService {
     const empresaId = await this.resolveEmpresaId(userId);
     await this.verificarConvocatoriaAbierta(convocatoriaId);
 
-    const formulario = await this.formularioService.findByConvocatoriaId(convocatoriaId);
+    const existing = await this.postulacionRepo.findByEmpresaAndConvocatoria(empresaId, convocatoriaId);
+
+    // La categoria se elige al crear la postulacion; una vez creada NO se puede cambiar
+    // (el formulario es distinto por categoria). En update debe coincidir con la existente.
+    let categoriaId: number;
+    if (existing) {
+      if (existing.categoriaId !== dto.categoriaId) {
+        throw new ConflictException('No puedes cambiar la categoría de una postulación ya iniciada');
+      }
+      categoriaId = existing.categoriaId;
+    } else {
+      await this.categoriaService.verificarPerteneceAConvocatoria(dto.categoriaId, convocatoriaId);
+      categoriaId = dto.categoriaId;
+    }
+
+    // El formulario a validar es el de la categoria elegida
+    const formulario = await this.formularioService.getByCategoriaId(categoriaId);
     const schemaDef = formulario.schemaDefinition as SchemaDefinition;
 
     // Validacion dinamica en modo draft (todo opcional, passthrough)
     const validated = this.validateResponseData(schemaDef, dto.responseData, 'draft');
     const porcentaje = calculateCompletionPercentage(schemaDef, validated);
-
-    let existing = await this.postulacionRepo.findByEmpresaAndConvocatoria(empresaId, convocatoriaId);
 
     if (existing) {
       // Solo se puede editar en borrador u observado
@@ -67,6 +82,7 @@ export class PostulacionService {
     // Crear nueva postulacion en borrador
     return this.postulacionRepo.create({
       convocatoriaId,
+      categoriaId,
       empresaId,
       responseData: validated,
       porcentajeCompletado: porcentaje.toString(),
@@ -91,8 +107,8 @@ export class PostulacionService {
       );
     }
 
-    // Validar con modo submit (requeridos obligatorios)
-    const formulario = await this.formularioService.findByConvocatoriaId(convocatoriaId);
+    // Validar con modo submit (requeridos obligatorios), contra el formulario de su categoria
+    const formulario = await this.formularioService.getByCategoriaId(existing.categoriaId);
     const schemaDef = formulario.schemaDefinition as SchemaDefinition;
     const responseData = existing.responseData as Record<string, unknown>;
 
@@ -124,7 +140,7 @@ export class PostulacionService {
     query: ListPostulacionesQueryDto,
     user: AuthUser,
   ): Promise<PaginatedResponse<unknown>> {
-    const { page, limit, convocatoriaId, empresaId, estado } = query;
+    const { page, limit, convocatoriaId, categoriaId, empresaId, estado } = query;
 
     // responsable solo ve postulaciones de sus convocatorias asignadas
     const responsableUsuarioId =
@@ -134,6 +150,7 @@ export class PostulacionService {
       page,
       limit,
       convocatoriaId,
+      categoriaId,
       empresaId,
       estado,
       responsableUsuarioId,
@@ -155,30 +172,31 @@ export class PostulacionService {
 
   // --- Responsable / Admin ---
 
-  // Listar postulaciones de una convocatoria (sin responseData)
-  async findAllByConvocatoria(convocatoriaId: number, estado?: string) {
+  // Listar postulaciones de una convocatoria (sin responseData), opcionalmente por categoria
+  async findAllByConvocatoria(convocatoriaId: number, estado?: string, categoriaId?: number) {
     // Verificar que la convocatoria existe
     const convocatoriaEstado = await this.convocatoriaRepo.getEstado(convocatoriaId);
     if (!convocatoriaEstado) {
       throw new NotFoundException('Convocatoria no encontrada');
     }
 
-    return this.postulacionRepo.findAllByConvocatoria(convocatoriaId, estado);
+    return this.postulacionRepo.findAllByConvocatoria(convocatoriaId, estado, categoriaId);
   }
 
-  // Detalle de una postulacion (con responseData)
-  async findById(id: number) {
+  // Detalle de una postulacion (con responseData). Coherencia: la postulacion debe
+  // pertenecer a la convocatoria de la ruta (evita IDOR entre convocatorias).
+  async findById(convocatoriaId: number, id: number) {
     const existing = await this.postulacionRepo.findById(id);
-    if (!existing) {
+    if (!existing || existing.convocatoriaId !== convocatoriaId) {
       throw new NotFoundException('Postulacion no encontrada');
     }
     return existing;
   }
 
   // Observar postulacion (devolver al proponente con comentarios)
-  async observar(id: number, dto: ObservarPostulacionDto) {
+  async observar(convocatoriaId: number, id: number, dto: ObservarPostulacionDto) {
     const existing = await this.postulacionRepo.findById(id);
-    if (!existing) {
+    if (!existing || existing.convocatoriaId !== convocatoriaId) {
       throw new NotFoundException('Postulacion no encontrada');
     }
 
@@ -197,9 +215,9 @@ export class PostulacionService {
   }
 
   // Rechazar postulacion (estado final)
-  async rechazar(id: number) {
+  async rechazar(convocatoriaId: number, id: number) {
     const existing = await this.postulacionRepo.findById(id);
-    if (!existing) {
+    if (!existing || existing.convocatoriaId !== convocatoriaId) {
       throw new NotFoundException('Postulacion no encontrada');
     }
 
@@ -222,9 +240,9 @@ export class PostulacionService {
   }
 
   // Aprobar postulacion para evaluacion (enviado → en_evaluacion)
-  async aprobar(id: number) {
+  async aprobar(convocatoriaId: number, id: number) {
     const existing = await this.postulacionRepo.findById(id);
-    if (!existing) {
+    if (!existing || existing.convocatoriaId !== convocatoriaId) {
       throw new NotFoundException('Postulacion no encontrada');
     }
 

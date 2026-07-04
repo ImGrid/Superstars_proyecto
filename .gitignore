@@ -29,6 +29,9 @@ cookies.txt
 .playwright-mcp/
 superstars_backup_*.sql
 
+# Credenciales del servidor (NUNCA commitear)
+vps.txt
+
 # Backups de base de datos
 *.sql.bak
 backup_*.sql

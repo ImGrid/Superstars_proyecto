@@ -12,37 +12,41 @@ import {
 import type { SaveCalificacionDto, DevolverCalificacionDto, AssignEvaluadorPostulacionDto } from '@superstars/shared';
 import { EvaluacionRepository } from './evaluacion.repository';
 import { CalificacionStateMachine } from './calificacion.state-machine';
+import { CategoriaService } from '../categoria/categoria.service';
 
 @Injectable()
 export class EvaluacionService {
   private readonly stateMachine = new CalificacionStateMachine();
 
-  constructor(private readonly evaluacionRepo: EvaluacionRepository) {}
+  constructor(
+    private readonly evaluacionRepo: EvaluacionRepository,
+    private readonly categoriaService: CategoriaService,
+  ) {}
 
   // --- Evaluador ---
 
-  // convocatorias asignadas al evaluador
-  async findMisConvocatorias(evaluadorId: number) {
-    return this.evaluacionRepo.findConvocatoriasDelEvaluador(evaluadorId);
+  // categorias donde soy jurado (pool nivel 1), con el contexto de su convocatoria
+  async findMisCategorias(evaluadorId: number) {
+    return this.evaluacionRepo.findCategoriasDelEvaluador(evaluadorId);
   }
 
-  // postulaciones evaluables de una convocatoria
-  async findPostulacionesEvaluables(convocatoriaId: number, evaluadorId: number) {
-    await this.verificarAccesoEvaluador(convocatoriaId, evaluadorId);
-    return this.evaluacionRepo.findPostulacionesEvaluables(convocatoriaId, evaluadorId);
+  // postulaciones que me asignaron (nivel 2) en una categoria de cuyo pool formo parte
+  async findPostulacionesEvaluables(categoriaId: number, evaluadorId: number) {
+    await this.verificarPoolCategoria(categoriaId, evaluadorId);
+    return this.evaluacionRepo.findPostulacionesEvaluables(categoriaId, evaluadorId);
   }
 
   // detalle de postulacion (para que el evaluador vea la propuesta)
-  async findPostulacionDetalle(convocatoriaId: number, postulacionId: number, evaluadorId: number) {
-    await this.verificarAccesoEvaluador(convocatoriaId, evaluadorId);
+  async findPostulacionDetalle(categoriaId: number, postulacionId: number, evaluadorId: number) {
+    // el gate real es la asignacion (nivel 2); la categoria da coherencia de la ruta
     await this.verificarAsignacionPostulacion(postulacionId, evaluadorId);
 
     const post = await this.evaluacionRepo.findPostulacionById(postulacionId);
     if (!post) {
       throw new NotFoundException('Postulación no encontrada');
     }
-    if (post.convocatoriaId !== convocatoriaId) {
-      throw new ForbiddenException('La postulación no pertenece a esta convocatoria');
+    if (post.categoriaId !== categoriaId) {
+      throw new ForbiddenException('La postulación no pertenece a esta categoría');
     }
 
     // obtener calificacion del evaluador si existe
@@ -60,27 +64,22 @@ export class EvaluacionService {
 
   // guardar calificacion parcial (crear o actualizar)
   async saveCalificacion(
-    convocatoriaId: number,
     postulacionId: number,
     evaluadorId: number,
     dto: SaveCalificacionDto,
   ) {
-    await this.verificarAccesoEvaluador(convocatoriaId, evaluadorId);
     await this.verificarAsignacionPostulacion(postulacionId, evaluadorId);
 
     const post = await this.evaluacionRepo.findPostulacionById(postulacionId);
     if (!post) {
       throw new NotFoundException('Postulación no encontrada');
     }
-    if (post.convocatoriaId !== convocatoriaId) {
-      throw new ForbiddenException('La postulación no pertenece a esta convocatoria');
-    }
     if (post.estado !== EstadoPostulacion.EN_EVALUACION) {
       throw new ConflictException('La postulación no está en estado de evaluación');
     }
 
-    // validar puntajes contra rangos de la rubrica
-    await this.validarRangosPuntaje(convocatoriaId, dto.detalles);
+    // validar puntajes contra los rangos de la rubrica de la categoria de la postulacion
+    await this.validarRangosPuntaje(post.categoriaId, dto.detalles);
 
     let calif = await this.evaluacionRepo.findCalificacion(postulacionId, evaluadorId);
 
@@ -126,13 +125,13 @@ export class EvaluacionService {
   }
 
   // completar calificacion (enviar para revision)
-  async completarCalificacion(
-    convocatoriaId: number,
-    postulacionId: number,
-    evaluadorId: number,
-  ) {
-    await this.verificarAccesoEvaluador(convocatoriaId, evaluadorId);
+  async completarCalificacion(postulacionId: number, evaluadorId: number) {
     await this.verificarAsignacionPostulacion(postulacionId, evaluadorId);
+
+    const post = await this.evaluacionRepo.findPostulacionById(postulacionId);
+    if (!post) {
+      throw new NotFoundException('Postulación no encontrada');
+    }
 
     const calif = await this.evaluacionRepo.findCalificacion(postulacionId, evaluadorId);
     if (!calif) {
@@ -145,9 +144,9 @@ export class EvaluacionService {
       );
     }
 
-    // verificar que todos los sub-criterios tienen puntaje
+    // verificar que todos los sub-criterios (de la rubrica de la categoria) tienen puntaje
     const detalles = await this.evaluacionRepo.findDetalles(calif.id);
-    const totalSubCriterios = await this.evaluacionRepo.countSubCriteriosByConvocatoria(convocatoriaId);
+    const totalSubCriterios = await this.evaluacionRepo.countSubCriteriosByCategoria(post.categoriaId);
 
     if (detalles.length < totalSubCriterios) {
       throw new BadRequestException(
@@ -164,16 +163,6 @@ export class EvaluacionService {
     });
   }
 
-  // helper publico para obtener convocatoriaId desde postulacionId
-  // (mantiene el nombre con "Para" que en este caso significa "para obtener")
-  async findPostulacionParaConvocatoriaId(postulacionId: number) {
-    const post = await this.evaluacionRepo.findPostulacionById(postulacionId);
-    if (!post) {
-      throw new NotFoundException('Postulación no encontrada');
-    }
-    return post;
-  }
-
   // --- Responsable / Admin ---
 
   // listar calificaciones de una convocatoria
@@ -182,7 +171,8 @@ export class EvaluacionService {
   }
 
   // detalle de una calificacion (para revision del responsable)
-  async findCalificacionDetalle(calificacionId: number) {
+  async findCalificacionDetalle(convocatoriaId: number, calificacionId: number) {
+    await this.verificarCalificacionEnConvocatoria(calificacionId, convocatoriaId);
     const result = await this.evaluacionRepo.findCalificacionConDetalle(calificacionId);
     if (!result) {
       throw new NotFoundException('Calificación no encontrada');
@@ -191,11 +181,8 @@ export class EvaluacionService {
   }
 
   // aprobar calificacion
-  async aprobarCalificacion(calificacionId: number) {
-    const calif = await this.evaluacionRepo.findCalificacionById(calificacionId);
-    if (!calif) {
-      throw new NotFoundException('Calificación no encontrada');
-    }
+  async aprobarCalificacion(convocatoriaId: number, calificacionId: number) {
+    const calif = await this.verificarCalificacionEnConvocatoria(calificacionId, convocatoriaId);
 
     if (!this.stateMachine.canTransition(calif.estado, 'aprobar')) {
       throw new ConflictException(
@@ -214,11 +201,8 @@ export class EvaluacionService {
   }
 
   // devolver calificacion al evaluador
-  async devolverCalificacion(calificacionId: number, dto: DevolverCalificacionDto) {
-    const calif = await this.evaluacionRepo.findCalificacionById(calificacionId);
-    if (!calif) {
-      throw new NotFoundException('Calificación no encontrada');
-    }
+  async devolverCalificacion(convocatoriaId: number, calificacionId: number, dto: DevolverCalificacionDto) {
+    const calif = await this.verificarCalificacionEnConvocatoria(calificacionId, convocatoriaId);
 
     if (!this.stateMachine.canTransition(calif.estado, 'devolver')) {
       throw new ConflictException(
@@ -235,7 +219,8 @@ export class EvaluacionService {
   // --- Asignacion de evaluadores a postulaciones (admin/responsable) ---
 
   // listar evaluadores asignados a una postulacion
-  async findAsignacionesByPostulacion(postulacionId: number) {
+  async findAsignacionesByPostulacion(convocatoriaId: number, postulacionId: number) {
+    await this.verificarPostulacionEnConvocatoria(postulacionId, convocatoriaId);
     return this.evaluacionRepo.findAsignacionesByPostulacion(postulacionId);
   }
 
@@ -255,11 +240,11 @@ export class EvaluacionService {
       throw new ForbiddenException('La postulación no pertenece a esta convocatoria');
     }
 
-    // verificar que el evaluador pertenece al pool de la convocatoria
-    const enPool = await this.evaluacionRepo.isEvaluadorDeConvocatoria(convocatoriaId, dto.evaluadorId);
+    // coherencia: solo se asigna (nivel 2) si el evaluador esta en el pool (nivel 1) de la categoria
+    const enPool = await this.categoriaService.esEvaluadorDeCategoria(post.categoriaId, dto.evaluadorId);
     if (!enPool) {
       throw new BadRequestException(
-        'El evaluador no esta asignado a la convocatoria. Primero asignelo a la convocatoria.',
+        'El evaluador no está en el pool de esta categoría. Primero asígnalo a la categoría.',
       );
     }
 
@@ -297,14 +282,15 @@ export class EvaluacionService {
 
   // --- Helpers privados ---
 
-  private async verificarAccesoEvaluador(convocatoriaId: number, evaluadorId: number) {
-    const isAsignado = await this.evaluacionRepo.isEvaluadorDeConvocatoria(convocatoriaId, evaluadorId);
-    if (!isAsignado) {
-      throw new ForbiddenException('No estás asignado como evaluador a esta convocatoria');
+  // el evaluador debe estar en el pool (nivel 1) de la categoria
+  private async verificarPoolCategoria(categoriaId: number, evaluadorId: number) {
+    const enPool = await this.categoriaService.esEvaluadorDeCategoria(categoriaId, evaluadorId);
+    if (!enPool) {
+      throw new ForbiddenException('No estás asignado como evaluador a esta categoría');
     }
   }
 
-  // verificar que el evaluador esta asignado a la postulacion especifica
+  // verificar que el evaluador esta asignado a la postulacion especifica (nivel 2)
   private async verificarAsignacionPostulacion(postulacionId: number, evaluadorId: number) {
     const isAsignado = await this.evaluacionRepo.isAsignadoAPostulacion(postulacionId, evaluadorId);
     if (!isAsignado) {
@@ -312,12 +298,36 @@ export class EvaluacionService {
     }
   }
 
-  // valida que cada puntaje este dentro del rango [basico.min, avanzado.max] del sub-criterio
+  // coherencia de ruta anidada: la postulacion debe pertenecer a la convocatoria del path.
+  // El guard @CheckConvocatoria valida propiedad de la convocatoria; esto evita el IDOR
+  // en que un responsable de la convocatoria A opera sobre recursos de la convocatoria B.
+  private async verificarPostulacionEnConvocatoria(postulacionId: number, convocatoriaId: number) {
+    const post = await this.evaluacionRepo.findPostulacionById(postulacionId);
+    if (!post || post.convocatoriaId !== convocatoriaId) {
+      throw new NotFoundException('Postulación no encontrada');
+    }
+    return post;
+  }
+
+  // coherencia: la calificacion, via su postulacion, debe pertenecer a la convocatoria del path
+  private async verificarCalificacionEnConvocatoria(calificacionId: number, convocatoriaId: number) {
+    const calif = await this.evaluacionRepo.findCalificacionById(calificacionId);
+    if (!calif) {
+      throw new NotFoundException('Calificación no encontrada');
+    }
+    const post = await this.evaluacionRepo.findPostulacionById(calif.postulacionId);
+    if (!post || post.convocatoriaId !== convocatoriaId) {
+      throw new NotFoundException('Calificación no encontrada');
+    }
+    return calif;
+  }
+
+  // valida que cada puntaje este dentro del rango [basico.min, avanzado.max] del sub-criterio (de la categoria)
   private async validarRangosPuntaje(
-    convocatoriaId: number,
+    categoriaId: number,
     detalles: { subCriterioId: number; puntaje: number }[],
   ) {
-    const niveles = await this.evaluacionRepo.findRangosPuntajeByConvocatoria(convocatoriaId);
+    const niveles = await this.evaluacionRepo.findRangosPuntajeByCategoria(categoriaId);
 
     // construir mapa subCriterioId -> { min, max, nombre }
     const rangos = new Map<number, { min: number; max: number; nombre: string }>();
@@ -337,7 +347,7 @@ export class EvaluacionService {
     for (const d of detalles) {
       const rango = rangos.get(d.subCriterioId);
       if (!rango) {
-        errores.push(`Sub-criterio ${d.subCriterioId} no pertenece a la rubrica de esta convocatoria`);
+        errores.push(`Sub-criterio ${d.subCriterioId} no pertenece a la rúbrica de esta categoría`);
         continue;
       }
       if (d.puntaje < rango.min || d.puntaje > rango.max) {

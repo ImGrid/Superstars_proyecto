@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConvocatoriaModule } from '../convocatoria/convocatoria.module';
+import { CategoriaModule } from '../categoria/categoria.module';
 import { EvaluacionEvaluadorController, EvaluacionResponsableController, AsignacionEvaluadorController } from './evaluacion.controller';
 import { EvaluacionService } from './evaluacion.service';
 import { EvaluacionRepository } from './evaluacion.repository';
 
 @Module({
-  imports: [ConvocatoriaModule],
+  imports: [ConvocatoriaModule, CategoriaModule],
   controllers: [EvaluacionEvaluadorController, EvaluacionResponsableController, AsignacionEvaluadorController],
   providers: [EvaluacionService, EvaluacionRepository],
   exports: [EvaluacionService],

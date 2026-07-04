@@ -1,10 +1,10 @@
 import { InferSelectModel, InferInsertModel } from "drizzle-orm";
 import {
 	usuario, sesionRefreshToken, verificacionPendiente, resetPasswordPendiente,
-	convocatoria, responsableConvocatoria, documentoConvocatoria, formularioDinamico,
+	convocatoria, categoriaConvocatoria, responsableConvocatoria, documentoCategoria, formularioDinamico,
 	empresa, postulacion, archivoPostulacion,
 	rubrica, criterio, subCriterio, nivelEvaluacion,
-	evaluadorConvocatoria, asignacionEvaluador, calificacion, calificacionDetalle,
+	evaluadorCategoria, asignacionEvaluador, calificacion, calificacionDetalle,
 	notificacionEmail,
 	preguntaFrecuente,
 	historiaExito,
@@ -16,8 +16,9 @@ export type SesionRefreshToken = InferSelectModel<typeof sesionRefreshToken>;
 export type VerificacionPendiente = InferSelectModel<typeof verificacionPendiente>;
 export type ResetPasswordPendiente = InferSelectModel<typeof resetPasswordPendiente>;
 export type Convocatoria = InferSelectModel<typeof convocatoria>;
+export type CategoriaConvocatoria = InferSelectModel<typeof categoriaConvocatoria>;
 export type ResponsableConvocatoria = InferSelectModel<typeof responsableConvocatoria>;
-export type DocumentoConvocatoria = InferSelectModel<typeof documentoConvocatoria>;
+export type DocumentoCategoria = InferSelectModel<typeof documentoCategoria>;
 export type FormularioDinamico = InferSelectModel<typeof formularioDinamico>;
 export type Empresa = InferSelectModel<typeof empresa>;
 export type Postulacion = InferSelectModel<typeof postulacion>;
@@ -26,7 +27,7 @@ export type Rubrica = InferSelectModel<typeof rubrica>;
 export type Criterio = InferSelectModel<typeof criterio>;
 export type SubCriterio = InferSelectModel<typeof subCriterio>;
 export type NivelEvaluacion = InferSelectModel<typeof nivelEvaluacion>;
-export type EvaluadorConvocatoria = InferSelectModel<typeof evaluadorConvocatoria>;
+export type EvaluadorCategoria = InferSelectModel<typeof evaluadorCategoria>;
 export type AsignacionEvaluador = InferSelectModel<typeof asignacionEvaluador>;
 export type Calificacion = InferSelectModel<typeof calificacion>;
 export type CalificacionDetalle = InferSelectModel<typeof calificacionDetalle>;
@@ -40,8 +41,9 @@ export type NewSesionRefreshToken = InferInsertModel<typeof sesionRefreshToken>;
 export type NewVerificacionPendiente = InferInsertModel<typeof verificacionPendiente>;
 export type NewResetPasswordPendiente = InferInsertModel<typeof resetPasswordPendiente>;
 export type NewConvocatoria = InferInsertModel<typeof convocatoria>;
+export type NewCategoriaConvocatoria = InferInsertModel<typeof categoriaConvocatoria>;
 export type NewResponsableConvocatoria = InferInsertModel<typeof responsableConvocatoria>;
-export type NewDocumentoConvocatoria = InferInsertModel<typeof documentoConvocatoria>;
+export type NewDocumentoCategoria = InferInsertModel<typeof documentoCategoria>;
 export type NewFormularioDinamico = InferInsertModel<typeof formularioDinamico>;
 export type NewEmpresa = InferInsertModel<typeof empresa>;
 export type NewPostulacion = InferInsertModel<typeof postulacion>;
@@ -50,7 +52,7 @@ export type NewRubrica = InferInsertModel<typeof rubrica>;
 export type NewCriterio = InferInsertModel<typeof criterio>;
 export type NewSubCriterio = InferInsertModel<typeof subCriterio>;
 export type NewNivelEvaluacion = InferInsertModel<typeof nivelEvaluacion>;
-export type NewEvaluadorConvocatoria = InferInsertModel<typeof evaluadorConvocatoria>;
+export type NewEvaluadorCategoria = InferInsertModel<typeof evaluadorCategoria>;
 export type NewAsignacionEvaluador = InferInsertModel<typeof asignacionEvaluador>;
 export type NewCalificacion = InferInsertModel<typeof calificacion>;
 export type NewCalificacionDetalle = InferInsertModel<typeof calificacionDetalle>;

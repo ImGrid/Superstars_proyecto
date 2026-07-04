@@ -19,6 +19,7 @@ import { RolUsuario } from '@superstars/shared';
 import type { AuthUser } from '@superstars/shared';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { CheckConvocatoria } from '../convocatoria/decorators/check-convocatoria.decorator';
 import { ArchivoService } from './archivo.service';
 
 @Controller('convocatorias/:convocatoriaId/postulaciones/:postulacionId/archivos')
@@ -56,23 +57,28 @@ export class ArchivoController {
   // Listar archivos de una postulacion (proponente solo su propia postulacion)
   @Get()
   @Roles(RolUsuario.PROPONENTE, RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA, RolUsuario.EVALUADOR)
+  @CheckConvocatoria('convocatoriaId')
   async findAll(
+    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
     @Param('postulacionId', ParseIntPipe) postulacionId: number,
     @CurrentUser() user: AuthUser,
   ) {
-    return this.archivoService.findAllByPostulacion(postulacionId, user.id, user.rol);
+    return this.archivoService.findAllByPostulacion(convocatoriaId, postulacionId, user.id, user.rol);
   }
 
   // Descargar archivo
   @Get(':archivoId/download')
   @Roles(RolUsuario.PROPONENTE, RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA, RolUsuario.EVALUADOR)
+  @CheckConvocatoria('convocatoriaId')
   async download(
+    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
+    @Param('postulacionId', ParseIntPipe) postulacionId: number,
     @Param('archivoId', ParseIntPipe) archivoId: number,
     @CurrentUser() user: AuthUser,
     @Res() res: Response,
   ) {
     const { buffer, mimeType, nombreOriginal } = await this.archivoService.download(
-      archivoId, user.id, user.rol,
+      convocatoriaId, postulacionId, archivoId, user.id, user.rol,
     );
 
     res.set({

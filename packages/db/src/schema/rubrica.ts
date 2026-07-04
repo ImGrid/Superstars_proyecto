@@ -1,14 +1,15 @@
 // Bloque Rubrica: rubrica, criterio, sub_criterio, nivel_evaluacion
 import { pgTable, pgEnum, unique, integer, text, timestamp, foreignKey, check, numeric, index } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
-import { convocatoria } from "./convocatoria"
+import { categoriaConvocatoria } from "./convocatoria"
 
 export const tipoCriterio = pgEnum("tipo_criterio", ['economico', 'tecnico', 'medioambiental', 'social', 'financiero'])
 export const nivelEnum = pgEnum("nivel_enum", ['basico', 'intermedio', 'avanzado'])
 
+// rubrica (guia de evaluacion) por categoria
 export const rubrica = pgTable("rubrica", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity({ name: "rubrica_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
-	convocatoriaId: integer("convocatoria_id").notNull(),
+	categoriaId: integer("categoria_id").notNull(),
 	nombre: text().notNull(),
 	descripcion: text(),
 	puntajeTotal: numeric("puntaje_total", { precision: 6, scale: 2 }).default('100').notNull(),
@@ -16,11 +17,11 @@ export const rubrica = pgTable("rubrica", {
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
 	foreignKey({
-			columns: [table.convocatoriaId],
-			foreignColumns: [convocatoria.id],
-			name: "fk_rubrica_convocatoria"
+			columns: [table.categoriaId],
+			foreignColumns: [categoriaConvocatoria.id],
+			name: "fk_rubrica_categoria"
 		}).onDelete("cascade"),
-	unique("uq_rubrica_convocatoria").on(table.convocatoriaId),
+	unique("uq_rubrica_categoria").on(table.categoriaId),
 	check("chk_rubrica_puntaje", sql`puntaje_total > (0)::numeric`),
 ]);
 

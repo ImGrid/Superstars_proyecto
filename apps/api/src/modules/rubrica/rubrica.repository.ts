@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { eq, and, asc, sum } from 'drizzle-orm';
+import { eq, and, asc } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/drizzle.provider';
 import type { DrizzleDB } from '../../database/drizzle.provider';
 import { rubrica, criterio, subCriterio, nivelEvaluacion } from '@superstars/db';
@@ -8,20 +8,20 @@ import { rubrica, criterio, subCriterio, nivelEvaluacion } from '@superstars/db'
 export class RubricaRepository {
   constructor(@Inject(DRIZZLE) private readonly db: DrizzleDB) {}
 
-  // --- Rubrica ---
+  // --- Rubrica (1:1 con categoria) ---
 
-  async findByConvocatoriaId(convocatoriaId: number) {
+  async findByCategoriaId(categoriaId: number) {
     const rows = await this.db
       .select()
       .from(rubrica)
-      .where(eq(rubrica.convocatoriaId, convocatoriaId));
+      .where(eq(rubrica.categoriaId, categoriaId));
     return rows[0] ?? null;
   }
 
   // Arbol completo: rubrica + criterios + sub-criterios + niveles
-  async findFullTree(convocatoriaId: number) {
+  async findFullTree(categoriaId: number) {
     return this.db.query.rubrica.findFirst({
-      where: eq(rubrica.convocatoriaId, convocatoriaId),
+      where: eq(rubrica.categoriaId, categoriaId),
       with: {
         criterios: {
           orderBy: [asc(criterio.orden)],
@@ -39,7 +39,7 @@ export class RubricaRepository {
   }
 
   async createRubrica(data: {
-    convocatoriaId: number;
+    categoriaId: number;
     nombre: string;
     descripcion?: string;
     puntajeTotal: string;
@@ -64,10 +64,10 @@ export class RubricaRepository {
     return updated ?? null;
   }
 
-  async deleteRubrica(convocatoriaId: number): Promise<boolean> {
+  async deleteRubrica(categoriaId: number): Promise<boolean> {
     const result = await this.db
       .delete(rubrica)
-      .where(eq(rubrica.convocatoriaId, convocatoriaId))
+      .where(eq(rubrica.categoriaId, categoriaId))
       .returning({ id: rubrica.id });
     return result.length > 0;
   }
@@ -82,15 +82,15 @@ export class RubricaRepository {
     return rows[0] ?? null;
   }
 
-  // Verificar que un criterio pertenece a la rubrica de la convocatoria
-  async findCriterioByIdAndConvocatoria(criterioId: number, convocatoriaId: number) {
+  // Verificar que un criterio pertenece a la rubrica de la categoria
+  async findCriterioByIdAndCategoria(criterioId: number, categoriaId: number) {
     const rows = await this.db
       .select({ criterio, rubrica })
       .from(criterio)
       .innerJoin(rubrica, eq(criterio.rubricaId, rubrica.id))
       .where(and(
         eq(criterio.id, criterioId),
-        eq(rubrica.convocatoriaId, convocatoriaId),
+        eq(rubrica.categoriaId, categoriaId),
       ));
     return rows[0] ?? null;
   }
@@ -135,8 +135,8 @@ export class RubricaRepository {
 
   // --- Sub-criterio ---
 
-  // Verificar que un sub-criterio pertenece a la convocatoria (join sub_criterio->criterio->rubrica)
-  async findSubCriterioByIdAndConvocatoria(subCriterioId: number, convocatoriaId: number) {
+  // Verificar que un sub-criterio pertenece a la categoria (join sub_criterio->criterio->rubrica)
+  async findSubCriterioByIdAndCategoria(subCriterioId: number, categoriaId: number) {
     const rows = await this.db
       .select({ subCriterio, criterio, rubrica })
       .from(subCriterio)
@@ -144,7 +144,7 @@ export class RubricaRepository {
       .innerJoin(rubrica, eq(criterio.rubricaId, rubrica.id))
       .where(and(
         eq(subCriterio.id, subCriterioId),
-        eq(rubrica.convocatoriaId, convocatoriaId),
+        eq(rubrica.categoriaId, categoriaId),
       ));
     return rows[0] ?? null;
   }
@@ -210,8 +210,8 @@ export class RubricaRepository {
 
   // --- Nivel evaluacion ---
 
-  // Verificar que un nivel pertenece a la convocatoria (join nivel->sub_criterio->criterio->rubrica)
-  async findNivelByIdAndConvocatoria(nivelId: number, convocatoriaId: number) {
+  // Verificar que un nivel pertenece a la categoria (join nivel->sub_criterio->criterio->rubrica)
+  async findNivelByIdAndCategoria(nivelId: number, categoriaId: number) {
     const rows = await this.db
       .select({ nivelEvaluacion, subCriterio, criterio, rubrica })
       .from(nivelEvaluacion)
@@ -220,7 +220,7 @@ export class RubricaRepository {
       .innerJoin(rubrica, eq(criterio.rubricaId, rubrica.id))
       .where(and(
         eq(nivelEvaluacion.id, nivelId),
-        eq(rubrica.convocatoriaId, convocatoriaId),
+        eq(rubrica.categoriaId, categoriaId),
       ));
     return rows[0] ?? null;
   }

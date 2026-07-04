@@ -1,8 +1,9 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { eq, asc } from 'drizzle-orm';
+import { eq, and, asc, inArray } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/drizzle.provider';
 import type { DrizzleDB } from '../../database/drizzle.provider';
-import { documentoConvocatoria } from '@superstars/db';
+import { documentoCategoria } from '@superstars/db';
+import type { PropositoDocumento } from '@superstars/shared';
 
 @Injectable()
 export class DocumentoRepository {
@@ -11,49 +12,55 @@ export class DocumentoRepository {
   async findById(id: number) {
     const rows = await this.db
       .select()
-      .from(documentoConvocatoria)
-      .where(eq(documentoConvocatoria.id, id));
+      .from(documentoCategoria)
+      .where(eq(documentoCategoria.id, id));
     return rows[0] ?? null;
   }
 
-  async findAllByConvocatoriaId(convocatoriaId: number) {
+  // lista los documentos de una categoria; si se pasan propositos, filtra por audiencia
+  async findAllByCategoriaId(categoriaId: number, propositos?: PropositoDocumento[]) {
+    const conds = [eq(documentoCategoria.categoriaId, categoriaId)];
+    if (propositos && propositos.length > 0) {
+      conds.push(inArray(documentoCategoria.proposito, propositos));
+    }
     return this.db
       .select()
-      .from(documentoConvocatoria)
-      .where(eq(documentoConvocatoria.convocatoriaId, convocatoriaId))
-      .orderBy(asc(documentoConvocatoria.orden), asc(documentoConvocatoria.createdAt));
+      .from(documentoCategoria)
+      .where(and(...conds))
+      .orderBy(asc(documentoCategoria.orden), asc(documentoCategoria.createdAt));
   }
 
   async create(data: {
-    convocatoriaId: number;
+    categoriaId: number;
     nombre: string;
     storageKey: string;
     nombreOriginal: string;
     mimeType: string;
     tamanoBytes: number;
     orden: number;
+    proposito: PropositoDocumento;
   }) {
     const [created] = await this.db
-      .insert(documentoConvocatoria)
+      .insert(documentoCategoria)
       .values(data)
       .returning();
     return created;
   }
 
-  async update(id: number, data: Partial<{ nombre: string; orden: number }>) {
+  async update(id: number, data: Partial<{ nombre: string; orden: number; proposito: PropositoDocumento }>) {
     const [updated] = await this.db
-      .update(documentoConvocatoria)
+      .update(documentoCategoria)
       .set(data)
-      .where(eq(documentoConvocatoria.id, id))
+      .where(eq(documentoCategoria.id, id))
       .returning();
     return updated ?? null;
   }
 
   async delete(id: number): Promise<boolean> {
     const result = await this.db
-      .delete(documentoConvocatoria)
-      .where(eq(documentoConvocatoria.id, id))
-      .returning({ id: documentoConvocatoria.id });
+      .delete(documentoCategoria)
+      .where(eq(documentoCategoria.id, id))
+      .returning({ id: documentoCategoria.id });
     return result.length > 0;
   }
 }

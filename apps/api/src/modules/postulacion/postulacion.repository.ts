@@ -16,6 +16,7 @@ export class PostulacionRepository {
       .select({
         id: postulacion.id,
         convocatoriaId: postulacion.convocatoriaId,
+        categoriaId: postulacion.categoriaId,
         empresaId: postulacion.empresaId,
         estado: postulacion.estado,
         responseData: postulacion.responseData,
@@ -36,8 +37,11 @@ export class PostulacionRepository {
   }
 
   // Listado sin responseData (evita cargar JSONB grandes)
-  async findAllByConvocatoria(convocatoriaId: number, estado?: string) {
+  async findAllByConvocatoria(convocatoriaId: number, estado?: string, categoriaId?: number) {
     const conditions = [eq(postulacion.convocatoriaId, convocatoriaId)];
+    if (categoriaId) {
+      conditions.push(eq(postulacion.categoriaId, categoriaId));
+    }
     if (estado) {
       conditions.push(eq(postulacion.estado, estado as EstadoPostulacion));
     }
@@ -53,6 +57,7 @@ export class PostulacionRepository {
       .select({
         id: postulacion.id,
         convocatoriaId: postulacion.convocatoriaId,
+        categoriaId: postulacion.categoriaId,
         empresaId: postulacion.empresaId,
         estado: postulacion.estado,
         porcentajeCompletado: postulacion.porcentajeCompletado,
@@ -86,6 +91,7 @@ export class PostulacionRepository {
 
   async create(data: {
     convocatoriaId: number;
+    categoriaId: number;
     empresaId: number;
     responseData: Record<string, unknown>;
     porcentajeCompletado: string;
@@ -164,6 +170,7 @@ export class PostulacionRepository {
       .select({
         id: postulacion.id,
         convocatoriaId: postulacion.convocatoriaId,
+        categoriaId: postulacion.categoriaId,
         empresaId: postulacion.empresaId,
         estado: postulacion.estado,
         porcentajeCompletado: postulacion.porcentajeCompletado,
@@ -187,16 +194,20 @@ export class PostulacionRepository {
     page: number;
     limit: number;
     convocatoriaId?: number;
+    categoriaId?: number;
     empresaId?: number;
     estado?: string;
     responsableUsuarioId?: number;
   }) {
-    const { page, limit, convocatoriaId, empresaId, estado, responsableUsuarioId } = params;
+    const { page, limit, convocatoriaId, categoriaId, empresaId, estado, responsableUsuarioId } = params;
     const offset = (page - 1) * limit;
 
     const conditions = [];
     if (convocatoriaId) {
       conditions.push(eq(postulacion.convocatoriaId, convocatoriaId));
+    }
+    if (categoriaId) {
+      conditions.push(eq(postulacion.categoriaId, categoriaId));
     }
     if (empresaId) {
       conditions.push(eq(postulacion.empresaId, empresaId));

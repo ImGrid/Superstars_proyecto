@@ -1,23 +1,21 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { eq, and, or, ilike, count, desc, isNull, sql, inArray } from 'drizzle-orm';
+import { eq, and, or, ilike, count, desc, asc, isNull, ne, sql, inArray } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/drizzle.provider';
 import type { DrizzleDB } from '../../database/drizzle.provider';
-import { convocatoria, formularioDinamico, documentoConvocatoria, publicacion, categoriaPublicacion, postulacion, empresa } from '@superstars/db';
+import { convocatoria, categoriaConvocatoria, formularioDinamico, documentoCategoria, publicacion, categoriaPublicacion, postulacion, empresa } from '@superstars/db';
 import { ESTADO_CONVOCATORIA_PUBLICO, EstadoConvocatoria } from '@superstars/shared';
 import type { EstadoPublicacion } from '@superstars/shared';
 
-// Columnas seguras para el listado publico (excluye createdBy, topNSistema)
+// Columnas seguras para el listado publico (excluye createdBy, topNSistema).
+// El premio/bases viven en las categorias, no aqui.
 const publicConvocatoriaColumns = {
   id: convocatoria.id,
   nombre: convocatoria.nombre,
   descripcion: convocatoria.descripcion,
-  bases: convocatoria.bases,
   fechaInicioPostulacion: convocatoria.fechaInicioPostulacion,
   fechaCierrePostulacion: convocatoria.fechaCierrePostulacion,
   fechaAnuncioGanadores: convocatoria.fechaAnuncioGanadores,
   fechaCierreEfectiva: convocatoria.fechaCierreEfectiva,
-  monto: convocatoria.monto,
-  numeroGanadores: convocatoria.numeroGanadores,
   departamentos: convocatoria.departamentos,
   estado: convocatoria.estado,
   imagenKey: convocatoria.imagenKey,
@@ -91,7 +89,24 @@ export class PublicRepository {
     return rows[0] ?? null;
   }
 
-  async findFormularioByConvocatoriaId(convocatoriaId: number) {
+  // Categorias de la convocatoria (datos publicos: premio, bases, etc.)
+  async findCategoriasByConvocatoriaId(convocatoriaId: number) {
+    return this.db
+      .select({
+        id: categoriaConvocatoria.id,
+        nombre: categoriaConvocatoria.nombre,
+        descripcion: categoriaConvocatoria.descripcion,
+        bases: categoriaConvocatoria.bases,
+        monto: categoriaConvocatoria.monto,
+        numeroGanadores: categoriaConvocatoria.numeroGanadores,
+        orden: categoriaConvocatoria.orden,
+      })
+      .from(categoriaConvocatoria)
+      .where(eq(categoriaConvocatoria.convocatoriaId, convocatoriaId))
+      .orderBy(asc(categoriaConvocatoria.orden));
+  }
+
+  async findFormularioByCategoriaId(categoriaId: number) {
     const rows = await this.db
       .select({
         id: formularioDinamico.id,
@@ -101,24 +116,27 @@ export class PublicRepository {
         version: formularioDinamico.version,
       })
       .from(formularioDinamico)
-      .where(eq(formularioDinamico.convocatoriaId, convocatoriaId));
+      .where(eq(formularioDinamico.categoriaId, categoriaId));
     return rows[0] ?? null;
   }
 
-  // Documentos de la convocatoria (solo metadata, sin storageKey)
-  async findDocumentosByConvocatoriaId(convocatoriaId: number) {
+  // Documentos de la categoria (metadata sin storageKey; excluye los de proposito 'jurado')
+  async findDocumentosByCategoriaId(categoriaId: number) {
     return this.db
       .select({
-        id: documentoConvocatoria.id,
-        nombre: documentoConvocatoria.nombre,
-        nombreOriginal: documentoConvocatoria.nombreOriginal,
-        mimeType: documentoConvocatoria.mimeType,
-        tamanoBytes: documentoConvocatoria.tamanoBytes,
-        orden: documentoConvocatoria.orden,
+        id: documentoCategoria.id,
+        nombre: documentoCategoria.nombre,
+        nombreOriginal: documentoCategoria.nombreOriginal,
+        mimeType: documentoCategoria.mimeType,
+        tamanoBytes: documentoCategoria.tamanoBytes,
+        orden: documentoCategoria.orden,
       })
-      .from(documentoConvocatoria)
-      .where(eq(documentoConvocatoria.convocatoriaId, convocatoriaId))
-      .orderBy(documentoConvocatoria.orden, documentoConvocatoria.id);
+      .from(documentoCategoria)
+      .where(and(
+        eq(documentoCategoria.categoriaId, categoriaId),
+        ne(documentoCategoria.proposito, 'jurado'),
+      ))
+      .orderBy(documentoCategoria.orden, documentoCategoria.id);
   }
 
   // --- Publicaciones publicas ---
@@ -210,19 +228,23 @@ export class PublicRepository {
     return this.db.select().from(categoriaPublicacion).orderBy(categoriaPublicacion.nombre);
   }
 
-  // ganadores de una convocatoria (solo datos publicos)
+  // ganadores de una convocatoria, con su categoria (para agrupar y mostrar el premio)
   async findGanadores(convocatoriaId: number) {
     return this.db
       .select({
+        categoriaId: categoriaConvocatoria.id,
+        categoriaNombre: categoriaConvocatoria.nombre,
+        monto: categoriaConvocatoria.monto,
         empresaNombre: empresa.razonSocial,
         posicionFinal: postulacion.posicionFinal,
       })
       .from(postulacion)
       .innerJoin(empresa, eq(postulacion.empresaId, empresa.id))
+      .innerJoin(categoriaConvocatoria, eq(postulacion.categoriaId, categoriaConvocatoria.id))
       .where(and(
         eq(postulacion.convocatoriaId, convocatoriaId),
         eq(postulacion.estado, 'ganador' as any),
       ))
-      .orderBy(postulacion.posicionFinal);
+      .orderBy(asc(categoriaConvocatoria.orden), asc(postulacion.posicionFinal));
   }
 }

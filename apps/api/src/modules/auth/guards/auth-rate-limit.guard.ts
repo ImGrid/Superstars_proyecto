@@ -62,11 +62,15 @@ export class AuthRateLimitGuard implements CanActivate {
       if (!tracker) continue;
 
       const key = `auth:${cfg.prefix}:${tracker}`;
+      // IMPORTANTE: blockDuration debe ser > 0. En @nestjs/throttler v6, con
+      // blockDuration=0 el bloqueo expira en el mismo instante (timeToBlockExpire<=0)
+      // y el storage lo resetea de inmediato -> isBlocked siempre false (rate limit
+      // inutil). Bloqueamos por la misma ventana (ttl) una vez superado el limite.
       const record = await this.storage.increment(
         key,
         cfg.ttl,
         cfg.limit,
-        0,
+        cfg.ttl,
         cfg.prefix,
       );
 

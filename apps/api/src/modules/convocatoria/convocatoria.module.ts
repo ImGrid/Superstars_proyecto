@@ -7,9 +7,10 @@ import { ConvocatoriaAccessService } from './convocatoria-access.service';
 import { ConvocatoriaAccessGuard } from './guards/convocatoria-access.guard';
 import { ConvocatoriaCron } from './convocatoria.cron';
 import { RubricaModule } from '../rubrica/rubrica.module';
+import { CategoriaModule } from '../categoria/categoria.module';
 
 @Module({
-  imports: [forwardRef(() => RubricaModule)],
+  imports: [forwardRef(() => RubricaModule), CategoriaModule],
   controllers: [ConvocatoriaController],
   providers: [
     ConvocatoriaService,

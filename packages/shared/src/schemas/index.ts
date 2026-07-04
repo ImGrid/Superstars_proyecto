@@ -49,7 +49,6 @@ export {
   listConvocatoriasQuerySchema,
   tipoListadoProponenteSchema,
   assignResponsableSchema,
-  assignEvaluadorSchema,
   seleccionarGanadoresSchema,
   type CreateConvocatoriaDto,
   type UpdateConvocatoriaDto,
@@ -57,16 +56,25 @@ export {
   type ListConvocatoriasQueryDto,
   type TipoListadoProponente,
   type AssignResponsableDto,
-  type AssignEvaluadorDto,
   type SeleccionarGanadoresDto,
   type ConvocatoriaResponse,
   type ResponsableResponse,
-  type EvaluadorConvocatoriaResponse,
   type CanPublicarResponse,
   type ConvocatoriaResultadosResumenItem,
   type PostulacionRankingItem,
-  type ConvocatoriaRankingResponse,
+  type CategoriaRankingResponse,
 } from './convocatoria.schema';
+
+export {
+  createCategoriaSchema,
+  updateCategoriaSchema,
+  assignEvaluadorSchema,
+  type CreateCategoriaDto,
+  type UpdateCategoriaDto,
+  type AssignEvaluadorDto,
+  type CategoriaResponse,
+  type EvaluadorCategoriaResponse,
+} from './categoria.schema';
 
 export {
   tipoCampoSchema,
@@ -76,6 +84,9 @@ export {
   createFormularioSchema,
   updateFormularioSchema,
   tiposCampoFormulario,
+  variantesInformativo,
+  varianteInformativoSchema,
+  esCampoDeDato,
   type TipoCampoFormulario,
   type FormField,
   type Seccion,
@@ -86,12 +97,16 @@ export {
   type ColumnaTabla,
   type FilaFijaTabla,
   type AutoRelleno,
+  type VarianteInformativo,
   type FormularioResponse,
 } from './formulario.schema';
 
 export {
+  propositoDocumentoValues,
+  propositoDocumentoSchema,
   createDocumentoSchema,
   updateDocumentoSchema,
+  type PropositoDocumento,
   type CreateDocumentoDto,
   type UpdateDocumentoDto,
   type DocumentoResponse,
@@ -148,7 +163,7 @@ export {
   type DevolverCalificacionDto,
   type AssignEvaluadorPostulacionDto,
   type AsignacionEvaluadorResponse,
-  type EvaluadorConvocatoriaItem,
+  type EvaluadorCategoriaItem,
   type PostulacionEvaluableItem,
   type PostulacionDetalleEvaluador,
   type CalificacionListItem,
@@ -166,9 +181,12 @@ export {
   type PublicConvocatoriaResponse,
   type PublicConvocatoriaDetailResponse,
   type PublicDocumentoResponse,
+  type PublicFormularioResponse,
+  type PublicCategoriaDetail,
   type PublicPublicacionListItem,
   type PublicPublicacionResponse,
   type PublicResultadoGanador,
+  type PublicResultadoCategoria,
   type PublicResultadosResponse,
 } from './public.schema';
 

@@ -44,6 +44,13 @@ export const RATE_LIMIT_REGISTER_EMAIL_DAY_TTL_MS = 86400000; // 24 horas
 export const RATE_LIMIT_VERIFY_IP_LIMIT = 5;
 export const RATE_LIMIT_VERIFY_IP_TTL_MS = 60000; // 1 minuto
 
+// Login: freno de fuerza bruta. Capa IP (rapida) + capa email (protege una cuenta
+// puntual de ataques distribuidos). Generoso para no molestar al usuario legitimo.
+export const RATE_LIMIT_LOGIN_IP_LIMIT = 10;
+export const RATE_LIMIT_LOGIN_IP_TTL_MS = 60000; // 1 minuto
+export const RATE_LIMIT_LOGIN_EMAIL_LIMIT = 20;
+export const RATE_LIMIT_LOGIN_EMAIL_TTL_MS = 900000; // 15 minutos
+
 // Mensajes genericos anti-enumeration: misma respuesta para email existente,
 // no existente, desechable, honeypot, sin pendiente, etc.
 export const MENSAJE_GENERICO_REGISTRO =

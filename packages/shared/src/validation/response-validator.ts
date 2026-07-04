@@ -1,5 +1,6 @@
 import { z, type ZodTypeAny } from 'zod';
 import type { SchemaDefinition, FormField } from '../schemas/formulario.schema';
+import { esCampoDeDato } from '../schemas/formulario.schema';
 import { countWords } from './word-count';
 
 export type ValidationMode = 'draft' | 'submit';
@@ -15,6 +16,9 @@ export function buildResponseSchema(
   const allCampos = schema.secciones.flatMap(s => s.campos);
 
   for (const campo of allCampos) {
+    // Los campos informativos son solo presentacion: no generan clave en response_data
+    if (!esCampoDeDato(campo)) continue;
+
     let fieldSchema = buildFieldValidator(campo, mode);
 
     // Draft: todo opcional (guardar parcial). Submit: solo no-requeridos opcionales

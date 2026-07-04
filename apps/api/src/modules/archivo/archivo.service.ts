@@ -47,8 +47,8 @@ export class ArchivoService {
     await this.verificarPropietario(post.empresaId, userId);
     this.verificarEditable(post.estado);
 
-    // Buscar campo en el schema del formulario
-    const formulario = await this.formularioService.findByConvocatoriaId(post.convocatoriaId);
+    // Buscar campo en el schema del formulario de la categoria de la postulacion
+    const formulario = await this.formularioService.getByCategoriaId(post.categoriaId);
     const schemaDef = formulario.schemaDefinition as SchemaDefinition;
     const campo = this.findArchivoCampo(schemaDef, fieldId);
 
@@ -93,9 +93,16 @@ export class ArchivoService {
   }
 
   // Listar archivos de una postulacion
-  async findAllByPostulacion(postulacionId: number, userId: number, userRol: string) {
+  async findAllByPostulacion(
+    convocatoriaId: number,
+    postulacionId: number,
+    userId: number,
+    userRol: string,
+  ) {
+    // coherencia de ruta: la postulacion debe pertenecer a la convocatoria del path
+    // (el guard @CheckConvocatoria ya valido que el responsable sea dueno de esa convocatoria)
+    const post = await this.getPostulacionEnConvocatoria(postulacionId, convocatoriaId);
     if (userRol === 'proponente') {
-      const post = await this.getPostulacionOrFail(postulacionId);
       await this.verificarPropietario(post.empresaId, userId);
     } else if (userRol === 'evaluador') {
       await this.verificarAccesoEvaluador(postulacionId, userId);
@@ -104,20 +111,28 @@ export class ArchivoService {
   }
 
   // Descargar archivo
-  async download(archivoId: number, userId: number, userRol: string) {
+  async download(
+    convocatoriaId: number,
+    postulacionId: number,
+    archivoId: number,
+    userId: number,
+    userRol: string,
+  ) {
     const archivo = await this.archivoRepo.findById(archivoId);
-    if (!archivo) {
+    // coherencia de ruta: el archivo debe pertenecer a la postulacion del path
+    if (!archivo || archivo.postulacionId !== postulacionId) {
       throw new NotFoundException('Archivo no encontrado');
     }
 
+    // coherencia de ruta: la postulacion debe pertenecer a la convocatoria del path
+    // (el guard @CheckConvocatoria ya valido que el responsable sea dueno de esa convocatoria)
+    const post = await this.getPostulacionEnConvocatoria(postulacionId, convocatoriaId);
+
     // verificar acceso segun rol
     if (userRol === 'proponente') {
-      const post = await this.postulacionRepo.findById(archivo.postulacionId);
-      if (post) {
-        await this.verificarPropietario(post.empresaId, userId);
-      }
+      await this.verificarPropietario(post.empresaId, userId);
     } else if (userRol === 'evaluador') {
-      await this.verificarAccesoEvaluador(archivo.postulacionId, userId);
+      await this.verificarAccesoEvaluador(postulacionId, userId);
     }
 
     const buffer = await this.storage.download(archivo.storageKey);
@@ -145,6 +160,15 @@ export class ArchivoService {
   private async getPostulacionOrFail(postulacionId: number) {
     const post = await this.postulacionRepo.findById(postulacionId);
     if (!post) {
+      throw new NotFoundException('Postulacion no encontrada');
+    }
+    return post;
+  }
+
+  // carga la postulacion y verifica que pertenece a la convocatoria del path (evita IDOR)
+  private async getPostulacionEnConvocatoria(postulacionId: number, convocatoriaId: number) {
+    const post = await this.postulacionRepo.findById(postulacionId);
+    if (!post || post.convocatoriaId !== convocatoriaId) {
       throw new NotFoundException('Postulacion no encontrada');
     }
     return post;

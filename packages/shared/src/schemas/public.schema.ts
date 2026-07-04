@@ -14,18 +14,15 @@ export type ListPublicConvocatoriasQueryDto = z.infer<typeof listPublicConvocato
 import { EstadoConvocatoria } from '../enums';
 import type { SchemaDefinition } from './formulario.schema';
 
-// GET /public/convocatorias (excluye createdBy y topNSistema)
+// GET /public/convocatorias (el premio/bases viven en las categorias)
 export interface PublicConvocatoriaResponse {
   id: number;
   nombre: string;
   descripcion: string | null;
-  bases: string | null;
   fechaInicioPostulacion: string;
   fechaCierrePostulacion: string;
   fechaAnuncioGanadores: string | null;
   fechaCierreEfectiva: string | null;
-  monto: string;
-  numeroGanadores: number;
   departamentos: string[];
   estado: EstadoConvocatoria;
   imagenKey: string | null;
@@ -34,7 +31,7 @@ export interface PublicConvocatoriaResponse {
   updatedAt: string;
 }
 
-// Documento publico (metadata sin storageKey)
+// Documento publico (metadata sin storageKey; no incluye los de proposito 'jurado')
 export interface PublicDocumentoResponse {
   id: number;
   nombre: string;
@@ -44,28 +41,50 @@ export interface PublicDocumentoResponse {
   orden: number;
 }
 
-// GET /public/convocatorias/:id (incluye formulario y documentos)
-export interface PublicConvocatoriaDetailResponse extends PublicConvocatoriaResponse {
-  formulario: {
-    id: number;
-    nombre: string;
-    descripcion: string | null;
-    schemaDefinition: SchemaDefinition;
-    version: number;
-  } | null;
+// Formulario publico (metadata + schema)
+export interface PublicFormularioResponse {
+  id: number;
+  nombre: string;
+  descripcion: string | null;
+  schemaDefinition: SchemaDefinition;
+  version: number;
+}
+
+// Categoria en el detalle publico: metadata + su formulario + sus documentos
+export interface PublicCategoriaDetail {
+  id: number;
+  nombre: string;
+  descripcion: string | null;
+  bases: string | null;
+  monto: string;
+  numeroGanadores: number;
+  orden: number;
+  formulario: PublicFormularioResponse | null;
   documentos: PublicDocumentoResponse[];
 }
 
-// GET /public/convocatorias/:id/resultados
+// GET /public/convocatorias/:id (incluye sus categorias con formulario y documentos)
+export interface PublicConvocatoriaDetailResponse extends PublicConvocatoriaResponse {
+  categorias: PublicCategoriaDetail[];
+}
+
+// GET /public/convocatorias/:id/resultados (ganadores agrupados por categoria)
 export interface PublicResultadoGanador {
   empresaNombre: string;
   posicionFinal: number;
 }
 
+export interface PublicResultadoCategoria {
+  categoriaId: number;
+  categoriaNombre: string;
+  monto: string;
+  ganadores: PublicResultadoGanador[];
+}
+
 export interface PublicResultadosResponse {
   convocatoriaNombre: string;
   fechaPublicacionResultados: string;
-  ganadores: PublicResultadoGanador[];
+  categorias: PublicResultadoCategoria[];
 }
 
 // GET /public/publicaciones (lista, sin contenido, con categoriaNombre)

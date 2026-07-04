@@ -10,19 +10,16 @@ import { DRIZZLE } from '../../database/drizzle.provider';
 import type { DrizzleDB } from '../../database/drizzle.provider';
 import {
   convocatoria,
+  categoriaConvocatoria,
   responsableConvocatoria,
-  evaluadorConvocatoria,
+  evaluadorCategoria,
   formularioDinamico,
-  rubrica,
-  criterio,
-  subCriterio,
-  nivelEvaluacion,
   usuario,
   postulacion,
   empresa,
   calificacion,
 } from '@superstars/db';
-import type { EstadoConvocatoria } from '@superstars/shared';
+import type { EstadoConvocatoria, SchemaDefinition } from '@superstars/shared';
 
 export interface FindAllConvocatoriasParams {
   page: number;
@@ -157,13 +154,9 @@ export class ConvocatoriaRepository {
   async create(data: {
     nombre: string;
     descripcion?: string;
-    bases?: string;
     fechaInicioPostulacion: string;
     fechaCierrePostulacion: string;
     fechaAnuncioGanadores?: string;
-    monto: string;
-    numeroGanadores: number;
-    topNSistema: number;
     departamentos: string[];
     createdBy: number;
   }) {
@@ -174,16 +167,69 @@ export class ConvocatoriaRepository {
     return created;
   }
 
+  // SB-6: crea la convocatoria + (opcional) su responsable + N categorias por
+  // defecto con sus formularios, TODO en una transaccion (o se crea todo o nada).
+  async createConCategorias(
+    data: {
+      nombre: string;
+      descripcion?: string;
+      fechaInicioPostulacion: string;
+      fechaCierrePostulacion: string;
+      fechaAnuncioGanadores?: string;
+      departamentos: string[];
+      createdBy: number;
+    },
+    responsableUserId: number | null,
+    categorias: Array<{
+      nombre: string;
+      monto: string;
+      numeroGanadores: number;
+      topNSistema: number;
+      orden: number;
+      formularioNombre: string;
+      schemaDefinition: SchemaDefinition;
+    }>,
+  ) {
+    return this.db.transaction(async (tx) => {
+      const [conv] = await tx.insert(convocatoria).values(data).returning();
+
+      if (responsableUserId !== null) {
+        await tx.insert(responsableConvocatoria).values({
+          convocatoriaId: conv.id,
+          usuarioId: responsableUserId,
+        });
+      }
+
+      for (const cat of categorias) {
+        const [catRow] = await tx
+          .insert(categoriaConvocatoria)
+          .values({
+            convocatoriaId: conv.id,
+            nombre: cat.nombre,
+            monto: cat.monto,
+            numeroGanadores: cat.numeroGanadores,
+            topNSistema: cat.topNSistema,
+            orden: cat.orden,
+          })
+          .returning();
+
+        await tx.insert(formularioDinamico).values({
+          categoriaId: catRow.id,
+          nombre: cat.formularioNombre,
+          schemaDefinition: cat.schemaDefinition,
+        });
+      }
+
+      return conv;
+    });
+  }
+
   async update(id: number, data: Partial<{
     nombre: string;
     descripcion: string;
-    bases: string;
     fechaInicioPostulacion: string;
     fechaCierrePostulacion: string;
     fechaAnuncioGanadores: string;
-    monto: string;
-    numeroGanadores: number;
-    topNSistema: number;
     departamentos: string[];
     imagenKey: string | null;
   }>) {
@@ -279,23 +325,13 @@ export class ConvocatoriaRepository {
     return Number(result.count);
   }
 
-  // --- Checks para publicar ---
+  // --- Checks para publicar (por categoria) ---
 
-  async hasFormulario(convocatoriaId: number): Promise<boolean> {
+  async hasFormulario(categoriaId: number): Promise<boolean> {
     const rows = await this.db
       .select({ id: formularioDinamico.id })
       .from(formularioDinamico)
-      .where(eq(formularioDinamico.convocatoriaId, convocatoriaId))
-      .limit(1);
-    return rows.length > 0;
-  }
-
-  async hasRubricaWithCriterios(convocatoriaId: number): Promise<boolean> {
-    const rows = await this.db
-      .select({ id: rubrica.id })
-      .from(rubrica)
-      .innerJoin(criterio, eq(rubrica.id, criterio.rubricaId))
-      .where(eq(rubrica.convocatoriaId, convocatoriaId))
+      .where(eq(formularioDinamico.categoriaId, categoriaId))
       .limit(1);
     return rows.length > 0;
   }
@@ -324,48 +360,19 @@ export class ConvocatoriaRepository {
     return result.length;
   }
 
-  // --- Pivot: evaluador_convocatoria ---
+  // --- Guard: evaluador de la convocatoria ---
+  // El pool de evaluadores es por categoria (evaluador_categoria); el CRUD del pool
+  // vive en el modulo categoria. Aqui solo queda el check que usa el guard.
 
-  async findEvaluadores(convocatoriaId: number) {
-    return this.db
-      .select({
-        id: evaluadorConvocatoria.id,
-        evaluadorId: evaluadorConvocatoria.evaluadorId,
-        email: usuario.email,
-        nombre: usuario.nombre,
-        createdAt: evaluadorConvocatoria.createdAt,
-      })
-      .from(evaluadorConvocatoria)
-      .innerJoin(usuario, eq(evaluadorConvocatoria.evaluadorId, usuario.id))
-      .where(eq(evaluadorConvocatoria.convocatoriaId, convocatoriaId));
-  }
-
-  async addEvaluador(convocatoriaId: number, evaluadorId: number, asignadoPor: number) {
-    const [created] = await this.db
-      .insert(evaluadorConvocatoria)
-      .values({ convocatoriaId, evaluadorId, asignadoPor })
-      .returning();
-    return created;
-  }
-
-  async removeEvaluador(convocatoriaId: number, evaluadorId: number): Promise<boolean> {
-    const result = await this.db
-      .delete(evaluadorConvocatoria)
-      .where(and(
-        eq(evaluadorConvocatoria.convocatoriaId, convocatoriaId),
-        eq(evaluadorConvocatoria.evaluadorId, evaluadorId),
-      ))
-      .returning({ id: evaluadorConvocatoria.id });
-    return result.length > 0;
-  }
-
+  // el evaluador esta en el pool de ALGUNA categoria de esta convocatoria
   async isEvaluador(convocatoriaId: number, evaluadorId: number): Promise<boolean> {
     const rows = await this.db
-      .select({ id: evaluadorConvocatoria.id })
-      .from(evaluadorConvocatoria)
+      .select({ id: evaluadorCategoria.id })
+      .from(evaluadorCategoria)
+      .innerJoin(categoriaConvocatoria, eq(evaluadorCategoria.categoriaId, categoriaConvocatoria.id))
       .where(and(
-        eq(evaluadorConvocatoria.convocatoriaId, convocatoriaId),
-        eq(evaluadorConvocatoria.evaluadorId, evaluadorId),
+        eq(categoriaConvocatoria.convocatoriaId, convocatoriaId),
+        eq(evaluadorCategoria.evaluadorId, evaluadorId),
       ))
       .limit(1);
     return rows.length > 0;
@@ -373,8 +380,8 @@ export class ConvocatoriaRepository {
 
   // --- Resultados: queries para seleccion de ganadores ---
 
-  // postulaciones calificadas de una convocatoria (para validar seleccion)
-  async findPostulacionesCalificadas(convocatoriaId: number) {
+  // postulaciones calificadas de una categoria (para validar seleccion)
+  async findPostulacionesCalificadas(categoriaId: number) {
     return this.db
       .select({
         id: postulacion.id,
@@ -385,39 +392,39 @@ export class ConvocatoriaRepository {
       .from(postulacion)
       .innerJoin(empresa, eq(postulacion.empresaId, empresa.id))
       .where(and(
-        eq(postulacion.convocatoriaId, convocatoriaId),
+        eq(postulacion.categoriaId, categoriaId),
         eq(postulacion.estado, 'calificado' as any),
       ))
       .orderBy(desc(postulacion.puntajeFinal));
   }
 
-  // verificar si hay postulaciones en estados intermedios (no terminales y no calificado)
-  async countPostulacionesPendientes(convocatoriaId: number): Promise<number> {
+  // postulaciones aun en evaluacion en una categoria
+  async countPostulacionesPendientes(categoriaId: number): Promise<number> {
     const [result] = await this.db
       .select({ count: count() })
       .from(postulacion)
       .where(and(
-        eq(postulacion.convocatoriaId, convocatoriaId),
+        eq(postulacion.categoriaId, categoriaId),
         sql`${postulacion.estado} IN ('en_evaluacion')`,
       ));
     return Number(result.count);
   }
 
-  // verificar si hay calificaciones no aprobadas en una convocatoria
-  async countCalificacionesNoAprobadas(convocatoriaId: number): Promise<number> {
+  // calificaciones no aprobadas de las postulaciones de una categoria
+  async countCalificacionesNoAprobadas(categoriaId: number): Promise<number> {
     const [result] = await this.db
       .select({ count: count() })
       .from(calificacion)
       .innerJoin(postulacion, eq(calificacion.postulacionId, postulacion.id))
       .where(and(
-        eq(postulacion.convocatoriaId, convocatoriaId),
+        eq(postulacion.categoriaId, categoriaId),
         sql`${calificacion.estado} != 'aprobado'`,
       ));
     return Number(result.count);
   }
 
-  // calcular ranking con DENSE_RANK y persistir posicion_final
-  async calcularRanking(convocatoriaId: number) {
+  // calcular ranking (DENSE_RANK dentro de la categoria) y persistir posicion_final
+  async calcularRanking(categoriaId: number) {
     await this.db.execute(sql`
       UPDATE postulacion SET posicion_final = ranked.pos
       FROM (
@@ -425,7 +432,7 @@ export class ConvocatoriaRepository {
           ORDER BY puntaje_final DESC, fecha_envio ASC
         ) AS pos
         FROM postulacion
-        WHERE convocatoria_id = ${convocatoriaId}
+        WHERE categoria_id = ${categoriaId}
           AND puntaje_final IS NOT NULL
           AND estado IN ('calificado', 'ganador', 'no_seleccionado')
       ) ranked
@@ -444,42 +451,18 @@ export class ConvocatoriaRepository {
       ));
   }
 
-  // marcar postulaciones restantes como no seleccionadas
-  async marcarNoSeleccionados(convocatoriaId: number, exceptIds: number[]) {
+  // marcar las postulaciones calificadas restantes de la categoria como no seleccionadas
+  async marcarNoSeleccionados(categoriaId: number, exceptIds: number[]) {
     await this.db
       .update(postulacion)
       .set({ estado: 'no_seleccionado' as any })
       .where(and(
-        eq(postulacion.convocatoriaId, convocatoriaId),
+        eq(postulacion.categoriaId, categoriaId),
         eq(postulacion.estado, 'calificado' as any),
         exceptIds.length > 0
           ? sql`${postulacion.id} NOT IN (${sql.join(exceptIds.map(id => sql`${id}`), sql`, `)})`
           : sql`true`,
       ));
-  }
-
-  // contar ganadores actuales de una convocatoria
-  async countGanadores(convocatoriaId: number): Promise<number> {
-    const [result] = await this.db
-      .select({ count: count() })
-      .from(postulacion)
-      .where(and(
-        eq(postulacion.convocatoriaId, convocatoriaId),
-        eq(postulacion.estado, 'ganador' as any),
-      ));
-    return Number(result.count);
-  }
-
-  // postulaciones calificadas que aun no fueron decididas (ni ganador ni no_seleccionado)
-  async countCalificadasSinDecidir(convocatoriaId: number): Promise<number> {
-    const [result] = await this.db
-      .select({ count: count() })
-      .from(postulacion)
-      .where(and(
-        eq(postulacion.convocatoriaId, convocatoriaId),
-        eq(postulacion.estado, 'calificado' as any),
-      ));
-    return Number(result.count);
   }
 
   // --- Resultados: vista admin/responsable ---
@@ -492,8 +475,6 @@ export class ConvocatoriaRepository {
         id: convocatoria.id,
         nombre: convocatoria.nombre,
         estado: convocatoria.estado,
-        monto: convocatoria.monto,
-        numeroGanadores: convocatoria.numeroGanadores,
         fechaPublicacionResultados: convocatoria.fechaPublicacionResultados,
         totalPostulaciones: sql<number>`count(${postulacion.id}) filter (where ${postulacion.estado} not in ('borrador'))`.mapWith(Number),
         totalCalificadas: sql<number>`count(${postulacion.id}) filter (where ${postulacion.estado} in ('calificado', 'ganador', 'no_seleccionado'))`.mapWith(Number),
@@ -515,8 +496,6 @@ export class ConvocatoriaRepository {
           id: convocatoria.id,
           nombre: convocatoria.nombre,
           estado: convocatoria.estado,
-          monto: convocatoria.monto,
-          numeroGanadores: convocatoria.numeroGanadores,
           fechaPublicacionResultados: convocatoria.fechaPublicacionResultados,
           totalPostulaciones: sql<number>`count(${postulacion.id}) filter (where ${postulacion.estado} not in ('borrador'))`.mapWith(Number),
           totalCalificadas: sql<number>`count(${postulacion.id}) filter (where ${postulacion.estado} in ('calificado', 'ganador', 'no_seleccionado'))`.mapWith(Number),
@@ -539,8 +518,8 @@ export class ConvocatoriaRepository {
     return query;
   }
 
-  // ranking de postulaciones calificadas/ganadoras de una convocatoria
-  async findRankingPostulaciones(convocatoriaId: number) {
+  // ranking de postulaciones calificadas/ganadoras de una categoria
+  async findRankingPostulaciones(categoriaId: number) {
     return this.db
       .select({
         postulacionId: postulacion.id,
@@ -553,7 +532,7 @@ export class ConvocatoriaRepository {
       .from(postulacion)
       .innerJoin(empresa, eq(postulacion.empresaId, empresa.id))
       .where(and(
-        eq(postulacion.convocatoriaId, convocatoriaId),
+        eq(postulacion.categoriaId, categoriaId),
         sql`${postulacion.estado} in ('calificado', 'ganador', 'no_seleccionado')`,
       ))
       .orderBy(desc(postulacion.puntajeFinal));

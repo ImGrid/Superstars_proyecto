@@ -1,17 +1,14 @@
 import { z } from 'zod';
 import { EstadoConvocatoria } from '../enums';
 
-// Crear convocatoria (chk_convocatoria_monto: monto > 0, chk_convocatoria_ganadores: numero_ganadores > 0, chk_convocatoria_top_n: top_n_sistema > 0)
+// Crear convocatoria. El premio/ganadores/bases viven en cada categoria (se
+// configuran despues de crear la convocatoria), no aqui.
 export const createConvocatoriaSchema = z.object({
   nombre: z.string().min(1),
   descripcion: z.string().optional(),
-  bases: z.string().optional(),
   fechaInicioPostulacion: z.string().date(),
   fechaCierrePostulacion: z.string().date(),
   fechaAnuncioGanadores: z.string().date().optional(),
-  monto: z.number().positive(),
-  numeroGanadores: z.number().int().positive().default(3),
-  topNSistema: z.number().int().positive().default(5),
   departamentos: z.array(z.string()).min(1),
 }).refine(
   // chk_convocatoria_fechas: fecha_cierre_postulacion >= fecha_inicio_postulacion
@@ -23,13 +20,9 @@ export const createConvocatoriaSchema = z.object({
 export const updateConvocatoriaSchema = z.object({
   nombre: z.string().min(1).optional(),
   descripcion: z.string().optional(),
-  bases: z.string().optional(),
   fechaInicioPostulacion: z.string().date().optional(),
   fechaCierrePostulacion: z.string().date().optional(),
   fechaAnuncioGanadores: z.string().date().optional(),
-  monto: z.number().positive().optional(),
-  numeroGanadores: z.number().int().positive().optional(),
-  topNSistema: z.number().int().positive().optional(),
   departamentos: z.array(z.string()).min(1).optional(),
 });
 
@@ -76,14 +69,10 @@ export interface ConvocatoriaResponse {
   id: number;
   nombre: string;
   descripcion: string | null;
-  bases: string | null;
   fechaInicioPostulacion: string;
   fechaCierrePostulacion: string;
   fechaAnuncioGanadores: string | null;
   fechaCierreEfectiva: string | null;
-  monto: string;
-  numeroGanadores: number;
-  topNSistema: number;
   departamentos: string[];
   estado: EstadoConvocatoria;
   imagenKey: string | null;
@@ -102,22 +91,6 @@ export interface ResponsableResponse {
   createdAt: string;
 }
 
-// asignar evaluador a una convocatoria
-export const assignEvaluadorSchema = z.object({
-  evaluadorId: z.number().int().positive(),
-});
-
-export type AssignEvaluadorDto = z.infer<typeof assignEvaluadorSchema>;
-
-// GET /convocatorias/:id/evaluadores
-export interface EvaluadorConvocatoriaResponse {
-  id: number;
-  evaluadorId: number;
-  email: string;
-  nombre: string;
-  createdAt: string;
-}
-
 // GET /convocatorias/:id/can-publicar
 export interface CanPublicarResponse {
   canPublicar: boolean;
@@ -129,8 +102,6 @@ export interface ConvocatoriaResultadosResumenItem {
   id: number;
   nombre: string;
   estado: EstadoConvocatoria;
-  monto: string;
-  numeroGanadores: number;
   fechaPublicacionResultados: string | null;
   totalPostulaciones: number;
   totalCalificadas: number;
@@ -148,13 +119,15 @@ export interface PostulacionRankingItem {
   fechaEnvio: string | null;
 }
 
-// GET /convocatorias/:id/ranking — ranking completo de una convocatoria
-export interface ConvocatoriaRankingResponse {
-  id: number;
-  nombre: string;
-  estado: EstadoConvocatoria;
+// GET /convocatorias/:id/categorias/:categoriaId/ranking — ranking de una categoria
+export interface CategoriaRankingResponse {
+  categoriaId: number;
+  categoriaNombre: string;
+  convocatoriaId: number;
   monto: string;
   numeroGanadores: number;
+  // true si ya se seleccionaron los ganadores de esta categoria
+  resuelta: boolean;
   totalCalificadas: number;
   promedioCalificadas: number | null;
   maxPuntaje: number | null;

@@ -42,21 +42,23 @@ export interface AsignacionEvaluadorResponse {
   createdAt: string;
 }
 
-// GET /mis-evaluaciones/convocatorias
-export interface EvaluadorConvocatoriaItem {
-  id: number;
-  nombre: string;
-  descripcion: string | null;
-  estado: EstadoConvocatoria;
-  fechaCierrePostulacion: string;
+// GET /mis-evaluaciones/categorias (categorias donde el evaluador es jurado)
+export interface EvaluadorCategoriaItem {
+  categoriaId: number;
+  categoriaNombre: string;
   monto: string;
+  convocatoriaId: number;
+  convocatoriaNombre: string;
+  convocatoriaEstado: EstadoConvocatoria;
+  fechaCierrePostulacion: string;
   asignadoEn: string;
 }
 
-// GET /mis-evaluaciones/convocatorias/:id/postulaciones
+// GET /mis-evaluaciones/categorias/:id/postulaciones
 export interface PostulacionEvaluableItem {
   id: number;
   convocatoriaId: number;
+  categoriaId: number;
   empresaId: number;
   estado: EstadoPostulacion;
   porcentajeCompletado: string;
@@ -73,6 +75,7 @@ export interface PostulacionDetalleEvaluador {
   postulacion: {
     id: number;
     convocatoriaId: number;
+    categoriaId: number;
     empresaId: number;
     estado: EstadoPostulacion;
     responseData: Record<string, unknown>;
@@ -102,6 +105,7 @@ export interface PostulacionDetalleEvaluador {
 export interface CalificacionListItem {
   id: number;
   postulacionId: number;
+  categoriaId: number;
   evaluadorId: number;
   puntajeTotal: string | null;
   estado: EstadoCalificacion;
@@ -134,6 +138,7 @@ export interface CalificacionDetalleResponsable {
   postulacion: {
     id: number;
     convocatoriaId: number;
+    categoriaId: number;
     empresaId: number;
     estado: EstadoPostulacion;
     responseData: Record<string, unknown>;
