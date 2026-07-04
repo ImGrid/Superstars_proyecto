@@ -12,6 +12,7 @@ import { TablaField } from "./fields/tabla-field";
 import { ArchivoField } from "./fields/archivo-field";
 import { SiNoField } from "./fields/si-no-field";
 import { TextoUrlField } from "./fields/texto-url-field";
+import { InformativoField } from "./fields/informativo-field";
 
 interface CampoRendererProps {
   campo: FormFieldType;
@@ -61,6 +62,9 @@ export const CampoRenderer = memo(function CampoRenderer({
 
     case "texto_url":
       return <TextoUrlField campo={campo} form={form} />;
+
+    case "informativo":
+      return <InformativoField campo={campo} />;
 
     default:
       return null;

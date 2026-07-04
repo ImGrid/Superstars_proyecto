@@ -31,16 +31,16 @@ import { evaluacionQueries } from "@/lib/api/query-keys";
 import { formatShortDate } from "@/lib/format";
 
 interface PageProps {
-  params: Promise<{ convocatoriaId: string }>;
+  params: Promise<{ categoriaId: string }>;
 }
 
 export default function PostulacionesEvaluadorPage({ params }: PageProps) {
-  const { convocatoriaId: convocatoriaIdStr } = use(params);
-  const convocatoriaId = Number(convocatoriaIdStr);
+  const { categoriaId: categoriaIdStr } = use(params);
+  const categoriaId = Number(categoriaIdStr);
   const router = useRouter();
 
   const { data, isLoading } = useQuery(
-    evaluacionQueries.postulaciones(convocatoriaId),
+    evaluacionQueries.postulaciones(categoriaId),
   );
 
   const postulaciones = data ?? [];
@@ -74,7 +74,7 @@ export default function PostulacionesEvaluadorPage({ params }: PageProps) {
         <EmptyState
           icon="ph:file-text-duotone"
           title="Sin postulaciones"
-          description="No hay postulaciones disponibles para evaluar en esta convocatoria."
+          description="No hay postulaciones asignadas para evaluar en esta categoría."
         />
       ) : (
         <Card>
@@ -103,7 +103,7 @@ export default function PostulacionesEvaluadorPage({ params }: PageProps) {
                       key={p.id}
                       postulacion={p}
                       onCalificar={() =>
-                        router.push(`/dashboard/mis-evaluaciones/${convocatoriaId}/${p.id}`)
+                        router.push(`/dashboard/mis-evaluaciones/${categoriaId}/${p.id}`)
                       }
                     />
                   ))}

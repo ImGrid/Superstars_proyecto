@@ -85,39 +85,54 @@ function ConvocatoriaResultadosSection({ convocatoria }: { convocatoria: PublicC
   return (
     <div>
       {/* encabezado de la convocatoria */}
-      <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="font-heading text-2xl font-bold text-primary-800">
-            {convocatoria.nombre}
-          </h2>
-          {convocatoria.fechaPublicacionResultados && (
-            <p className="mt-1 text-sm text-secondary-500">
-              Resultados publicados el {formatDate(convocatoria.fechaPublicacionResultados)}
-            </p>
-          )}
-        </div>
-        <Badge variant="secondary" className="w-fit text-sm">
-          Monto: {formatMoney(convocatoria.monto)}
-        </Badge>
+      <div className="mb-6">
+        <h2 className="font-heading text-2xl font-bold text-primary-800">
+          {convocatoria.nombre}
+        </h2>
+        {convocatoria.fechaPublicacionResultados && (
+          <p className="mt-1 text-sm text-secondary-500">
+            Resultados publicados el {formatDate(convocatoria.fechaPublicacionResultados)}
+          </p>
+        )}
       </div>
 
-      {/* cards de ganadores */}
+      {/* ganadores agrupados por categoria */}
       {isLoading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map((i) => (
             <Skeleton key={i} className="h-40 rounded-lg" />
           ))}
         </div>
-      ) : !data || data.ganadores.length === 0 ? (
+      ) : !data || data.categorias.length === 0 ? (
         <p className="text-sm text-secondary-500">No se encontraron ganadores.</p>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {data.ganadores.map((ganador, idx) => (
-            <GanadorCard
-              key={idx}
-              empresaNombre={ganador.empresaNombre}
-              posicion={ganador.posicionFinal}
-            />
+        <div className="space-y-8">
+          {data.categorias.map((categoria) => (
+            <div key={categoria.categoriaId}>
+              <div className="mb-4 flex flex-wrap items-center gap-3">
+                <h3 className="font-heading text-lg font-semibold text-primary-700">
+                  {categoria.categoriaNombre}
+                </h3>
+                <Badge variant="secondary" className="text-sm">
+                  Premio: {formatMoney(categoria.monto)}
+                </Badge>
+              </div>
+              {categoria.ganadores.length === 0 ? (
+                <p className="text-sm text-secondary-500">
+                  Esta categoría aún no tiene ganadores.
+                </p>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {categoria.ganadores.map((ganador, idx) => (
+                    <GanadorCard
+                      key={idx}
+                      empresaNombre={ganador.empresaNombre}
+                      posicion={ganador.posicionFinal}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           ))}
         </div>
       )}

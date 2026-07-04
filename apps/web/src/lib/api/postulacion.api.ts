@@ -55,12 +55,19 @@ export function listPostulacionesAdmin(params?: Partial<ListPostulacionesQueryDt
     .then((r) => r.data);
 }
 
-// Listar postulaciones de una convocatoria
-export function listPostulaciones(convocatoriaId: number, estado?: string) {
+// Listar postulaciones de una convocatoria, opcionalmente filtradas por categoria
+export function listPostulaciones(
+  convocatoriaId: number,
+  estado?: string,
+  categoriaId?: number,
+) {
+  const params: Record<string, string | number> = {};
+  if (estado) params.estado = estado;
+  if (categoriaId !== undefined) params.categoriaId = categoriaId;
   return apiClient
     .get<PostulacionListItem[]>(
       `/convocatorias/${convocatoriaId}/postulaciones`,
-      { params: estado ? { estado } : undefined },
+      { params: Object.keys(params).length ? params : undefined },
     )
     .then((r) => r.data);
 }

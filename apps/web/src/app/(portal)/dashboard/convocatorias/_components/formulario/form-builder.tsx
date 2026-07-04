@@ -25,6 +25,7 @@ import { CampoConfigSheet } from "./campo-config-sheet";
 
 interface FormBuilderProps {
   convocatoriaId: number;
+  categoriaId: number;
   formulario: FormularioResponse;
   canEdit: boolean;
 }
@@ -35,7 +36,7 @@ interface EditingCampo {
   campo: FormField;
 }
 
-export function FormBuilder({ convocatoriaId, formulario, canEdit }: FormBuilderProps) {
+export function FormBuilder({ convocatoriaId, categoriaId, formulario, canEdit }: FormBuilderProps) {
   const queryClient = useQueryClient();
   const versionRef = useRef(formulario.version);
 
@@ -79,7 +80,7 @@ export function FormBuilder({ convocatoriaId, formulario, canEdit }: FormBuilder
   // mutation de guardado
   const saveMutation = useMutation({
     mutationFn: () =>
-      updateFormulario(convocatoriaId, {
+      updateFormulario(convocatoriaId, categoriaId, {
         schemaDefinition: schema,
         version: versionRef.current,
       }),
@@ -88,7 +89,7 @@ export function FormBuilder({ convocatoriaId, formulario, canEdit }: FormBuilder
       setIsDirty(false);
       toast.success("Formulario guardado correctamente");
       queryClient.invalidateQueries({
-        queryKey: formularioQueries.detail(convocatoriaId).queryKey,
+        queryKey: formularioQueries.detail(convocatoriaId, categoriaId).queryKey,
       });
     },
     onError: (error: any) => {
@@ -97,7 +98,7 @@ export function FormBuilder({ convocatoriaId, formulario, canEdit }: FormBuilder
       if (status === 409) {
         toast.error("El formulario fue modificado por otro usuario. Recargando...");
         queryClient.invalidateQueries({
-          queryKey: formularioQueries.detail(convocatoriaId).queryKey,
+          queryKey: formularioQueries.detail(convocatoriaId, categoriaId).queryKey,
         });
       } else {
         toast.error(Array.isArray(msg) ? msg[0] : msg);

@@ -3,7 +3,7 @@
 import { use, useState, useCallback } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { isAxiosError } from "axios";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Icon } from "@iconify/react";
@@ -41,13 +41,8 @@ export default function PostularPage({ params }: PostularPageProps) {
   const convocatoriaId = Number(id);
   const router = useRouter();
   const { data: user } = useAuth();
-
-  // cargar formulario de la convocatoria
-  const {
-    data: formulario,
-    isLoading: isLoadingForm,
-    isError: isErrorForm,
-  } = useQuery(formularioQueries.detail(convocatoriaId));
+  const searchParams = useSearchParams();
+  const categoriaIdParam = searchParams.get("categoriaId");
 
   // cargar postulacion existente (404 = no tiene, es valido)
   const {
@@ -55,6 +50,26 @@ export default function PostularPage({ params }: PostularPageProps) {
     isLoading: isLoadingPost,
   } = useQuery({
     ...postulacionQueries.mine(convocatoriaId),
+    retry: (failureCount, err) => {
+      if (isAxiosError(err) && err.response?.status === 404) return false;
+      return failureCount < 2;
+    },
+  });
+
+  // la categoria: si ya hay postulacion, la suya (no se puede cambiar); si no,
+  // la que el proponente eligio en la pagina de la convocatoria (?categoriaId=)
+  const categoriaId =
+    postulacion?.categoriaId ??
+    (categoriaIdParam ? Number(categoriaIdParam) : null);
+
+  // cargar el formulario de la categoria (solo cuando ya sabemos cual es)
+  const {
+    data: formulario,
+    isLoading: isLoadingForm,
+    isError: isErrorForm,
+  } = useQuery({
+    ...formularioQueries.detail(convocatoriaId, categoriaId ?? 0),
+    enabled: categoriaId != null,
     retry: (failureCount, err) => {
       if (isAxiosError(err) && err.response?.status === 404) return false;
       return failureCount < 2;
@@ -70,7 +85,7 @@ export default function PostularPage({ params }: PostularPageProps) {
     },
   });
 
-  const isLoading = isLoadingForm || isLoadingPost;
+  const isLoading = isLoadingPost || (categoriaId != null && isLoadingForm);
 
   // cargando
   if (isLoading) {
@@ -83,13 +98,33 @@ export default function PostularPage({ params }: PostularPageProps) {
     );
   }
 
+  // el proponente llego sin elegir categoria y aun no tiene postulacion
+  if (categoriaId == null) {
+    return (
+      <div className="space-y-4">
+        <Alert>
+          <AlertDescription>
+            Elige una categoría desde la página de la convocatoria para empezar tu postulación.
+          </AlertDescription>
+        </Alert>
+        <Button
+          variant="outline"
+          onClick={() => router.push(`/dashboard/convocatorias/${convocatoriaId}`)}
+        >
+          <ArrowLeft className="size-4" />
+          Volver a la convocatoria
+        </Button>
+      </div>
+    );
+  }
+
   // error del formulario
   if (isErrorForm || !formulario) {
     return (
       <div className="space-y-4">
         <Alert variant="destructive">
           <AlertDescription>
-            No se pudo cargar el formulario de la convocatoria.
+            No se pudo cargar el formulario de la categoría.
           </AlertDescription>
         </Alert>
         <Button variant="outline" onClick={() => router.back()}>
@@ -125,6 +160,7 @@ export default function PostularPage({ params }: PostularPageProps) {
   return (
     <PostularFormContent
       convocatoriaId={convocatoriaId}
+      categoriaId={categoriaId}
       schema={formulario.schemaDefinition as SchemaDefinition}
       existingData={postulacion?.responseData as Record<string, unknown> | undefined}
       postulacionId={postulacion?.id}
@@ -141,6 +177,7 @@ export default function PostularPage({ params }: PostularPageProps) {
 // componente interno con el formulario (separado para que los hooks se ejecuten con datos listos)
 function PostularFormContent({
   convocatoriaId,
+  categoriaId,
   schema,
   existingData,
   postulacionId,
@@ -152,6 +189,7 @@ function PostularFormContent({
   router,
 }: {
   convocatoriaId: number;
+  categoriaId: number;
   schema: SchemaDefinition;
   existingData: Record<string, unknown> | undefined;
   postulacionId: number | undefined;
@@ -181,7 +219,7 @@ function PostularFormContent({
   });
 
   // guardar borrador
-  const { saveDraft: saveDraftFn, saveDraftAsync, isSaving } = useDraftSave(convocatoriaId, form);
+  const { saveDraft: saveDraftFn, saveDraftAsync, isSaving } = useDraftSave(convocatoriaId, categoriaId, form);
 
   // enviar postulacion
   const submitMutation = useMutation({

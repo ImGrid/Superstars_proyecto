@@ -31,6 +31,7 @@ export const TablaField = memo(function TablaField({
   if (campo.tipo !== "tabla") return null;
 
   const { columnas, filasIniciales, filasDinamicas, filasFijas } = campo;
+  const usaFilasFijas = !!filasFijas && filasFijas.length > 0;
 
   // crear una fila vacia basada en las columnas
   // celdas numericas se inicializan como undefined (no "") para evitar
@@ -129,18 +130,30 @@ export const TablaField = memo(function TablaField({
                 <TableBody>
                   {rows.map((row, rowIdx) => (
                     <TableRow key={rowIdx}>
-                      {columnas.map((col) => (
-                        <TableCell key={col.id} className="p-2">
-                          <Input
-                            type={col.tipo === "numerico" ? "number" : "text"}
-                            value={row[col.id] ?? ""}
-                            onChange={(e) =>
-                              updateCell(rowIdx, col.id, e.target.value, col.tipo)
-                            }
-                            className="h-8 text-sm"
-                          />
-                        </TableCell>
-                      ))}
+                      {columnas.map((col) => {
+                        // en tablas de filas fijas, la primera columna es la etiqueta
+                        // predefinida (ej. un año): se muestra como texto, no editable
+                        const esEtiquetaFija =
+                          usaFilasFijas && col.id === columnas[0].id;
+                        return (
+                          <TableCell key={col.id} className="p-2">
+                            {esEtiquetaFija ? (
+                              <span className="text-sm font-medium text-secondary-700">
+                                {String(row[col.id] ?? "")}
+                              </span>
+                            ) : (
+                              <Input
+                                type={col.tipo === "numerico" ? "number" : "text"}
+                                value={row[col.id] ?? ""}
+                                onChange={(e) =>
+                                  updateCell(rowIdx, col.id, e.target.value, col.tipo)
+                                }
+                                className="h-8 text-sm"
+                              />
+                            )}
+                          </TableCell>
+                        );
+                      })}
                       {filasDinamicas && (
                         <TableCell className="p-2">
                           <Button

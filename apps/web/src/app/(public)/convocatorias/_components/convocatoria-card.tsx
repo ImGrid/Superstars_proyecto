@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { StateBadge } from "@/components/shared/state-badge";
-import { formatMoney, getDiasRestantes, formatShortMonth } from "@/lib/format";
+import { getDiasRestantes, formatShortMonth } from "@/lib/format";
 import { getConvocatoriaImagenUrl } from "@/lib/api/convocatoria.api";
 import type { PublicConvocatoriaResponse } from "@superstars/shared";
 
@@ -104,11 +104,8 @@ export function ConvocatoriaCard({ convocatoria }: ConvocatoriaCardProps) {
 
           <Separator className="my-4" />
 
-          {/* footer: monto + deadline */}
-          <div className="flex items-center justify-between text-sm">
-            <span className="font-bold text-orange-600">
-              {formatMoney(convocatoria.monto)}
-            </span>
+          {/* footer: fecha limite */}
+          <div className="flex items-center justify-end text-sm">
             <span className={deadline.className}>{deadline.text}</span>
           </div>
         </CardContent>

@@ -17,7 +17,6 @@ import { PageHeader } from "@/components/shared/page-header";
 import { StateBadge } from "@/components/shared/state-badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import { convocatoriaQueries } from "@/lib/api/query-keys";
-import { formatMoney } from "@/lib/format";
 import type { ConvocatoriaResultadosResumenItem } from "@superstars/shared";
 
 export default function ResultadosPage() {
@@ -128,7 +127,8 @@ function ConvocatoriaCard({
           <StateBadge tipo="convocatoria" valor={convocatoria.estado} />
         </div>
         <p className="text-sm text-secondary-500">
-          Monto: {formatMoney(convocatoria.monto)}
+          {convocatoria.totalGanadores}{" "}
+          {convocatoria.totalGanadores === 1 ? "ganador" : "ganadores"}
         </p>
       </CardHeader>
 

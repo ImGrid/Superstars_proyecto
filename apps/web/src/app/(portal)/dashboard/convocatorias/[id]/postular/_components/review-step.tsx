@@ -3,7 +3,7 @@
 import { memo } from "react";
 import { Icon } from "@iconify/react";
 import type { SchemaDefinition, FormField } from "@superstars/shared";
-import { calculateCompletionPercentage, isFieldFilled } from "@superstars/shared";
+import { calculateCompletionPercentage, isFieldFilled, esCampoDeDato } from "@superstars/shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -86,7 +86,7 @@ export const ReviewStep = memo(function ReviewStep({
             </CardHeader>
             <CardContent>
               <div className="grid gap-2">
-                {seccion.campos.map((campo) => {
+                {seccion.campos.filter(esCampoDeDato).map((campo) => {
                   const value = responseData[campo.id];
                   const otraValue = responseData[`${campo.id}__otra`] as string | undefined;
                   const isFilled = isFieldFilled(campo.tipo, value);

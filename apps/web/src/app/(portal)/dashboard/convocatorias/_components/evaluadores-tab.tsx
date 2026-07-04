@@ -7,7 +7,7 @@ import { Loader2, Plus, Trash2 } from "lucide-react";
 import { Icon } from "@iconify/react";
 import {
   RolUsuario,
-  type EvaluadorConvocatoriaResponse,
+  type EvaluadorCategoriaResponse,
 } from "@superstars/shared";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,20 +35,24 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { EmptyState } from "@/components/shared/empty-state";
-import { addEvaluador, removeEvaluador } from "@/lib/api/convocatoria.api";
-import { convocatoriaQueries, usuarioQueries } from "@/lib/api/query-keys";
+import {
+  addCategoriaEvaluador,
+  removeCategoriaEvaluador,
+} from "@/lib/api/categoria.api";
+import { categoriaQueries, usuarioQueries } from "@/lib/api/query-keys";
 import { formatDate } from "@/lib/format";
 
 interface EvaluadoresTabProps {
   convocatoriaId: number;
+  categoriaId: number;
 }
 
-export function EvaluadoresTab({ convocatoriaId }: EvaluadoresTabProps) {
+export function EvaluadoresTab({ convocatoriaId, categoriaId }: EvaluadoresTabProps) {
   const queryClient = useQueryClient();
 
-  // lista de evaluadores de la convocatoria
+  // pool de evaluadores (jurado) de la categoria
   const { data: evaluadores, isLoading } = useQuery(
-    convocatoriaQueries.evaluadores(convocatoriaId),
+    categoriaQueries.evaluadores(convocatoriaId, categoriaId),
   );
 
   // usuarios con rol evaluador (para el selector)
@@ -68,11 +72,11 @@ export function EvaluadoresTab({ convocatoriaId }: EvaluadoresTabProps) {
   // agregar evaluador
   const addMutation = useMutation({
     mutationFn: (evaluadorId: number) =>
-      addEvaluador(convocatoriaId, { evaluadorId }),
+      addCategoriaEvaluador(convocatoriaId, categoriaId, { evaluadorId }),
     onSuccess: () => {
       toast.success("Evaluador asignado correctamente");
       queryClient.invalidateQueries({
-        queryKey: convocatoriaQueries.evaluadores(convocatoriaId).queryKey,
+        queryKey: categoriaQueries.evaluadores(convocatoriaId, categoriaId).queryKey,
       });
       setSelectedUserId("");
     },
@@ -84,16 +88,17 @@ export function EvaluadoresTab({ convocatoriaId }: EvaluadoresTabProps) {
   });
 
   // estado para eliminar
-  const [deleteTarget, setDeleteTarget] = useState<EvaluadorConvocatoriaResponse | null>(
+  const [deleteTarget, setDeleteTarget] = useState<EvaluadorCategoriaResponse | null>(
     null,
   );
 
   const removeMutation = useMutation({
-    mutationFn: (evaluadorId: number) => removeEvaluador(convocatoriaId, evaluadorId),
+    mutationFn: (evaluadorId: number) =>
+      removeCategoriaEvaluador(convocatoriaId, categoriaId, evaluadorId),
     onSuccess: () => {
       toast.success("Evaluador removido correctamente");
       queryClient.invalidateQueries({
-        queryKey: convocatoriaQueries.evaluadores(convocatoriaId).queryKey,
+        queryKey: categoriaQueries.evaluadores(convocatoriaId, categoriaId).queryKey,
       });
       setDeleteTarget(null);
     },
@@ -129,9 +134,9 @@ export function EvaluadoresTab({ convocatoriaId }: EvaluadoresTabProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Evaluadores de la convocatoria</CardTitle>
+        <CardTitle>Evaluadores de la categoría</CardTitle>
         <CardDescription>
-          Jurados asignados para evaluar las postulaciones de esta convocatoria.
+          Jurados que pueden evaluar las postulaciones de esta categoría.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -173,7 +178,7 @@ export function EvaluadoresTab({ convocatoriaId }: EvaluadoresTabProps) {
           <EmptyState
             icon="ph:clipboard-text-duotone"
             title="Sin evaluadores"
-            description="No hay evaluadores asignados a esta convocatoria. Agrega jurados para que puedan evaluar las postulaciones."
+            description="No hay evaluadores asignados a esta categoría. Agrega jurados para que puedan evaluar las postulaciones."
           />
         ) : (
           <Table>
@@ -217,7 +222,7 @@ export function EvaluadoresTab({ convocatoriaId }: EvaluadoresTabProps) {
             open={!!deleteTarget}
             onOpenChange={(open) => !open && setDeleteTarget(null)}
             title="Remover evaluador"
-            description={`Se removerá a "${deleteTarget.nombre}" como evaluador de esta convocatoria.`}
+            description={`Se removerá a "${deleteTarget.nombre}" de los evaluadores de esta categoría.`}
             confirmLabel="Remover"
             onConfirm={() => removeMutation.mutate(deleteTarget.evaluadorId)}
             isLoading={removeMutation.isPending}

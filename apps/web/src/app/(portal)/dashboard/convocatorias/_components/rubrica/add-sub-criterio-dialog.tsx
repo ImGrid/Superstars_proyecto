@@ -24,6 +24,7 @@ import { createSubCriterio } from "@/lib/api/rubrica.api";
 
 interface AddSubCriterioDialogProps {
   convocatoriaId: number;
+  categoriaId: number;
   criterioId: number;
   nextOrden: number;
 }
@@ -53,6 +54,7 @@ function sugerirRangos(peso: number) {
 
 export function AddSubCriterioDialog({
   convocatoriaId,
+  categoriaId,
   criterioId,
   nextOrden,
 }: AddSubCriterioDialogProps) {
@@ -92,7 +94,7 @@ export function AddSubCriterioDialog({
 
   const mutation = useMutation({
     mutationFn: () =>
-      createSubCriterio(convocatoriaId, {
+      createSubCriterio(convocatoriaId, categoriaId, {
         criterioId,
         nombre: nombre.trim(),
         pesoPorcentaje: Number(peso),
@@ -121,10 +123,10 @@ export function AddSubCriterioDialog({
     onSuccess: () => {
       toast.success("Sub-criterio agregado");
       queryClient.invalidateQueries({
-        queryKey: rubricaQueries.detail(convocatoriaId).queryKey,
+        queryKey: rubricaQueries.detail(convocatoriaId, categoriaId).queryKey,
       });
       queryClient.invalidateQueries({
-        queryKey: rubricaQueries.validacion(convocatoriaId).queryKey,
+        queryKey: rubricaQueries.validacion(convocatoriaId, categoriaId).queryKey,
       });
       resetAndClose();
     },

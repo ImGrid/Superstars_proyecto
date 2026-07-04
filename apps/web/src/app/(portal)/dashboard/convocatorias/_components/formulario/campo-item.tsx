@@ -53,6 +53,12 @@ export const CampoItem = memo(function CampoItem({
   const campoWarnings = getWarningsForItem(warnings, campo.id);
   const hasError = campoWarnings.some((w) => w.severity === "error");
 
+  // los bloques informativos no tienen etiqueta: se muestra un fragmento del contenido
+  const displayLabel =
+    campo.tipo === "informativo"
+      ? (campo.contenido || "").replace(/<[^>]*>/g, " ").trim()
+      : campo.etiqueta;
+
   const handleDelete = useCallback(() => {
     dispatch({
       type: "DELETE_CAMPO",
@@ -72,8 +78,10 @@ export const CampoItem = memo(function CampoItem({
 
       {/* etiqueta */}
       <span className="min-w-0 flex-1 truncate text-sm text-secondary-800">
-        {campo.etiqueta || (
-          <span className="italic text-secondary-400">Sin etiqueta</span>
+        {displayLabel || (
+          <span className="italic text-secondary-400">
+            {campo.tipo === "informativo" ? "Bloque informativo" : "Sin etiqueta"}
+          </span>
         )}
       </span>
 
@@ -171,7 +179,7 @@ export const CampoItem = memo(function CampoItem({
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         title="Eliminar campo"
-        description={`Se eliminara el campo "${campo.etiqueta || "Sin etiqueta"}". Esta accion no se puede deshacer.`}
+        description={`Se eliminará el elemento "${displayLabel || "sin etiqueta"}". Esta acción no se puede deshacer.`}
         confirmLabel="Eliminar"
         onConfirm={handleDelete}
       />

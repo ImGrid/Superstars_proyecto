@@ -40,6 +40,7 @@ type SubCriterioWithNiveles = SubCriterioResponse & {
 
 interface SubCriterioItemProps {
   convocatoriaId: number;
+  categoriaId: number;
   subCriterio: SubCriterioWithNiveles;
   isFirst: boolean;
   isLast: boolean;
@@ -48,6 +49,7 @@ interface SubCriterioItemProps {
 
 export function SubCriterioItem({
   convocatoriaId,
+  categoriaId,
   subCriterio,
   isFirst,
   isLast,
@@ -65,17 +67,17 @@ export function SubCriterioItem({
   // invalidar queries
   const invalidate = useCallback(() => {
     queryClient.invalidateQueries({
-      queryKey: rubricaQueries.detail(convocatoriaId).queryKey,
+      queryKey: rubricaQueries.detail(convocatoriaId, categoriaId).queryKey,
     });
     queryClient.invalidateQueries({
-      queryKey: rubricaQueries.validacion(convocatoriaId).queryKey,
+      queryKey: rubricaQueries.validacion(convocatoriaId, categoriaId).queryKey,
     });
-  }, [queryClient, convocatoriaId]);
+  }, [queryClient, convocatoriaId, categoriaId]);
 
   // actualizar sub-criterio
   const updateMutation = useMutation({
     mutationFn: (data: { nombre?: string; pesoPorcentaje?: number; orden?: number }) =>
-      updateSubCriterio(convocatoriaId, subCriterio.id, data),
+      updateSubCriterio(convocatoriaId, categoriaId, subCriterio.id, data),
     onSuccess: () => {
       toast.success("Sub-criterio actualizado");
       setIsEditing(false);
@@ -90,7 +92,7 @@ export function SubCriterioItem({
 
   // eliminar sub-criterio
   const deleteMutation = useMutation({
-    mutationFn: () => deleteSubCriterio(convocatoriaId, subCriterio.id),
+    mutationFn: () => deleteSubCriterio(convocatoriaId, categoriaId, subCriterio.id),
     onSuccess: () => {
       toast.success("Sub-criterio eliminado");
       setDeleteOpen(false);
@@ -106,7 +108,7 @@ export function SubCriterioItem({
   // reordenar
   const reorderMutation = useMutation({
     mutationFn: (newOrden: number) =>
-      updateSubCriterio(convocatoriaId, subCriterio.id, { orden: newOrden }),
+      updateSubCriterio(convocatoriaId, categoriaId, subCriterio.id, { orden: newOrden }),
     onSuccess: () => invalidate(),
     onError: () => toast.error("Error al reordenar"),
   });
@@ -236,6 +238,7 @@ export function SubCriterioItem({
           <div className="border-t border-secondary-100 px-3 py-2">
             <NivelesEditor
               convocatoriaId={convocatoriaId}
+              categoriaId={categoriaId}
               niveles={subCriterio.nivelEvaluacions}
               canEdit={canEdit}
             />

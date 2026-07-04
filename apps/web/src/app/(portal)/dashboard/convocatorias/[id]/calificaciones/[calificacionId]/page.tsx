@@ -65,15 +65,17 @@ export default function RevisionCalificacionPage({ params }: PageProps) {
     calificacionQueries.detalle(convocatoriaId, calificacionId),
   );
 
-  // cargar formulario (schema)
-  const { data: formulario, isLoading: isLoadingForm } = useQuery(
-    formularioQueries.detail(convocatoriaId),
-  );
+  // cargar formulario (schema) de la categoria de la postulacion
+  const { data: formulario, isLoading: isLoadingForm } = useQuery({
+    ...formularioQueries.detail(convocatoriaId, data?.postulacion?.categoriaId ?? 0),
+    enabled: !!data?.postulacion?.categoriaId,
+  });
 
-  // cargar rubrica
-  const { data: rubrica, isLoading: isLoadingRubrica } = useQuery(
-    rubricaQueries.detail(convocatoriaId),
-  );
+  // cargar rubrica de la categoria de la postulacion
+  const { data: rubrica, isLoading: isLoadingRubrica } = useQuery({
+    ...rubricaQueries.detail(convocatoriaId, data?.postulacion?.categoriaId ?? 0),
+    enabled: !!data?.postulacion?.categoriaId,
+  });
 
   // cargar archivos
   const { data: archivos, isLoading: isLoadingArchivos } = useQuery({

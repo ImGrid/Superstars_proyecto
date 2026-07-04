@@ -33,15 +33,16 @@ import { FormBuilder } from "./form-builder";
 
 interface FormularioTabProps {
   convocatoriaId: number;
+  categoriaId: number;
   estadoConvocatoria: string;
 }
 
-export function FormularioTab({ convocatoriaId, estadoConvocatoria }: FormularioTabProps) {
+export function FormularioTab({ convocatoriaId, categoriaId, estadoConvocatoria }: FormularioTabProps) {
   const queryClient = useQueryClient();
   const canEdit = estadoConvocatoria === EstadoConvocatoria.BORRADOR;
 
   const { data, isLoading, isError } = useQuery({
-    ...formularioQueries.detail(convocatoriaId),
+    ...formularioQueries.detail(convocatoriaId, categoriaId),
     // 404 es esperado si no existe formulario
     retry: (count, error: any) => {
       if (error?.response?.status === 404) return false;
@@ -59,7 +60,7 @@ export function FormularioTab({ convocatoriaId, estadoConvocatoria }: Formulario
   // crear formulario con plantilla default (secciones fijas B y C)
   const createMutation = useMutation({
     mutationFn: () => {
-      return createFormulario(convocatoriaId, {
+      return createFormulario(convocatoriaId, categoriaId, {
         nombre: nombre.trim(),
         schemaDefinition: DEFAULT_TEMPLATE,
       });
@@ -67,7 +68,7 @@ export function FormularioTab({ convocatoriaId, estadoConvocatoria }: Formulario
     onSuccess: () => {
       toast.success("Formulario creado correctamente");
       queryClient.invalidateQueries({
-        queryKey: formularioQueries.detail(convocatoriaId).queryKey,
+        queryKey: formularioQueries.detail(convocatoriaId, categoriaId).queryKey,
       });
       setCreateOpen(false);
       setNombre("");
@@ -80,11 +81,11 @@ export function FormularioTab({ convocatoriaId, estadoConvocatoria }: Formulario
 
   // eliminar formulario
   const deleteMutation = useMutation({
-    mutationFn: () => deleteFormulario(convocatoriaId),
+    mutationFn: () => deleteFormulario(convocatoriaId, categoriaId),
     onSuccess: () => {
       toast.success("Formulario eliminado");
       queryClient.invalidateQueries({
-        queryKey: formularioQueries.detail(convocatoriaId).queryKey,
+        queryKey: formularioQueries.detail(convocatoriaId, categoriaId).queryKey,
       });
       setDeleteOpen(false);
     },
@@ -181,6 +182,7 @@ export function FormularioTab({ convocatoriaId, estadoConvocatoria }: Formulario
     <div className="space-y-4">
       <FormBuilder
         convocatoriaId={convocatoriaId}
+        categoriaId={categoriaId}
         formulario={data}
         canEdit={canEdit}
       />

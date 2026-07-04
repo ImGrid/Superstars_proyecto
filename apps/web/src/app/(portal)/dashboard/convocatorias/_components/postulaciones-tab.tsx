@@ -36,12 +36,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { StateBadge } from "@/components/shared/state-badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
-import { postulacionQueries, calificacionQueries, convocatoriaQueries } from "@/lib/api/query-keys";
+import {
+  postulacionQueries,
+  calificacionQueries,
+  convocatoriaQueries,
+  categoriaQueries,
+} from "@/lib/api/query-keys";
 import { seleccionarGanadores } from "@/lib/api/convocatoria.api";
 import { formatShortDate, formatPercent } from "@/lib/format";
 
 interface PostulacionesTabProps {
   convocatoriaId: number;
+  categoriaId: number;
   estadoConvocatoria: string;
   numeroGanadores: number;
 }
@@ -59,7 +65,7 @@ const ESTADOS_FILTRO = [
   { valor: "no_seleccionado", label: "No seleccionado" },
 ];
 
-export function PostulacionesTab({ convocatoriaId, estadoConvocatoria, numeroGanadores }: PostulacionesTabProps) {
+export function PostulacionesTab({ convocatoriaId, categoriaId, estadoConvocatoria, numeroGanadores }: PostulacionesTabProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [filtroEstado, setFiltroEstado] = useState<string>("all");
@@ -67,23 +73,24 @@ export function PostulacionesTab({ convocatoriaId, estadoConvocatoria, numeroGan
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const estado = filtroEstado === "all" ? undefined : filtroEstado;
-  const { data, isLoading } = useQuery(postulacionQueries.list(convocatoriaId, estado));
+  const { data, isLoading } = useQuery(postulacionQueries.list(convocatoriaId, estado, categoriaId));
 
-  // cargar calificaciones para mostrar indicadores
-  const { data: calificaciones } = useQuery(calificacionQueries.list(convocatoriaId));
+  // calificaciones de la convocatoria, filtradas a esta categoria
+  const { data: calificacionesRaw } = useQuery(calificacionQueries.list(convocatoriaId));
+  const calificaciones = (calificacionesRaw ?? []).filter((c) => c.categoriaId === categoriaId);
 
-  // cargar evaluadores del pool para mostrar total
-  const { data: poolEvaluadores } = useQuery(convocatoriaQueries.evaluadores(convocatoriaId));
+  // pool de evaluadores de la categoria (para mostrar total)
+  const { data: poolEvaluadores } = useQuery(categoriaQueries.evaluadores(convocatoriaId, categoriaId));
   const totalEvaluadoresPool = poolEvaluadores?.length ?? 0;
 
   // contar evaluadores con calificacion por postulacion
   const califsPorPostulacion = new Map<number, number>();
-  for (const c of calificaciones ?? []) {
+  for (const c of calificaciones) {
     califsPorPostulacion.set(c.postulacionId, (califsPorPostulacion.get(c.postulacionId) ?? 0) + 1);
   }
 
   const postulaciones = data ?? [];
-  const pendientesRevision = (calificaciones ?? []).filter(
+  const pendientesRevision = calificaciones.filter(
     (c) => c.estado === EstadoCalificacion.COMPLETADO,
   );
 
@@ -106,7 +113,7 @@ export function PostulacionesTab({ convocatoriaId, estadoConvocatoria, numeroGan
 
   // mutation para seleccionar ganadores
   const seleccionarMutation = useMutation({
-    mutationFn: () => seleccionarGanadores(convocatoriaId, { ganadorIds: Array.from(selectedIds) }),
+    mutationFn: () => seleccionarGanadores(convocatoriaId, categoriaId, { ganadorIds: Array.from(selectedIds) }),
     onSuccess: () => {
       toast.success("Ganadores seleccionados correctamente");
       setSelectedIds(new Set());
@@ -249,7 +256,7 @@ export function PostulacionesTab({ convocatoriaId, estadoConvocatoria, numeroGan
             description={
               filtroEstado !== "all"
                 ? "No hay postulaciones con ese estado."
-                : "Aún no se han recibido postulaciones para esta convocatoria."
+                : "Aún no se han recibido postulaciones para esta categoría."
             }
           />
         ) : (

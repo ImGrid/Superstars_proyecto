@@ -18,10 +18,14 @@ import {
   canPublicar,
   canFinalizar,
   listResponsables,
-  listEvaluadores,
   getResumenResultados,
-  getRankingConvocatoria,
+  getRankingCategoria,
 } from "./convocatoria.api";
+import {
+  listCategorias,
+  getCategoria,
+  listCategoriaEvaluadores,
+} from "./categoria.api";
 import { getFormulario } from "./formulario.api";
 import { listDocumentos } from "./documento.api";
 import {
@@ -52,7 +56,7 @@ import {
   getHistoriaExito,
 } from "./historia-exito.api";
 import {
-  listMisConvocatorias,
+  listMisCategorias,
   listPostulacionesEvaluables,
   getPostulacionDetalle,
   listCalificaciones,
@@ -154,42 +158,58 @@ export const convocatoriaQueries = {
       queryFn: () => listResponsables(convocatoriaId),
     }),
 
-  evaluadores: (convocatoriaId: number) =>
-    queryOptions({
-      queryKey: ["convocatorias", "detail", convocatoriaId, "evaluadores"] as const,
-      queryFn: () => listEvaluadores(convocatoriaId),
-    }),
-
   resumenResultados: () =>
     queryOptions({
       queryKey: ["convocatorias", "resumen-resultados"] as const,
       queryFn: getResumenResultados,
     }),
+};
 
-  ranking: (id: number) =>
+// --- Categorias (el pool de evaluadores y el ranking viven aqui, por categoria) ---
+
+export const categoriaQueries = {
+  list: (convocatoriaId: number) =>
     queryOptions({
-      queryKey: ["convocatorias", "ranking", id] as const,
-      queryFn: () => getRankingConvocatoria(id),
+      queryKey: ["convocatorias", "detail", convocatoriaId, "categorias"] as const,
+      queryFn: () => listCategorias(convocatoriaId),
+    }),
+
+  detail: (convocatoriaId: number, categoriaId: number) =>
+    queryOptions({
+      queryKey: ["convocatorias", "detail", convocatoriaId, "categorias", categoriaId] as const,
+      queryFn: () => getCategoria(convocatoriaId, categoriaId),
+    }),
+
+  evaluadores: (convocatoriaId: number, categoriaId: number) =>
+    queryOptions({
+      queryKey: ["convocatorias", "detail", convocatoriaId, "categorias", categoriaId, "evaluadores"] as const,
+      queryFn: () => listCategoriaEvaluadores(convocatoriaId, categoriaId),
+    }),
+
+  ranking: (convocatoriaId: number, categoriaId: number) =>
+    queryOptions({
+      queryKey: ["convocatorias", "detail", convocatoriaId, "categorias", categoriaId, "ranking"] as const,
+      queryFn: () => getRankingCategoria(convocatoriaId, categoriaId),
     }),
 };
 
 // --- Formularios ---
 
 export const formularioQueries = {
-  detail: (convocatoriaId: number) =>
+  detail: (convocatoriaId: number, categoriaId: number) =>
     queryOptions({
-      queryKey: ["convocatorias", "detail", convocatoriaId, "formulario"] as const,
-      queryFn: () => getFormulario(convocatoriaId),
+      queryKey: ["convocatorias", "detail", convocatoriaId, "categorias", categoriaId, "formulario"] as const,
+      queryFn: () => getFormulario(convocatoriaId, categoriaId),
     }),
 };
 
 // --- Documentos ---
 
 export const documentoQueries = {
-  list: (convocatoriaId: number) =>
+  list: (convocatoriaId: number, categoriaId: number) =>
     queryOptions({
-      queryKey: ["convocatorias", "detail", convocatoriaId, "documentos"] as const,
-      queryFn: () => listDocumentos(convocatoriaId),
+      queryKey: ["convocatorias", "detail", convocatoriaId, "categorias", categoriaId, "documentos"] as const,
+      queryFn: () => listDocumentos(convocatoriaId, categoriaId),
     }),
 };
 
@@ -210,10 +230,10 @@ export const postulacionQueries = {
       queryFn: listMyPostulaciones,
     }),
 
-  list: (convocatoriaId: number, estado?: string) =>
+  list: (convocatoriaId: number, estado?: string, categoriaId?: number) =>
     queryOptions({
-      queryKey: ["postulaciones", "list", convocatoriaId, estado ?? "all"] as const,
-      queryFn: () => listPostulaciones(convocatoriaId, estado),
+      queryKey: ["postulaciones", "list", convocatoriaId, categoriaId ?? "all-cat", estado ?? "all"] as const,
+      queryFn: () => listPostulaciones(convocatoriaId, estado, categoriaId),
     }),
 
   detail: (convocatoriaId: number, id: number) =>
@@ -247,22 +267,24 @@ export const archivoQueries = {
 // --- Rubrica ---
 
 export const rubricaQueries = {
-  detail: (convocatoriaId: number) =>
+  detail: (convocatoriaId: number, categoriaId: number) =>
     queryOptions({
-      queryKey: ["convocatorias", "detail", convocatoriaId, "rubrica"] as const,
-      queryFn: () => getRubrica(convocatoriaId),
+      queryKey: ["convocatorias", "detail", convocatoriaId, "categorias", categoriaId, "rubrica"] as const,
+      queryFn: () => getRubrica(convocatoriaId, categoriaId),
     }),
 
-  validacion: (convocatoriaId: number) =>
+  validacion: (convocatoriaId: number, categoriaId: number) =>
     queryOptions({
       queryKey: [
         "convocatorias",
         "detail",
         convocatoriaId,
+        "categorias",
+        categoriaId,
         "rubrica",
         "validacion",
       ] as const,
-      queryFn: () => validarRubrica(convocatoriaId),
+      queryFn: () => validarRubrica(convocatoriaId, categoriaId),
     }),
 };
 
@@ -359,22 +381,22 @@ export const publicQueries = {
 export const evaluacionQueries = {
   all: () => ["evaluaciones"] as const,
 
-  misConvocatorias: () =>
+  misCategorias: () =>
     queryOptions({
-      queryKey: ["evaluaciones", "mis-convocatorias"] as const,
-      queryFn: listMisConvocatorias,
+      queryKey: ["evaluaciones", "mis-categorias"] as const,
+      queryFn: listMisCategorias,
     }),
 
-  postulaciones: (convocatoriaId: number) =>
+  postulaciones: (categoriaId: number) =>
     queryOptions({
-      queryKey: ["evaluaciones", "postulaciones", convocatoriaId] as const,
-      queryFn: () => listPostulacionesEvaluables(convocatoriaId),
+      queryKey: ["evaluaciones", "postulaciones", categoriaId] as const,
+      queryFn: () => listPostulacionesEvaluables(categoriaId),
     }),
 
-  detalle: (convocatoriaId: number, postulacionId: number) =>
+  detalle: (categoriaId: number, postulacionId: number) =>
     queryOptions({
-      queryKey: ["evaluaciones", "detalle", convocatoriaId, postulacionId] as const,
-      queryFn: () => getPostulacionDetalle(convocatoriaId, postulacionId),
+      queryKey: ["evaluaciones", "detalle", categoriaId, postulacionId] as const,
+      queryFn: () => getPostulacionDetalle(categoriaId, postulacionId),
     }),
 };
 

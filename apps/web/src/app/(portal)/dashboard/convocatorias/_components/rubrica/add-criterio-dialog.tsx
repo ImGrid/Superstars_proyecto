@@ -30,6 +30,7 @@ import { tipoCriterioOptions } from "./_lib/tipo-criterio-labels";
 
 interface AddCriterioDialogProps {
   convocatoriaId: number;
+  categoriaId: number;
   nextOrden: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -37,6 +38,7 @@ interface AddCriterioDialogProps {
 
 export function AddCriterioDialog({
   convocatoriaId,
+  categoriaId,
   nextOrden,
   open,
   onOpenChange,
@@ -48,7 +50,7 @@ export function AddCriterioDialog({
 
   const mutation = useMutation({
     mutationFn: () =>
-      createCriterio(convocatoriaId, {
+      createCriterio(convocatoriaId, categoriaId, {
         nombre: nombre.trim(),
         tipo,
         pesoPorcentaje: Number(peso),
@@ -57,10 +59,10 @@ export function AddCriterioDialog({
     onSuccess: () => {
       toast.success("Criterio agregado");
       queryClient.invalidateQueries({
-        queryKey: rubricaQueries.detail(convocatoriaId).queryKey,
+        queryKey: rubricaQueries.detail(convocatoriaId, categoriaId).queryKey,
       });
       queryClient.invalidateQueries({
-        queryKey: rubricaQueries.validacion(convocatoriaId).queryKey,
+        queryKey: rubricaQueries.validacion(convocatoriaId, categoriaId).queryKey,
       });
       resetAndClose();
     },

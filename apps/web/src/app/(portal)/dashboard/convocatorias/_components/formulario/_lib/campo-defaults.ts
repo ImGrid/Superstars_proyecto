@@ -64,5 +64,13 @@ export function createDefaultCampo(
       return { ...base, tipo: "si_no", labelSi: "Si", labelNo: "No" };
     case "texto_url":
       return { ...base, tipo: "texto_url" };
+    case "informativo":
+      // solo presentacion: no captura dato, no valida, no es requerido
+      return {
+        ...base,
+        tipo: "informativo",
+        variante: "parrafo",
+        contenido: "Texto informativo",
+      };
   }
 }

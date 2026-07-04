@@ -32,15 +32,16 @@ import { RubricaBuilder } from "./rubrica-builder";
 
 interface RubricaTabProps {
   convocatoriaId: number;
+  categoriaId: number;
   estadoConvocatoria: string;
 }
 
-export function RubricaTab({ convocatoriaId, estadoConvocatoria }: RubricaTabProps) {
+export function RubricaTab({ convocatoriaId, categoriaId, estadoConvocatoria }: RubricaTabProps) {
   const queryClient = useQueryClient();
   const canEdit = estadoConvocatoria === EstadoConvocatoria.BORRADOR;
 
   const { data, isLoading, isError } = useQuery({
-    ...rubricaQueries.detail(convocatoriaId),
+    ...rubricaQueries.detail(convocatoriaId, categoriaId),
     retry: (count, error: any) => {
       if (error?.response?.status === 404) return false;
       return count < 2;
@@ -57,14 +58,14 @@ export function RubricaTab({ convocatoriaId, estadoConvocatoria }: RubricaTabPro
   // crear rubrica
   const createMutation = useMutation({
     mutationFn: () =>
-      createRubrica(convocatoriaId, {
+      createRubrica(convocatoriaId, categoriaId, {
         nombre: nombre.trim(),
         puntajeTotal: 100,
       }),
     onSuccess: () => {
       toast.success("Rubrica creada correctamente");
       queryClient.invalidateQueries({
-        queryKey: rubricaQueries.detail(convocatoriaId).queryKey,
+        queryKey: rubricaQueries.detail(convocatoriaId, categoriaId).queryKey,
       });
       setCreateOpen(false);
       setNombre("");
@@ -77,11 +78,11 @@ export function RubricaTab({ convocatoriaId, estadoConvocatoria }: RubricaTabPro
 
   // eliminar rubrica
   const deleteMutation = useMutation({
-    mutationFn: () => deleteRubrica(convocatoriaId),
+    mutationFn: () => deleteRubrica(convocatoriaId, categoriaId),
     onSuccess: () => {
       toast.success("Rúbrica eliminada");
       queryClient.invalidateQueries({
-        queryKey: rubricaQueries.detail(convocatoriaId).queryKey,
+        queryKey: rubricaQueries.detail(convocatoriaId, categoriaId).queryKey,
       });
       setDeleteOpen(false);
     },
@@ -180,6 +181,7 @@ export function RubricaTab({ convocatoriaId, estadoConvocatoria }: RubricaTabPro
     <div className="space-y-4">
       <RubricaBuilder
         convocatoriaId={convocatoriaId}
+        categoriaId={categoriaId}
         rubrica={data}
         canEdit={canEdit}
       />

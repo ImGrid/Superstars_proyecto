@@ -21,6 +21,7 @@ import {
   Cell,
 } from "recharts";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -29,7 +30,8 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StateBadge } from "@/components/shared/state-badge";
-import { convocatoriaQueries } from "@/lib/api/query-keys";
+import { convocatoriaQueries, categoriaQueries } from "@/lib/api/query-keys";
+import { formatMoney } from "@/lib/format";
 import type { PostulacionRankingItem } from "@superstars/shared";
 
 // colores por posicion en el ranking
@@ -70,9 +72,16 @@ export default function RankingConvocatoriaPage({
   const convocatoriaId = parseInt(id, 10);
   const router = useRouter();
 
-  const { data, isLoading } = useQuery(convocatoriaQueries.ranking(convocatoriaId));
+  // datos transversales de la convocatoria (nombre/estado) para el encabezado
+  const { data: convocatoria, isLoading: isLoadingConv } = useQuery(
+    convocatoriaQueries.detail(convocatoriaId),
+  );
+  // el ranking es por categoria (DENSE_RANK independiente por categoria)
+  const { data: categorias, isLoading: isLoadingCats } = useQuery(
+    categoriaQueries.list(convocatoriaId),
+  );
 
-  if (isLoading) {
+  if (isLoadingConv || isLoadingCats) {
     return (
       <div className="space-y-6">
         <Skeleton className="h-8 w-64" />
@@ -86,7 +95,7 @@ export default function RankingConvocatoriaPage({
     );
   }
 
-  if (!data) {
+  if (!convocatoria) {
     return (
       <div className="space-y-4">
         <Button
@@ -105,16 +114,6 @@ export default function RankingConvocatoriaPage({
     );
   }
 
-  // datos del grafico: ordenar por puntaje desc
-  const datosGrafico = [...data.ranking]
-    .filter((r) => r.puntajeFinal !== null)
-    .map((r) => ({
-      nombre: truncarNombre(r.empresaNombre),
-      puntaje: r.puntajeFinal ?? 0,
-      estado: r.estado,
-      posicion: r.posicionFinal,
-    }));
-
   return (
     <div className="space-y-6">
       {/* navegacion de regreso */}
@@ -131,12 +130,83 @@ export default function RankingConvocatoriaPage({
       {/* encabezado con nombre y estado */}
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="font-heading text-2xl font-bold text-secondary-900">
-          {data.nombre}
+          {convocatoria.nombre}
         </h1>
-        <StateBadge tipo="convocatoria" valor={data.estado} />
+        <StateBadge tipo="convocatoria" valor={convocatoria.estado} />
       </div>
 
-      {/* stats de resumen */}
+      {/* ranking por categoria */}
+      {!categorias || categorias.length === 0 ? (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <p className="text-sm text-secondary-500">
+              Esta convocatoria no tiene categorías.
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        categorias.map((cat) => (
+          <CategoriaRankingBlock
+            key={cat.id}
+            convocatoriaId={convocatoriaId}
+            categoriaId={cat.id}
+          />
+        ))
+      )}
+    </div>
+  );
+}
+
+// bloque de ranking de una categoria: estadisticas + tabla + grafico
+function CategoriaRankingBlock({
+  convocatoriaId,
+  categoriaId,
+}: {
+  convocatoriaId: number;
+  categoriaId: number;
+}) {
+  const { data, isLoading } = useQuery(
+    categoriaQueries.ranking(convocatoriaId, categoriaId),
+  );
+
+  if (isLoading) {
+    return <Skeleton className="h-64 w-full" />;
+  }
+
+  if (!data) return null;
+
+  // datos del grafico: solo calificadas
+  const datosGrafico = [...data.ranking]
+    .filter((r) => r.puntajeFinal !== null)
+    .map((r) => ({
+      nombre: truncarNombre(r.empresaNombre),
+      puntaje: r.puntajeFinal ?? 0,
+      estado: r.estado,
+      posicion: r.posicionFinal,
+    }));
+
+  return (
+    <section className="space-y-4 border-t border-secondary-100 pt-6">
+      {/* encabezado de la categoria */}
+      <div className="flex flex-wrap items-center gap-3">
+        <h2 className="font-heading text-lg font-semibold text-secondary-900">
+          {data.categoriaNombre}
+        </h2>
+        <Badge variant="outline" className="text-secondary-600">
+          {formatMoney(data.monto)} · {data.numeroGanadores} ganadores
+        </Badge>
+        {data.resuelta ? (
+          <Badge className="border-emerald-300 bg-emerald-50 text-emerald-700">
+            Ganadores seleccionados
+          </Badge>
+        ) : (
+          <Badge variant="outline" className="border-amber-300 text-amber-600">
+            Pendiente de selección
+          </Badge>
+        )}
+      </div>
+
+      {/* stats de la categoria */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MiniStat
           icon={<Icon icon="ph:users-three-duotone" className="size-5 text-primary-600" />}
@@ -155,25 +225,21 @@ export default function RankingConvocatoriaPage({
         <MiniStat
           icon={<TrendingUp className="size-5 text-success-600" />}
           label="Puntaje máximo"
-          value={
-            data.maxPuntaje !== null ? `${data.maxPuntaje.toFixed(1)} pts` : "—"
-          }
+          value={data.maxPuntaje !== null ? `${data.maxPuntaje.toFixed(1)} pts` : "—"}
         />
         <MiniStat
           icon={<TrendingDown className="size-5 text-secondary-400" />}
           label="Puntaje mínimo"
-          value={
-            data.minPuntaje !== null ? `${data.minPuntaje.toFixed(1)} pts` : "—"
-          }
+          value={data.minPuntaje !== null ? `${data.minPuntaje.toFixed(1)} pts` : "—"}
         />
       </div>
 
-      {/* ranking table */}
+      {/* tabla de ranking */}
       {data.ranking.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
             <p className="text-sm text-secondary-500">
-              No hay postulaciones calificadas en esta convocatoria.
+              No hay postulaciones calificadas en esta categoría.
             </p>
           </CardContent>
         </Card>
@@ -192,14 +258,14 @@ export default function RankingConvocatoriaPage({
       {datosGrafico.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Comparacion de puntajes</CardTitle>
+            <CardTitle className="text-base">Comparación de puntajes</CardTitle>
           </CardHeader>
           <CardContent>
             <GraficoBarras datos={datosGrafico} />
           </CardContent>
         </Card>
       )}
-    </div>
+    </section>
   );
 }
 

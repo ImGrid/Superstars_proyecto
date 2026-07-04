@@ -14,6 +14,7 @@ import { updateNivel } from "@/lib/api/rubrica.api";
 
 interface NivelesEditorProps {
   convocatoriaId: number;
+  categoriaId: number;
   niveles: NivelEvaluacionResponse[];
   canEdit: boolean;
 }
@@ -42,6 +43,7 @@ const nivelOrden = [NivelEnum.BASICO, NivelEnum.INTERMEDIO, NivelEnum.AVANZADO];
 
 export function NivelesEditor({
   convocatoriaId,
+  categoriaId,
   niveles,
   canEdit,
 }: NivelesEditorProps) {
@@ -56,6 +58,7 @@ export function NivelesEditor({
         <NivelCard
           key={nivel.id}
           convocatoriaId={convocatoriaId}
+          categoriaId={categoriaId}
           nivel={nivel}
           canEdit={canEdit}
         />
@@ -67,10 +70,12 @@ export function NivelesEditor({
 // card individual de nivel
 function NivelCard({
   convocatoriaId,
+  categoriaId,
   nivel,
   canEdit,
 }: {
   convocatoriaId: number;
+  categoriaId: number;
   nivel: NivelEvaluacionResponse;
   canEdit: boolean;
 }) {
@@ -89,7 +94,7 @@ function NivelCard({
 
   const mutation = useMutation({
     mutationFn: () =>
-      updateNivel(convocatoriaId, nivel.id, {
+      updateNivel(convocatoriaId, categoriaId, nivel.id, {
         descripcion: desc,
         puntajeMin: Number(pMin),
         puntajeMax: Number(pMax),
@@ -97,10 +102,10 @@ function NivelCard({
     onSuccess: () => {
       toast.success(`Nivel ${config.label} actualizado`);
       queryClient.invalidateQueries({
-        queryKey: rubricaQueries.detail(convocatoriaId).queryKey,
+        queryKey: rubricaQueries.detail(convocatoriaId, categoriaId).queryKey,
       });
       queryClient.invalidateQueries({
-        queryKey: rubricaQueries.validacion(convocatoriaId).queryKey,
+        queryKey: rubricaQueries.validacion(convocatoriaId, categoriaId).queryKey,
       });
     },
     onError: (error: any) => {

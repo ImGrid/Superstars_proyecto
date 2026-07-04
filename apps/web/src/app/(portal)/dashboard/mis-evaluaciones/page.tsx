@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Calendar, DollarSign, ArrowRight } from "lucide-react";
-import type { EvaluadorConvocatoriaItem } from "@superstars/shared";
+import type { EvaluadorCategoriaItem } from "@superstars/shared";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,7 +21,7 @@ import { formatDate, formatMoney } from "@/lib/format";
 
 export default function MisEvaluacionesPage() {
   const router = useRouter();
-  const { data, isLoading } = useQuery(evaluacionQueries.misConvocatorias());
+  const { data, isLoading } = useQuery(evaluacionQueries.misCategorias());
 
   if (isLoading) {
     return (
@@ -36,28 +36,30 @@ export default function MisEvaluacionesPage() {
     );
   }
 
-  const convocatorias = data ?? [];
+  const categorias = data ?? [];
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Mis Evaluaciones"
-        description="Convocatorias donde estás asignado como evaluador."
+        description="Categorías donde estás asignado como evaluador."
       />
 
-      {convocatorias.length === 0 ? (
+      {categorias.length === 0 ? (
         <EmptyState
           icon="ph:clipboard-text-duotone"
-          title="Sin convocatorias asignadas"
-          description="Aún no te han asignado como evaluador en ninguna convocatoria."
+          title="Sin categorías asignadas"
+          description="Aún no te han asignado como evaluador en ninguna categoría."
         />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {convocatorias.map((c) => (
-            <ConvocatoriaEvaluadorCard
-              key={c.id}
-              convocatoria={c}
-              onClick={() => router.push(`/dashboard/mis-evaluaciones/${c.id}`)}
+          {categorias.map((c) => (
+            <CategoriaEvaluadorCard
+              key={c.categoriaId}
+              categoria={c}
+              onClick={() =>
+                router.push(`/dashboard/mis-evaluaciones/${c.categoriaId}`)
+              }
             />
           ))}
         </div>
@@ -66,41 +68,42 @@ export default function MisEvaluacionesPage() {
   );
 }
 
-function ConvocatoriaEvaluadorCard({
-  convocatoria,
+function CategoriaEvaluadorCard({
+  categoria,
   onClick,
 }: {
-  convocatoria: EvaluadorConvocatoriaItem;
+  categoria: EvaluadorCategoriaItem;
   onClick: () => void;
 }) {
   return (
-    <Card className="flex flex-col hover:shadow-md transition-shadow cursor-pointer" onClick={onClick}>
+    <Card
+      className="flex flex-col hover:shadow-md transition-shadow cursor-pointer"
+      onClick={onClick}
+    >
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="text-base leading-tight line-clamp-2">
-            {convocatoria.nombre}
+            {categoria.categoriaNombre}
           </CardTitle>
-          <StateBadge tipo="convocatoria" valor={convocatoria.estado} />
+          <StateBadge tipo="convocatoria" valor={categoria.convocatoriaEstado} />
         </div>
-        {convocatoria.descripcion && (
-          <CardDescription className="line-clamp-2">
-            {convocatoria.descripcion}
-          </CardDescription>
-        )}
+        <CardDescription className="line-clamp-2">
+          {categoria.convocatoriaNombre}
+        </CardDescription>
       </CardHeader>
       <CardContent className="flex-1 space-y-3">
         <div className="flex items-center gap-4 text-sm text-secondary-500">
           <div className="flex items-center gap-1">
             <DollarSign className="size-3.5" />
-            {formatMoney(convocatoria.monto)}
+            {formatMoney(categoria.monto)}
           </div>
           <div className="flex items-center gap-1">
             <Calendar className="size-3.5" />
-            {formatDate(convocatoria.fechaCierrePostulacion)}
+            {formatDate(categoria.fechaCierrePostulacion)}
           </div>
         </div>
         <div className="text-xs text-secondary-400">
-          Asignado el {formatDate(convocatoria.asignadoEn)}
+          Asignado el {formatDate(categoria.asignadoEn)}
         </div>
       </CardContent>
       <div className="px-6 pb-4">

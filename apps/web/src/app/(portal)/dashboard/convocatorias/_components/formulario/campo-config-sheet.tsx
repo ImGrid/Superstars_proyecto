@@ -7,12 +7,14 @@ import type {
   ColumnaTabla,
   FilaFijaTabla,
 } from "@superstars/shared";
+import { variantesInformativo } from "@superstars/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -50,6 +52,15 @@ const filePresets = {
 } as const;
 
 const allFileTypes = [".pdf", ".doc", ".docx", ".xls", ".xlsx", ".jpg", ".jpeg", ".png"];
+
+// etiquetas legibles para las variantes del bloque informativo
+const VARIANTE_LABELS: Record<string, string> = {
+  parrafo: "Párrafo",
+  subtitulo: "Subtítulo",
+  nota: "Nota destacada",
+  advertencia: "Advertencia",
+  detalle: "Desplegable",
+};
 
 export function CampoConfigSheet({ campo, open, onOpenChange, onApply }: CampoConfigSheetProps) {
   // estado local para edicion sin afectar el reducer
@@ -99,41 +110,45 @@ export function CampoConfigSheet({ campo, open, onOpenChange, onApply }: CampoCo
         </SheetHeader>
 
         <div className="space-y-6 py-4">
-          {/* propiedades comunes */}
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="campo-etiqueta">Etiqueta</Label>
-              <Input
-                id="campo-etiqueta"
-                value={local.etiqueta}
-                onChange={(e) => updateBase({ etiqueta: e.target.value })}
-                placeholder="Ej: Nombre de la empresa"
-              />
-            </div>
+          {/* propiedades comunes (los bloques informativos no capturan dato) */}
+          {local.tipo !== "informativo" && (
+            <>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="campo-etiqueta">Etiqueta</Label>
+                  <Input
+                    id="campo-etiqueta"
+                    value={local.etiqueta ?? ""}
+                    onChange={(e) => updateBase({ etiqueta: e.target.value })}
+                    placeholder="Ej: Nombre de la empresa"
+                  />
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="campo-descripcion">Descripción (opcional)</Label>
-              <Input
-                id="campo-descripcion"
-                value={local.descripcion ?? ""}
-                onChange={(e) =>
-                  updateBase({ descripcion: e.target.value || undefined })
-                }
-                placeholder="Instrucciones para el usuario"
-              />
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="campo-descripcion">Descripción (opcional)</Label>
+                  <Input
+                    id="campo-descripcion"
+                    value={local.descripcion ?? ""}
+                    onChange={(e) =>
+                      updateBase({ descripcion: e.target.value || undefined })
+                    }
+                    placeholder="Instrucciones para el usuario"
+                  />
+                </div>
 
-            <div className="flex items-center justify-between">
-              <Label htmlFor="campo-requerido">Requerido</Label>
-              <Switch
-                id="campo-requerido"
-                checked={local.requerido}
-                onCheckedChange={(v) => updateBase({ requerido: v })}
-              />
-            </div>
-          </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="campo-requerido">Requerido</Label>
+                  <Switch
+                    id="campo-requerido"
+                    checked={local.requerido ?? false}
+                    onCheckedChange={(v) => updateBase({ requerido: v })}
+                  />
+                </div>
+              </div>
 
-          <Separator />
+              <Separator />
+            </>
+          )}
 
           {/* propiedades especificas por tipo */}
           <div className="space-y-4">
@@ -464,6 +479,58 @@ function TypeSpecificConfig({
             disabled={disabled}
           />
         </div>
+      );
+
+    case "informativo":
+      return (
+        <>
+          <div className="space-y-2">
+            <Label>Estilo del bloque</Label>
+            <Select
+              value={campo.variante}
+              onValueChange={(v) => update({ variante: v })}
+              disabled={disabled}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {variantesInformativo.map((v) => (
+                  <SelectItem key={v} value={v}>
+                    {VARIANTE_LABELS[v]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {campo.variante === "detalle" && (
+            <div className="space-y-2">
+              <Label>Título del desplegable</Label>
+              <Input
+                value={campo.etiqueta ?? ""}
+                onChange={(e) => update({ etiqueta: e.target.value || undefined })}
+                placeholder="Ej: Ver actividades elegibles"
+                disabled={disabled}
+              />
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label>Contenido</Label>
+            <Textarea
+              className="min-h-32"
+              value={campo.contenido}
+              onChange={(e) => update({ contenido: e.target.value })}
+              placeholder="Texto que verá el postulante. Puedes usar HTML sencillo (negrita, listas, tablas)."
+              disabled={disabled}
+              rows={5}
+            />
+            <p className="text-xs text-secondary-500">
+              Este bloque solo muestra información; el postulante no responde nada aquí.
+            </p>
+          </div>
+        </>
       );
 
     default:

@@ -27,7 +27,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { TableSkeleton } from "@/components/shared/loading-skeleton";
 import { convocatoriaQueries } from "@/lib/api/query-keys";
-import { formatMoney, formatShortDate } from "@/lib/format";
+import { formatShortDate } from "@/lib/format";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useAuth } from "@/hooks/use-auth";
 import { ConvocatoriaActions } from "./_components/convocatoria-actions";
@@ -56,13 +56,6 @@ const columns: Column<ConvocatoriaResponse>[] = [
     key: "estado",
     header: "Estado",
     cell: (row) => <StateBadge tipo="convocatoria" valor={row.estado} />,
-  },
-  {
-    key: "monto",
-    header: "Monto",
-    cell: (row) => (
-      <span className="text-secondary-700">{formatMoney(row.monto)}</span>
-    ),
   },
   {
     key: "departamentos",

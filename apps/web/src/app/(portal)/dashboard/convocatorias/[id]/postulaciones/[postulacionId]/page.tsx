@@ -76,10 +76,11 @@ export default function PostulacionDetallePage({ params }: PageProps) {
     postulacionQueries.detail(convocatoriaId, postulacionId),
   );
 
-  // cargar formulario (schema) para interpretar respuestas
-  const { data: formulario, isLoading: isLoadingForm } = useQuery(
-    formularioQueries.detail(convocatoriaId),
-  );
+  // cargar formulario (schema) de la categoria de la postulacion para interpretar respuestas
+  const { data: formulario, isLoading: isLoadingForm } = useQuery({
+    ...formularioQueries.detail(convocatoriaId, postulacion?.categoriaId ?? 0),
+    enabled: !!postulacion?.categoriaId,
+  });
 
   // cargar calificaciones de la convocatoria (para mostrar las de esta postulacion)
   const { data: calificaciones } = useQuery(calificacionQueries.list(convocatoriaId));
@@ -246,6 +247,7 @@ export default function PostulacionDetallePage({ params }: PageProps) {
         <TabsContent value="evaluadores" className="mt-4">
           <EvaluadoresAsignadosTab
             convocatoriaId={convocatoriaId}
+            categoriaId={postulacion.categoriaId}
             postulacionId={postulacionId}
           />
         </TabsContent>

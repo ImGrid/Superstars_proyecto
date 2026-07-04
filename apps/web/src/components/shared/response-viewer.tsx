@@ -3,6 +3,7 @@
 import { memo } from "react";
 import { Download, FileIcon, ExternalLink } from "lucide-react";
 import type { SchemaDefinition, FormField, ArchivoResponse } from "@superstars/shared";
+import { esCampoDeDato } from "@superstars/shared";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -49,31 +50,35 @@ export function ResponseViewer({
         ))}
       </TabsList>
 
-      {schema.secciones.map((sec) => (
-        <TabsContent key={sec.id} value={sec.id} className="pt-4">
-          {sec.descripcion && (
-            <p className="mb-4 text-sm text-secondary-500">{sec.descripcion}</p>
-          )}
-          {sec.campos.length === 0 ? (
-            <p className="text-sm text-secondary-400">Seccion sin campos.</p>
-          ) : (
-            <div className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
-              {sec.campos.map((campo) => (
-                <CampoReadonly
-                  key={campo.id}
-                  campo={campo}
-                  value={responseData[campo.id]}
-                  otraValue={responseData[`${campo.id}__otra`] as string | undefined}
-                  archivos={archivos.filter((a) => a.fieldId === campo.id)}
-                  convocatoriaId={convocatoriaId}
-                  postulacionId={postulacionId}
-                  wide={isWideCampo(campo)}
-                />
-              ))}
-            </div>
-          )}
-        </TabsContent>
-      ))}
+      {schema.secciones.map((sec) => {
+        // los bloques informativos no son respuestas: se omiten del detalle
+        const camposDato = sec.campos.filter(esCampoDeDato);
+        return (
+          <TabsContent key={sec.id} value={sec.id} className="pt-4">
+            {sec.descripcion && (
+              <p className="mb-4 text-sm text-secondary-500">{sec.descripcion}</p>
+            )}
+            {camposDato.length === 0 ? (
+              <p className="text-sm text-secondary-400">Sección sin campos.</p>
+            ) : (
+              <div className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
+                {camposDato.map((campo) => (
+                  <CampoReadonly
+                    key={campo.id}
+                    campo={campo}
+                    value={responseData[campo.id]}
+                    otraValue={responseData[`${campo.id}__otra`] as string | undefined}
+                    archivos={archivos.filter((a) => a.fieldId === campo.id)}
+                    convocatoriaId={convocatoriaId}
+                    postulacionId={postulacionId}
+                    wide={isWideCampo(campo)}
+                  />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        );
+      })}
     </Tabs>
   );
 }

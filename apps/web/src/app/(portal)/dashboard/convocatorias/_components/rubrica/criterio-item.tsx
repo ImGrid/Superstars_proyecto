@@ -51,6 +51,7 @@ type CriterioWithChildren = CriterioResponse & {
 
 interface CriterioItemProps {
   convocatoriaId: number;
+  categoriaId: number;
   criterio: CriterioWithChildren;
   isFirst: boolean;
   isLast: boolean;
@@ -59,6 +60,7 @@ interface CriterioItemProps {
 
 export function CriterioItem({
   convocatoriaId,
+  categoriaId,
   criterio,
   isFirst,
   isLast,
@@ -83,17 +85,17 @@ export function CriterioItem({
   // invalidar queries
   const invalidate = useCallback(() => {
     queryClient.invalidateQueries({
-      queryKey: rubricaQueries.detail(convocatoriaId).queryKey,
+      queryKey: rubricaQueries.detail(convocatoriaId, categoriaId).queryKey,
     });
     queryClient.invalidateQueries({
-      queryKey: rubricaQueries.validacion(convocatoriaId).queryKey,
+      queryKey: rubricaQueries.validacion(convocatoriaId, categoriaId).queryKey,
     });
-  }, [queryClient, convocatoriaId]);
+  }, [queryClient, convocatoriaId, categoriaId]);
 
   // actualizar criterio
   const updateMutation = useMutation({
     mutationFn: (data: { nombre?: string; tipo?: TipoCriterio; pesoPorcentaje?: number; orden?: number }) =>
-      updateCriterio(convocatoriaId, criterio.id, data),
+      updateCriterio(convocatoriaId, categoriaId, criterio.id, data),
     onSuccess: () => {
       toast.success("Criterio actualizado");
       setIsEditing(false);
@@ -108,7 +110,7 @@ export function CriterioItem({
 
   // eliminar criterio
   const deleteMutation = useMutation({
-    mutationFn: () => deleteCriterio(convocatoriaId, criterio.id),
+    mutationFn: () => deleteCriterio(convocatoriaId, categoriaId, criterio.id),
     onSuccess: () => {
       toast.success("Criterio eliminado");
       setDeleteOpen(false);
@@ -124,7 +126,7 @@ export function CriterioItem({
   // reordenar
   const reorderMutation = useMutation({
     mutationFn: (newOrden: number) =>
-      updateCriterio(convocatoriaId, criterio.id, { orden: newOrden }),
+      updateCriterio(convocatoriaId, categoriaId, criterio.id, { orden: newOrden }),
     onSuccess: () => invalidate(),
     onError: () => toast.error("Error al reordenar"),
   });
@@ -311,6 +313,7 @@ export function CriterioItem({
                     <SubCriterioItem
                       key={sc.id}
                       convocatoriaId={convocatoriaId}
+                      categoriaId={categoriaId}
                       subCriterio={sc}
                       isFirst={idx === 0}
                       isLast={idx === criterio.subCriterios.length - 1}
@@ -325,6 +328,7 @@ export function CriterioItem({
               <div className="pt-1">
                 <AddSubCriterioDialog
                   convocatoriaId={convocatoriaId}
+                  categoriaId={categoriaId}
                   criterioId={criterio.id}
                   nextOrden={criterio.subCriterios.length + 1}
                 />

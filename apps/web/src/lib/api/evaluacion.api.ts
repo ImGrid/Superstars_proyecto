@@ -2,7 +2,7 @@ import { apiClient } from "./client";
 import type {
   SaveCalificacionDto,
   DevolverCalificacionDto,
-  EvaluadorConvocatoriaItem,
+  EvaluadorCategoriaItem,
   PostulacionEvaluableItem,
   PostulacionDetalleEvaluador,
   CalificacionListItem,
@@ -12,27 +12,27 @@ import type {
 
 // --- Evaluador ---
 
-// convocatorias donde estoy asignado
-export function listMisConvocatorias() {
+// categorias donde soy jurado (pool nivel 1)
+export function listMisCategorias() {
   return apiClient
-    .get<EvaluadorConvocatoriaItem[]>("/mis-evaluaciones/convocatorias")
+    .get<EvaluadorCategoriaItem[]>("/mis-evaluaciones/categorias")
     .then((r) => r.data);
 }
 
-// postulaciones evaluables de una convocatoria
-export function listPostulacionesEvaluables(convocatoriaId: number) {
+// postulaciones que me asignaron (nivel 2) en una categoria
+export function listPostulacionesEvaluables(categoriaId: number) {
   return apiClient
     .get<PostulacionEvaluableItem[]>(
-      `/mis-evaluaciones/convocatorias/${convocatoriaId}/postulaciones`,
+      `/mis-evaluaciones/categorias/${categoriaId}/postulaciones`,
     )
     .then((r) => r.data);
 }
 
 // detalle de postulacion + mi calificacion
-export function getPostulacionDetalle(convocatoriaId: number, postulacionId: number) {
+export function getPostulacionDetalle(categoriaId: number, postulacionId: number) {
   return apiClient
     .get<PostulacionDetalleEvaluador>(
-      `/mis-evaluaciones/convocatorias/${convocatoriaId}/postulaciones/${postulacionId}`,
+      `/mis-evaluaciones/categorias/${categoriaId}/postulaciones/${postulacionId}`,
     )
     .then((r) => r.data);
 }

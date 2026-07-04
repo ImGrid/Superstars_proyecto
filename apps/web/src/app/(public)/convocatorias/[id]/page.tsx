@@ -201,6 +201,17 @@ export default function ConvocatoriaDetallePage({
     };
   })();
 
+  // rango de premios entre las categorias (para el sidebar)
+  const montos = convocatoria.categorias
+    .map((c) => Number(c.monto))
+    .filter((n) => !Number.isNaN(n));
+  const premioLabel =
+    montos.length === 0
+      ? "—"
+      : Math.min(...montos) === Math.max(...montos)
+        ? formatMoney(String(Math.max(...montos)))
+        : `${formatMoney(String(Math.min(...montos)))} – ${formatMoney(String(Math.max(...montos)))}`;
+
   return (
     <div className="pt-28 pb-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -220,6 +231,7 @@ export default function ConvocatoriaDetallePage({
         <div className="mb-8 lg:hidden">
           <SidebarCard
             convocatoria={convocatoria}
+            premioLabel={premioLabel}
             deptos={deptos}
             deadlineText={deadlineText}
             plazoExtendido={plazoExtendido}
@@ -267,53 +279,74 @@ export default function ConvocatoriaDetallePage({
                   </div>
                 )}
 
-                {/* bases y requisitos */}
-                {convocatoria.bases && (
-                  <div>
-                    <h3 className="mb-3 text-lg font-semibold text-primary-800">
-                      Bases y requisitos
-                    </h3>
-                    <div className="prose prose-lg max-w-none text-secondary-700">
-                      <p className="whitespace-pre-line">{convocatoria.bases}</p>
+                {/* categorias: cada una con su premio, bases y documentos */}
+                {convocatoria.categorias.map((categoria) => (
+                  <div
+                    key={categoria.id}
+                    className="rounded-xl border border-secondary-200 p-6"
+                  >
+                    <div className="mb-3 flex flex-wrap items-center gap-3">
+                      <h3 className="text-lg font-semibold text-primary-800">
+                        {categoria.nombre}
+                      </h3>
+                      <Badge variant="secondary" className="text-sm">
+                        Premio: {formatMoney(categoria.monto)} · {categoria.numeroGanadores} ganadores
+                      </Badge>
                     </div>
-                  </div>
-                )}
 
-                {/* documentos descargables */}
-                {convocatoria.documentos && convocatoria.documentos.length > 0 && (
-                  <div>
-                    <h3 className="mb-3 text-lg font-semibold text-primary-800">
-                      Documentos de la convocatoria
-                    </h3>
-                    <div className="space-y-2">
-                      {convocatoria.documentos.map((doc) => (
-                        <Link
-                          key={doc.id}
-                          href="/auth/login"
-                          className="flex items-center gap-3 rounded-lg border p-4 transition-colors hover:bg-secondary-50"
-                        >
-                          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary-100">
-                            <FileSearch className="size-5 text-primary-700" />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-medium text-secondary-900">
-                              {doc.nombre}
-                            </p>
-                            <p className="text-xs text-secondary-500">
-                              {doc.nombreOriginal} — {formatFileSize(doc.tamanoBytes)}
-                            </p>
-                          </div>
-                          <span className="shrink-0 rounded-md bg-orange-600 px-3 py-1.5 text-xs font-medium text-white">
-                            Descargar
-                          </span>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                    {categoria.descripcion && (
+                      <p className="mb-4 whitespace-pre-line text-secondary-700">
+                        {categoria.descripcion}
+                      </p>
+                    )}
 
-                {/* sin descripcion ni bases */}
-                {!convocatoria.descripcion && !convocatoria.bases && (!convocatoria.documentos || convocatoria.documentos.length === 0) && (
+                    {categoria.bases && (
+                      <div className="mb-4">
+                        <h4 className="mb-2 font-semibold text-primary-800">
+                          Bases y requisitos
+                        </h4>
+                        <div className="prose max-w-none text-secondary-700">
+                          <p className="whitespace-pre-line">{categoria.bases}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {categoria.documentos.length > 0 && (
+                      <div>
+                        <h4 className="mb-2 font-semibold text-primary-800">
+                          Documentos
+                        </h4>
+                        <div className="space-y-2">
+                          {categoria.documentos.map((doc) => (
+                            <Link
+                              key={doc.id}
+                              href="/auth/login"
+                              className="flex items-center gap-3 rounded-lg border p-4 transition-colors hover:bg-secondary-50"
+                            >
+                              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary-100">
+                                <FileSearch className="size-5 text-primary-700" />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className="text-sm font-medium text-secondary-900">
+                                  {doc.nombre}
+                                </p>
+                                <p className="text-xs text-secondary-500">
+                                  {doc.nombreOriginal} — {formatFileSize(doc.tamanoBytes)}
+                                </p>
+                              </div>
+                              <span className="shrink-0 rounded-md bg-orange-600 px-3 py-1.5 text-xs font-medium text-white">
+                                Descargar
+                              </span>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                {/* sin descripcion ni categorias */}
+                {!convocatoria.descripcion && convocatoria.categorias.length === 0 && (
                   <p className="text-secondary-500">
                     La información de esta convocatoria aún no ha sido publicada.
                   </p>
@@ -350,6 +383,7 @@ export default function ConvocatoriaDetallePage({
             <div className="sticky top-24">
               <SidebarCard
                 convocatoria={convocatoria}
+                premioLabel={premioLabel}
                 deptos={deptos}
                 deadlineText={deadlineText}
                 plazoExtendido={plazoExtendido}
@@ -365,11 +399,13 @@ export default function ConvocatoriaDetallePage({
 // card lateral con info clave y CTA
 function SidebarCard({
   convocatoria,
+  premioLabel,
   deptos,
   deadlineText,
   plazoExtendido,
 }: {
-  convocatoria: { estado: string; monto: string; fechaCierrePostulacion: string };
+  convocatoria: { estado: string };
+  premioLabel: string;
   deptos: string[];
   deadlineText: { text: string; className: string };
   plazoExtendido: boolean;
@@ -400,12 +436,10 @@ function SidebarCard({
 
         <Separator />
 
-        {/* monto */}
+        {/* premio */}
         <div className="flex items-center justify-between">
-          <span className="text-sm text-secondary-500">Monto</span>
-          <span className="font-bold text-orange-600">
-            {formatMoney(convocatoria.monto)}
-          </span>
+          <span className="text-sm text-secondary-500">Premio</span>
+          <span className="font-bold text-orange-600">{premioLabel}</span>
         </div>
 
         <Separator />

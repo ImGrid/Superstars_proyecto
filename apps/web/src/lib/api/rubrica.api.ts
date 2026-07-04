@@ -16,57 +16,75 @@ import type {
   RubricaValidacionResponse,
 } from "@superstars/shared";
 
-// --- Rubrica (1:1 con convocatoria) ---
+// La rubrica es 1:1 con la categoria (ruta anidada bajo la convocatoria).
+const base = (convocatoriaId: number, categoriaId: number) =>
+  `/convocatorias/${convocatoriaId}/categorias/${categoriaId}/rubrica`;
 
-export function getRubrica(convocatoriaId: number) {
+// --- Rubrica (1:1 con categoria) ---
+
+export function getRubrica(convocatoriaId: number, categoriaId: number) {
   return apiClient
-    .get<RubricaFullResponse>(`/convocatorias/${convocatoriaId}/rubrica`)
+    .get<RubricaFullResponse>(base(convocatoriaId, categoriaId))
     .then((r) => r.data);
 }
 
-export function createRubrica(convocatoriaId: number, dto: CreateRubricaDto) {
+export function createRubrica(
+  convocatoriaId: number,
+  categoriaId: number,
+  dto: CreateRubricaDto,
+) {
   return apiClient
-    .post<RubricaResponse>(`/convocatorias/${convocatoriaId}/rubrica`, dto)
+    .post<RubricaResponse>(base(convocatoriaId, categoriaId), dto)
     .then((r) => r.data);
 }
 
-export function updateRubrica(convocatoriaId: number, dto: UpdateRubricaDto) {
+export function updateRubrica(
+  convocatoriaId: number,
+  categoriaId: number,
+  dto: UpdateRubricaDto,
+) {
   return apiClient
-    .put<RubricaResponse>(`/convocatorias/${convocatoriaId}/rubrica`, dto)
+    .put<RubricaResponse>(base(convocatoriaId, categoriaId), dto)
     .then((r) => r.data);
 }
 
-export function deleteRubrica(convocatoriaId: number) {
-  return apiClient.delete(`/convocatorias/${convocatoriaId}/rubrica`);
+export function deleteRubrica(convocatoriaId: number, categoriaId: number) {
+  return apiClient.delete(base(convocatoriaId, categoriaId));
 }
 
 // --- Criterios ---
 
-export function createCriterio(convocatoriaId: number, dto: CreateCriterioDto) {
+export function createCriterio(
+  convocatoriaId: number,
+  categoriaId: number,
+  dto: CreateCriterioDto,
+) {
   return apiClient
-    .post<CriterioResponse>(
-      `/convocatorias/${convocatoriaId}/rubrica/criterios`,
-      dto,
-    )
+    .post<CriterioResponse>(`${base(convocatoriaId, categoriaId)}/criterios`, dto)
     .then((r) => r.data);
 }
 
 export function updateCriterio(
   convocatoriaId: number,
+  categoriaId: number,
   criterioId: number,
   dto: UpdateCriterioDto,
 ) {
   return apiClient
     .put<CriterioResponse>(
-      `/convocatorias/${convocatoriaId}/rubrica/criterios/${criterioId}`,
+      `${base(convocatoriaId, categoriaId)}/criterios/${criterioId}`,
       dto,
     )
     .then((r) => r.data);
 }
 
-export function deleteCriterio(convocatoriaId: number, criterioId: number) {
+export function deleteCriterio(
+  convocatoriaId: number,
+  categoriaId: number,
+  criterioId: number,
+) {
   return apiClient.delete(
-    `/convocatorias/${convocatoriaId}/rubrica/criterios/${criterioId}`,
+    `${base(convocatoriaId, categoriaId)}/criterios/${criterioId}`,
   );
 }
 
@@ -74,11 +92,12 @@ export function deleteCriterio(convocatoriaId: number, criterioId: number) {
 
 export function createSubCriterio(
   convocatoriaId: number,
+  categoriaId: number,
   dto: CreateSubCriterioConNivelesDto,
 ) {
   return apiClient
     .post<SubCriterioConNivelesResponse>(
-      `/convocatorias/${convocatoriaId}/rubrica/sub-criterios`,
+      `${base(convocatoriaId, categoriaId)}/sub-criterios`,
       dto,
     )
     .then((r) => r.data);
@@ -86,12 +105,13 @@ export function createSubCriterio(
 
 export function updateSubCriterio(
   convocatoriaId: number,
+  categoriaId: number,
   subCriterioId: number,
   dto: UpdateSubCriterioDto,
 ) {
   return apiClient
     .put<SubCriterioResponse>(
-      `/convocatorias/${convocatoriaId}/rubrica/sub-criterios/${subCriterioId}`,
+      `${base(convocatoriaId, categoriaId)}/sub-criterios/${subCriterioId}`,
       dto,
     )
     .then((r) => r.data);
@@ -99,10 +119,11 @@ export function updateSubCriterio(
 
 export function deleteSubCriterio(
   convocatoriaId: number,
+  categoriaId: number,
   subCriterioId: number,
 ) {
   return apiClient.delete(
-    `/convocatorias/${convocatoriaId}/rubrica/sub-criterios/${subCriterioId}`,
+    `${base(convocatoriaId, categoriaId)}/sub-criterios/${subCriterioId}`,
   );
 }
 
@@ -110,29 +131,34 @@ export function deleteSubCriterio(
 
 export function updateNivel(
   convocatoriaId: number,
+  categoriaId: number,
   nivelId: number,
   dto: UpdateNivelEvaluacionDto,
 ) {
   return apiClient
     .put<NivelEvaluacionResponse>(
-      `/convocatorias/${convocatoriaId}/rubrica/niveles/${nivelId}`,
+      `${base(convocatoriaId, categoriaId)}/niveles/${nivelId}`,
       dto,
     )
     .then((r) => r.data);
 }
 
-export function deleteNivel(convocatoriaId: number, nivelId: number) {
+export function deleteNivel(
+  convocatoriaId: number,
+  categoriaId: number,
+  nivelId: number,
+) {
   return apiClient.delete(
-    `/convocatorias/${convocatoriaId}/rubrica/niveles/${nivelId}`,
+    `${base(convocatoriaId, categoriaId)}/niveles/${nivelId}`,
   );
 }
 
 // --- Validacion ---
 
-export function validarRubrica(convocatoriaId: number) {
+export function validarRubrica(convocatoriaId: number, categoriaId: number) {
   return apiClient
     .get<RubricaValidacionResponse>(
-      `/convocatorias/${convocatoriaId}/rubrica/validar`,
+      `${base(convocatoriaId, categoriaId)}/validar`,
     )
     .then((r) => r.data);
 }

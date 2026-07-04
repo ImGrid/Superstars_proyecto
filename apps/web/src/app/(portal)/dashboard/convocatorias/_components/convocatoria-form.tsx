@@ -49,37 +49,28 @@ const DEPARTAMENTOS_BOLIVIA = [
   "Tarija",
 ];
 
-// schema local para el formulario (monto como number, fechas como string date)
-// replica createConvocatoriaSchema pero sin el .refine() para usar con react-hook-form
-// la validacion cross-campo se hace manualmente en onSubmit
+// schema local para el formulario (fechas como string date). El premio, los ganadores
+// y las bases ya no viven en la convocatoria: se configuran por categoria.
+// la validacion cross-campo de fechas se hace manualmente en onSubmit
 const convocatoriaFormSchema = z.object({
   nombre: z.string().min(1, "El nombre es obligatorio"),
   descripcion: z.string().optional(),
-  bases: z.string().optional(),
   fechaInicioPostulacion: z.string().min(1, "La fecha de inicio es obligatoria"),
   fechaCierrePostulacion: z.string().min(1, "La fecha de cierre es obligatoria"),
   fechaAnuncioGanadores: z.string().optional(),
-  monto: z.number({ invalid_type_error: "Ingresa un monto válido" }).positive("El monto debe ser mayor a 0"),
-  numeroGanadores: z.number().int().positive().default(3),
-  topNSistema: z.number().int().positive().default(5),
   departamentos: z.array(z.string()).min(1, "Selecciona al menos un departamento"),
 });
 
 type ConvocatoriaFormValues = z.infer<typeof convocatoriaFormSchema>;
 
 // transforma ConvocatoriaResponse a valores del formulario
-// monto viene como string del backend (Drizzle numeric), lo convertimos a number
 function convocatoriaToFormValues(c: ConvocatoriaResponse): ConvocatoriaFormValues {
   return {
     nombre: c.nombre,
     descripcion: c.descripcion ?? undefined,
-    bases: c.bases ?? undefined,
     fechaInicioPostulacion: c.fechaInicioPostulacion,
     fechaCierrePostulacion: c.fechaCierrePostulacion,
     fechaAnuncioGanadores: c.fechaAnuncioGanadores ?? undefined,
-    monto: parseFloat(c.monto),
-    numeroGanadores: c.numeroGanadores,
-    topNSistema: c.topNSistema,
     departamentos: c.departamentos,
   };
 }
@@ -97,9 +88,11 @@ export function ConvocatoriaForm({ initialData }: ConvocatoriaFormProps) {
     resolver: zodResolver(convocatoriaFormSchema),
     defaultValues: {
       nombre: "",
+      descripcion: "",
+      fechaInicioPostulacion: "",
+      fechaCierrePostulacion: "",
+      fechaAnuncioGanadores: "",
       departamentos: [],
-      numeroGanadores: 3,
-      topNSistema: 5,
     },
   });
 
@@ -153,13 +146,9 @@ export function ConvocatoriaForm({ initialData }: ConvocatoriaFormProps) {
     const dto: CreateConvocatoriaDto = {
       nombre: values.nombre,
       descripcion: values.descripcion || undefined,
-      bases: values.bases || undefined,
       fechaInicioPostulacion: values.fechaInicioPostulacion,
       fechaCierrePostulacion: values.fechaCierrePostulacion,
       fechaAnuncioGanadores: values.fechaAnuncioGanadores || undefined,
-      monto: values.monto,
-      numeroGanadores: values.numeroGanadores,
-      topNSistema: values.topNSistema,
       departamentos: values.departamentos,
     };
 
@@ -183,9 +172,9 @@ export function ConvocatoriaForm({ initialData }: ConvocatoriaFormProps) {
               className="mt-0.5 size-5 shrink-0 text-primary-600"
             />
             <p>
-              Después de crear la convocatoria podrás subir su imagen de portada
-              desde la página de detalles. Es opcional y se puede agregar o cambiar
-              en cualquier momento.
+              Al crear la convocatoria se generan automáticamente sus categorías,
+              cada una con su propio premio, formulario, rúbrica y bases (editables
+              desde el detalle). También podrás subir la imagen de portada desde ahí.
             </p>
           </div>
         )}
@@ -195,7 +184,7 @@ export function ConvocatoriaForm({ initialData }: ConvocatoriaFormProps) {
           <CardHeader>
             <CardTitle>Información básica</CardTitle>
             <CardDescription>
-              Nombre, descripción y bases de la convocatoria.
+              Nombre y descripción de la convocatoria.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -222,24 +211,6 @@ export function ConvocatoriaForm({ initialData }: ConvocatoriaFormProps) {
                     <Textarea
                       placeholder="Describe brevemente la convocatoria"
                       rows={3}
-                      {...field}
-                      value={field.value ?? ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="bases"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Bases de la convocatoria</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Requisitos, criterios de elegibilidad y reglas"
-                      rows={4}
                       {...field}
                       value={field.value ?? ""}
                     />
@@ -302,89 +273,7 @@ export function ConvocatoriaForm({ initialData }: ConvocatoriaFormProps) {
           </CardContent>
         </Card>
 
-        {/* seccion 3: monto y configuracion */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Configuración</CardTitle>
-            <CardDescription>
-              Monto asignado, cantidad de ganadores y configuración del sistema.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4 sm:grid-cols-3">
-            <FormField
-              control={form.control}
-              name="monto"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Monto asignado (Bs.) *</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min={0}
-                      step="0.01"
-                      placeholder="Ej: 50000"
-                      {...field}
-                      value={field.value ?? ""}
-                      onChange={(e) => {
-                        const v = e.target.value;
-                        field.onChange(v === "" ? undefined : Number(v));
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="numeroGanadores"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Número de ganadores</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min={1}
-                      placeholder="3"
-                      {...field}
-                      value={field.value ?? ""}
-                      onChange={(e) => {
-                        const v = e.target.value;
-                        field.onChange(v === "" ? undefined : Number(v));
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="topNSistema"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Top N del sistema</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min={1}
-                      placeholder="5"
-                      {...field}
-                      value={field.value ?? ""}
-                      onChange={(e) => {
-                        const v = e.target.value;
-                        field.onChange(v === "" ? undefined : Number(v));
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-        </Card>
-
-        {/* seccion 4: departamentos */}
+        {/* seccion 3: departamentos */}
         <Card>
           <CardHeader>
             <CardTitle>Departamentos *</CardTitle>

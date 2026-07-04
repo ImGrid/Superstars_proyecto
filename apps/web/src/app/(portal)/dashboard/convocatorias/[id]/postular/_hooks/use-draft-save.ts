@@ -49,13 +49,17 @@ function cleanResponseData(
 // hook para guardar borrador de la postulacion
 export function useDraftSave(
   convocatoriaId: number,
+  categoriaId: number,
   form: UseFormReturn<Record<string, unknown>>,
 ) {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
     mutationFn: (responseData: Record<string, unknown>) =>
-      saveDraft(convocatoriaId, { responseData: cleanResponseData(responseData) }),
+      saveDraft(convocatoriaId, {
+        categoriaId,
+        responseData: cleanResponseData(responseData),
+      }),
     onSuccess: (postulacionGuardada: PostulacionResponse) => {
       // limpiar errores del servidor cuando el guardado es exitoso
       form.clearErrors();

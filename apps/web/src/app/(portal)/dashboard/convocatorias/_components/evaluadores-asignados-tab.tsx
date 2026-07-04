@@ -39,7 +39,7 @@ import {
 } from "@/lib/api/evaluacion.api";
 import {
   asignacionQueries,
-  convocatoriaQueries,
+  categoriaQueries,
   calificacionQueries,
 } from "@/lib/api/query-keys";
 import { formatDate } from "@/lib/format";
@@ -47,11 +47,13 @@ import type { CalificacionListItem } from "@superstars/shared";
 
 interface EvaluadoresAsignadosTabProps {
   convocatoriaId: number;
+  categoriaId: number;
   postulacionId: number;
 }
 
 export function EvaluadoresAsignadosTab({
   convocatoriaId,
+  categoriaId,
   postulacionId,
 }: EvaluadoresAsignadosTabProps) {
   const queryClient = useQueryClient();
@@ -61,9 +63,9 @@ export function EvaluadoresAsignadosTab({
     asignacionQueries.list(convocatoriaId, postulacionId),
   );
 
-  // pool de evaluadores de la convocatoria (para el selector)
+  // pool de evaluadores de la categoria (para el selector)
   const { data: poolEvaluadores } = useQuery(
-    convocatoriaQueries.evaluadores(convocatoriaId),
+    categoriaQueries.evaluadores(convocatoriaId, categoriaId),
   );
 
   // calificaciones de la convocatoria para mostrar estado por evaluador
@@ -158,7 +160,7 @@ export function EvaluadoresAsignadosTab({
           Evaluadores asignados ({totalAsignados} de {totalPool})
         </CardTitle>
         <CardDescription>
-          Selecciona que evaluadores de la convocatoria calificaran esta postulacion.
+          Selecciona qué evaluadores de la categoría calificarán esta postulación.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -166,13 +168,13 @@ export function EvaluadoresAsignadosTab({
         <div className="flex gap-2">
           <Select value={selectedUserId} onValueChange={setSelectedUserId}>
             <SelectTrigger className="flex-1">
-              <SelectValue placeholder="Seleccionar evaluador de la convocatoria..." />
+              <SelectValue placeholder="Seleccionar evaluador de la categoría..." />
             </SelectTrigger>
             <SelectContent>
               {disponibles.length === 0 ? (
                 <SelectItem value="_empty" disabled>
                   {totalPool === 0
-                    ? "No hay evaluadores en la convocatoria"
+                    ? "No hay evaluadores asignados a esta categoría"
                     : "Todos los evaluadores ya están asignados"}
                 </SelectItem>
               ) : (
@@ -202,7 +204,7 @@ export function EvaluadoresAsignadosTab({
           <EmptyState
             icon="ph:user-check-duotone"
             title="Sin evaluadores asignados"
-            description="Asigna evaluadores de la convocatoria para que califiquen esta postulación."
+            description="Asigna evaluadores de la categoría para que califiquen esta postulación."
           />
         ) : (
           <div className="rounded-md border">

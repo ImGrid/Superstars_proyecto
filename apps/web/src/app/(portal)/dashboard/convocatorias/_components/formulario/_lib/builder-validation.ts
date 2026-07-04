@@ -1,4 +1,5 @@
 import type { SchemaDefinition } from "@superstars/shared";
+import { esCampoDeDato } from "@superstars/shared";
 
 export interface BuilderWarning {
   itemId: string;
@@ -36,19 +37,25 @@ export function validateSchema(schema: SchemaDefinition): BuilderWarning[] {
       }
       allFieldIds.add(campo.id);
 
-      // campo sin etiqueta
-      if (!campo.etiqueta.trim()) {
+      // campo de dato sin etiqueta (los informativos no llevan etiqueta)
+      if (esCampoDeDato(campo) && !campo.etiqueta?.trim()) {
         warnings.push({ itemId: campo.id, message: "El campo no tiene etiqueta", severity: "error" });
       }
 
-      // seleccion con < 2 opciones
-      if (
-        (campo.tipo === "seleccion_unica" || campo.tipo === "seleccion_multiple") &&
-        campo.opciones.length < 2
-      ) {
+      // seleccion unica necesita al menos 2 opciones (un radio de 1 no aplica)
+      if (campo.tipo === "seleccion_unica" && campo.opciones.length < 2) {
         warnings.push({
           itemId: campo.id,
           message: "La selección necesita al menos 2 opciones",
+          severity: "error",
+        });
+      }
+
+      // seleccion multiple necesita al menos 1 opcion
+      if (campo.tipo === "seleccion_multiple" && campo.opciones.length < 1) {
+        warnings.push({
+          itemId: campo.id,
+          message: "La selección necesita al menos 1 opción",
           severity: "error",
         });
       }

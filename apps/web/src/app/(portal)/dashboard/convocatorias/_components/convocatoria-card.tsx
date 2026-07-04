@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Calendar, MapPin, DollarSign, Clock, ArrowRight } from "lucide-react";
+import { Calendar, MapPin, Clock, ArrowRight } from "lucide-react";
 import { isConvocatoriaAbierta } from "@superstars/shared";
 import type { ConvocatoriaResponse } from "@superstars/shared";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { StateBadge } from "@/components/shared/state-badge";
-import { formatMoney, formatDate, getDiasRestantes } from "@/lib/format";
+import { formatDate, getDiasRestantes } from "@/lib/format";
 
 interface ConvocatoriaCardProps {
   convocatoria: ConvocatoriaResponse;
@@ -73,17 +73,6 @@ export function ConvocatoriaCard({ convocatoria }: ConvocatoriaCardProps) {
       </CardHeader>
 
       <CardContent className="flex-1 space-y-3">
-        {/* monto */}
-        <div className="flex items-center gap-2">
-          <DollarSign className="size-4 text-primary-600 shrink-0" />
-          <span className="text-lg font-bold text-primary-700">
-            {formatMoney(convocatoria.monto)}
-          </span>
-          <span className="text-xs text-secondary-400">
-            ({convocatoria.numeroGanadores} ganador{convocatoria.numeroGanadores !== 1 && "es"})
-          </span>
-        </div>
-
         {/* fechas */}
         <div className="flex items-center gap-2 text-sm text-secondary-600">
           <Calendar className="size-4 shrink-0 text-secondary-400" />

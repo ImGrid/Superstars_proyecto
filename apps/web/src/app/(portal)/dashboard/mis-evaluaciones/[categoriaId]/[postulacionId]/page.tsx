@@ -37,35 +37,41 @@ import {
 import { saveCalificacion, completarCalificacion } from "@/lib/api/evaluacion.api";
 
 interface PageProps {
-  params: Promise<{ convocatoriaId: string; postulacionId: string }>;
+  params: Promise<{ categoriaId: string; postulacionId: string }>;
 }
 
 export default function CalificacionPage({ params }: PageProps) {
-  const { convocatoriaId: cId, postulacionId: pId } = use(params);
-  const convocatoriaId = Number(cId);
+  const { categoriaId: catId, postulacionId: pId } = use(params);
+  const categoriaId = Number(catId);
   const postulacionId = Number(pId);
   const router = useRouter();
   const queryClient = useQueryClient();
 
   // cargar detalle de postulacion + calificacion existente
   const { data: detalleData, isLoading: isLoadingDetalle } = useQuery(
-    evaluacionQueries.detalle(convocatoriaId, postulacionId),
+    evaluacionQueries.detalle(categoriaId, postulacionId),
   );
 
-  // cargar rubrica completa
-  const { data: rubrica, isLoading: isLoadingRubrica } = useQuery(
-    rubricaQueries.detail(convocatoriaId),
-  );
+  // la convocatoria de la postulacion (para cargar rubrica/formulario por la ruta anidada)
+  const convocatoriaId = detalleData?.postulacion?.convocatoriaId;
+
+  // cargar rubrica completa de la categoria
+  const { data: rubrica, isLoading: isLoadingRubrica } = useQuery({
+    ...rubricaQueries.detail(convocatoriaId ?? 0, categoriaId),
+    enabled: !!convocatoriaId,
+  });
 
   // cargar formulario (schema) para interpretar las respuestas
-  const { data: formulario, isLoading: isLoadingForm } = useQuery(
-    formularioQueries.detail(convocatoriaId),
-  );
+  const { data: formulario, isLoading: isLoadingForm } = useQuery({
+    ...formularioQueries.detail(convocatoriaId ?? 0, categoriaId),
+    enabled: !!convocatoriaId,
+  });
 
   // cargar archivos de la postulacion
-  const { data: archivos, isLoading: isLoadingArchivos } = useQuery(
-    archivoQueries.list(convocatoriaId, postulacionId),
-  );
+  const { data: archivos, isLoading: isLoadingArchivos } = useQuery({
+    ...archivoQueries.list(convocatoriaId ?? 0, postulacionId),
+    enabled: !!convocatoriaId,
+  });
 
   // estado local de puntajes y justificaciones
   const [puntajes, setPuntajes] = useState<Record<number, string>>({});
@@ -120,7 +126,7 @@ export default function CalificacionPage({ params }: PageProps) {
     onSuccess: () => {
       toast.success("Calificación enviada para revisión");
       queryClient.invalidateQueries({ queryKey: evaluacionQueries.all() });
-      router.push(`/dashboard/mis-evaluaciones/${convocatoriaId}`);
+      router.push(`/dashboard/mis-evaluaciones/${categoriaId}`);
     },
     onError: (err: any) => {
       toast.error(err.response?.data?.message ?? "Error al completar");
@@ -165,7 +171,7 @@ export default function CalificacionPage({ params }: PageProps) {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => router.push(`/dashboard/mis-evaluaciones/${convocatoriaId}`)}
+          onClick={() => router.push(`/dashboard/mis-evaluaciones/${categoriaId}`)}
         >
           <ArrowLeft className="size-4" />
         </Button>
@@ -269,7 +275,7 @@ export default function CalificacionPage({ params }: PageProps) {
                   Propuesta del postulante
                 </h2>
               </div>
-              {formulario ? (
+              {formulario && convocatoriaId ? (
                 <ResponseViewer
                   schema={formulario.schemaDefinition}
                   responseData={detalleData.postulacion.responseData}
@@ -279,7 +285,7 @@ export default function CalificacionPage({ params }: PageProps) {
                 />
               ) : (
                 <p className="text-sm text-secondary-400">
-                  No se encontró el formulario de la convocatoria.
+                  No se encontró el formulario de la categoría.
                 </p>
               )}
             </div>

@@ -5,30 +5,36 @@ import type {
   FormularioResponse,
 } from "@superstars/shared";
 
-export function getFormulario(convocatoriaId: number) {
+// El formulario es 1:1 con la categoria (ruta anidada bajo la convocatoria).
+const base = (convocatoriaId: number, categoriaId: number) =>
+  `/convocatorias/${convocatoriaId}/categorias/${categoriaId}/formulario`;
+
+export function getFormulario(convocatoriaId: number, categoriaId: number) {
   return apiClient
-    .get<FormularioResponse>(`/convocatorias/${convocatoriaId}/formulario`)
+    .get<FormularioResponse>(base(convocatoriaId, categoriaId))
     .then((r) => r.data);
 }
 
 export function createFormulario(
   convocatoriaId: number,
+  categoriaId: number,
   dto: CreateFormularioDto,
 ) {
   return apiClient
-    .post<FormularioResponse>(`/convocatorias/${convocatoriaId}/formulario`, dto)
+    .post<FormularioResponse>(base(convocatoriaId, categoriaId), dto)
     .then((r) => r.data);
 }
 
 export function updateFormulario(
   convocatoriaId: number,
+  categoriaId: number,
   dto: UpdateFormularioDto,
 ) {
   return apiClient
-    .put<FormularioResponse>(`/convocatorias/${convocatoriaId}/formulario`, dto)
+    .put<FormularioResponse>(base(convocatoriaId, categoriaId), dto)
     .then((r) => r.data);
 }
 
-export function deleteFormulario(convocatoriaId: number) {
-  return apiClient.delete(`/convocatorias/${convocatoriaId}/formulario`);
+export function deleteFormulario(convocatoriaId: number, categoriaId: number) {
+  return apiClient.delete(base(convocatoriaId, categoriaId));
 }

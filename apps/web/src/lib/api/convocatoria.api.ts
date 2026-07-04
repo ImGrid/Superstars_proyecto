@@ -6,14 +6,12 @@ import type {
   UpdateFechasConvocatoriaDto,
   ListConvocatoriasQueryDto,
   AssignResponsableDto,
-  AssignEvaluadorDto,
   SeleccionarGanadoresDto,
   ConvocatoriaResponse,
   ResponsableResponse,
-  EvaluadorConvocatoriaResponse,
   CanPublicarResponse,
   ConvocatoriaResultadosResumenItem,
-  ConvocatoriaRankingResponse,
+  CategoriaRankingResponse,
 } from "@superstars/shared";
 
 // --- CRUD ---
@@ -78,10 +76,18 @@ export function iniciarEvaluacion(id: number) {
     .then((r) => r.data);
 }
 
-// Seleccionar ganadores (en_evaluacion -> resultados_listos)
-export function seleccionarGanadores(id: number, dto: SeleccionarGanadoresDto) {
+// Seleccionar ganadores de una categoria (la convocatoria avanza a resultados_listos
+// cuando TODAS sus categorias quedan resueltas)
+export function seleccionarGanadores(
+  convocatoriaId: number,
+  categoriaId: number,
+  dto: SeleccionarGanadoresDto,
+) {
   return apiClient
-    .post<ConvocatoriaResponse>(`/convocatorias/${id}/seleccionar-ganadores`, dto)
+    .post<ConvocatoriaResponse>(
+      `/convocatorias/${convocatoriaId}/categorias/${categoriaId}/seleccionar-ganadores`,
+      dto,
+    )
     .then((r) => r.data);
 }
 
@@ -119,25 +125,7 @@ export function removeResponsable(convocatoriaId: number, userId: number) {
   );
 }
 
-// --- Evaluadores ---
-
-export function listEvaluadores(convocatoriaId: number) {
-  return apiClient
-    .get<EvaluadorConvocatoriaResponse[]>(`/convocatorias/${convocatoriaId}/evaluadores`)
-    .then((r) => r.data);
-}
-
-export function addEvaluador(convocatoriaId: number, dto: AssignEvaluadorDto) {
-  return apiClient
-    .post(`/convocatorias/${convocatoriaId}/evaluadores`, dto)
-    .then((r) => r.data);
-}
-
-export function removeEvaluador(convocatoriaId: number, evaluadorId: number) {
-  return apiClient.delete(
-    `/convocatorias/${convocatoriaId}/evaluadores/${evaluadorId}`,
-  );
-}
+// Nota: el pool de evaluadores (nivel 1) se gestiona por categoria (ver categoria.api.ts).
 
 // --- Resultados ---
 
@@ -147,9 +135,11 @@ export function getResumenResultados() {
     .then((r) => r.data);
 }
 
-export function getRankingConvocatoria(id: number) {
+export function getRankingCategoria(convocatoriaId: number, categoriaId: number) {
   return apiClient
-    .get<ConvocatoriaRankingResponse>(`/convocatorias/${id}/ranking`)
+    .get<CategoriaRankingResponse>(
+      `/convocatorias/${convocatoriaId}/categorias/${categoriaId}/ranking`,
+    )
     .then((r) => r.data);
 }
 

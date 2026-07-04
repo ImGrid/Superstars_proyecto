@@ -1,37 +1,74 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Info } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Info, Pencil, Check, X, Loader2 } from "lucide-react";
 import { Icon } from "@iconify/react";
 import type { RubricaFullResponse } from "@superstars/shared";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { rubricaQueries } from "@/lib/api/query-keys";
+import { updateRubrica } from "@/lib/api/rubrica.api";
 import { PesoProgress } from "./peso-progress";
 import { CriterioItem } from "./criterio-item";
 import { AddCriterioDialog } from "./add-criterio-dialog";
 
 interface RubricaBuilderProps {
   convocatoriaId: number;
+  categoriaId: number;
   rubrica: RubricaFullResponse;
   canEdit: boolean;
 }
 
 export function RubricaBuilder({
   convocatoriaId,
+  categoriaId,
   rubrica,
   canEdit,
 }: RubricaBuilderProps) {
   const [addCriterioOpen, setAddCriterioOpen] = useState(false);
+  const queryClient = useQueryClient();
+
+  // edicion inline del nombre de la rubrica
+  const [isEditingNombre, setIsEditingNombre] = useState(false);
+  const [editNombre, setEditNombre] = useState(rubrica.nombre);
+
+  const renameMutation = useMutation({
+    mutationFn: (nombre: string) =>
+      updateRubrica(convocatoriaId, categoriaId, { nombre }),
+    onSuccess: () => {
+      toast.success("Rúbrica renombrada");
+      queryClient.invalidateQueries({
+        queryKey: rubricaQueries.detail(convocatoriaId, categoriaId).queryKey,
+      });
+      setIsEditingNombre(false);
+    },
+    onError: (error: any) => {
+      const msg =
+        error.response?.data?.message ?? "Error al renombrar la rúbrica";
+      toast.error(Array.isArray(msg) ? msg[0] : msg);
+    },
+  });
+
+  function guardarNombre() {
+    const nombre = editNombre.trim();
+    if (!nombre || nombre === rubrica.nombre) {
+      setIsEditingNombre(false);
+      return;
+    }
+    renameMutation.mutate(nombre);
+  }
 
   // validacion server-side
   const { data: validacion } = useQuery({
-    ...rubricaQueries.validacion(convocatoriaId),
+    ...rubricaQueries.validacion(convocatoriaId, categoriaId),
     refetchOnWindowFocus: true,
   });
 
@@ -53,9 +90,60 @@ export function RubricaBuilder({
       {/* toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-lg border border-secondary-200 bg-white p-4">
         <div className="space-y-1">
-          <h3 className="text-sm font-semibold text-secondary-900">
-            {rubrica.nombre}
-          </h3>
+          {isEditingNombre ? (
+            <div className="flex items-center gap-1">
+              <Input
+                value={editNombre}
+                onChange={(e) => setEditNombre(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") guardarNombre();
+                  if (e.key === "Escape") setIsEditingNombre(false);
+                }}
+                className="h-8 w-64 text-sm font-semibold"
+                autoFocus
+              />
+              <Button
+                size="icon"
+                variant="ghost"
+                className="size-7"
+                onClick={guardarNombre}
+                disabled={renameMutation.isPending}
+              >
+                {renameMutation.isPending ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Check className="size-4" />
+                )}
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="size-7"
+                onClick={() => setIsEditingNombre(false)}
+              >
+                <X className="size-4" />
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1">
+              <h3 className="text-sm font-semibold text-secondary-900">
+                {rubrica.nombre}
+              </h3>
+              {canEdit && (
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="size-6"
+                  onClick={() => {
+                    setEditNombre(rubrica.nombre);
+                    setIsEditingNombre(true);
+                  }}
+                >
+                  <Pencil className="size-3.5 text-secondary-400" />
+                </Button>
+              )}
+            </div>
+          )}
           <p className="text-xs text-secondary-500">
             {criteriosCount} {criteriosCount === 1 ? "criterio" : "criterios"},{" "}
             {subCriteriosCount}{" "}
@@ -128,6 +216,7 @@ export function RubricaBuilder({
               <CriterioItem
                 key={criterio.id}
                 convocatoriaId={convocatoriaId}
+                categoriaId={categoriaId}
                 criterio={criterio}
                 isFirst={idx === 0}
                 isLast={idx === rubrica.criterios.length - 1}
@@ -141,6 +230,7 @@ export function RubricaBuilder({
       {canEdit && (
         <AddCriterioDialog
           convocatoriaId={convocatoriaId}
+          categoriaId={categoriaId}
           nextOrden={rubrica.criterios.length + 1}
           open={addCriterioOpen}
           onOpenChange={setAddCriterioOpen}
