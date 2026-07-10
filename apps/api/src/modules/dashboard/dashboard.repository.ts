@@ -122,6 +122,81 @@ export class DashboardRepository {
     };
   }
 
+  // cobertura nacional: empresas agrupadas por departamento (slug canonico).
+  // Omite empresas sin departamento declarado (decision de producto: a veces no lo cargan).
+  async getAdminCoberturaNacional() {
+    return this.db
+      .select({
+        departamento: empresa.departamento,
+        total: count(),
+      })
+      .from(empresa)
+      .where(and(sql`${empresa.departamento} is not null`, ne(empresa.departamento, '')))
+      .groupBy(empresa.departamento);
+  }
+
+  // empresas creadas dentro del mes calendario actual
+  async getAdminEmpresasNuevasEsteMes() {
+    const [row] = await this.db
+      .select({ total: count() })
+      .from(empresa)
+      .where(sql`${empresa.createdAt} >= date_trunc('month', now())`);
+    return Number(row.total);
+  }
+
+  // suma de los montos de premio comprometidos (todas las categorias). numeric -> string
+  async getAdminMontoComprometido() {
+    const [row] = await this.db
+      .select({ total: sql<string>`coalesce(sum(${categoriaConvocatoria.monto}), 0)::text` })
+      .from(categoriaConvocatoria);
+    return row.total;
+  }
+
+  // distribucion global de postulaciones por estado
+  async getAdminPostulacionesPorEstado() {
+    return this.db
+      .select({ estado: postulacion.estado, total: count() })
+      .from(postulacion)
+      .groupBy(postulacion.estado);
+  }
+
+  // metricas de inclusion: empleados por genero y genero del contacto
+  async getAdminInclusion() {
+    const [empleados] = await this.db
+      .select({
+        mujeres: sql<number>`coalesce(sum(${empresa.numEmpleadosMujeres}), 0)`.mapWith(Number),
+        hombres: sql<number>`coalesce(sum(${empresa.numEmpleadosHombres}), 0)`.mapWith(Number),
+      })
+      .from(empresa);
+
+    const [contacto] = await this.db
+      .select({
+        femenino: sql<number>`count(*) filter (where ${empresa.contactoGenero} = 'femenino')`.mapWith(Number),
+        conContacto: sql<number>`count(*) filter (where ${empresa.contactoGenero} is not null and ${empresa.contactoGenero} != '')`.mapWith(Number),
+      })
+      .from(empresa);
+
+    return {
+      empleadasMujeres: empleados.mujeres,
+      empleadosHombres: empleados.hombres,
+      empresasContactoFemenino: contacto.femenino,
+      empresasConContacto: contacto.conContacto,
+    };
+  }
+
+  // postulaciones enviadas agrupadas por mes (YYYY-MM), para la serie de tendencia.
+  // El service arma la ventana de 6 meses y rellena los meses sin datos en 0.
+  async getAdminPostulacionesPorMes() {
+    return this.db
+      .select({
+        mes: sql<string>`to_char(${postulacion.fechaEnvio}, 'YYYY-MM')`,
+        total: count(),
+      })
+      .from(postulacion)
+      .where(sql`${postulacion.fechaEnvio} is not null`)
+      .groupBy(sql`to_char(${postulacion.fechaEnvio}, 'YYYY-MM')`);
+  }
+
   // ============== RESPONSABLE ==============
 
   // KPIs principales para un responsable: cuenta sus convocatorias y trabajo pendiente
@@ -260,7 +335,11 @@ export class DashboardRepository {
       })
       .from(convocatoria)
       .innerJoin(responsableConvocatoria, eq(responsableConvocatoria.convocatoriaId, convocatoria.id))
-      .where(eq(responsableConvocatoria.usuarioId, usuarioId))
+      // solo vigentes: el dashboard no muestra las finalizadas (van a la pagina de convocatorias)
+      .where(and(
+        eq(responsableConvocatoria.usuarioId, usuarioId),
+        ne(convocatoria.estado, 'finalizado'),
+      ))
       .orderBy(desc(convocatoria.createdAt));
   }
 
@@ -330,6 +409,7 @@ export class DashboardRepository {
     return this.db
       .select({
         postulacionId: postulacion.id,
+        categoriaId: postulacion.categoriaId,
         convocatoriaId: convocatoria.id,
         convocatoriaNombre: convocatoria.nombre,
         empresaNombre: empresa.razonSocial,
@@ -358,6 +438,7 @@ export class DashboardRepository {
       .select({
         calificacionId: calificacion.id,
         postulacionId: postulacion.id,
+        categoriaId: postulacion.categoriaId,
         convocatoriaId: convocatoria.id,
         convocatoriaNombre: convocatoria.nombre,
         empresaNombre: empresa.razonSocial,
@@ -482,6 +563,20 @@ export class DashboardRepository {
         montoMin: sql<string | null>`(select min(monto) from categoria_convocatoria where convocatoria_id = convocatoria.id)`,
         montoMax: sql<string | null>`(select max(monto) from categoria_convocatoria where convocatoria_id = convocatoria.id)`,
         numeroGanadores: sql<number>`(select coalesce(sum(numero_ganadores), 0) from categoria_convocatoria where convocatoria_id = convocatoria.id)`.mapWith(Number),
+        departamentos: convocatoria.departamentos,
+        totalPostulantes: sql<number>`(
+          select count(*) from postulacion p
+          where p.convocatoria_id = convocatoria.id and p.estado != 'borrador'
+        )`.mapWith(Number),
+        tieneImagen: sql<boolean>`${convocatoria.imagenKey} is not null`.mapWith(Boolean),
+        // categorias con su premio, para los chips de la tarjeta (json_agg -> array parseado)
+        categorias: sql<{ nombre: string; monto: string }[]>`(
+          select coalesce(
+            json_agg(json_build_object('nombre', nombre, 'monto', monto::text) order by orden),
+            '[]'::json
+          )
+          from categoria_convocatoria where convocatoria_id = convocatoria.id
+        )`,
         diasParaCerrar: sql<number>`(
           coalesce(${convocatoria.fechaCierreEfectiva}, ${convocatoria.fechaCierrePostulacion}) - current_date
         )::int`.mapWith(Number),

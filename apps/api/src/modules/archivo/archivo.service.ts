@@ -160,7 +160,7 @@ export class ArchivoService {
   private async getPostulacionOrFail(postulacionId: number) {
     const post = await this.postulacionRepo.findById(postulacionId);
     if (!post) {
-      throw new NotFoundException('Postulacion no encontrada');
+      throw new NotFoundException('Postulación no encontrada');
     }
     return post;
   }
@@ -169,7 +169,7 @@ export class ArchivoService {
   private async getPostulacionEnConvocatoria(postulacionId: number, convocatoriaId: number) {
     const post = await this.postulacionRepo.findById(postulacionId);
     if (!post || post.convocatoriaId !== convocatoriaId) {
-      throw new NotFoundException('Postulacion no encontrada');
+      throw new NotFoundException('Postulación no encontrada');
     }
     return post;
   }
@@ -177,7 +177,7 @@ export class ArchivoService {
   private async verificarPropietario(empresaId: number, userId: number): Promise<void> {
     const userEmpresaId = await this.postulacionRepo.getEmpresaIdByUsuarioId(userId);
     if (userEmpresaId !== empresaId) {
-      throw new ForbiddenException('No tienes acceso a esta postulacion');
+      throw new ForbiddenException('No tienes acceso a esta postulación');
     }
   }
 

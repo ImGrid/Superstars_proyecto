@@ -36,14 +36,17 @@ export class CategoriaService {
   // --- CRUD ---
 
   async findByConvocatoria(convocatoriaId: number, user?: AuthUser) {
-    // Proponente no ve categorias de convocatorias en borrador
+    // Proponente no ve categorias de convocatorias en borrador, y recibe la
+    // version SIN conteos (no exponemos volumen de jurado ni de postulaciones).
     if (user?.rol === RolUsuario.PROPONENTE) {
       const estado = await this.categoriaRepo.getConvocatoriaEstado(convocatoriaId);
       if (!estado || estado === EstadoConvocatoria.BORRADOR) {
         throw new NotFoundException('Convocatoria no encontrada');
       }
+      return this.categoriaRepo.findByConvocatoriaId(convocatoriaId);
     }
-    return this.categoriaRepo.findByConvocatoriaId(convocatoriaId);
+    // admin/responsable: incluye el resumen de configuracion y actividad por categoria
+    return this.categoriaRepo.findByConvocatoriaIdConResumen(convocatoriaId);
   }
 
   async getOne(convocatoriaId: number, categoriaId: number, user?: AuthUser) {

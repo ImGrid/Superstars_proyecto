@@ -14,10 +14,12 @@ import {
   RolUsuario,
   savePostulacionDraftSchema,
   observarPostulacionSchema,
+  rechazarPostulacionSchema,
 } from '@superstars/shared';
 import type {
   SavePostulacionDraftDto,
   ObservarPostulacionDto,
+  RechazarPostulacionDto,
   AuthUser,
 } from '@superstars/shared';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -107,7 +109,8 @@ export class PostulacionController {
     return this.postulacionService.observar(convocatoriaId, id, dto);
   }
 
-  // Rechazar postulacion (estado final)
+  // Rechazar postulacion con motivo (estado final). Sirve en revision y
+  // en evaluacion (sacar del concurso una postulacion que no se pudo evaluar).
   @Post(':id/rechazar')
   @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   @CheckConvocatoria('convocatoriaId')
@@ -115,8 +118,10 @@ export class PostulacionController {
   async rechazar(
     @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
     @Param('id', ParseIntPipe) id: number,
+    @Body() body: RechazarPostulacionDto,
   ) {
-    return this.postulacionService.rechazar(convocatoriaId, id);
+    const dto = rechazarPostulacionSchema.parse(body);
+    return this.postulacionService.rechazar(convocatoriaId, id, dto);
   }
 
   // Aprobar postulacion para evaluacion (enviado → en_evaluacion)

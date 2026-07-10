@@ -26,7 +26,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     if (exception instanceof ZodError) {
       const body: ErrorResponse = {
         statusCode: HttpStatus.BAD_REQUEST,
-        message: 'Error de validacion',
+        message: 'Error de validación',
         timestamp,
         path,
         errors: exception.errors.map((e) => ({

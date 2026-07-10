@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { eq, and, asc, desc, count, isNull } from 'drizzle-orm';
+import { eq, and, asc, desc, count, isNull, sql, getTableColumns } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/drizzle.provider';
 import type { DrizzleDB } from '../../database/drizzle.provider';
 import { categoriaConvocatoria, evaluadorCategoria, convocatoria, usuario } from '@superstars/db';
@@ -23,6 +23,27 @@ export class CategoriaRepository {
   async findByConvocatoriaId(convocatoriaId: number) {
     return this.db
       .select()
+      .from(categoriaConvocatoria)
+      .where(eq(categoriaConvocatoria.convocatoriaId, convocatoriaId))
+      .orderBy(asc(categoriaConvocatoria.orden));
+  }
+
+  // como findByConvocatoriaId pero agrega conteos de configuracion y actividad
+  // por categoria: formulario, criterios de la rubrica, evaluadores del pool y
+  // postulaciones. Solo para admin/responsable (el proponente usa la version sin
+  // conteos, para no exponer volumen de jurado ni postulaciones).
+  // Nota: la correlacion con la tabla externa se escribe como literal calificado
+  // (categoria_convocatoria.id), no como ${categoriaConvocatoria.id}, porque en
+  // posicion SELECT Drizzle la renderiza sin calificar y da "column ambiguous".
+  async findByConvocatoriaIdConResumen(convocatoriaId: number) {
+    return this.db
+      .select({
+        ...getTableColumns(categoriaConvocatoria),
+        numFormularios: sql<number>`(select count(*)::int from formulario_dinamico fd where fd.categoria_id = categoria_convocatoria.id)`,
+        numCriterios: sql<number>`(select count(*)::int from criterio cr join rubrica ru on ru.id = cr.rubrica_id where ru.categoria_id = categoria_convocatoria.id)`,
+        numEvaluadores: sql<number>`(select count(*)::int from evaluador_categoria ec where ec.categoria_id = categoria_convocatoria.id)`,
+        numPostulaciones: sql<number>`(select count(*)::int from postulacion po where po.categoria_id = categoria_convocatoria.id)`,
+      })
       .from(categoriaConvocatoria)
       .where(eq(categoriaConvocatoria.convocatoriaId, convocatoriaId))
       .orderBy(asc(categoriaConvocatoria.orden));

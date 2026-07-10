@@ -34,6 +34,9 @@ export const empresa = pgTable("empresa", {
 	contactoGenero: text("contacto_genero"),
 	contactoFechaNacimiento: date("contacto_fecha_nacimiento", { mode: 'string' }),
 
+	// Logo de la empresa (opcional, lo sube el propio proponente)
+	logoKey: text("logo_key"),
+
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [

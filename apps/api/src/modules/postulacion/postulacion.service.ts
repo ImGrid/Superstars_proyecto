@@ -7,6 +7,7 @@ import {
 import type {
   SavePostulacionDraftDto,
   ObservarPostulacionDto,
+  RechazarPostulacionDto,
   ListPostulacionesQueryDto,
   SchemaDefinition,
   AuthUser,
@@ -69,7 +70,7 @@ export class PostulacionService {
     if (existing) {
       // Solo se puede editar en borrador u observado
       if (existing.estado !== EstadoPostulacion.BORRADOR && existing.estado !== EstadoPostulacion.OBSERVADO) {
-        throw new ConflictException('La postulacion no se puede editar en su estado actual');
+        throw new ConflictException('La postulación no se puede editar en su estado actual');
       }
 
       return this.postulacionRepo.updateDraft(existing.id, {
@@ -97,13 +98,13 @@ export class PostulacionService {
 
     const existing = await this.postulacionRepo.findByEmpresaAndConvocatoria(empresaId, convocatoriaId);
     if (!existing) {
-      throw new NotFoundException('No tienes una postulacion para esta convocatoria');
+      throw new NotFoundException('No tienes una postulación para esta convocatoria');
     }
 
     // Verificar transicion valida
     if (!this.stateMachine.canTransition(existing.estado, 'enviar')) {
       throw new ConflictException(
-        `No se puede enviar una postulacion en estado "${existing.estado}"`,
+        `No se puede enviar una postulación en estado "${existing.estado}"`,
       );
     }
 
@@ -123,7 +124,7 @@ export class PostulacionService {
 
     const updated = await this.postulacionRepo.submitPostulacion(existing.id, existing.estado);
     if (!updated) {
-      throw new ConflictException('La postulacion fue modificada por otro proceso');
+      throw new ConflictException('La postulación fue modificada por otro proceso');
     }
 
     return updated;
@@ -165,7 +166,7 @@ export class PostulacionService {
     const empresaId = await this.resolveEmpresaId(userId);
     const existing = await this.postulacionRepo.findByEmpresaAndConvocatoria(empresaId, convocatoriaId);
     if (!existing) {
-      throw new NotFoundException('No tienes una postulacion para esta convocatoria');
+      throw new NotFoundException('No tienes una postulación para esta convocatoria');
     }
     return existing;
   }
@@ -188,7 +189,7 @@ export class PostulacionService {
   async findById(convocatoriaId: number, id: number) {
     const existing = await this.postulacionRepo.findById(id);
     if (!existing || existing.convocatoriaId !== convocatoriaId) {
-      throw new NotFoundException('Postulacion no encontrada');
+      throw new NotFoundException('Postulación no encontrada');
     }
     return existing;
   }
@@ -197,43 +198,45 @@ export class PostulacionService {
   async observar(convocatoriaId: number, id: number, dto: ObservarPostulacionDto) {
     const existing = await this.postulacionRepo.findById(id);
     if (!existing || existing.convocatoriaId !== convocatoriaId) {
-      throw new NotFoundException('Postulacion no encontrada');
+      throw new NotFoundException('Postulación no encontrada');
     }
 
     if (!this.stateMachine.canTransition(existing.estado, 'observar')) {
       throw new ConflictException(
-        `No se puede observar una postulacion en estado "${existing.estado}"`,
+        `No se puede observar una postulación en estado "${existing.estado}"`,
       );
     }
 
     const updated = await this.postulacionRepo.observarPostulacion(id, dto.observacion);
     if (!updated) {
-      throw new ConflictException('La postulacion fue modificada por otro proceso');
+      throw new ConflictException('La postulación fue modificada por otro proceso');
     }
 
     return updated;
   }
 
-  // Rechazar postulacion (estado final)
-  async rechazar(convocatoriaId: number, id: number) {
+  // Rechazar postulacion con un motivo (estado final). Sirve en revision
+  // (enviado) y en evaluacion (en_evaluacion, sacar del concurso una que no
+  // se pudo evaluar). El motivo se guarda en observacion para la empresa.
+  async rechazar(convocatoriaId: number, id: number, dto: RechazarPostulacionDto) {
     const existing = await this.postulacionRepo.findById(id);
     if (!existing || existing.convocatoriaId !== convocatoriaId) {
-      throw new NotFoundException('Postulacion no encontrada');
+      throw new NotFoundException('Postulación no encontrada');
     }
 
     if (!this.stateMachine.canTransition(existing.estado, 'rechazar')) {
       throw new ConflictException(
-        `No se puede rechazar una postulacion en estado "${existing.estado}"`,
+        `No se puede rechazar una postulación en estado "${existing.estado}"`,
       );
     }
 
-    const updated = await this.postulacionRepo.updateEstado(
+    const updated = await this.postulacionRepo.rechazarPostulacion(
       id,
       existing.estado,
-      EstadoPostulacion.RECHAZADO,
+      dto.motivo,
     );
     if (!updated) {
-      throw new ConflictException('La postulacion fue modificada por otro proceso');
+      throw new ConflictException('La postulación fue modificada por otro proceso');
     }
 
     return updated;
@@ -243,12 +246,12 @@ export class PostulacionService {
   async aprobar(convocatoriaId: number, id: number) {
     const existing = await this.postulacionRepo.findById(id);
     if (!existing || existing.convocatoriaId !== convocatoriaId) {
-      throw new NotFoundException('Postulacion no encontrada');
+      throw new NotFoundException('Postulación no encontrada');
     }
 
     if (!this.stateMachine.canTransition(existing.estado, 'iniciar_evaluacion')) {
       throw new ConflictException(
-        `No se puede aprobar una postulacion en estado "${existing.estado}"`,
+        `No se puede aprobar una postulación en estado "${existing.estado}"`,
       );
     }
 
@@ -258,7 +261,7 @@ export class PostulacionService {
       EstadoPostulacion.EN_EVALUACION,
     );
     if (!updated) {
-      throw new ConflictException('La postulacion fue modificada por otro proceso');
+      throw new ConflictException('La postulación fue modificada por otro proceso');
     }
 
     return updated;
@@ -283,7 +286,7 @@ export class PostulacionService {
       throw new NotFoundException('Convocatoria no encontrada');
     }
     if (estado !== EstadoConvocatoria.PUBLICADO) {
-      throw new ConflictException('La convocatoria no esta abierta para postulaciones');
+      throw new ConflictException('La convocatoria no está abierta para postulaciones');
     }
   }
 
@@ -297,7 +300,7 @@ export class PostulacionService {
 
     if (!result.success) {
       throw new BadRequestException({
-        message: 'Error de validacion del formulario',
+        message: 'Error de validación del formulario',
         errors: result.error.issues.map(i => ({
           campo: i.path.join('.'),
           mensaje: i.message,

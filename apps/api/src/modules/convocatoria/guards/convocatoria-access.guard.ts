@@ -63,7 +63,7 @@ export class ConvocatoriaAccessGuard implements CanActivate {
     if (user.rol === RolUsuario.EVALUADOR) {
       const isEvaluador = await this.accessService.isEvaluador(convocatoriaId, user.id);
       if (!isEvaluador) {
-        throw new ForbiddenException('No estas asignado como evaluador a esta convocatoria');
+        throw new ForbiddenException('No estás asignado como evaluador a esta convocatoria');
       }
       return true;
     }

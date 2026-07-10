@@ -12,8 +12,15 @@ export const observarPostulacionSchema = z.object({
   observacion: z.string().min(1),
 });
 
+// Rechazar postulacion (responsable indica el motivo). Sirve en revision
+// (enviado) y en evaluacion (en_evaluacion): saca la postulacion del concurso.
+export const rechazarPostulacionSchema = z.object({
+  motivo: z.string().min(1, 'Debes indicar el motivo del rechazo'),
+});
+
 export type SavePostulacionDraftDto = z.infer<typeof savePostulacionDraftSchema>;
 export type ObservarPostulacionDto = z.infer<typeof observarPostulacionSchema>;
+export type RechazarPostulacionDto = z.infer<typeof rechazarPostulacionSchema>;
 
 import { EstadoPostulacion } from '../enums';
 

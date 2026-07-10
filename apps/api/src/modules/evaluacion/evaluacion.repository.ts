@@ -245,13 +245,20 @@ export class EvaluacionRepository {
     puntajeFinal: string,
     estado: string,
   ) {
+    // WHERE estado in ('en_evaluacion','calificado'): permite el paso normal a
+    // calificado y el recalculo cuando otro evaluador aprueba, pero evita
+    // "resucitar" una postulacion rechazada o ya decidida (ganador/no_seleccionado)
+    // si se aprobara una calificacion vieja.
     const [updated] = await this.db
       .update(postulacion)
       .set({
         puntajeFinal,
         estado: estado as any,
       })
-      .where(eq(postulacion.id, postulacionId))
+      .where(and(
+        eq(postulacion.id, postulacionId),
+        sql`${postulacion.estado} in ('en_evaluacion', 'calificado')`,
+      ))
       .returning();
     return updated ?? null;
   }

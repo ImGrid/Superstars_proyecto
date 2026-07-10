@@ -186,7 +186,7 @@ export class EvaluacionService {
 
     if (!this.stateMachine.canTransition(calif.estado, 'aprobar')) {
       throw new ConflictException(
-        `No se puede aprobar una calificacion en estado "${calif.estado}"`,
+        `No se puede aprobar una calificación en estado "${calif.estado}"`,
       );
     }
 
@@ -206,7 +206,7 @@ export class EvaluacionService {
 
     if (!this.stateMachine.canTransition(calif.estado, 'devolver')) {
       throw new ConflictException(
-        `No se puede devolver una calificacion en estado "${calif.estado}"`,
+        `No se puede devolver una calificación en estado "${calif.estado}"`,
       );
     }
 

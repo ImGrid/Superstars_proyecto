@@ -410,7 +410,10 @@ export class ConvocatoriaRepository {
     return Number(result.count);
   }
 
-  // calificaciones no aprobadas de las postulaciones de una categoria
+  // calificaciones no aprobadas de las postulaciones de una categoria.
+  // Solo cuenta las de postulaciones que siguen en juego (en_evaluacion o
+  // calificado); las de postulaciones rechazadas quedan de auditoria pero no
+  // deben bloquear la seleccion de ganadores.
   async countCalificacionesNoAprobadas(categoriaId: number): Promise<number> {
     const [result] = await this.db
       .select({ count: count() })
@@ -418,6 +421,7 @@ export class ConvocatoriaRepository {
       .innerJoin(postulacion, eq(calificacion.postulacionId, postulacion.id))
       .where(and(
         eq(postulacion.categoriaId, categoriaId),
+        sql`${postulacion.estado} in ('en_evaluacion', 'calificado')`,
         sql`${calificacion.estado} != 'aprobado'`,
       ));
     return Number(result.count);

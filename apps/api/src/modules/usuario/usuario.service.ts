@@ -59,7 +59,7 @@ export class UsuarioService {
   async create(dto: CreateUsuarioDto) {
     const emailExists = await this.usuarioRepository.existsByEmail(dto.email);
     if (emailExists) {
-      throw new ConflictException('El email ya esta registrado');
+      throw new ConflictException('El email ya está registrado');
     }
 
     const passwordHash = await argon2.hash(dto.password, {
@@ -106,7 +106,7 @@ export class UsuarioService {
       // FK constraint violation (23503): usuario tiene datos asociados
       if (pgCode === '23503') {
         throw new ConflictException(
-          'No se puede eliminar el usuario porque tiene datos asociados. Desactivalo en su lugar.',
+          'No se puede eliminar el usuario porque tiene datos asociados. Desactívalo en su lugar.',
         );
       }
       throw error;

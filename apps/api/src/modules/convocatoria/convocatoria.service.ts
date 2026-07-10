@@ -192,7 +192,7 @@ export class ConvocatoriaService {
     );
 
     if (!updated) {
-      throw new ConflictException('No se pudo publicar la convocatoria (estado ya cambio)');
+      throw new ConflictException('No se pudo publicar la convocatoria (estado ya cambió)');
     }
 
     return updated;
@@ -377,7 +377,7 @@ export class ConvocatoriaService {
     ];
     if (!estadosPermitidos.includes(c.estado as EstadoConvocatoria)) {
       throw new ConflictException(
-        'Solo se pueden modificar fechas en convocatorias publicadas, cerradas o en evaluacion',
+        'Solo se pueden modificar fechas en convocatorias publicadas, cerradas o en evaluación',
       );
     }
 
@@ -387,7 +387,7 @@ export class ConvocatoriaService {
     if (dto.fechaCierreEfectiva !== undefined) {
       if (c.estado !== EstadoConvocatoria.PUBLICADO) {
         throw new ConflictException(
-          'La fecha de cierre solo se puede extender cuando la convocatoria esta publicada',
+          'La fecha de cierre solo se puede extender cuando la convocatoria está publicada',
         );
       }
       if (dto.fechaCierreEfectiva !== null && dto.fechaCierreEfectiva < c.fechaCierrePostulacion) {

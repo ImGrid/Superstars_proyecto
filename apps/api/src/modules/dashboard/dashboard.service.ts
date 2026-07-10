@@ -3,6 +3,7 @@ import {
   EstadoConvocatoria,
   EstadoPostulacion,
   RolUsuario,
+  OPCIONES_DEPARTAMENTO,
 } from '@superstars/shared';
 import type {
   AdminDashboardStats,
@@ -27,12 +28,24 @@ export class DashboardService {
       usuarioStats,
       convocatoriasResumen,
       alertas,
+      coberturaRows,
+      empresasNuevasEsteMes,
+      montoComprometidoTotal,
+      postulacionesPorEstadoRows,
+      inclusionRaw,
+      postulacionesPorMesRows,
     ] = await Promise.all([
       this.repo.getAdminConvocatoriaStats(),
       this.repo.getAdminGlobalCounts(),
       this.repo.getAdminUsuarioStats(),
       this.repo.getAdminConvocatoriasActivasResumen(),
       this.repo.getAdminAlertas(),
+      this.repo.getAdminCoberturaNacional(),
+      this.repo.getAdminEmpresasNuevasEsteMes(),
+      this.repo.getAdminMontoComprometido(),
+      this.repo.getAdminPostulacionesPorEstado(),
+      this.repo.getAdminInclusion(),
+      this.repo.getAdminPostulacionesPorMes(),
     ]);
 
     // total de convocatorias en estados activos (publicado + cerrado + en_evaluacion + resultados_listos)
@@ -42,11 +55,62 @@ export class DashboardService {
       convocatoriaStats.en_evaluacion +
       convocatoriaStats.resultados_listos;
 
+    // cobertura: rellenar los 9 departamentos canonicos con 0 donde no haya empresas
+    const coberturaMap = new Map(
+      coberturaRows.map((r) => [r.departamento, Number(r.total)]),
+    );
+    const coberturaNacional = OPCIONES_DEPARTAMENTO.map((d) => ({
+      departamento: d.valor,
+      label: d.label,
+      total: coberturaMap.get(d.valor) ?? 0,
+    }));
+    const departamentosCubiertos = coberturaNacional.filter((d) => d.total > 0).length;
+
+    // distribucion global de postulaciones por estado (rellenar los 8 estados en 0)
+    const postulacionesPorEstado = this.emptyPostulacionRecord();
+    for (const row of postulacionesPorEstadoRows) {
+      postulacionesPorEstado[row.estado as EstadoPostulacion] = Number(row.total);
+    }
+
+    // inclusion: calcular % de empleadas mujeres sobre el total de personas
+    const totalEmpleados =
+      inclusionRaw.empleadasMujeres + inclusionRaw.empleadosHombres;
+    const inclusion = {
+      empleadasMujeres: inclusionRaw.empleadasMujeres,
+      empleadosHombres: inclusionRaw.empleadosHombres,
+      pctMujeres:
+        totalEmpleados > 0
+          ? Math.round((inclusionRaw.empleadasMujeres / totalEmpleados) * 100)
+          : 0,
+      empresasContactoFemenino: inclusionRaw.empresasContactoFemenino,
+      empresasConContacto: inclusionRaw.empresasConContacto,
+    };
+
+    // tendencia: serie de los ultimos 6 meses, rellenando en 0 los meses sin envios
+    const mesesMap = new Map(
+      postulacionesPorMesRows.map((r) => [r.mes, Number(r.total)]),
+    );
+    const tendenciaPostulaciones = this.ultimosMeses(6).map((mes) => ({
+      mes,
+      total: mesesMap.get(mes) ?? 0,
+    }));
+
+    // convocatorias que cierran en <= 7 dias (derivado del resumen de activas)
+    const convocatoriasProximasACerrar = convocatoriasResumen.filter(
+      (c) => c.diasParaCerrar !== null && c.diasParaCerrar >= 0 && c.diasParaCerrar <= 7,
+    ).length;
+
     return {
       totalConvocatoriasActivas,
+      convocatoriasProximasACerrar,
       totalEmpresas: globalCounts.totalEmpresas,
+      empresasNuevasEsteMes,
       totalPostulacionesNoBorrador: globalCounts.totalPostulacionesNoBorrador,
       totalGanadoresHistoricos: globalCounts.totalGanadoresHistoricos,
+      montoComprometidoTotal,
+
+      coberturaNacional,
+      departamentosCubiertos,
 
       convocatoriasPorEstado: {
         [EstadoConvocatoria.BORRADOR]: convocatoriaStats.borrador,
@@ -57,12 +121,17 @@ export class DashboardService {
         [EstadoConvocatoria.FINALIZADO]: convocatoriaStats.finalizado,
       },
 
+      postulacionesPorEstado,
+
       usuariosActivosPorRol: {
         [RolUsuario.ADMINISTRADOR]: usuarioStats.administrador,
         [RolUsuario.RESPONSABLE_CONVOCATORIA]: usuarioStats.responsable_convocatoria,
         [RolUsuario.EVALUADOR]: usuarioStats.evaluador,
         [RolUsuario.PROPONENTE]: usuarioStats.proponente,
       },
+
+      inclusion,
+      tendenciaPostulaciones,
 
       convocatoriasActivasResumen: convocatoriasResumen.map((c) => ({
         id: c.id,
@@ -168,6 +237,7 @@ export class DashboardService {
 
       postulacionesPorCalificarLista: pendientes.map((p) => ({
         postulacionId: p.postulacionId,
+        categoriaId: p.categoriaId,
         convocatoriaId: p.convocatoriaId,
         convocatoriaNombre: p.convocatoriaNombre,
         empresaNombre: p.empresaNombre,
@@ -178,6 +248,7 @@ export class DashboardService {
       calificacionesDevueltasLista: devueltas.map((d) => ({
         calificacionId: d.calificacionId,
         postulacionId: d.postulacionId,
+        categoriaId: d.categoriaId,
         convocatoriaId: d.convocatoriaId,
         convocatoriaNombre: d.convocatoriaNombre,
         empresaNombre: d.empresaNombre,
@@ -250,8 +321,23 @@ export class DashboardService {
         montoMax: c.montoMax,
         numeroGanadores: c.numeroGanadores,
         yaPostule: c.yaPostule,
+        departamentos: c.departamentos,
+        categorias: c.categorias,
+        totalPostulantes: c.totalPostulantes,
+        tieneImagen: c.tieneImagen,
       })),
     };
+  }
+
+  // helper: devuelve los ultimos n meses en formato YYYY-MM, del mas viejo al actual
+  private ultimosMeses(n: number): string[] {
+    const meses: string[] = [];
+    const hoy = new Date();
+    for (let i = n - 1; i >= 0; i--) {
+      const d = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
+      meses.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+    }
+    return meses;
   }
 
   // helper: crea un Record con todos los estados de postulacion en 0

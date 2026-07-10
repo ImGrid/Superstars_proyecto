@@ -98,7 +98,7 @@ export class PublicService {
   async findPublicacionBySlug(slug: string) {
     const pub = await this.publicRepo.findPublicacionBySlug(slug);
     if (!pub) {
-      throw new NotFoundException('Publicacion no encontrada');
+      throw new NotFoundException('Publicación no encontrada');
     }
     return pub;
   }

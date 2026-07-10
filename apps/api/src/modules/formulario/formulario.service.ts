@@ -54,7 +54,7 @@ export class FormularioService {
         throw new NotFoundException('Convocatoria no encontrada');
       }
       if (estado === EstadoConvocatoria.BORRADOR) {
-        throw new ForbiddenException('La convocatoria no esta disponible');
+        throw new ForbiddenException('La convocatoria no está disponible');
       }
     }
 
@@ -112,7 +112,7 @@ export class FormularioService {
       if (!exists) {
         throw new NotFoundException('La categoría no tiene un formulario configurado');
       }
-      throw new ConflictException('El formulario fue modificado por otro usuario (version no coincide)');
+      throw new ConflictException('El formulario fue modificado por otro usuario (la versión no coincide)');
     }
 
     return updated;
@@ -128,7 +128,9 @@ export class FormularioService {
     }
   }
 
-  // verifica que el schema no elimine ni altere secciones/campos fijos de la plantilla.
+  // integridad contra la plantilla de referencia: los campos que SIGUEN existiendo
+  // (mismo id) no pueden cambiar de tipo. Eliminar campos o secciones (incluidos los
+  // de plantilla) SI esta permitido; el formulario es una plantilla manipulable.
   // TODO(plantillas por categoria): pasar el discriminador de plantilla (empresas/agricultura)
   // cuando exista el ladrillo de las 2 plantillas por defecto.
   private verificarIntegridadPlantilla(

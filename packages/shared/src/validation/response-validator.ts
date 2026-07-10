@@ -51,7 +51,7 @@ function buildFieldValidator(campo: FormField, mode: ValidationMode = 'submit'):
     case 'texto_corto': {
       let s = z.string().min(1, 'Campo obligatorio');
       if (campo.maxLength) {
-        s = s.max(campo.maxLength);
+        s = s.max(campo.maxLength, `Máximo ${campo.maxLength} caracteres`);
       }
       return s;
     }
@@ -69,8 +69,8 @@ function buildFieldValidator(campo: FormField, mode: ValidationMode = 'submit'):
 
     case 'numerico': {
       let n = z.number({ invalid_type_error: 'Debe ser un número' });
-      if (campo.min !== undefined) n = n.min(campo.min);
-      if (campo.max !== undefined) n = n.max(campo.max);
+      if (campo.min !== undefined) n = n.min(campo.min, `Debe ser un valor mayor o igual a ${campo.min}`);
+      if (campo.max !== undefined) n = n.max(campo.max, `Debe ser un valor menor o igual a ${campo.max}`);
       return n;
     }
 
@@ -88,8 +88,8 @@ function buildFieldValidator(campo: FormField, mode: ValidationMode = 'submit'):
         ? z.string().min(1)
         : z.enum(campo.opciones.map(o => o.valor) as [string, ...string[]]);
       let arr = z.array(baseItem);
-      if (campo.minSelecciones) arr = arr.min(campo.minSelecciones);
-      if (campo.maxSelecciones) arr = arr.max(campo.maxSelecciones);
+      if (campo.minSelecciones) arr = arr.min(campo.minSelecciones, `Selecciona al menos ${campo.minSelecciones} opción(es)`);
+      if (campo.maxSelecciones) arr = arr.max(campo.maxSelecciones, `Selecciona como máximo ${campo.maxSelecciones} opción(es)`);
       return arr;
     }
 
@@ -120,7 +120,9 @@ function buildFieldValidator(campo: FormField, mode: ValidationMode = 'submit'):
 
     case 'archivo': {
       // response_data guarda IDs de archivo_postulacion (number[])
-      return z.array(z.number().int().positive()).min(1).max(campo.maxArchivos);
+      return z.array(z.number().int().positive())
+        .min(1, 'Debe subir al menos un archivo')
+        .max(campo.maxArchivos, `Máximo ${campo.maxArchivos} archivo(s)`);
     }
 
     case 'si_no':

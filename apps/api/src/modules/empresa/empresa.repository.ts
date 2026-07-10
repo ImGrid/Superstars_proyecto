@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { eq, or, ilike, count, desc } from 'drizzle-orm';
+import { eq, or, and, ilike, count, desc } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/drizzle.provider';
 import type { DrizzleDB } from '../../database/drizzle.provider';
 import { empresa } from '@superstars/db';
@@ -9,6 +9,9 @@ export interface FindAllEmpresasParams {
   page: number;
   limit: number;
   search?: string;
+  departamento?: string;
+  rubro?: string;
+  tipoEmpresa?: string;
 }
 
 @Injectable()
@@ -32,15 +35,22 @@ export class EmpresaRepository {
   }
 
   async findAll(params: FindAllEmpresasParams) {
-    const { page, limit, search } = params;
+    const { page, limit, search, departamento, rubro, tipoEmpresa } = params;
     const offset = (page - 1) * limit;
 
-    const where = search
-      ? or(
-          ilike(empresa.razonSocial, `%${search}%`),
-          ilike(empresa.nit, `%${search}%`),
-        )
-      : undefined;
+    // combina la busqueda de texto (razon social/NIT) con los filtros por columna.
+    // and() descarta los undefined, asi que un filtro no aplicado no afecta.
+    const where = and(
+      search
+        ? or(
+            ilike(empresa.razonSocial, `%${search}%`),
+            ilike(empresa.nit, `%${search}%`),
+          )
+        : undefined,
+      departamento ? eq(empresa.departamento, departamento) : undefined,
+      rubro ? eq(empresa.rubro, rubro) : undefined,
+      tipoEmpresa ? eq(empresa.tipoEmpresa, tipoEmpresa) : undefined,
+    );
 
     const [data, totalResult] = await Promise.all([
       this.db

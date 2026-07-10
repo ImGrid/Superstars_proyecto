@@ -1,4 +1,5 @@
 import type { SchemaDefinition, FormField, Seccion } from '../schemas/formulario.schema';
+import { EDAD_MINIMA_REPRESENTANTE, EDAD_MAXIMA_REPRESENTANTE } from './validation-patterns';
 import {
   OPCIONES_GENERO,
   OPCIONES_TIPO_EMPRESA,
@@ -71,7 +72,8 @@ const camposContacto: FormField[] = [
     orden: 5,
     fijo: true,
 
-    min: 1,
+    min: EDAD_MINIMA_REPRESENTANTE,
+    max: EDAD_MAXIMA_REPRESENTANTE,
   },
   {
     id: 'contacto_email',

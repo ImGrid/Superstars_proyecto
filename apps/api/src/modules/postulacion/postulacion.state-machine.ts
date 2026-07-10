@@ -25,6 +25,9 @@ const TRANSITIONS: Record<string, Partial<Record<PostulacionEvent, EstadoPostula
   },
   [EstadoPostulacion.EN_EVALUACION]: {
     calificar: EstadoPostulacion.CALIFICADO,
+    // el responsable puede sacar del concurso una postulacion que no se pudo
+    // evaluar (nadie la califico); queda rechazada con un motivo
+    rechazar: EstadoPostulacion.RECHAZADO,
   },
   [EstadoPostulacion.CALIFICADO]: {
     seleccionar: EstadoPostulacion.GANADOR,

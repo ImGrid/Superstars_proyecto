@@ -115,9 +115,11 @@ export {
 export {
   savePostulacionDraftSchema,
   observarPostulacionSchema,
+  rechazarPostulacionSchema,
   listPostulacionesQuerySchema,
   type SavePostulacionDraftDto,
   type ObservarPostulacionDto,
+  type RechazarPostulacionDto,
   type ListPostulacionesQueryDto,
   type PostulacionResponse,
   type PostulacionListItem,
@@ -235,6 +237,9 @@ export {
 
 export {
   type AdminConvocatoriaResumenItem,
+  type AdminCoberturaDepartamentoItem,
+  type AdminInclusion,
+  type AdminTendenciaMesItem,
   type AdminDashboardStats,
   type ResponsablePostulacionPendiente,
   type ResponsableCalificacionPendiente,

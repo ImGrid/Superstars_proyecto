@@ -46,6 +46,12 @@ export interface CategoriaResponse {
   fechaSeleccionGanadores: string | null;
   createdAt: string;
   updatedAt: string;
+  // resumen de configuracion y actividad por categoria. Solo lo incluye el
+  // LISTADO para admin/responsable; ausente en el detalle y para el proponente.
+  numFormularios?: number;
+  numCriterios?: number;
+  numEvaluadores?: number;
+  numPostulaciones?: number;
 }
 
 // GET /convocatorias/:convocatoriaId/categorias/:categoriaId/evaluadores

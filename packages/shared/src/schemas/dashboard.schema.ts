@@ -12,17 +12,51 @@ export interface AdminConvocatoriaResumenItem {
   diasParaCerrar: number | null;
 }
 
+// Cobertura geografica: empresas registradas en un departamento (los 9 canonicos)
+export interface AdminCoberturaDepartamentoItem {
+  departamento: string; // slug canonico (la_paz, cochabamba, ...)
+  label: string; // nombre visible (La Paz)
+  total: number; // empresas registradas en ese departamento
+}
+
+// Metricas de inclusion (genero) del programa
+export interface AdminInclusion {
+  empleadasMujeres: number;
+  empleadosHombres: number;
+  pctMujeres: number; // 0-100, redondeado
+  empresasContactoFemenino: number;
+  empresasConContacto: number; // empresas con genero de contacto declarado
+}
+
+// Punto de la serie temporal de participacion
+export interface AdminTendenciaMesItem {
+  mes: string; // YYYY-MM
+  total: number;
+}
+
 // Respuesta del endpoint GET /api/dashboard/admin
 export interface AdminDashboardStats {
   // KPIs principales
   totalConvocatoriasActivas: number;
+  convocatoriasProximasACerrar: number; // cierran en <= 7 dias
   totalEmpresas: number;
+  empresasNuevasEsteMes: number;
   totalPostulacionesNoBorrador: number;
   totalGanadoresHistoricos: number;
+  montoComprometidoTotal: string; // Bs, suma de montos de premio de todas las categorias
+
+  // Cobertura nacional (los 9 departamentos, rellenados en 0)
+  coberturaNacional: AdminCoberturaDepartamentoItem[];
+  departamentosCubiertos: number; // cuantos de los 9 tienen al menos 1 empresa
 
   // Distribuciones para graficos
   convocatoriasPorEstado: Record<EstadoConvocatoria, number>;
+  postulacionesPorEstado: Record<EstadoPostulacion, number>;
   usuariosActivosPorRol: Record<RolUsuario, number>;
+
+  // Inclusion y tendencia de participacion
+  inclusion: AdminInclusion;
+  tendenciaPostulaciones: AdminTendenciaMesItem[];
 
   // Resumen accionable
   convocatoriasActivasResumen: AdminConvocatoriaResumenItem[];
@@ -89,7 +123,7 @@ export interface ResponsableDashboardStats {
 
 // ====== PROPONENTE ======
 
-// Item de convocatoria abierta listo para postular (snapshot ligero para el dashboard)
+// Item de convocatoria abierta listo para postular (snapshot para las tarjetas del dashboard)
 export interface ProponenteConvocatoriaAbiertaItem {
   id: number;
   nombre: string;
@@ -101,6 +135,11 @@ export interface ProponenteConvocatoriaAbiertaItem {
   // total de ganadores sumando todas las categorias
   numeroGanadores: number;
   yaPostule: boolean;
+  // datos para la tarjeta rica del proponente
+  departamentos: string[];
+  categorias: { nombre: string; monto: string }[];
+  totalPostulantes: number; // prueba social: postulaciones no-borrador en la convocatoria
+  tieneImagen: boolean; // si tiene imagen de portada (el front arma la URL por id)
 }
 
 // Respuesta del endpoint GET /api/dashboard/proponente
@@ -126,6 +165,7 @@ export interface ProponenteDashboardStats {
 
 export interface EvaluadorPostulacionPendiente {
   postulacionId: number;
+  categoriaId: number;
   convocatoriaId: number;
   convocatoriaNombre: string;
   empresaNombre: string;
@@ -135,6 +175,7 @@ export interface EvaluadorPostulacionPendiente {
 export interface EvaluadorCalificacionDevuelta {
   calificacionId: number;
   postulacionId: number;
+  categoriaId: number;
   convocatoriaId: number;
   convocatoriaNombre: string;
   empresaNombre: string;

@@ -76,7 +76,7 @@ export class PublicacionService {
   async findById(id: number) {
     const pub = await this.publicacionRepo.findById(id);
     if (!pub) {
-      throw new NotFoundException('Publicacion no encontrada');
+      throw new NotFoundException('Publicación no encontrada');
     }
     return pub;
   }
@@ -109,7 +109,7 @@ export class PublicacionService {
 
     // No se puede borrar si esta publicada
     if (pub.estado === EstadoPublicacion.PUBLICADO || pub.estado === EstadoPublicacion.PROGRAMADO) {
-      throw new ConflictException('No se puede eliminar una publicacion publicada o programada. Archivela primero');
+      throw new ConflictException('No se puede eliminar una publicación publicada o programada. Archívela primero');
     }
 
     // Borrar imagen del storage si existe
@@ -202,7 +202,7 @@ export class PublicacionService {
   async downloadImagen(id: number): Promise<{ buffer: Buffer; mimeType: string }> {
     const pub = await this.ensureExists(id);
     if (!pub.imagenDestacadaKey) {
-      throw new NotFoundException('La publicacion no tiene imagen de portada');
+      throw new NotFoundException('La publicación no tiene imagen de portada');
     }
 
     const buffer = await this.storage.download(pub.imagenDestacadaKey);
@@ -214,7 +214,7 @@ export class PublicacionService {
   async removeImagen(id: number) {
     const pub = await this.ensureExists(id);
     if (!pub.imagenDestacadaKey) {
-      throw new NotFoundException('La publicacion no tiene imagen de portada');
+      throw new NotFoundException('La publicación no tiene imagen de portada');
     }
 
     await this.storage.delete(pub.imagenDestacadaKey);
@@ -235,7 +235,7 @@ export class PublicacionService {
   async deleteCategoria(id: number) {
     const cat = await this.publicacionRepo.findCategoriaById(id);
     if (!cat) {
-      throw new NotFoundException(`Categoria ${id} no encontrada`);
+      throw new NotFoundException(`Categoría ${id} no encontrada`);
     }
     await this.publicacionRepo.deleteCategoria(id);
   }
@@ -245,7 +245,7 @@ export class PublicacionService {
   private async ensureExists(id: number) {
     const pub = await this.publicacionRepo.findById(id);
     if (!pub) {
-      throw new NotFoundException('Publicacion no encontrada');
+      throw new NotFoundException('Publicación no encontrada');
     }
     return pub;
   }
@@ -253,13 +253,13 @@ export class PublicacionService {
   private async ensureCategoriaExists(categoriaId: number) {
     const cat = await this.publicacionRepo.findCategoriaById(categoriaId);
     if (!cat) {
-      throw new NotFoundException(`Categoria ${categoriaId} no encontrada`);
+      throw new NotFoundException(`Categoría ${categoriaId} no encontrada`);
     }
   }
 
   private verificarEditable(estado: string): void {
     if (!ESTADOS_EDITABLES.includes(estado as EstadoPublicacion)) {
-      throw new ConflictException('No se puede editar una publicacion en el estado actual');
+      throw new ConflictException('No se puede editar una publicación en el estado actual');
     }
   }
 

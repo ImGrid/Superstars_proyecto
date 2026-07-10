@@ -172,6 +172,10 @@ export const listEmpresasQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
   search: z.string().min(1).optional(),
+  // filtros por columna (slugs). Coinciden con OPCIONES_DEPARTAMENTO / OPCIONES_RUBRO / OPCIONES_TIPO_EMPRESA
+  departamento: z.string().min(1).optional(),
+  rubro: z.string().min(1).optional(),
+  tipoEmpresa: z.string().min(1).optional(),
 });
 
 export type CreateEmpresaDto = z.infer<typeof createEmpresaSchema>;
@@ -200,6 +204,8 @@ export interface EmpresaResponse {
   contactoTelefono: string | null;
   contactoGenero: string | null;
   contactoFechaNacimiento: string | null;
+  // Clave del logo en storage; null si la empresa no ha subido logo
+  logoKey: string | null;
   createdAt: string;
   updatedAt: string;
 }

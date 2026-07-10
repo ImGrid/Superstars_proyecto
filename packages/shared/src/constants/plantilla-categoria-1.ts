@@ -3,6 +3,7 @@
 // 37 preguntas, secciones A (ambitos) + B, C, D, E. Texto verbatim del PDF.
 // Los campos de perfil (B y C) reusan los ids contacto_*/empresa_* con autoRelleno.
 import type { SchemaDefinition, FormField, Seccion } from '../schemas/formulario.schema';
+import { EDAD_MINIMA_REPRESENTANTE, EDAD_MAXIMA_REPRESENTANTE } from './validation-patterns';
 import {
   OPCIONES_GENERO,
   OPCIONES_TIPO_EMPRESA,
@@ -96,7 +97,7 @@ const camposContacto: FormField[] = [
   { id: 'contacto_cargo', tipo: 'texto_corto', etiqueta: 'Puesto/cargo en la empresa', requerido: true, orden: 2, fijo: true, autoRelleno: { tabla: 'empresa', campo: 'contactoCargo' } },
   { id: 'contacto_telefono', tipo: 'texto_corto', etiqueta: 'Número de contacto', requerido: true, orden: 3, fijo: true, autoRelleno: { tabla: 'empresa', campo: 'contactoTelefono' } },
   { id: 'contacto_genero', tipo: 'seleccion_unica', etiqueta: 'Género', requerido: true, orden: 4, fijo: true, autoRelleno: { tabla: 'empresa', campo: 'contactoGenero' }, opciones: [...OPCIONES_GENERO], permiteOtra: false, display: 'dropdown' },
-  { id: 'contacto_edad', tipo: 'numerico', etiqueta: 'Edad', requerido: true, orden: 5, fijo: true, min: 1 },
+  { id: 'contacto_edad', tipo: 'numerico', etiqueta: 'Edad', requerido: true, orden: 5, fijo: true, min: EDAD_MINIMA_REPRESENTANTE, max: EDAD_MAXIMA_REPRESENTANTE },
   { id: 'contacto_email', tipo: 'texto_corto', etiqueta: 'Dirección de correo electrónico', requerido: true, orden: 6, fijo: true, autoRelleno: { tabla: 'usuario', campo: 'email' } },
 ];
 

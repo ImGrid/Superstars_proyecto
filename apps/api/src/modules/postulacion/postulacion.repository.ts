@@ -148,6 +148,24 @@ export class PostulacionRepository {
     return result[0] ?? null;
   }
 
+  // Rechazar: cambia estado a rechazado + guarda el motivo en observacion.
+  // WHERE estado = currentEstado para que sea atomico y sirva tanto desde
+  // 'enviado' (revision) como desde 'en_evaluacion' (sacar del concurso).
+  async rechazarPostulacion(id: number, currentEstado: string, motivo: string) {
+    const result = await this.db
+      .update(postulacion)
+      .set({
+        estado: 'rechazado' as EstadoPostulacion,
+        observacion: motivo,
+      })
+      .where(and(
+        eq(postulacion.id, id),
+        eq(postulacion.estado, currentEstado as EstadoPostulacion),
+      ))
+      .returning();
+    return result[0] ?? null;
+  }
+
   // Observar: cambia estado + guarda observacion
   async observarPostulacion(id: number, observacion: string) {
     const result = await this.db
