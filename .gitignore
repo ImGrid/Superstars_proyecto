@@ -37,3 +37,16 @@ vps.txt
 backup_*.sql
 preview_*.html
 backups/
+
+# Capturas de depuracion con Playwright (no son codigo)
+playwright-images/
+
+# Imagenes fuente del disenador (16 MB, no se sirven desde el repo)
+material/
+
+# Notas sueltas de trabajo
+landing.txt
+texto.txt
+
+# Artefacto local de la herramienta de skills
+apps/web/skills-lock.json
