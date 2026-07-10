@@ -343,7 +343,7 @@ export function CriterioItem({
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         title="Eliminar criterio"
-        description={`Se eliminara "${criterio.nombre}" con todos sus sub-criterios y niveles. Esta accion no se puede deshacer.`}
+        description={`Se eliminará "${criterio.nombre}" con todos sus sub-criterios y niveles. Esta acción no se puede deshacer.`}
         confirmLabel="Eliminar"
         onConfirm={() => deleteMutation.mutate()}
         isLoading={deleteMutation.isPending}

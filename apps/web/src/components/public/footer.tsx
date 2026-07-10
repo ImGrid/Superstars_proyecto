@@ -43,7 +43,7 @@ export function PublicFooter() {
           {/* col 2: links rapidos */}
           <div>
             <h3 className="mb-3 text-sm font-semibold tracking-wider text-white uppercase">
-              Navegacion
+              Navegación
             </h3>
             <ul className="space-y-2">
               {quickLinks.map((link) => (

@@ -35,6 +35,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { StateBadge } from "@/components/shared/state-badge";
 import { EmptyState } from "@/components/shared/empty-state";
+import { RowAction } from "@/components/shared/row-actions";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import {
   postulacionQueries,
@@ -59,7 +60,7 @@ const ESTADOS_FILTRO = [
   { valor: "enviado", label: "Enviado" },
   { valor: "observado", label: "Observado" },
   { valor: "rechazado", label: "Rechazado" },
-  { valor: "en_evaluacion", label: "En evaluacion" },
+  { valor: "en_evaluacion", label: "En evaluación" },
   { valor: "calificado", label: "Calificado" },
   { valor: "ganador", label: "Ganador" },
   { valor: "no_seleccionado", label: "No seleccionado" },
@@ -180,7 +181,7 @@ export function PostulacionesTab({ convocatoriaId, categoriaId, estadoConvocator
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            <Icon icon="ph:file-text-duotone" className="size-5 text-secondary-400" />
+            <Icon icon="ph:file-text-duotone" className="size-5 text-primary-600" />
             Postulaciones ({postulaciones.length})
           </CardTitle>
           <Select value={filtroEstado} onValueChange={setFiltroEstado}>
@@ -202,10 +203,12 @@ export function PostulacionesTab({ convocatoriaId, categoriaId, estadoConvocator
             <Icon icon="ph:clipboard-text-duotone" className="size-5 text-blue-600 shrink-0" />
             <div className="flex-1">
               <p className="text-sm font-medium text-blue-800">
-                {pendientesRevision.length} calificacion{pendientesRevision.length !== 1 ? "es" : ""} pendiente{pendientesRevision.length !== 1 ? "s" : ""} de revision
+                {pendientesRevision.length}{" "}
+                {pendientesRevision.length !== 1 ? "calificaciones" : "calificación"}{" "}
+                pendiente{pendientesRevision.length !== 1 ? "s" : ""} de revisión
               </p>
               <p className="text-xs text-blue-600">
-                Los evaluadores han enviado sus calificaciones y esperan tu aprobacion.
+                Los evaluadores han enviado sus calificaciones y esperan tu aprobación.
               </p>
             </div>
             <div className="flex flex-wrap gap-1.5 shrink-0">
@@ -222,6 +225,41 @@ export function PostulacionesTab({ convocatoriaId, categoriaId, estadoConvocator
                   {c.empresaRazonSocial} — {c.evaluadorNombre}
                 </Button>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* banner-guia: hay postulaciones aun en evaluacion que bloquean elegir ganadores */}
+        {estadoConvocatoria === EstadoConvocatoria.EN_EVALUACION &&
+          pendientesEvaluacion.length > 0 && (
+          <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+            <Icon icon="ph:info-duotone" className="mt-0.5 size-5 shrink-0 text-amber-600" />
+            <div className="flex-1 space-y-2">
+              <div>
+                <p className="text-sm font-medium text-amber-800">
+                  Aún no puedes elegir ganadores
+                </p>
+                <p className="text-xs text-amber-700">
+                  {pendientesEvaluacion.length === 1
+                    ? "Esta postulación sigue en evaluación. Ábrela para asignarle un evaluador, revisar su calificación, o sacarla de la convocatoria si no se pudo evaluar."
+                    : `Estas ${pendientesEvaluacion.length} postulaciones siguen en evaluación. Ábrelas para asignarles un evaluador, revisar su calificación, o sacarlas de la convocatoria si no se pudieron evaluar.`}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {pendientesEvaluacion.map((p) => (
+                  <Button
+                    key={p.id}
+                    variant="outline"
+                    size="sm"
+                    className="gap-1 border-amber-300 text-xs text-amber-700 hover:bg-amber-100"
+                    onClick={() =>
+                      router.push(`/dashboard/convocatorias/${convocatoriaId}/postulaciones/${p.id}`)
+                    }
+                  >
+                    {p.empresaRazonSocial}
+                  </Button>
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -459,19 +497,15 @@ function PostulacionRow({
         {postulacion.puntajeFinal ? postulacion.puntajeFinal : "-"}
       </TableCell>
       <TableCell className="text-right">
-        <div className="flex items-center justify-end gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="gap-1"
-            onClick={(e) => {
-              e.stopPropagation();
-              onVerDetalle();
-            }}
-          >
-            <Eye className="size-3.5" />
-            Ver detalle
-          </Button>
+        <div
+          className="flex items-center justify-end gap-1"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <RowAction
+            icon={<Eye className="size-4" />}
+            label="Ver detalle"
+            onClick={onVerDetalle}
+          />
         </div>
       </TableCell>
     </TableRow>

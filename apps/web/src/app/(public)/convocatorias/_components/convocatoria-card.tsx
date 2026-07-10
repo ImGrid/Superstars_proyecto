@@ -71,7 +71,7 @@ export function ConvocatoriaCard({ convocatoria }: ConvocatoriaCardProps) {
 
         <CardContent className="p-5">
           {/* titulo */}
-          <h3 className="line-clamp-2 font-heading text-lg font-bold text-primary-800">
+          <h3 className="line-clamp-2 font-display text-lg leading-snug tracking-[0.01em] text-primary-800">
             {convocatoria.nombre}
           </h3>
 

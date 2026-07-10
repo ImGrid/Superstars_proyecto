@@ -2,20 +2,13 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { ArrowRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { Icon } from "@iconify/react";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-} from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/shared/page-header";
 import { StateBadge } from "@/components/shared/state-badge";
 import { EmptyState } from "@/components/shared/empty-state";
+import { StatTile } from "../_components/stat-tile";
 import { convocatoriaQueries } from "@/lib/api/query-keys";
 import type { ConvocatoriaResultadosResumenItem } from "@superstars/shared";
 
@@ -25,17 +18,10 @@ export default function ResultadosPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-5">
         <Skeleton className="h-8 w-48" />
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Skeleton className="h-24" />
-          <Skeleton className="h-24" />
-          <Skeleton className="h-24" />
-        </div>
-        <div className="grid gap-4 lg:grid-cols-2">
-          <Skeleton className="h-48" />
-          <Skeleton className="h-48" />
-        </div>
+        <Skeleton className="h-12 w-full max-w-md" />
+        <Skeleton className="h-48" />
       </div>
     );
   }
@@ -53,32 +39,35 @@ export default function ResultadosPage() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <PageHeader
         title="Resultados"
         description="Seguimiento de convocatorias en evaluación y resultados"
       />
 
-      {/* resumen global */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        <MiniStat
-          icon={<Icon icon="ph:chart-line-up-duotone" className="size-5 text-primary-600" />}
+      {/* resumen: mismos KPIs compactos que los dashboards (estilo consistente) */}
+      <div className="grid gap-3 sm:grid-cols-3">
+        <StatTile
           label="En evaluación"
-          value={String(enEvaluacion)}
+          value={enEvaluacion}
+          tone="primary"
+          icon={<Icon icon="ph:chart-line-up-duotone" className="size-5" />}
         />
-        <MiniStat
-          icon={<Icon icon="ph:check-circle-duotone" className="size-5 text-secondary-600" />}
+        <StatTile
           label="Finalizados"
-          value={String(finalizados)}
+          value={finalizados}
+          tone="success"
+          icon={<Icon icon="ph:check-circle-duotone" className="size-5" />}
         />
-        <MiniStat
-          icon={<Icon icon="ph:users-three-duotone" className="size-5 text-primary-600" />}
+        <StatTile
           label="Postulaciones calificadas"
-          value={String(totalCalificadas)}
+          value={totalCalificadas}
+          tone="neutral"
+          icon={<Icon icon="ph:users-three-duotone" className="size-5" />}
         />
       </div>
 
-      {/* lista de convocatorias */}
+      {/* lista de convocatorias como tabla compacta (fila clickeable -> ranking) */}
       {convocatorias.length === 0 ? (
         <EmptyState
           icon="ph:chart-line-up-duotone"
@@ -86,29 +75,45 @@ export default function ResultadosPage() {
           description="No hay convocatorias en evaluación o con resultados publicados."
         />
       ) : (
-        <div className="grid gap-4 lg:grid-cols-2">
-          {convocatorias.map(convocatoria => (
-            <ConvocatoriaCard
-              key={convocatoria.id}
-              convocatoria={convocatoria}
-              onVerRanking={() =>
-                router.push(`/dashboard/resultados/${convocatoria.id}`)
-              }
-            />
-          ))}
+        <div className="overflow-hidden rounded-lg border border-secondary-100">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-secondary-100 bg-secondary-50 text-left text-xs uppercase tracking-wide text-secondary-500">
+                  <th className="px-4 py-2.5 font-medium">Convocatoria</th>
+                  <th className="px-4 py-2.5 font-medium">Estado</th>
+                  <th className="px-4 py-2.5 text-center font-medium">Ganadores</th>
+                  <th className="px-4 py-2.5 font-medium">Calificadas</th>
+                  <th className="px-4 py-2.5 text-right font-medium">Promedio</th>
+                  <th className="w-10 px-4 py-2.5"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {convocatorias.map((convocatoria) => (
+                  <ConvocatoriaRow
+                    key={convocatoria.id}
+                    convocatoria={convocatoria}
+                    onClick={() =>
+                      router.push(`/dashboard/resultados/${convocatoria.id}`)
+                    }
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
   );
 }
 
-// card individual por convocatoria
-function ConvocatoriaCard({
+// fila de convocatoria (toda la fila lleva al ranking)
+function ConvocatoriaRow({
   convocatoria,
-  onVerRanking,
+  onClick,
 }: {
   convocatoria: ConvocatoriaResultadosResumenItem;
-  onVerRanking: () => void;
+  onClick: () => void;
 }) {
   const progreso =
     convocatoria.totalPostulaciones > 0
@@ -118,96 +123,53 @@ function ConvocatoriaCard({
       : 0;
 
   return (
-    <Card className="flex flex-col">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-2">
-          <CardTitle className="text-base leading-snug">
-            {convocatoria.nombre}
-          </CardTitle>
-          <StateBadge tipo="convocatoria" valor={convocatoria.estado} />
-        </div>
-        <p className="text-sm text-secondary-500">
-          {convocatoria.totalGanadores}{" "}
-          {convocatoria.totalGanadores === 1 ? "ganador" : "ganadores"}
-        </p>
-      </CardHeader>
-
-      <CardContent className="flex-1 space-y-3">
-        {/* progreso de calificaciones */}
-        <div>
-          <div className="mb-1 flex items-center justify-between text-sm">
-            <span className="text-secondary-600">Postulaciones calificadas</span>
-            <span className="font-medium text-secondary-900">
-              {convocatoria.totalCalificadas} / {convocatoria.totalPostulaciones}
-            </span>
-          </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-secondary-100">
+    <tr
+      onClick={onClick}
+      className="cursor-pointer border-b border-secondary-50 last:border-0 hover:bg-secondary-50/60"
+    >
+      <td className="px-4 py-3">
+        <span className="font-medium text-primary-700">{convocatoria.nombre}</span>
+      </td>
+      <td className="px-4 py-3">
+        <StateBadge tipo="convocatoria" valor={convocatoria.estado} />
+      </td>
+      <td className="px-4 py-3 text-center tabular-nums">
+        {convocatoria.totalGanadores > 0 ? (
+          <span className="font-semibold text-secondary-900">
+            {convocatoria.totalGanadores}
+          </span>
+        ) : (
+          <span className="text-secondary-300">—</span>
+        )}
+      </td>
+      <td className="px-4 py-3">
+        <div className="flex items-center gap-2">
+          <div className="h-1.5 w-16 overflow-hidden rounded-full bg-secondary-100">
             <div
-              className="h-full rounded-full bg-primary-600 transition-all"
+              className="h-full rounded-full bg-primary-600"
               style={{ width: `${progreso}%` }}
             />
           </div>
+          <span className="text-xs tabular-nums text-secondary-500">
+            {convocatoria.totalCalificadas} / {convocatoria.totalPostulaciones}
+          </span>
         </div>
-
-        {/* puntaje promedio */}
-        {convocatoria.promedioCalificadas !== null && (
-          <div className="flex items-center gap-2 text-sm">
-            <Icon icon="ph:star-duotone" className="size-4 text-amber-500" />
-            <span className="text-secondary-600">Promedio:</span>
+      </td>
+      <td className="px-4 py-3 text-right tabular-nums">
+        {convocatoria.promedioCalificadas !== null ? (
+          <>
             <span className="font-semibold text-secondary-900">
-              {convocatoria.promedioCalificadas.toFixed(1)} pts
-            </span>
-          </div>
+              {convocatoria.promedioCalificadas.toFixed(1)}
+            </span>{" "}
+            <span className="text-xs text-secondary-400">pts</span>
+          </>
+        ) : (
+          <span className="text-secondary-300">—</span>
         )}
-
-        {/* ganadores si los hay */}
-        {convocatoria.totalGanadores > 0 && (
-          <div className="flex items-center gap-2 text-sm">
-            <Icon icon="ph:trophy-duotone" className="size-4 text-amber-500" />
-            <span className="text-secondary-600">Ganadores seleccionados:</span>
-            <span className="font-semibold text-secondary-900">
-              {convocatoria.totalGanadores}
-            </span>
-          </div>
-        )}
-      </CardContent>
-
-      <CardFooter className="pt-3">
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full gap-1"
-          onClick={onVerRanking}
-        >
-          Ver ranking
-          <ArrowRight className="size-3" />
-        </Button>
-      </CardFooter>
-    </Card>
-  );
-}
-
-// stat card pequeno
-function MiniStat({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}) {
-  return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium text-secondary-600">
-          {label}
-        </CardTitle>
-        {icon}
-      </CardHeader>
-      <CardContent>
-        <p className="text-2xl font-bold text-secondary-900">{value}</p>
-      </CardContent>
-    </Card>
+      </td>
+      <td className="px-4 py-3 text-right">
+        <ChevronRight className="ml-auto size-4 text-secondary-400" />
+      </td>
+    </tr>
   );
 }

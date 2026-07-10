@@ -1,19 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Eye, MoreHorizontal, Pencil, Trash2, CalendarClock } from "lucide-react";
+import { Eye, Pencil, Trash2, CalendarClock } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { EstadoConvocatoria, type ConvocatoriaResponse } from "@superstars/shared";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { RowActions, RowAction } from "@/components/shared/row-actions";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { ModificarFechasDialog } from "./modificar-fechas-dialog";
 import { deleteConvocatoria } from "@/lib/api/convocatoria.api";
@@ -26,7 +18,6 @@ interface ConvocatoriaActionsProps {
 export function ConvocatoriaActions({ convocatoria }: ConvocatoriaActionsProps) {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [fechasOpen, setFechasOpen] = useState(false);
-  const router = useRouter();
   const queryClient = useQueryClient();
 
   const isBorrador = convocatoria.estado === EstadoConvocatoria.BORRADOR;
@@ -49,46 +40,35 @@ export function ConvocatoriaActions({ convocatoria }: ConvocatoriaActionsProps) 
 
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="size-8">
-            <MoreHorizontal className="size-4" />
-            <span className="sr-only">Acciones</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem
-            onClick={() => router.push(`/dashboard/convocatorias/${convocatoria.id}`)}
-          >
-            <Eye className="size-4" />
-            Ver detalle
-          </DropdownMenuItem>
-          {canEditFechas && (
-            <DropdownMenuItem onClick={() => setFechasOpen(true)}>
-              <CalendarClock className="size-4" />
-              Modificar fechas
-            </DropdownMenuItem>
-          )}
-          {isBorrador && (
-            <>
-              <DropdownMenuItem
-                onClick={() => router.push(`/dashboard/convocatorias/${convocatoria.id}/editar`)}
-              >
-                <Pencil className="size-4" />
-                Editar
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => setDeleteOpen(true)}
-                className="text-destructive focus:text-destructive"
-              >
-                <Trash2 className="size-4" />
-                Eliminar
-              </DropdownMenuItem>
-            </>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <RowActions>
+        <RowAction
+          icon={<Eye className="size-4" />}
+          label="Ver detalle"
+          href={`/dashboard/convocatorias/${convocatoria.id}`}
+        />
+        {canEditFechas && (
+          <RowAction
+            icon={<CalendarClock className="size-4" />}
+            label="Modificar fechas"
+            onClick={() => setFechasOpen(true)}
+          />
+        )}
+        {isBorrador && (
+          <RowAction
+            icon={<Pencil className="size-4" />}
+            label="Editar"
+            href={`/dashboard/convocatorias/${convocatoria.id}/editar`}
+          />
+        )}
+        {isBorrador && (
+          <RowAction
+            icon={<Trash2 className="size-4" />}
+            label="Eliminar"
+            onClick={() => setDeleteOpen(true)}
+            destructive
+          />
+        )}
+      </RowActions>
 
       {isBorrador && (
         <ConfirmDialog

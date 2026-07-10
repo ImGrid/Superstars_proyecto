@@ -9,6 +9,7 @@ import { FormSkeleton } from "@/components/shared/loading-skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { empresaQueries } from "@/lib/api/query-keys";
 import { EmpresaForm } from "./_components/empresa-form";
+import { EmpresaHero } from "./_components/empresa-hero";
 
 export default function MiEmpresaPage() {
   return (
@@ -61,14 +62,14 @@ function MiEmpresaContent() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Mi Empresa"
-        description={
-          isCreating
-            ? "Registra los datos de tu empresa para poder postularte a convocatorias."
-            : "Actualiza los datos de tu empresa."
-        }
-      />
+      {isCreating ? (
+        <PageHeader
+          title="Mi Empresa"
+          description="Registra los datos de tu empresa para poder postularte a convocatorias."
+        />
+      ) : (
+        <EmpresaHero empresa={data} />
+      )}
 
       {isCreating && (
         <div className="flex items-center gap-3 rounded-lg border border-primary-200 bg-primary-50 p-4">

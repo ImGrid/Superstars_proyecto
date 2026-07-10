@@ -48,7 +48,9 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline'",
               `img-src 'self' data: blob: ${apiOrigin}`,
               "font-src 'self'",
-              `connect-src 'self' ${apiOrigin} https://api.iconify.design`,
+              // Iconify balancea entre sus 3 CDNs oficiales; hay que permitir los 3
+              // o algunos iconos fallan por CSP (api.iconify.design solo no alcanza).
+              `connect-src 'self' ${apiOrigin} https://api.iconify.design https://api.simplesvg.com https://api.unisvg.com`,
               "frame-ancestors 'none'",
             ].join("; "),
           },

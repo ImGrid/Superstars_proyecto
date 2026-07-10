@@ -48,7 +48,7 @@ export function PublicacionCard({ publicacion }: PublicacionCardProps) {
           </div>
 
           {/* titulo */}
-          <h3 className="line-clamp-2 font-heading text-base font-bold text-primary-800">
+          <h3 className="line-clamp-2 font-display text-base leading-snug tracking-[0.01em] text-primary-800">
             {publicacion.titulo}
           </h3>
 

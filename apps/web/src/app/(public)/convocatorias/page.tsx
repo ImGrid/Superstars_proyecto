@@ -48,7 +48,7 @@ export default function ConvocatoriasPage() {
       {/* header */}
       <section className="bg-primary-800 py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h1 className="font-heading text-3xl font-bold text-white sm:text-4xl">
+          <h1 className="font-display text-3xl leading-[1.3] tracking-wide text-white uppercase sm:text-4xl">
             Convocatorias
           </h1>
           <p className="mt-3 text-lg text-primary-200">

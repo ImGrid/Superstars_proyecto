@@ -44,48 +44,56 @@ interface Slide {
   eyebrow: string;
   title: ReactNode;
   subtitle: string;
+  // llamada a la accion propia de cada slide
+  cta: { label: string; href: string };
 }
 
 const slides: Slide[] = [
   {
-    image: "/images/hero-vendedora.webp",
-    alt: "Mujer mayor andina vendiendo flores tejidas a crochet en una plaza de Bolivia",
-    overlay: [0.92, 0.72, 0.5],
-    eyebrow: "Convocatoria 2026 abierta",
+    image: "/images/banner-agricultura.webp",
+    alt: "Productora boliviana sonriendo junto a sacos de papa recien cosechada en el campo",
+    overlay: [0.92, 0.72, 0.45],
+    eyebrow: "Beneficios del programa",
     title: (
       <>
-        Impulsa tu empresa al{" "}
-        <span className="text-orange-400">siguiente nivel</span>
+        Impulsamos tu empresa en{" "}
+        <span className="text-orange-400">cada etapa</span> de crecimiento
       </>
     ),
     subtitle:
-      "Participa en SUPERIMPACT360 y accede a financiamiento, mentoría y visibilidad para tu emprendimiento con impacto en Bolivia.",
+      "SUPERIMPACT360 te brinda financiamiento, conocimiento y acompañamiento para que tu emprendimiento crezca y genere un triple impacto en Bolivia.",
+    cta: { label: "Postularme ahora", href: "/auth/registro" },
   },
   {
-    image: "/images/hero-telar.webp",
-    alt: "Manos tejiendo en telar tradicional con textiles andinos coloridos",
-    overlay: [0.94, 0.78, 0.55],
-    eyebrow: "Triple impacto",
+    image: "/images/banner-energia.webp",
+    alt: "Pareja aymara sosteniendo paneles solares y un equipo de energia limpia frente a su casa",
+    overlay: [0.94, 0.76, 0.5],
+    eyebrow: "Casos de éxito",
     title: (
       <>
-        Negocios que <span className="text-orange-400">transforman</span> Bolivia
+        Historias que inspiran,{" "}
+        <span className="text-orange-400">impactos</span> que transforman
       </>
     ),
     subtitle:
-      "Apoyamos empresas con propuestas innovadoras que generan valor económico, social y ambiental al mismo tiempo.",
+      "Conoce a las empresas ganadoras de ediciones anteriores y descubre el impacto positivo que han generado en Bolivia.",
+    cta: { label: "Resultados e impactos", href: "/resultados" },
   },
   {
-    image: "/images/hero-asamblea.webp",
-    alt: "Mujer indígena con sombrero rosa y trenza, de espaldas, en una reunión comunitaria",
-    overlay: [0.88, 0.62, 0.4],
-    eyebrow: "Equidad e inclusión",
+    // la foto original tiene a la protagonista a la izquierda, justo donde va el
+    // texto. Se guarda espejada para que quede a la derecha, como las otras dos
+    image: "/images/banner-laboratorio.webp",
+    alt: "Quimica boliviana sonriendo en el laboratorio de su empresa, rodeada de equipos de destilacion",
+    overlay: [0.92, 0.7, 0.4],
+    eyebrow: "Convocatoria abierta",
     title: (
       <>
-        Crecimiento con <span className="text-orange-400">propósito</span>
+        5.ª edición <span className="text-orange-400">SuperStar</span>
       </>
     ),
     subtitle:
-      "Apoyamos modelos de negocio que incluyen a mujeres, jóvenes y comunidades en toda su cadena de valor.",
+      "Postula tu empresa a la convocatoria 2026 y compite por financiamiento, mentoría y visibilidad en todo el país.",
+    cta: { label: "Postular ahora", href: "/auth/registro" },
   },
 ];
 
@@ -211,9 +219,8 @@ export function HeroCarousel() {
               alt={slide.alt}
               fill
               sizes="100vw"
-              // mobile: sujeto al centro de la foto (los 3 frames tienen el sujeto
-              // hacia el centro/izquierda). Desktop: object-right para Z-pattern
-              // (texto izquierda + sujeto derecha)
+              // mobile: sujeto al centro de la foto. Desktop: object-right para
+              // Z-pattern (texto izquierda + sujeto derecha en los 3 slides)
               className="object-cover object-center md:object-right"
               priority={i === 0}
             />
@@ -250,7 +257,7 @@ export function HeroCarousel() {
               <Badge className="mb-6 border-orange-500/30 bg-orange-500/10 px-3 py-1 text-sm text-orange-300">
                 {slide.eyebrow}
               </Badge>
-              <h1 className="font-heading text-4xl leading-tight font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+              <h1 className="font-display text-4xl leading-[1.15] tracking-[0.01em] text-white sm:text-5xl lg:text-6xl">
                 {slide.title}
               </h1>
               <p className="mt-6 text-lg leading-relaxed text-primary-200 sm:text-xl">
@@ -260,9 +267,10 @@ export function HeroCarousel() {
           ))}
         </div>
 
-        {/* CTAs fijos — los mismos en los 3 slides. Pause-on-hover/focus aqui.
-            w-fit para que la zona de hover solo abarque los botones reales y no
-            todo el ancho del padre (que sino dispara pausa "a la misma altura") */}
+        {/* CTA principal propio de cada slide + secundario fijo. Pause-on-hover/
+            focus aqui. w-fit para que la zona de hover solo abarque los botones
+            reales y no todo el ancho del padre (que sino dispara pausa "a la
+            misma altura") */}
         <div
           className="relative mt-8 flex w-fit flex-wrap gap-4"
           onMouseEnter={handleZoneMouseEnter}
@@ -270,13 +278,9 @@ export function HeroCarousel() {
           onFocus={handleZoneFocus}
           onBlur={handleZoneBlur}
         >
-          <Button
-            asChild
-            size="lg"
-            className="bg-orange-600 text-white hover:bg-orange-700"
-          >
-            <Link href="/auth/registro">
-              Participar ahora
+          <Button asChild size="lg" variant="cta">
+            <Link href={slides[current].cta.href}>
+              {slides[current].cta.label}
               <ArrowRight className="size-4" />
             </Link>
           </Button>

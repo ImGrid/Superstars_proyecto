@@ -251,7 +251,7 @@ export function SubCriterioItem({
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         title="Eliminar sub-criterio"
-        description={`Se eliminara "${subCriterio.nombre}" y sus 3 niveles de evaluacion. Esta accion no se puede deshacer.`}
+        description={`Se eliminará "${subCriterio.nombre}" y sus 3 niveles de evaluación. Esta acción no se puede deshacer.`}
         confirmLabel="Eliminar"
         onConfirm={() => deleteMutation.mutate()}
         isLoading={deleteMutation.isPending}

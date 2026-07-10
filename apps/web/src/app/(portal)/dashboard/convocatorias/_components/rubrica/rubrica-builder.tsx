@@ -205,7 +205,7 @@ export function RubricaBuilder({
           <Info className="mx-auto size-8 text-secondary-300" />
           <p className="mt-2 text-sm text-secondary-500">
             No hay criterios definidos. Agrega el primer criterio para comenzar
-            a construir la rubrica.
+            a construir la rúbrica.
           </p>
         </div>
       ) : (

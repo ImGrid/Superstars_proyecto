@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
+import type { ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Save } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { toast } from "sonner";
 import {
   createEmpresaSchema,
@@ -18,6 +20,7 @@ import type { CreateEmpresaDto, EmpresaResponse } from "@superstars/shared";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -71,6 +74,108 @@ function empresaToFormValues(emp: EmpresaResponse): EmpresaFormValues {
   };
 }
 
+// un campo se considera "lleno" si tiene valor real (los numeros 0 cuentan)
+function lleno(v: unknown): boolean {
+  if (v === null || v === undefined) return false;
+  if (typeof v === "string") return v.trim() !== "";
+  return true;
+}
+
+// colores del icono de cada seccion (dentro de los tokens del sistema)
+const COLORES_SECCION = {
+  primary: "bg-primary-50 text-primary-600",
+  info: "bg-info-50 text-info-600",
+  orange: "bg-orange-50 text-orange-600",
+} as const;
+
+// cabecera de seccion: icono en cuadro de color + titulo + microcopy + estado
+function SeccionHeader({
+  icon,
+  color,
+  title,
+  subtitle,
+  faltan,
+}: {
+  icon: string;
+  color: keyof typeof COLORES_SECCION;
+  title: string;
+  subtitle: string;
+  faltan: number;
+}) {
+  return (
+    <div className="flex items-center gap-3">
+      <div
+        className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${COLORES_SECCION[color]}`}
+      >
+        <Icon icon={icon} className="size-5" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <CardTitle className="text-base">{title}</CardTitle>
+        <CardDescription className="mt-0.5">{subtitle}</CardDescription>
+      </div>
+      {faltan === 0 ? (
+        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-success-50 px-2.5 py-1 text-xs font-semibold text-success-700">
+          <Icon icon="ph:check-circle-duotone" className="size-3.5" />
+          Completa
+        </span>
+      ) : (
+        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-orange-50 px-2.5 py-1 text-xs font-semibold text-orange-700">
+          <Icon icon="ph:warning-circle-duotone" className="size-3.5" />
+          {faltan === 1 ? "Falta 1 dato" : `Faltan ${faltan} datos`}
+        </span>
+      )}
+    </div>
+  );
+}
+
+// etiqueta de campo con marca de obligatorio (*) u opcional
+function Etiqueta({
+  children,
+  requerido,
+}: {
+  children: ReactNode;
+  requerido?: boolean;
+}) {
+  return (
+    <FormLabel className="flex items-center gap-1.5">
+      <span>{children}</span>
+      {requerido ? (
+        <span className="text-error-600">*</span>
+      ) : (
+        <span className="text-[11px] font-normal text-secondary-400">
+          (opcional)
+        </span>
+      )}
+    </FormLabel>
+  );
+}
+
+// campos que pertenecen a cada seccion (para el contador de "faltan")
+const CAMPOS_CONTACTO = [
+  "contactoCargo",
+  "contactoTelefono",
+  "contactoGenero",
+  "contactoFechaNacimiento",
+] as const;
+const CAMPOS_LEGALES = [
+  "razonSocial",
+  "nit",
+  "registroSeprec",
+  "tipoEmpresa",
+] as const;
+const CAMPOS_GENERALES = [
+  "numeroSocios",
+  "rubro",
+  "numEmpleadosMujeres",
+  "numEmpleadosHombres",
+  "anioFundacion",
+  "departamento",
+  "ciudad",
+  "direccion",
+  "telefono",
+  "descripcion",
+] as const;
+
 interface EmpresaFormProps {
   initialData?: EmpresaResponse;
 }
@@ -111,6 +216,13 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
       form.reset(empresaToFormValues(initialData));
     }
   }, [initialData, form]);
+
+  // valores en vivo para el contador de datos faltantes de cada seccion
+  const valores = form.watch();
+  function faltanEn(campos: readonly string[]): number {
+    return campos.filter((k) => !lleno((valores as Record<string, unknown>)[k]))
+      .length;
+  }
 
   // mutacion crear
   const createMutation = useMutation({
@@ -172,14 +284,21 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form
+        id="datos-empresa"
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-6 scroll-mt-6"
+      >
         {/* seccion 1: persona de contacto */}
         <Card>
           <CardHeader>
-            <CardTitle>Persona de contacto</CardTitle>
-            <CardDescription>
-              Datos de la persona que realiza la postulación.
-            </CardDescription>
+            <SeccionHeader
+              icon="ph:user-circle-duotone"
+              color="primary"
+              title="Persona de contacto"
+              subtitle="¿Con quién nos comunicamos sobre tus postulaciones?"
+              faltan={faltanEn(CAMPOS_CONTACTO)}
+            />
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             <FormField
@@ -187,7 +306,7 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
               name="contactoCargo"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Puesto/Cargo</FormLabel>
+                  <Etiqueta>Puesto/Cargo</Etiqueta>
                   <FormControl>
                     <Input placeholder="Cargo en la empresa" {...field} value={field.value ?? ""} />
                   </FormControl>
@@ -200,10 +319,13 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
               name="contactoTelefono"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Teléfono de contacto</FormLabel>
+                  <Etiqueta>Teléfono de contacto</Etiqueta>
                   <FormControl>
                     <Input placeholder="Número de contacto" {...field} value={field.value ?? ""} />
                   </FormControl>
+                  <FormDescription>
+                    Solo lo usamos para avisarte del resultado de tu postulación.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -213,7 +335,7 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
               name="contactoGenero"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Género</FormLabel>
+                  <Etiqueta>Género</Etiqueta>
                   <Select onValueChange={field.onChange} value={field.value ?? ""}>
                     <FormControl>
                       <SelectTrigger className="w-full">
@@ -235,7 +357,7 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
               name="contactoFechaNacimiento"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Fecha de nacimiento</FormLabel>
+                  <Etiqueta>Fecha de nacimiento</Etiqueta>
                   <FormControl>
                     <Input
                       type="date"
@@ -253,10 +375,13 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
         {/* seccion 2: datos legales */}
         <Card>
           <CardHeader>
-            <CardTitle>Datos legales</CardTitle>
-            <CardDescription>
-              Información jurídica de la empresa.
-            </CardDescription>
+            <SeccionHeader
+              icon="ph:shield-check-duotone"
+              color="info"
+              title="Datos legales"
+              subtitle="Con estos datos validamos que tu empresa cumple los requisitos."
+              faltan={faltanEn(CAMPOS_LEGALES)}
+            />
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             <FormField
@@ -264,7 +389,7 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
               name="razonSocial"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Razón social *</FormLabel>
+                  <Etiqueta requerido>Razón social</Etiqueta>
                   <FormControl>
                     <Input placeholder="Nombre registrado jurídicamente" {...field} />
                   </FormControl>
@@ -277,7 +402,7 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
               name="nit"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>NIT</FormLabel>
+                  <Etiqueta>NIT</Etiqueta>
                   <FormControl>
                     <Input
                       placeholder="Número de identificación tributaria"
@@ -285,6 +410,9 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
                       value={field.value ?? ""}
                     />
                   </FormControl>
+                  <FormDescription>
+                    Puedes completarlo después; no es obligatorio para registrarte.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -294,7 +422,7 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
               name="registroSeprec"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Registro SEPREC</FormLabel>
+                  <Etiqueta>Registro SEPREC</Etiqueta>
                   <FormControl>
                     <Input placeholder="Número de registro" {...field} value={field.value ?? ""} />
                   </FormControl>
@@ -307,7 +435,7 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
               name="tipoEmpresa"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tipo de empresa</FormLabel>
+                  <Etiqueta>Tipo de empresa</Etiqueta>
                   <Select onValueChange={field.onChange} value={field.value ?? ""}>
                     <FormControl>
                       <SelectTrigger className="w-full">
@@ -330,10 +458,13 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
         {/* seccion 3: datos generales */}
         <Card>
           <CardHeader>
-            <CardTitle>Datos generales</CardTitle>
-            <CardDescription>
-              Información sobre la empresa, su ubicación y actividad.
-            </CardDescription>
+            <SeccionHeader
+              icon="ph:buildings-duotone"
+              color="orange"
+              title="Datos generales"
+              subtitle="Cuéntanos de tu empresa para que el jurado te conozca mejor."
+              faltan={faltanEn(CAMPOS_GENERALES)}
+            />
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             <FormField
@@ -341,7 +472,7 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
               name="numeroSocios"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Número de socios</FormLabel>
+                  <Etiqueta>Número de socios</Etiqueta>
                   <Select onValueChange={field.onChange} value={field.value ?? ""}>
                     <FormControl>
                       <SelectTrigger className="w-full">
@@ -363,7 +494,7 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
               name="rubro"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Rubro o sector</FormLabel>
+                  <Etiqueta>Rubro o sector</Etiqueta>
                   <Select onValueChange={field.onChange} value={field.value ?? ""}>
                     <FormControl>
                       <SelectTrigger className="w-full">
@@ -385,7 +516,7 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
               name="numEmpleadosMujeres"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Empleadas mujeres</FormLabel>
+                  <Etiqueta>Empleadas mujeres</Etiqueta>
                   <FormControl>
                     <Input
                       type="number"
@@ -408,7 +539,7 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
               name="numEmpleadosHombres"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Empleados hombres</FormLabel>
+                  <Etiqueta>Empleados hombres</Etiqueta>
                   <FormControl>
                     <Input
                       type="number"
@@ -431,7 +562,7 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
               name="anioFundacion"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Año de fundación</FormLabel>
+                  <Etiqueta>Año de fundación</Etiqueta>
                   <FormControl>
                     <Input
                       type="number"
@@ -455,7 +586,7 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
               name="departamento"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Departamento</FormLabel>
+                  <Etiqueta>Departamento</Etiqueta>
                   <Select onValueChange={field.onChange} value={field.value ?? ""}>
                     <FormControl>
                       <SelectTrigger className="w-full">
@@ -477,7 +608,7 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
               name="ciudad"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Ciudad</FormLabel>
+                  <Etiqueta>Ciudad</Etiqueta>
                   <FormControl>
                     <Input placeholder="Ciudad donde opera" {...field} value={field.value ?? ""} />
                   </FormControl>
@@ -490,7 +621,7 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
               name="direccion"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Dirección</FormLabel>
+                  <Etiqueta>Dirección</Etiqueta>
                   <FormControl>
                     <Input placeholder="Dirección de la empresa" {...field} value={field.value ?? ""} />
                   </FormControl>
@@ -503,7 +634,7 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
               name="telefono"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Teléfono</FormLabel>
+                  <Etiqueta>Teléfono</Etiqueta>
                   <FormControl>
                     <Input placeholder="Número de teléfono" {...field} value={field.value ?? ""} />
                   </FormControl>
@@ -516,7 +647,7 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
               name="descripcion"
               render={({ field }) => (
                 <FormItem className="sm:col-span-2">
-                  <FormLabel>Descripción de la empresa</FormLabel>
+                  <Etiqueta>Descripción de la empresa</Etiqueta>
                   <FormControl>
                     <Textarea
                       placeholder="Explique brevemente a qué se dedica su empresa, qué necesidad atiende en el mercado y qué propuesta innovadora ofrece. (Máximo 200 palabras)"
@@ -525,6 +656,9 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
                       value={field.value ?? ""}
                     />
                   </FormControl>
+                  <FormDescription>
+                    Cuéntale al jurado a qué se dedica tu empresa y qué la hace especial.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

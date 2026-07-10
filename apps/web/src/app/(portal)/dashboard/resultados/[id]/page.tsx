@@ -3,64 +3,38 @@
 import { use } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import {
-  ArrowLeft,
-  Medal,
-  TrendingUp,
-  TrendingDown,
-} from "lucide-react";
-import { Icon } from "@iconify/react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-} from "recharts";
+import { ArrowLeft, Check, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StateBadge } from "@/components/shared/state-badge";
+import { RowActions, RowAction } from "@/components/shared/row-actions";
 import { convocatoriaQueries, categoriaQueries } from "@/lib/api/query-keys";
-import { formatMoney } from "@/lib/format";
+import { formatMoney, formatShortDate } from "@/lib/format";
 import type { PostulacionRankingItem } from "@superstars/shared";
 
-// colores por posicion en el ranking
-function getBarColor(estado: string, posicion: number | null): string {
-  if (estado === "ganador") return "#f59e0b"; // amber (ganador)
-  if (posicion === 1) return "#f59e0b";
-  if (posicion === 2) return "#94a3b8"; // silver
-  if (posicion === 3) return "#b45309"; // bronze
-  return "#3b5fa0"; // primary (resto)
-}
-
-// medalla para posicion
-function MedalIcon({ posicion }: { posicion: number }) {
-  if (posicion === 1)
-    return <Icon icon="ph:trophy-duotone" className="size-4 text-amber-500" />;
-  if (posicion === 2)
-    return <Medal className="size-4 text-slate-400" />;
-  if (posicion === 3)
-    return <Medal className="size-4 text-amber-700" />;
+// medalla compacta: circulo de color para el top 3, numero simple para el resto.
+// Combina numero + color para ser legible tambien sin distinguir el color.
+function MedalBadge({ posicion }: { posicion: number }) {
+  if (posicion <= 3) {
+    const estilo =
+      posicion === 1
+        ? "bg-amber-400 text-amber-950"
+        : posicion === 2
+          ? "bg-slate-300 text-slate-800"
+          : "bg-amber-700 text-white";
+    return (
+      <span
+        className={`inline-grid size-5 place-items-center rounded-full text-[11px] font-bold tabular-nums ${estilo}`}
+      >
+        {posicion}
+      </span>
+    );
+  }
   return (
-    <span className="flex size-4 items-center justify-center text-xs font-bold text-secondary-500">
+    <span className="inline-block w-5 text-center text-xs font-semibold tabular-nums text-secondary-400">
       {posicion}
     </span>
   );
-}
-
-// trunca el nombre de empresa para el eje Y del grafico
-function truncarNombre(nombre: string, max = 20): string {
-  return nombre.length > max ? nombre.slice(0, max) + "…" : nombre;
 }
 
 export default function RankingConvocatoriaPage({
@@ -83,14 +57,9 @@ export default function RankingConvocatoriaPage({
 
   if (isLoadingConv || isLoadingCats) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4">
         <Skeleton className="h-8 w-64" />
-        <div className="grid gap-4 sm:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-24" />
-          ))}
-        </div>
-        <Skeleton className="h-64" />
+        <Skeleton className="h-48" />
       </div>
     );
   }
@@ -115,12 +84,12 @@ export default function RankingConvocatoriaPage({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* navegacion de regreso */}
       <Button
         variant="ghost"
         size="sm"
-        className="gap-1 text-secondary-600"
+        className="-ml-2 gap-1 text-secondary-600"
         onClick={() => router.push("/dashboard/resultados")}
       >
         <ArrowLeft className="size-4" />
@@ -135,29 +104,27 @@ export default function RankingConvocatoriaPage({
         <StateBadge tipo="convocatoria" valor={convocatoria.estado} />
       </div>
 
-      {/* ranking por categoria */}
+      {/* ranking por categoria: secciones apiladas (sin tabs) */}
       {!categorias || categorias.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-sm text-secondary-500">
-              Esta convocatoria no tiene categorías.
-            </p>
-          </CardContent>
-        </Card>
+        <p className="rounded-lg border border-secondary-100 py-10 text-center text-sm text-secondary-500">
+          Esta convocatoria no tiene categorías.
+        </p>
       ) : (
-        categorias.map((cat) => (
-          <CategoriaRankingBlock
-            key={cat.id}
-            convocatoriaId={convocatoriaId}
-            categoriaId={cat.id}
-          />
-        ))
+        <div className="space-y-6">
+          {categorias.map((cat) => (
+            <CategoriaRankingBlock
+              key={cat.id}
+              convocatoriaId={convocatoriaId}
+              categoriaId={cat.id}
+            />
+          ))}
+        </div>
       )}
     </div>
   );
 }
 
-// bloque de ranking de una categoria: estadisticas + tabla + grafico
+// bloque de ranking de una categoria: encabezado + stat strip + ganadores + tabla
 function CategoriaRankingBlock({
   convocatoriaId,
   categoriaId,
@@ -170,169 +137,192 @@ function CategoriaRankingBlock({
   );
 
   if (isLoading) {
-    return <Skeleton className="h-64 w-full" />;
+    return <Skeleton className="h-40 w-full" />;
   }
 
   if (!data) return null;
 
-  // datos del grafico: solo calificadas
-  const datosGrafico = [...data.ranking]
-    .filter((r) => r.puntajeFinal !== null)
-    .map((r) => ({
-      nombre: truncarNombre(r.empresaNombre),
-      puntaje: r.puntajeFinal ?? 0,
-      estado: r.estado,
-      posicion: r.posicionFinal,
-    }));
+  // los ganadores para la franja de arriba (conclusion primero: quien gano)
+  const ganadores = data.ranking.filter((r) => r.estado === "ganador");
 
   return (
-    <section className="space-y-4 border-t border-secondary-100 pt-6">
-      {/* encabezado de la categoria */}
-      <div className="flex flex-wrap items-center gap-3">
+    <section className="border-t border-secondary-100 pt-5">
+      {/* encabezado de categoria en una linea: nombre + monto + ganadores + estado
+          + stat strip a la derecha (reemplaza las 4 tarjetas KPI) */}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <h2 className="font-heading text-lg font-semibold text-secondary-900">
           {data.categoriaNombre}
         </h2>
-        <Badge variant="outline" className="text-secondary-600">
-          {formatMoney(data.monto)} · {data.numeroGanadores} ganadores
-        </Badge>
+        <span className="text-sm text-secondary-500">
+          {formatMoney(data.monto)} ·{" "}
+          {data.numeroGanadores}{" "}
+          {data.numeroGanadores === 1 ? "ganador" : "ganadores"}
+        </span>
         {data.resuelta ? (
-          <Badge className="border-emerald-300 bg-emerald-50 text-emerald-700">
+          <span className="inline-flex items-center gap-1 rounded-full bg-success-50 px-2.5 py-0.5 text-xs font-medium text-success-700">
+            <Check className="size-3" />
             Ganadores seleccionados
-          </Badge>
+          </span>
         ) : (
-          <Badge variant="outline" className="border-amber-300 text-amber-600">
+          <span className="inline-flex items-center rounded-full border border-warning-500 px-2.5 py-0.5 text-xs font-medium text-warning-600">
             Pendiente de selección
-          </Badge>
+          </span>
         )}
+
+        {/* stat strip inline: solo lo que la tabla no dice de un vistazo */}
+        <span className="ml-auto text-sm text-secondary-500 tabular-nums">
+          <span className="font-medium text-secondary-900">
+            {data.totalCalificadas}
+          </span>{" "}
+          calificadas
+          {data.promedioCalificadas !== null && (
+            <>
+              {" · promedio "}
+              <span className="font-medium text-secondary-900">
+                {data.promedioCalificadas.toFixed(1)}
+              </span>{" "}
+              pts
+            </>
+          )}
+        </span>
       </div>
 
-      {/* stats de la categoria */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <MiniStat
-          icon={<Icon icon="ph:users-three-duotone" className="size-5 text-primary-600" />}
-          label="Postulaciones calificadas"
-          value={String(data.totalCalificadas)}
-        />
-        <MiniStat
-          icon={<Icon icon="ph:star-duotone" className="size-5 text-amber-500" />}
-          label="Promedio"
-          value={
-            data.promedioCalificadas !== null
-              ? `${data.promedioCalificadas.toFixed(1)} pts`
-              : "—"
-          }
-        />
-        <MiniStat
-          icon={<TrendingUp className="size-5 text-success-600" />}
-          label="Puntaje máximo"
-          value={data.maxPuntaje !== null ? `${data.maxPuntaje.toFixed(1)} pts` : "—"}
-        />
-        <MiniStat
-          icon={<TrendingDown className="size-5 text-secondary-400" />}
-          label="Puntaje mínimo"
-          value={data.minPuntaje !== null ? `${data.minPuntaje.toFixed(1)} pts` : "—"}
-        />
-      </div>
-
-      {/* tabla de ranking */}
-      {data.ranking.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-sm text-secondary-500">
-              No hay postulaciones calificadas en esta categoría.
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Ranking de empresas</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <RankingTable rows={data.ranking} />
-          </CardContent>
-        </Card>
+      {/* franja de ganadores (solo si ya se resolvio y hay ganadores) */}
+      {data.resuelta && ganadores.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {ganadores.map((g) => (
+            <span
+              key={g.postulacionId}
+              className="inline-flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-sm"
+            >
+              <span className="font-bold tabular-nums text-amber-600">
+                {g.posicionFinal}º
+              </span>
+              <span className="font-medium text-secondary-900">
+                {g.empresaNombre}
+              </span>
+              {g.puntajeFinal !== null && (
+                <span className="font-semibold tabular-nums text-secondary-900">
+                  {g.puntajeFinal.toFixed(1)}
+                </span>
+              )}
+            </span>
+          ))}
+        </div>
       )}
 
-      {/* grafico de barras horizontal */}
-      {datosGrafico.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Comparación de puntajes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <GraficoBarras datos={datosGrafico} />
-          </CardContent>
-        </Card>
+      {/* tabla de ranking (el nucleo) */}
+      {data.ranking.length === 0 ? (
+        <p className="mt-3 rounded-lg border border-secondary-100 py-8 text-center text-sm text-secondary-500">
+          No hay postulaciones calificadas en esta categoría.
+        </p>
+      ) : (
+        <div className="mt-3 overflow-hidden rounded-lg border border-secondary-100">
+          <RankingTable rows={data.ranking} convocatoriaId={convocatoriaId} />
+        </div>
       )}
     </section>
   );
 }
 
-// tabla de ranking
-function RankingTable({ rows }: { rows: PostulacionRankingItem[] }) {
+// tabla de ranking con barra de puntaje inline (reemplaza al grafico duplicado)
+function RankingTable({
+  rows,
+  convocatoriaId,
+}: {
+  rows: PostulacionRankingItem[];
+  convocatoriaId: number;
+}) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b bg-secondary-50 text-left text-secondary-600">
-            <th className="px-4 py-3 font-medium">#</th>
-            <th className="px-4 py-3 font-medium">Empresa</th>
-            <th className="px-4 py-3 font-medium text-right">Puntaje</th>
-            <th className="px-4 py-3 font-medium">Estado</th>
+          <tr className="border-b border-secondary-100 bg-secondary-50 text-left text-xs uppercase tracking-wide text-secondary-500">
+            <th className="w-12 px-4 py-2.5 text-center font-medium">#</th>
+            <th className="px-4 py-2.5 font-medium">Empresa</th>
+            <th className="w-32 px-4 py-2.5 font-medium">Enviado</th>
+            <th className="w-44 px-4 py-2.5 text-right font-medium">Puntaje</th>
+            <th className="w-36 px-4 py-2.5 font-medium">Estado</th>
+            <th className="w-14 px-4 py-2.5 text-right font-medium">Ver</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((row, index) => {
             const pos = row.posicionFinal ?? index + 1;
             const esGanador = row.estado === "ganador";
+            const puntaje = row.puntajeFinal;
             return (
               <tr
                 key={row.postulacionId}
-                className={`border-b transition-colors last:border-0 ${
+                className={`border-b border-secondary-50 last:border-0 ${
                   esGanador
-                    ? "bg-amber-50 hover:bg-amber-100"
-                    : "hover:bg-secondary-50"
+                    ? "bg-amber-50/70"
+                    : "hover:bg-secondary-50/60"
                 }`}
               >
-                {/* posicion */}
-                <td className="px-4 py-3">
-                  <div className="flex items-center justify-center w-6">
-                    <MedalIcon posicion={pos} />
-                  </div>
+                {/* posicion (con borde dorado a la izquierda si es ganador) */}
+                <td
+                  className={`px-4 py-0 text-center ${
+                    esGanador ? "shadow-[inset_3px_0_0_#fbbf24]" : ""
+                  }`}
+                  style={{ height: 46 }}
+                >
+                  <MedalBadge posicion={pos} />
                 </td>
 
                 {/* empresa */}
-                <td className="px-4 py-3">
-                  <span
-                    className={`font-medium ${
-                      esGanador
-                        ? "text-amber-800"
-                        : "text-secondary-900"
-                    }`}
-                  >
+                <td className="px-4 py-0">
+                  <span className="font-medium text-secondary-900">
                     {row.empresaNombre}
                   </span>
                 </td>
 
-                {/* puntaje */}
-                <td className="px-4 py-3 text-right">
-                  {row.puntajeFinal !== null ? (
-                    <span
-                      className={`font-semibold tabular-nums ${
-                        esGanador ? "text-amber-700" : "text-secondary-900"
-                      }`}
-                    >
-                      {row.puntajeFinal.toFixed(1)}
-                    </span>
+                {/* fecha de envio (contexto + llena el espacio) */}
+                <td className="px-4 py-0">
+                  <span className="text-secondary-500">
+                    {row.fechaEnvio ? formatShortDate(row.fechaEnvio) : "—"}
+                  </span>
+                </td>
+
+                {/* puntaje con barra inline proporcional (0-100) */}
+                <td className="px-4 py-0">
+                  {puntaje !== null ? (
+                    <div className="relative ml-auto h-6 w-32">
+                      <div
+                        className={`absolute inset-y-0 right-0 rounded ${
+                          esGanador ? "bg-amber-200" : "bg-primary-100"
+                        }`}
+                        style={{
+                          width: `${Math.min(Math.max(puntaje, 0), 100)}%`,
+                        }}
+                      />
+                      <span
+                        className={`absolute inset-0 flex items-center justify-end pr-2 font-semibold tabular-nums ${
+                          esGanador ? "text-amber-800" : "text-secondary-900"
+                        }`}
+                      >
+                        {puntaje.toFixed(1)}
+                      </span>
+                    </div>
                   ) : (
-                    <span className="text-secondary-400">—</span>
+                    <span className="block text-right text-secondary-400">—</span>
                   )}
                 </td>
 
                 {/* estado */}
-                <td className="px-4 py-3">
+                <td className="px-4 py-0">
                   <StateBadge tipo="postulacion" valor={row.estado} />
+                </td>
+
+                {/* accion: ver la postulacion completa de esta empresa */}
+                <td className="px-4 py-0">
+                  <RowActions>
+                    <RowAction
+                      icon={<Eye className="size-4" />}
+                      label="Ver postulación"
+                      href={`/dashboard/convocatorias/${convocatoriaId}/postulaciones/${row.postulacionId}`}
+                    />
+                  </RowActions>
                 </td>
               </tr>
             );
@@ -340,86 +330,5 @@ function RankingTable({ rows }: { rows: PostulacionRankingItem[] }) {
         </tbody>
       </table>
     </div>
-  );
-}
-
-// grafico de barras horizontal con recharts
-function GraficoBarras({
-  datos,
-}: {
-  datos: {
-    nombre: string;
-    puntaje: number;
-    estado: string;
-    posicion: number | null;
-  }[];
-}) {
-  // altura dinamica segun cantidad de empresas
-  const alturaBase = 60;
-  const altura = Math.max(200, datos.length * alturaBase);
-
-  return (
-    <ResponsiveContainer width="100%" height={altura}>
-      <BarChart
-        layout="vertical"
-        data={datos}
-        margin={{ top: 0, right: 32, left: 8, bottom: 0 }}
-      >
-        <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-        <XAxis
-          type="number"
-          domain={[0, 100]}
-          tickCount={6}
-          tick={{ fontSize: 12 }}
-        />
-        <YAxis
-          type="category"
-          dataKey="nombre"
-          width={140}
-          tick={{ fontSize: 12 }}
-        />
-        <Tooltip
-          formatter={(value) => {
-            const num = typeof value === "number" ? value : Number(value);
-            return [`${num.toFixed(1)} pts`, "Puntaje"];
-          }}
-          labelStyle={{ fontSize: 12 }}
-          contentStyle={{ fontSize: 12 }}
-        />
-        <Bar dataKey="puntaje" radius={[0, 4, 4, 0]} maxBarSize={28}>
-          {datos.map((entry, index) => (
-            <Cell
-              key={`cell-${index}`}
-              fill={getBarColor(entry.estado, entry.posicion)}
-            />
-          ))}
-        </Bar>
-      </BarChart>
-    </ResponsiveContainer>
-  );
-}
-
-// stat card pequeno
-function MiniStat({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}) {
-  return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium text-secondary-600">
-          {label}
-        </CardTitle>
-        {icon}
-      </CardHeader>
-      <CardContent>
-        <p className="text-xl font-bold text-secondary-900">{value}</p>
-      </CardContent>
-    </Card>
   );
 }

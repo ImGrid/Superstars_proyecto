@@ -146,7 +146,7 @@ function RegistroForm() {
       </form>
 
       <p className="mt-4 text-center text-sm text-secondary-500">
-        Ya tienes cuenta?{" "}
+        ¿Ya tienes cuenta?{" "}
         <Link href="/auth/login" className="font-medium text-primary-600 hover:text-primary-700">
           Inicia sesión
         </Link>

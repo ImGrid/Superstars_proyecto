@@ -1,11 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   Archive,
   Calendar,
-  MoreHorizontal,
   Pencil,
   RefreshCw,
   Send,
@@ -18,13 +16,7 @@ import { EstadoPublicacion, type PublicacionResponse } from "@superstars/shared"
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { RowActions, RowAction } from "@/components/shared/row-actions";
 import {
   Dialog,
   DialogContent,
@@ -55,7 +47,6 @@ export function PublicacionActions({ publicacion }: PublicacionActionsProps) {
   const [republicarOpen, setRepublicarOpen] = useState(false);
   const [cancelarOpen, setCancelarOpen] = useState(false);
   const [fechaProgramada, setFechaProgramada] = useState("");
-  const router = useRouter();
   const queryClient = useQueryClient();
 
   const estado = publicacion.estado;
@@ -169,76 +160,58 @@ export function PublicacionActions({ publicacion }: PublicacionActionsProps) {
 
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="size-8">
-            <MoreHorizontal className="size-4" />
-            <span className="sr-only">Acciones</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          {canEdit && (
-            <DropdownMenuItem
-              onClick={() =>
-                router.push(
-                  `/dashboard/publicaciones/${publicacion.id}/editar`,
-                )
-              }
-            >
-              <Pencil className="size-4" />
-              Editar
-            </DropdownMenuItem>
-          )}
-
-          {canPublicar && (
-            <DropdownMenuItem onClick={() => setPublicarOpen(true)}>
-              <Send className="size-4" />
-              Publicar ahora
-            </DropdownMenuItem>
-          )}
-
-          {canProgramar && (
-            <DropdownMenuItem onClick={() => setProgramarOpen(true)}>
-              <Calendar className="size-4" />
-              Programar
-            </DropdownMenuItem>
-          )}
-
-          {canCancelar && (
-            <DropdownMenuItem onClick={() => setCancelarOpen(true)}>
-              <XCircle className="size-4" />
-              Cancelar programacion
-            </DropdownMenuItem>
-          )}
-
-          {canArchivar && (
-            <DropdownMenuItem onClick={() => setArchivarOpen(true)}>
-              <Archive className="size-4" />
-              Archivar
-            </DropdownMenuItem>
-          )}
-
-          {canRepublicar && (
-            <DropdownMenuItem onClick={() => setRepublicarOpen(true)}>
-              <RefreshCw className="size-4" />
-              Republicar
-            </DropdownMenuItem>
-          )}
-
-          {canDelete && (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => setDeleteOpen(true)}
-                className="text-destructive focus:text-destructive"
-              >
-                <Trash2 className="size-4" />
-                Eliminar
-              </DropdownMenuItem>
-            </>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <RowActions>
+        {canEdit && (
+          <RowAction
+            icon={<Pencil className="size-4" />}
+            label="Editar"
+            href={`/dashboard/publicaciones/${publicacion.id}/editar`}
+          />
+        )}
+        {canPublicar && (
+          <RowAction
+            icon={<Send className="size-4" />}
+            label="Publicar ahora"
+            onClick={() => setPublicarOpen(true)}
+          />
+        )}
+        {canProgramar && (
+          <RowAction
+            icon={<Calendar className="size-4" />}
+            label="Programar"
+            onClick={() => setProgramarOpen(true)}
+          />
+        )}
+        {canCancelar && (
+          <RowAction
+            icon={<XCircle className="size-4" />}
+            label="Cancelar programación"
+            onClick={() => setCancelarOpen(true)}
+          />
+        )}
+        {canArchivar && (
+          <RowAction
+            icon={<Archive className="size-4" />}
+            label="Archivar"
+            onClick={() => setArchivarOpen(true)}
+          />
+        )}
+        {canRepublicar && (
+          <RowAction
+            icon={<RefreshCw className="size-4" />}
+            label="Republicar"
+            onClick={() => setRepublicarOpen(true)}
+          />
+        )}
+        {canDelete && (
+          <RowAction
+            icon={<Trash2 className="size-4" />}
+            label="Eliminar"
+            onClick={() => setDeleteOpen(true)}
+            destructive
+          />
+        )}
+      </RowActions>
 
       {/* dialogo: publicar */}
       <ConfirmDialog

@@ -36,6 +36,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { EmptyState } from "@/components/shared/empty-state";
+import { RowAction } from "@/components/shared/row-actions";
 import { addResponsable, removeResponsable } from "@/lib/api/convocatoria.api";
 import { convocatoriaQueries, usuarioQueries } from "@/lib/api/query-keys";
 import { useAuth } from "@/hooks/use-auth";
@@ -134,7 +135,13 @@ export function ResponsablesTab({ convocatoriaId }: ResponsablesTabProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Responsables de la convocatoria</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <Icon
+            icon="ph:users-three-duotone"
+            className="size-5 text-primary-600"
+          />
+          Responsables de la convocatoria
+        </CardTitle>
         <CardDescription>
           Usuarios asignados para gestionar esta convocatoria.
         </CardDescription>
@@ -175,6 +182,25 @@ export function ResponsablesTab({ convocatoriaId }: ResponsablesTabProps) {
           </div>
         )}
 
+        {/* aviso cuando no hay usuarios para asignar (guia al coordinador) */}
+        {isAdmin && availableUsers.length === 0 && (
+          <p className="text-xs text-secondary-400">
+            {(usuariosData?.data?.length ?? 0) === 0
+              ? "No hay usuarios con rol Responsable. Crea uno en la sección Usuarios."
+              : "Todos los usuarios con rol Responsable ya están asignados."}
+          </p>
+        )}
+
+        {/* conteo */}
+        {responsables && responsables.length > 0 && (
+          <p className="text-sm text-secondary-500">
+            <span className="font-medium text-secondary-900">
+              {responsables.length}
+            </span>{" "}
+            {responsables.length === 1 ? "responsable" : "responsables"}
+          </p>
+        )}
+
         {/* tabla de responsables */}
         {!responsables || responsables.length === 0 ? (
           <EmptyState
@@ -204,14 +230,12 @@ export function ResponsablesTab({ convocatoriaId }: ResponsablesTabProps) {
                   </TableCell>
                   {isAdmin && (
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-8 text-destructive hover:text-destructive"
+                      <RowAction
+                        icon={<Trash2 className="size-4" />}
+                        label="Remover responsable"
                         onClick={() => setDeleteTarget(resp)}
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
+                        destructive
+                      />
                     </TableCell>
                   )}
                 </TableRow>

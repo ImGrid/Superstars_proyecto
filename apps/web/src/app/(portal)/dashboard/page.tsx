@@ -1,25 +1,12 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { ArrowRight } from "lucide-react";
-import { Icon } from "@iconify/react";
 import { RolUsuario } from "@superstars/shared";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PageHeader } from "@/components/shared/page-header";
 import { useAuth } from "@/hooks/use-auth";
-import { dashboardQueries } from "@/lib/api/query-keys";
 import { AdminDashboard } from "./_components/admin-dashboard";
 import { ResponsableDashboard } from "./_components/responsable-dashboard";
 import { EvaluadorDashboard } from "./_components/evaluador-dashboard";
+import { ProponenteDashboard } from "./_components/proponente-dashboard";
 
 export default function DashboardPage() {
   const { data: user } = useAuth();
@@ -41,190 +28,11 @@ export default function DashboardPage() {
   if (user.rol === RolUsuario.ADMINISTRADOR) {
     return <AdminDashboard nombre={user.nombre} />;
   }
-
   if (user.rol === RolUsuario.RESPONSABLE_CONVOCATORIA) {
     return <ResponsableDashboard nombre={user.nombre} />;
   }
-
   if (user.rol === RolUsuario.EVALUADOR) {
     return <EvaluadorDashboard nombre={user.nombre} />;
   }
-
-  // proponente: mantiene su dashboard existente
-  return <DashboardProponente nombre={user.nombre} />;
+  return <ProponenteDashboard nombre={user.nombre} />;
 }
-
-// dashboard del proponente: lee KPIs ya filtrados desde /api/dashboard/proponente
-// (convocatorias abiertas reales, postulaciones por estado, alerta de empresa)
-function DashboardProponente({ nombre }: { nombre: string }) {
-  const router = useRouter();
-
-  const { data: stats, isLoading } = useQuery(dashboardQueries.proponente());
-
-  return (
-    <div className="space-y-6">
-      <PageHeader
-        title={`Hola, ${nombre}`}
-        description="Este es tu panel de control. Aquí puedes ver el resumen de tu actividad."
-      />
-
-      {/* alerta si no tiene empresa */}
-      {!isLoading && stats && !stats.tieneEmpresa && (
-        <div className="flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4">
-          <Icon icon="ph:warning-duotone" className="mt-0.5 size-5 shrink-0 text-amber-600" />
-          <div>
-            <p className="text-sm font-medium text-amber-800">
-              Registra tu empresa para poder postularte
-            </p>
-            <p className="mt-0.5 text-sm text-amber-700">
-              Necesitas completar los datos de tu empresa antes de postularte a una convocatoria.
-            </p>
-            <Button
-              variant="outline"
-              size="sm"
-              className="mt-2"
-              onClick={() => router.push("/dashboard/mi-empresa")}
-            >
-              <Icon icon="ph:building-office-duotone" className="size-4" />
-              Registrar empresa
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* cards resumen */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {/* convocatorias abiertas (estado=publicado + fecha vigente) */}
-        <SummaryCard
-          title="Convocatorias abiertas"
-          value={isLoading ? null : String(stats?.convocatoriasAbiertas ?? 0)}
-          description={
-            stats && stats.convocatoriasAnteriores > 0
-              ? `Postulaciones abiertas ahora · ${stats.convocatoriasAnteriores} anterior${stats.convocatoriasAnteriores !== 1 ? "es" : ""}`
-              : "Postulaciones abiertas ahora"
-          }
-          icon={<Icon icon="ph:trophy-duotone" className="size-5 text-primary-600" />}
-          action={
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-1"
-              onClick={() => router.push("/dashboard/convocatorias")}
-            >
-              Ver convocatorias
-              <ArrowRight className="size-3" />
-            </Button>
-          }
-        />
-
-        {/* mis postulaciones */}
-        <SummaryCard
-          title="Mis postulaciones"
-          value={isLoading ? null : String(stats?.totalMisPostulaciones ?? 0)}
-          description={
-            stats && stats.misPostulacionesPorEstado.borrador > 0
-              ? `${stats.misPostulacionesPorEstado.borrador} en borrador`
-              : "Total de postulaciones"
-          }
-          icon={<Icon icon="ph:file-text-duotone" className="size-5 text-primary-600" />}
-          action={
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-1"
-              onClick={() => router.push("/dashboard/mis-postulaciones")}
-            >
-              Ver postulaciones
-              <ArrowRight className="size-3" />
-            </Button>
-          }
-        />
-
-        {/* mi empresa */}
-        <SummaryCard
-          title="Mi empresa"
-          value={
-            isLoading
-              ? null
-              : stats?.tieneEmpresa
-                ? stats.empresaRazonSocial ?? "Registrada"
-                : "Sin registrar"
-          }
-          description={stats?.tieneEmpresa ? "Datos de empresa completos" : "Completa el registro"}
-          icon={<Icon icon="ph:building-office-duotone" className="size-5 text-primary-600" />}
-          action={
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-1"
-              onClick={() => router.push("/dashboard/mi-empresa")}
-            >
-              {stats?.tieneEmpresa ? "Ver empresa" : "Registrar"}
-              <ArrowRight className="size-3" />
-            </Button>
-          }
-        />
-      </div>
-
-      {/* alertas de postulaciones observadas */}
-      {stats && stats.postulacionesObservadas > 0 && (
-        <div className="flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4">
-          <Icon icon="ph:warning-duotone" className="mt-0.5 size-5 shrink-0 text-amber-600" />
-          <div>
-            <p className="text-sm font-medium text-amber-800">
-              Tienes {stats.postulacionesObservadas} postulacion
-              {stats.postulacionesObservadas !== 1 && "es"} con observaciones
-            </p>
-            <p className="mt-0.5 text-sm text-amber-700">
-              Un responsable ha revisado tu postulacion y solicita cambios. Revisa las observaciones y corrige.
-            </p>
-            <Button
-              variant="outline"
-              size="sm"
-              className="mt-2"
-              onClick={() => router.push("/dashboard/mis-postulaciones")}
-            >
-              Ver postulaciones observadas
-            </Button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// card de resumen reutilizable
-function SummaryCard({
-  title,
-  value,
-  description,
-  icon,
-  action,
-}: {
-  title: string;
-  value: string | null;
-  description: string;
-  icon: React.ReactNode;
-  action?: React.ReactNode;
-}) {
-  return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium text-secondary-600">
-          {title}
-        </CardTitle>
-        {icon}
-      </CardHeader>
-      <CardContent>
-        {value === null ? (
-          <Skeleton className="h-8 w-16" />
-        ) : (
-          <p className="text-2xl font-bold text-secondary-900">{value}</p>
-        )}
-        <CardDescription className="mt-1">{description}</CardDescription>
-        {action && <div className="mt-3">{action}</div>}
-      </CardContent>
-    </Card>
-  );
-}
-

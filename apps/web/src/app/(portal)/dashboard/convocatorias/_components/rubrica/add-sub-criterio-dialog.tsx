@@ -102,7 +102,7 @@ export function AddSubCriterioDialog({
         niveles: [
           {
             nivel: NivelEnum.BASICO,
-            descripcion: descBasico.trim() || "Nivel basico",
+            descripcion: descBasico.trim() || "Nivel básico",
             puntajeMin: Number(bMin),
             puntajeMax: Number(bMax),
           },
@@ -167,8 +167,8 @@ export function AddSubCriterioDialog({
         <DialogHeader>
           <DialogTitle>Nuevo sub-criterio</DialogTitle>
           <DialogDescription>
-            Define el sub-criterio con sus 3 niveles de evaluacion (basico,
-            intermedio, avanzado). Los rangos de puntos se auto-sugieren segun
+            Define el sub-criterio con sus 3 niveles de evaluación (básico,
+            intermedio, avanzado). Los rangos de puntos se auto-sugieren según
             el peso.
           </DialogDescription>
         </DialogHeader>

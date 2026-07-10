@@ -303,7 +303,7 @@ export function UsuarioFormDialog({
                     <FormControl>
                       <Input
                         type="password"
-                        placeholder="Minimo 8 caracteres"
+                        placeholder="Mínimo 8 caracteres"
                         {...field}
                       />
                     </FormControl>

@@ -1,17 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { FaqResponse } from "@superstars/shared";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { RowActions, RowAction } from "@/components/shared/row-actions";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { FaqFormDialog } from "./faq-form-dialog";
 import { deleteFaq } from "@/lib/api/faq.api";
@@ -34,8 +28,7 @@ export function FaqActions({ faq }: FaqActionsProps) {
       setDeleteOpen(false);
     },
     onError: (error: any) => {
-      const msg =
-        error.response?.data?.message ?? "Error al eliminar la pregunta";
+      const msg = error.response?.data?.message ?? "Error al eliminar la pregunta";
       toast.error(msg);
       setDeleteOpen(false);
     },
@@ -43,27 +36,19 @@ export function FaqActions({ faq }: FaqActionsProps) {
 
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="size-8">
-            <MoreHorizontal className="size-4" />
-            <span className="sr-only">Acciones</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => setEditOpen(true)}>
-            <Pencil className="size-4" />
-            Editar
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => setDeleteOpen(true)}
-            className="text-destructive focus:text-destructive"
-          >
-            <Trash2 className="size-4" />
-            Eliminar
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <RowActions>
+        <RowAction
+          icon={<Pencil className="size-4" />}
+          label="Editar"
+          onClick={() => setEditOpen(true)}
+        />
+        <RowAction
+          icon={<Trash2 className="size-4" />}
+          label="Eliminar"
+          onClick={() => setDeleteOpen(true)}
+          destructive
+        />
+      </RowActions>
 
       <FaqFormDialog open={editOpen} onOpenChange={setEditOpen} faq={faq} />
 

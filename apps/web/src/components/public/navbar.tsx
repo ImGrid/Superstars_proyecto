@@ -102,7 +102,8 @@ export function PublicNavbar() {
           <Button
             asChild
             size="sm"
-            className="hidden bg-orange-600 text-white hover:bg-orange-700 md:inline-flex"
+            variant="cta"
+            className="hidden md:inline-flex"
           >
             <Link href="/auth/login">Acceso Empresas</Link>
           </Button>
@@ -120,11 +121,11 @@ export function PublicNavbar() {
                 }`}
               >
                 <Menu className="size-5" />
-                <span className="sr-only">Menu</span>
+                <span className="sr-only">Menú</span>
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-72 bg-white p-0">
-              <SheetTitle className="sr-only">Menu de navegacion</SheetTitle>
+              <SheetTitle className="sr-only">Menú de navegación</SheetTitle>
               <div className="flex h-full flex-col">
                 {/* header del sheet */}
                 <div className="flex items-center justify-between border-b px-4 py-3">
@@ -159,10 +160,7 @@ export function PublicNavbar() {
 
                 {/* CTA mobile */}
                 <div className="border-t p-4">
-                  <Button
-                    asChild
-                    className="w-full bg-orange-600 text-white hover:bg-orange-700"
-                  >
+                  <Button asChild variant="cta" className="w-full">
                     <Link href="/auth/login" onClick={() => setOpen(false)}>
                       Acceso Empresas
                     </Link>

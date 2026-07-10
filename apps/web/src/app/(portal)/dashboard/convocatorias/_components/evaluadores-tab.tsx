@@ -35,6 +35,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { EmptyState } from "@/components/shared/empty-state";
+import { RowAction } from "@/components/shared/row-actions";
 import {
   addCategoriaEvaluador,
   removeCategoriaEvaluador,
@@ -134,7 +135,13 @@ export function EvaluadoresTab({ convocatoriaId, categoriaId }: EvaluadoresTabPr
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Evaluadores de la categoría</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <Icon
+            icon="ph:clipboard-text-duotone"
+            className="size-5 text-primary-600"
+          />
+          Evaluadores de la categoría
+        </CardTitle>
         <CardDescription>
           Jurados que pueden evaluar las postulaciones de esta categoría.
         </CardDescription>
@@ -173,6 +180,25 @@ export function EvaluadoresTab({ convocatoriaId, categoriaId }: EvaluadoresTabPr
           </Button>
         </div>
 
+        {/* aviso cuando no hay evaluadores para asignar (guia al coordinador) */}
+        {availableUsers.length === 0 && (
+          <p className="text-xs text-secondary-400">
+            {(usuariosData?.data?.length ?? 0) === 0
+              ? "No hay usuarios con rol Evaluador. Crea uno en la sección Usuarios."
+              : "Todos los usuarios con rol Evaluador ya están asignados."}
+          </p>
+        )}
+
+        {/* conteo */}
+        {evaluadores && evaluadores.length > 0 && (
+          <p className="text-sm text-secondary-500">
+            <span className="font-medium text-secondary-900">
+              {evaluadores.length}
+            </span>{" "}
+            {evaluadores.length === 1 ? "evaluador" : "evaluadores"}
+          </p>
+        )}
+
         {/* tabla de evaluadores */}
         {!evaluadores || evaluadores.length === 0 ? (
           <EmptyState
@@ -201,14 +227,12 @@ export function EvaluadoresTab({ convocatoriaId, categoriaId }: EvaluadoresTabPr
                     {formatDate(ev.createdAt)}
                   </TableCell>
                   <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-8 text-destructive hover:text-destructive"
+                    <RowAction
+                      icon={<Trash2 className="size-4" />}
+                      label="Remover evaluador"
                       onClick={() => setDeleteTarget(ev)}
-                    >
-                      <Trash2 className="size-4" />
-                    </Button>
+                      destructive
+                    />
                   </TableCell>
                 </TableRow>
               ))}

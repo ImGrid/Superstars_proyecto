@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import {
   EstadoPostulacion,
   calculateCompletionPercentage,
+  isConvocatoriaAbierta,
 } from "@superstars/shared";
 import type { SchemaDefinition } from "@superstars/shared";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ import {
   formularioQueries,
   postulacionQueries,
   empresaQueries,
+  convocatoriaQueries,
 } from "@/lib/api/query-keys";
 import { submitPostulacion } from "@/lib/api/postulacion.api";
 import { useAuth } from "@/hooks/use-auth";
@@ -85,7 +87,14 @@ export default function PostularPage({ params }: PostularPageProps) {
     },
   });
 
-  const isLoading = isLoadingPost || (categoriaId != null && isLoadingForm);
+  // la convocatoria: necesaria para no dejar escribir un formulario que el
+  // backend rechazara al guardar (solo acepta envios si esta abierta)
+  const { data: convocatoria, isLoading: isLoadingConv } = useQuery(
+    convocatoriaQueries.detail(convocatoriaId),
+  );
+
+  const isLoading =
+    isLoadingPost || isLoadingConv || (categoriaId != null && isLoadingForm);
 
   // cargando
   if (isLoading) {
@@ -135,6 +144,28 @@ export default function PostularPage({ params }: PostularPageProps) {
     );
   }
 
+  // la convocatoria ya no acepta envios: no dejamos escribir un formulario que
+  // el backend rechazara al guardar (llegar aqui por URL directa o link viejo)
+  if (convocatoria && !isConvocatoriaAbierta(convocatoria)) {
+    return (
+      <div className="space-y-4">
+        <Alert>
+          <AlertDescription>
+            El plazo de postulación de esta convocatoria ya cerró, así que el
+            formulario no se puede editar ni enviar.
+          </AlertDescription>
+        </Alert>
+        <Button
+          variant="outline"
+          onClick={() => router.push(`/dashboard/convocatorias/${convocatoriaId}`)}
+        >
+          <ArrowLeft className="size-4" />
+          Volver a la convocatoria
+        </Button>
+      </div>
+    );
+  }
+
   // verificar que la postulacion no este en un estado que no permite edicion
   const estadoNoEditable =
     postulacion &&
@@ -146,7 +177,7 @@ export default function PostularPage({ params }: PostularPageProps) {
       <div className="space-y-4">
         <Alert>
           <AlertDescription>
-            Tu postulacion esta en estado &quot;{postulacion.estado}&quot; y no puede ser editada.
+            Tu postulación ya fue enviada, así que el formulario no se puede editar.
           </AlertDescription>
         </Alert>
         <Button variant="outline" onClick={() => router.back()}>

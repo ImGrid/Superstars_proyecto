@@ -17,6 +17,13 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // definicion de columna tipada
@@ -34,9 +41,16 @@ interface DataTableProps<T> {
   page: number;
   limit: number;
   onPageChange: (page: number) => void;
+  // nombre (plural) de los items, para mostrar el total: "9 empresas"
+  itemName?: string;
+  // si se provee, muestra el selector de filas por pagina (10/20/50)
+  onLimitChange?: (limit: number) => void;
   isLoading?: boolean;
   emptyState?: React.ReactNode;
 }
+
+// opciones del selector de filas por pagina
+const PAGE_SIZES = [10, 20, 50];
 
 // genera el rango de paginas visibles alrededor de la pagina actual
 function getPageRange(current: number, totalPages: number): (number | "ellipsis")[] {
@@ -75,12 +89,41 @@ export function DataTable<T>({
   page,
   limit,
   onPageChange,
+  itemName,
+  onLimitChange,
   isLoading = false,
   emptyState,
 }: DataTableProps<T>) {
-  const totalPages = Math.ceil(total / limit);
+  const totalPages = Math.ceil(total / limit) || 1;
   const hasPrev = page > 1;
   const hasNext = page < totalPages;
+
+  // linea compacta con el total (se usa arriba y abajo de la tabla)
+  const totalLine = itemName ? (
+    <p className="text-sm text-secondary-500">
+      <span className="font-medium tabular-nums text-secondary-900">{total}</span>{" "}
+      {itemName}
+    </p>
+  ) : null;
+
+  // selector de filas por pagina (compacto)
+  const pageSizeSelector = onLimitChange ? (
+    <div className="flex items-center gap-2 text-sm text-secondary-500">
+      <span className="hidden sm:inline">Filas:</span>
+      <Select value={String(limit)} onValueChange={(v) => onLimitChange(Number(v))}>
+        <SelectTrigger className="h-8 w-[4.25rem]">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {PAGE_SIZES.map((s) => (
+            <SelectItem key={s} value={String(s)}>
+              {s}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  ) : null;
 
   // skeleton de carga
   if (isLoading) {
@@ -135,7 +178,10 @@ export function DataTable<T>({
   const pageRange = getPageRange(page, totalPages);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
+      {/* total arriba (compacto, siempre visible) */}
+      {totalLine}
+
       {/* tabla */}
       <div className="rounded-md border">
         <Table>
@@ -162,53 +208,68 @@ export function DataTable<T>({
         </Table>
       </div>
 
-      {/* paginacion + info */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between">
+      {/* pie: total (rango si hay paginacion) + selector de filas + paginacion */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        {totalPages > 1 ? (
           <p className="text-sm text-secondary-500">
-            {(page - 1) * limit + 1}–{Math.min(page * limit, total)} de {total}
+            Mostrando{" "}
+            <span className="tabular-nums">
+              {(page - 1) * limit + 1}–{Math.min(page * limit, total)}
+            </span>{" "}
+            de{" "}
+            <span className="font-medium tabular-nums text-secondary-900">{total}</span>
+            {itemName ? ` ${itemName}` : ""}
           </p>
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  onClick={() => hasPrev && onPageChange(page - 1)}
-                  className={
-                    hasPrev ? "cursor-pointer" : "pointer-events-none opacity-50"
-                  }
-                />
-              </PaginationItem>
+        ) : (
+          totalLine
+        )}
 
-              {pageRange.map((p, i) =>
-                p === "ellipsis" ? (
-                  <PaginationItem key={`e-${i}`}>
-                    <PaginationEllipsis />
-                  </PaginationItem>
-                ) : (
-                  <PaginationItem key={p}>
-                    <PaginationLink
-                      isActive={p === page}
-                      onClick={() => onPageChange(p)}
-                      className="cursor-pointer"
-                    >
-                      {p}
-                    </PaginationLink>
-                  </PaginationItem>
-                ),
-              )}
+        <div className="flex items-center gap-4">
+          {pageSizeSelector}
 
-              <PaginationItem>
-                <PaginationNext
-                  onClick={() => hasNext && onPageChange(page + 1)}
-                  className={
-                    hasNext ? "cursor-pointer" : "pointer-events-none opacity-50"
-                  }
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+          {totalPages > 1 && (
+            <Pagination className="mx-0 w-auto">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => hasPrev && onPageChange(page - 1)}
+                    className={
+                      hasPrev ? "cursor-pointer" : "pointer-events-none opacity-50"
+                    }
+                  />
+                </PaginationItem>
+
+                {pageRange.map((p, i) =>
+                  p === "ellipsis" ? (
+                    <PaginationItem key={`e-${i}`}>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  ) : (
+                    <PaginationItem key={p}>
+                      <PaginationLink
+                        isActive={p === page}
+                        onClick={() => onPageChange(p)}
+                        className="cursor-pointer"
+                      >
+                        {p}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ),
+                )}
+
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => hasNext && onPageChange(page + 1)}
+                    className={
+                      hasNext ? "cursor-pointer" : "pointer-events-none opacity-50"
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

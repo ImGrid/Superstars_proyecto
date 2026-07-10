@@ -81,7 +81,7 @@ export default function PostulacionesEvaluadorPage({ params }: PageProps) {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Icon icon="ph:clipboard-text-duotone"className="size-5 text-secondary-400" />
-              {postulaciones.length} postulacion{postulaciones.length !== 1 ? "es" : ""}
+              {postulaciones.length} {postulaciones.length === 1 ? "postulación" : "postulaciones"}
             </CardTitle>
           </CardHeader>
           <CardContent>

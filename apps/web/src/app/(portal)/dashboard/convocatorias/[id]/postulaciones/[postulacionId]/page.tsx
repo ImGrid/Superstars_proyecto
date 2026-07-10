@@ -44,7 +44,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StateBadge } from "@/components/shared/state-badge";
-import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { ResponseViewer } from "@/components/shared/response-viewer";
 import { EvaluadoresAsignadosTab } from "../../../_components/evaluadores-asignados-tab";
 import {
@@ -62,10 +61,13 @@ import { formatDate, formatPercent } from "@/lib/format";
 
 interface PageProps {
   params: Promise<{ id: string; postulacionId: string }>;
+  // ?tab=calificaciones abre directo el tab de calificaciones (ej. desde "Revisar")
+  searchParams: Promise<{ tab?: string }>;
 }
 
-export default function PostulacionDetallePage({ params }: PageProps) {
+export default function PostulacionDetallePage({ params, searchParams }: PageProps) {
   const { id: cId, postulacionId: pId } = use(params);
+  const { tab: tabParam } = use(searchParams);
   const convocatoriaId = Number(cId);
   const postulacionId = Number(pId);
   const router = useRouter();
@@ -94,6 +96,11 @@ export default function PostulacionDetallePage({ params }: PageProps) {
   const [observarOpen, setObservarOpen] = useState(false);
   const [observacion, setObservacion] = useState("");
   const [rechazarOpen, setRechazarOpen] = useState(false);
+  const [motivo, setMotivo] = useState("");
+
+  // acciones disponibles segun el estado de la postulacion
+  const isEnviado = postulacion?.estado === EstadoPostulacion.ENVIADO;
+  const isEnEvaluacion = postulacion?.estado === EstadoPostulacion.EN_EVALUACION;
 
   // mutaciones
   const invalidar = () => {
@@ -106,7 +113,10 @@ export default function PostulacionDetallePage({ params }: PageProps) {
   const aprobarMutation = useMutation({
     mutationFn: () => aprobarPostulacion(convocatoriaId, postulacionId),
     onSuccess: () => {
-      toast.success("Postulación aprobada para evaluación");
+      // recordatorio proactivo: aprobar no basta, hay que asignar evaluadores
+      toast.success(
+        "Postulación aprobada. Ahora asígnale evaluadores en la pestaña Evaluadores para que la califiquen.",
+      );
       invalidar();
     },
     onError: (err: any) => {
@@ -128,10 +138,13 @@ export default function PostulacionDetallePage({ params }: PageProps) {
   });
 
   const rechazarMutation = useMutation({
-    mutationFn: () => rechazarPostulacion(convocatoriaId, postulacionId),
+    mutationFn: () => rechazarPostulacion(convocatoriaId, postulacionId, { motivo }),
     onSuccess: () => {
-      toast.success("Postulación rechazada");
+      toast.success(
+        isEnEvaluacion ? "Postulación sacada del concurso" : "Postulación rechazada",
+      );
       setRechazarOpen(false);
+      setMotivo("");
       invalidar();
     },
     onError: (err: any) => {
@@ -154,12 +167,10 @@ export default function PostulacionDetallePage({ params }: PageProps) {
   if (!postulacion || !formulario) {
     return (
       <Alert variant="destructive">
-        <AlertDescription>No se pudo cargar la postulacion o el formulario.</AlertDescription>
+        <AlertDescription>No se pudo cargar la postulación o el formulario.</AlertDescription>
       </Alert>
     );
   }
-
-  const isEnviado = postulacion.estado === EstadoPostulacion.ENVIADO;
 
   // filtrar calificaciones de esta postulacion
   const califsDeEstaPostulacion = (calificaciones ?? []).filter(
@@ -211,8 +222,17 @@ export default function PostulacionDetallePage({ params }: PageProps) {
         </Alert>
       )}
 
-      {/* tabs: propuesta, evaluadores, calificaciones */}
-      <Tabs defaultValue="propuesta">
+      {/* tabs: propuesta, evaluadores, calificaciones. El tab inicial puede venir
+          por URL (?tab=calificaciones) para el boton "Revisar" de la lista */}
+      <Tabs
+        defaultValue={
+          tabParam === "calificaciones" && califsDeEstaPostulacion.length > 0
+            ? "calificaciones"
+            : tabParam === "evaluadores"
+              ? "evaluadores"
+              : "propuesta"
+        }
+      >
         <TabsList>
           <TabsTrigger value="propuesta">Propuesta</TabsTrigger>
           <TabsTrigger value="evaluadores">
@@ -336,7 +356,7 @@ export default function PostulacionDetallePage({ params }: PageProps) {
               ) : (
                 <Icon icon="ph:check-circle-duotone"className="size-4" />
               )}
-              Aprobar para evaluacion
+              Aprobar para evaluación
             </Button>
             <Button
               variant="outline"
@@ -350,7 +370,7 @@ export default function PostulacionDetallePage({ params }: PageProps) {
             <Button
               variant="outline"
               className="gap-1 text-destructive border-destructive/30 hover:bg-destructive/5"
-              onClick={() => setRechazarOpen(true)}
+              onClick={() => { setMotivo(""); setRechazarOpen(true); }}
               disabled={isBusy}
             >
               <XCircle className="size-4" />
@@ -362,7 +382,28 @@ export default function PostulacionDetallePage({ params }: PageProps) {
             {/* boton mensajeria (sin logica, placeholder futuro) */}
             <Button variant="outline" className="gap-1" disabled>
               <MessageSquare className="size-4" />
-              Mensajeria
+              Mensajería
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* accion: sacar del concurso una postulacion que no se pudo evaluar */}
+      {isEnEvaluacion && (
+        <Card>
+          <CardContent className="flex flex-col gap-3 pt-6 sm:flex-row sm:items-center">
+            <p className="flex-1 text-sm text-secondary-600">
+              Si esta postulación no se pudo evaluar (ningún jurado la calificó), puedes
+              sacarla del concurso para continuar con la selección de ganadores.
+            </p>
+            <Button
+              variant="outline"
+              className="shrink-0 gap-1 text-destructive border-destructive/30 hover:bg-destructive/5"
+              onClick={() => { setMotivo(""); setRechazarOpen(true); }}
+              disabled={isBusy}
+            >
+              <XCircle className="size-4" />
+              Sacar del concurso
             </Button>
           </CardContent>
         </Card>
@@ -373,7 +414,7 @@ export default function PostulacionDetallePage({ params }: PageProps) {
         <div className="flex justify-end">
           <Button variant="outline" className="gap-1" disabled>
             <MessageSquare className="size-4" />
-            Mensajeria
+            Mensajería
           </Button>
         </div>
       )}
@@ -382,7 +423,7 @@ export default function PostulacionDetallePage({ params }: PageProps) {
       <Dialog open={observarOpen} onOpenChange={setObservarOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Observar postulacion</DialogTitle>
+            <DialogTitle>Observar postulación</DialogTitle>
             <DialogDescription>
               Escribe las observaciones para que el proponente corrija su propuesta.
             </DialogDescription>
@@ -413,16 +454,45 @@ export default function PostulacionDetallePage({ params }: PageProps) {
         </DialogContent>
       </Dialog>
 
-      {/* confirm rechazar */}
-      <ConfirmDialog
-        open={rechazarOpen}
-        onOpenChange={setRechazarOpen}
-        title="Rechazar postulación"
-        description="Esta acción es irreversible. La postulación será rechazada definitivamente y el proponente no podrá reenviarla."
-        onConfirm={() => rechazarMutation.mutate()}
-        isLoading={rechazarMutation.isPending}
-        destructive
-      />
+      {/* dialog rechazar / sacar del concurso (pide motivo obligatorio) */}
+      <Dialog open={rechazarOpen} onOpenChange={setRechazarOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {isEnEvaluacion ? "Sacar del concurso" : "Rechazar postulación"}
+            </DialogTitle>
+            <DialogDescription>
+              {isEnEvaluacion
+                ? "La postulación saldrá del concurso y no podrá ganar. Escribe el motivo; se guardará para poder informar a la empresa."
+                : "La postulación quedará fuera del concurso y la empresa no podrá reenviarla. Escribe el motivo; se guardará para poder informar a la empresa."}
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            placeholder="Motivo (por ejemplo: no cumple los requisitos, o no se pudo evaluar dentro del plazo)"
+            rows={4}
+            value={motivo}
+            onChange={(e) => setMotivo(e.target.value)}
+          />
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setRechazarOpen(false)}
+              disabled={rechazarMutation.isPending}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => rechazarMutation.mutate()}
+              disabled={rechazarMutation.isPending || !motivo.trim()}
+              className="gap-1"
+            >
+              {rechazarMutation.isPending && <Loader2 className="size-4 animate-spin" />}
+              {isEnEvaluacion ? "Sacar del concurso" : "Rechazar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

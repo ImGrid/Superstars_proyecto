@@ -1,23 +1,21 @@
 "use client";
 
-import Link from "next/link";
 import { Eye } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { RowActions, RowAction } from "@/components/shared/row-actions";
 
 interface EmpresaActionsProps {
   empresaId: number;
 }
 
-// Boton directo Ver detalle. Sin dropdown porque el admin tiene una sola
-// accion sobre una empresa (ver). Si en el futuro se agregan mas (ej:
-// exportar datos), refactorizar a un dropdown como UsuarioActions.
+// La razon social ya lleva al detalle; aca damos la accion explicita compacta.
 export function EmpresaActions({ empresaId }: EmpresaActionsProps) {
   return (
-    <Button asChild variant="outline" size="sm">
-      <Link href={`/dashboard/empresas/${empresaId}`}>
-        <Eye className="size-4" />
-        Ver detalle
-      </Link>
-    </Button>
+    <RowActions>
+      <RowAction
+        icon={<Eye className="size-4" />}
+        label="Ver detalle"
+        href={`/dashboard/empresas/${empresaId}`}
+      />
+    </RowActions>
   );
 }

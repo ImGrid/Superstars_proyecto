@@ -12,6 +12,7 @@ import {
   Calendar,
   MapPin,
   Download,
+  Eye,
 } from "lucide-react";
 import { Icon } from "@iconify/react";
 import {
@@ -42,6 +43,14 @@ import {
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { RowAction } from "@/components/shared/row-actions";
 import { StateBadge } from "@/components/shared/state-badge";
 import {
   convocatoriaQueries,
@@ -428,6 +437,10 @@ function ConvocatoriaDetailAdmin({
   } | null>(null);
   const [deleteCategoriaTarget, setDeleteCategoriaTarget] =
     useState<CategoriaResponse | null>(null);
+  // descripcion del header: recortada por defecto (puede ser larga)
+  const [descExpanded, setDescExpanded] = useState(false);
+  // categoria cuyas bases se muestran en el modal
+  const [basesModalCat, setBasesModalCat] = useState<CategoriaResponse | null>(null);
   const categoriaId = selCategoriaId ?? categorias?.[0]?.id ?? null;
   const categoriaActiva =
     categorias?.find((c) => c.id === categoriaId) ?? null;
@@ -479,7 +492,23 @@ function ConvocatoriaDetailAdmin({
               <StateBadge tipo="convocatoria" valor={data.estado} />
             </div>
             {data.descripcion && (
-              <p className="mt-1 text-sm text-secondary-500">{data.descripcion}</p>
+              <div className="mt-1">
+                <p
+                  className={`text-sm text-secondary-500 ${
+                    descExpanded ? "" : "line-clamp-2"
+                  }`}
+                >
+                  {data.descripcion}
+                </p>
+                {data.descripcion.length > 160 && (
+                  <button
+                    onClick={() => setDescExpanded((v) => !v)}
+                    className="mt-0.5 text-xs font-medium text-primary-600"
+                  >
+                    {descExpanded ? "Ver menos" : "Ver más"}
+                  </button>
+                )}
+              </div>
             )}
           </div>
         </div>
@@ -513,22 +542,16 @@ function ConvocatoriaDetailAdmin({
           <TabsTrigger value="postulaciones">Postulaciones</TabsTrigger>
         </TabsList>
 
-        {/* tab general: datos de la convocatoria + resumen de categorias */}
-        <TabsContent value="general" className="mt-4">
+        {/* tab general: fechas + departamentos + categorias (protagonista) + imagen */}
+        <TabsContent value="general" className="mt-4 space-y-6">
+          {/* fechas + departamentos (compactas, 2 columnas) */}
           <div className="grid gap-6 lg:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Información de la convocatoria</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <InfoRow label="Nombre" value={data.nombre} />
-                <InfoRow label="Descripción" value={data.descripcion ?? "Sin descripción"} />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Fechas</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Icon icon="ph:calendar-dots-duotone" className="size-5 text-primary-600" />
+                  Fechas
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <InfoRow
@@ -567,7 +590,10 @@ function ConvocatoriaDetailAdmin({
 
             <Card>
               <CardHeader>
-                <CardTitle>Departamentos</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Icon icon="ph:map-pin-duotone" className="size-5 text-primary-600" />
+                  Departamentos
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
@@ -577,84 +603,71 @@ function ConvocatoriaDetailAdmin({
                 </div>
               </CardContent>
             </Card>
-
-            {/* resumen de categorias (premio y ganadores por categoria) */}
-            <Card>
-              <CardHeader className="flex flex-row items-start justify-between gap-3">
-                <div>
-                  <CardTitle>Categorías</CardTitle>
-                  <CardDescription>
-                    Cada categoría tiene su propio premio, formulario, rúbrica y jurado.
-                    {isBorrador
-                      ? " Puedes agregarlas, editarlas o quitarlas mientras la convocatoria esté en borrador."
-                      : " La convocatoria ya no está en borrador, así que las categorías no se pueden modificar."}
-                  </CardDescription>
-                </div>
-                {isBorrador && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="shrink-0 gap-1"
-                    onClick={() => setCategoriaDialog({ categoria: null })}
-                  >
-                    <Plus className="size-3.5" />
-                    Agregar
-                  </Button>
-                )}
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {!categorias || categorias.length === 0 ? (
-                  <p className="text-sm text-secondary-500">
-                    Sin categorías configuradas.
-                  </p>
-                ) : (
-                  categorias.map((cat) => (
-                    <div
-                      key={cat.id}
-                      className="flex items-center justify-between gap-3 rounded-lg border p-3"
-                    >
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-secondary-900">
-                          {cat.nombre}
-                        </p>
-                        <p className="text-sm text-secondary-500">
-                          {formatMoney(cat.monto)} · {cat.numeroGanadores} ganadores
-                        </p>
-                      </div>
-                      {isBorrador && (
-                        <div className="flex shrink-0 items-center gap-1">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="gap-1"
-                            onClick={() => setCategoriaDialog({ categoria: cat })}
-                          >
-                            <Pencil className="size-3.5" />
-                            Editar
-                          </Button>
-                          {categorias.length > 1 && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="size-8 text-destructive hover:text-destructive"
-                              onClick={() => setDeleteCategoriaTarget(cat)}
-                            >
-                              <Trash2 className="size-4" />
-                            </Button>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ))
-                )}
-              </CardContent>
-            </Card>
-
-            <ConvocatoriaImagenCard
-              convocatoriaId={convocatoriaId}
-              imagenKey={data.imagenKey ?? null}
-            />
           </div>
+
+          {/* categorias: protagonista del tab. Premio, ganadores, descripcion y
+              acceso a las bases completas (modal, porque pueden ser largas) */}
+          <div>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Icon icon="ph:trophy-duotone" className="size-5 text-amber-500" />
+                <h2 className="font-heading text-lg font-semibold text-secondary-900">
+                  Categorías
+                </h2>
+                <span className="hidden text-xs text-secondary-400 md:inline">
+                  Cada una tiene su propio premio, formulario, rúbrica y jurado.
+                </span>
+              </div>
+              {isBorrador && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0 gap-1"
+                  onClick={() => setCategoriaDialog({ categoria: null })}
+                >
+                  <Plus className="size-3.5" />
+                  Agregar categoría
+                </Button>
+              )}
+            </div>
+            {!isBorrador && (
+              <p className="mb-3 text-xs text-secondary-400">
+                La convocatoria ya no está en borrador, así que las categorías no se pueden modificar.
+              </p>
+            )}
+            {!categorias || categorias.length === 0 ? (
+              <p className="rounded-xl border border-secondary-200 py-8 text-center text-sm text-secondary-500">
+                Sin categorías configuradas.
+              </p>
+            ) : (
+              <div
+                className={
+                  categorias.length > 1
+                    ? "grid gap-3 lg:grid-cols-2"
+                    : "space-y-3"
+                }
+              >
+                {categorias.map((cat) => (
+                  <CategoriaResumenCard
+                    key={cat.id}
+                    categoria={cat}
+                    isBorrador={isBorrador}
+                    canDelete={categorias.length > 1}
+                    wide={categorias.length === 1}
+                    onVerBases={() => setBasesModalCat(cat)}
+                    onEditar={() => setCategoriaDialog({ categoria: cat })}
+                    onEliminar={() => setDeleteCategoriaTarget(cat)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* imagen de portada */}
+          <ConvocatoriaImagenCard
+            convocatoriaId={convocatoriaId}
+            imagenKey={data.imagenKey ?? null}
+          />
         </TabsContent>
 
         <TabsContent value="responsables" className="mt-4">
@@ -735,6 +748,27 @@ function ConvocatoriaDetailAdmin({
         }}
       />
 
+      {/* modal con las bases completas de una categoria (pueden ser largas) */}
+      <Dialog
+        open={!!basesModalCat}
+        onOpenChange={(open) => !open && setBasesModalCat(null)}
+      >
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Bases · {basesModalCat?.nombre}</DialogTitle>
+            {basesModalCat && (
+              <DialogDescription>
+                Premio {formatMoney(basesModalCat.monto)} ·{" "}
+                {basesModalCat.numeroGanadores} ganadores
+              </DialogDescription>
+            )}
+          </DialogHeader>
+          <div className="max-h-[60vh] overflow-y-auto whitespace-pre-line text-sm leading-relaxed text-secondary-700">
+            {basesModalCat?.bases}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {deleteCategoriaTarget && (
         <ConfirmDialog
           open={!!deleteCategoriaTarget}
@@ -763,14 +797,20 @@ function CategoriaSelector({
   onChange: (id: number) => void;
 }) {
   if (!categorias || categorias.length <= 1) return null;
+  // banner con color suave para remarcar en que categoria se esta trabajando
+  // (todos los tabs por categoria cuelgan de esta seleccion; evita confusion)
   return (
-    <div className="flex items-center gap-3">
-      <span className="text-sm font-medium text-secondary-600">Categoría:</span>
+    <div className="flex flex-wrap items-center gap-3 rounded-lg border border-primary-200 bg-primary-50/60 px-4 py-3">
+      <Icon
+        icon="ph:folder-notch-open-duotone"
+        className="size-5 shrink-0 text-primary-600"
+      />
+      <span className="text-sm font-medium text-primary-900">Categoría:</span>
       <Select
         value={categoriaId != null ? String(categoriaId) : ""}
         onValueChange={(v) => onChange(Number(v))}
       >
-        <SelectTrigger className="w-72">
+        <SelectTrigger className="w-64 border-primary-300 bg-white font-semibold text-primary-800">
           <SelectValue placeholder="Selecciona una categoría" />
         </SelectTrigger>
         <SelectContent>
@@ -781,6 +821,9 @@ function CategoriaSelector({
           ))}
         </SelectContent>
       </Select>
+      <span className="hidden text-xs text-primary-700/80 sm:inline">
+        Lo que ves y editas abajo es de esta categoría.
+      </span>
     </div>
   );
 }
@@ -793,6 +836,142 @@ function SinCategorias() {
         Esta convocatoria todavía no tiene categorías configuradas.
       </CardContent>
     </Card>
+  );
+}
+
+// tarjeta resumen de una categoria en el tab general: premio, ganadores,
+// descripcion recortada y acceso a las bases completas (modal). En borrador
+// permite editar/eliminar. Las acciones son iconos con tooltip (compactas).
+function CategoriaResumenCard({
+  categoria,
+  isBorrador,
+  canDelete,
+  wide,
+  onVerBases,
+  onEditar,
+  onEliminar,
+}: {
+  categoria: CategoriaResponse;
+  isBorrador: boolean;
+  canDelete: boolean;
+  // una sola categoria: layout horizontal (llena el ancho); varias: tarjeta en grid
+  wide: boolean;
+  onVerBases: () => void;
+  onEditar: () => void;
+  onEliminar: () => void;
+}) {
+  const icono = (
+    <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+      <Icon icon="ph:trophy-duotone" className="size-5" />
+    </div>
+  );
+
+  const identidad = (
+    <>
+      <p className="text-sm font-semibold text-secondary-900">
+        {categoria.nombre}
+      </p>
+      <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+        <span className="inline-flex items-center rounded-md bg-amber-50 px-2 py-0.5 text-xs font-semibold tabular-nums text-amber-700">
+          {formatMoney(categoria.monto)}
+        </span>
+        <span className="text-xs text-secondary-500">
+          {categoria.numeroGanadores} ganadores
+        </span>
+      </div>
+      {categoria.descripcion && (
+        <p className="mt-2 line-clamp-2 text-sm text-secondary-600">
+          {categoria.descripcion}
+        </p>
+      )}
+      {!categoria.bases && (
+        <p className="mt-2 text-xs text-secondary-400">Sin bases definidas.</p>
+      )}
+    </>
+  );
+
+  // estado de configuracion y actividad de la categoria
+  const estado = (
+    <>
+      <ConfigChip ok={(categoria.numFormularios ?? 0) > 0} label="Formulario" />
+      <ConfigChip ok={(categoria.numCriterios ?? 0) > 0} label="Rúbrica" />
+      <span className="inline-flex items-center gap-1 text-secondary-500">
+        <Icon
+          icon="ph:users-three-duotone"
+          className="size-3.5 text-secondary-400"
+        />
+        <span className="font-semibold tabular-nums text-secondary-700">
+          {categoria.numEvaluadores ?? 0}
+        </span>
+        evaluadores
+      </span>
+      <span className="inline-flex items-center gap-1 text-secondary-500">
+        <Icon
+          icon="ph:file-text-duotone"
+          className="size-3.5 text-secondary-400"
+        />
+        <span className="font-semibold tabular-nums text-secondary-700">
+          {categoria.numPostulaciones ?? 0}
+        </span>
+        postulaciones
+      </span>
+    </>
+  );
+
+  const acciones = (
+    <div className="flex shrink-0 items-center gap-0.5">
+      {categoria.bases && (
+        <RowAction
+          icon={<Eye className="size-4" />}
+          label="Ver bases completas"
+          onClick={onVerBases}
+        />
+      )}
+      {isBorrador && (
+        <RowAction
+          icon={<Pencil className="size-4" />}
+          label="Editar categoría"
+          onClick={onEditar}
+        />
+      )}
+      {isBorrador && canDelete && (
+        <RowAction
+          icon={<Trash2 className="size-4" />}
+          label="Eliminar categoría"
+          onClick={onEliminar}
+          destructive
+        />
+      )}
+    </div>
+  );
+
+  // una sola categoria: horizontal, con el estado repartido en el centro para
+  // llenar el ancho (evita el hueco de una tarjeta a media pantalla)
+  if (wide) {
+    return (
+      <div className="flex items-center gap-5 rounded-xl border border-secondary-200 bg-white p-4">
+        {icono}
+        <div className="w-64 shrink-0">{identidad}</div>
+        <div className="flex flex-1 flex-wrap items-center justify-around gap-x-4 gap-y-1.5 text-xs">
+          {estado}
+        </div>
+        {acciones}
+      </div>
+    );
+  }
+
+  // varias categorias: tarjeta vertical (estado debajo de la identidad) en grid
+  return (
+    <div className="flex h-full items-start gap-4 rounded-xl border border-secondary-200 bg-white p-4">
+      {icono}
+      <div className="min-w-0 flex-1">
+        {identidad}
+        <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs">
+          {estado}
+        </div>
+      </div>
+      {acciones}
+    </div>
   );
 }
 
@@ -851,6 +1030,24 @@ function PostulacionCTA({
 
   const estado = miPostulacion.estado as EstadoPostulacion;
   const pct = formatPercent(miPostulacion.porcentajeCompletado);
+
+  // borrador u observada que quedaron sin enviar al cerrar el plazo: el backend
+  // rechaza guardar/enviar, asi que no ofrecemos el boton, explicamos por que.
+  if (
+    !isAbierto &&
+    (estado === EstadoPostulacion.BORRADOR || estado === EstadoPostulacion.OBSERVADO)
+  ) {
+    return (
+      <div className="rounded-lg border border-secondary-200 bg-secondary-50 p-4">
+        <p className="font-semibold text-secondary-800">
+          Ya no puedes editar esta postulación
+        </p>
+        <p className="mt-0.5 text-sm text-secondary-600">
+          {motivoNoPostulable(estadoConvocatoria)} Tu postulación quedó sin enviar.
+        </p>
+      </div>
+    );
+  }
 
   if (estado === EstadoPostulacion.BORRADOR) {
     return (
@@ -930,6 +1127,23 @@ function PostulacionCTA({
       </div>
       <StateBadge tipo="postulacion" valor={estado} />
     </div>
+  );
+}
+
+// indicador de configuracion (formulario / rubrica): verde si esta, gris si no
+function ConfigChip({ ok, label }: { ok: boolean; label: string }) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1 ${
+        ok ? "text-success-700" : "text-secondary-400"
+      }`}
+    >
+      <Icon
+        icon={ok ? "ph:check-circle-duotone" : "ph:x-circle-duotone"}
+        className="size-3.5"
+      />
+      {label}
+    </span>
   );
 }
 

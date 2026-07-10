@@ -45,8 +45,9 @@ const columns: Column<PublicacionResponse>[] = [
   {
     key: "titulo",
     header: "Titulo",
+    className: "max-w-sm",
     cell: (row) => (
-      <span className="font-medium text-secondary-900 line-clamp-1">
+      <span className="font-medium text-secondary-900 line-clamp-2">
         {row.titulo}
       </span>
     ),
@@ -99,7 +100,7 @@ function PublicacionesContent() {
   const [filters, setFilters] = useQueryStates(
     {
       page: parseAsInteger.withDefault(1),
-      limit: parseAsInteger.withDefault(12),
+      limit: parseAsInteger.withDefault(10),
       search: parseAsString.withDefault(""),
       estado: parseAsString.withDefault(ALL),
     },
@@ -177,6 +178,8 @@ function PublicacionesContent() {
         page={filters.page}
         limit={filters.limit}
         onPageChange={(page) => setFilters({ page })}
+        itemName="publicaciones"
+        onLimitChange={(limit) => setFilters({ limit, page: 1 })}
         isLoading={isLoading}
         emptyState={
           <EmptyState

@@ -23,7 +23,7 @@ export function ConvocatoriasActivasSection() {
             <p className="text-sm font-semibold tracking-wider text-orange-600 uppercase">
               Oportunidades
             </p>
-            <h2 className="mt-2 font-heading text-3xl font-bold text-primary-800 sm:text-4xl">
+            <h2 className="mt-2 font-display text-3xl leading-[1.3] tracking-wide text-primary-800 uppercase sm:text-4xl">
               Convocatorias activas
             </h2>
           </div>
@@ -33,7 +33,7 @@ export function ConvocatoriasActivasSection() {
             className="hidden sm:inline-flex"
           >
             <Link href="/convocatorias">
-              Ver todos
+              Ver todas
               <ArrowRight className="size-4" />
             </Link>
           </Button>
@@ -51,11 +51,11 @@ export function ConvocatoriasActivasSection() {
                   <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-xl bg-primary-100">
                     <Icon icon="ph:trophy-duotone" className="size-6 text-primary-600" />
                   </div>
-                  <h3 className="font-heading text-lg font-bold text-primary-800">
+                  <h3 className="font-display text-lg leading-snug tracking-wide text-primary-800 uppercase">
                     Nuevas convocatorias en camino
                   </h3>
                   <p className="mt-2 text-sm text-secondary-500">
-                    Proximamente se publicaran nuevas oportunidades para tu
+                    Próximamente se publicarán nuevas oportunidades para tu
                     empresa.
                   </p>
                   <Button
@@ -63,7 +63,7 @@ export function ConvocatoriasActivasSection() {
                     variant="link"
                     className="mt-2 text-orange-600"
                   >
-                    <Link href="/convocatorias">Ver todos las convocatorias</Link>
+                    <Link href="/convocatorias">Ver todas las convocatorias</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -84,18 +84,18 @@ export function ConvocatoriasActivasSection() {
                     <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-xl bg-primary-100">
                       <Icon icon="ph:trophy-duotone" className="size-6 text-primary-600" />
                     </div>
-                    <h3 className="font-heading text-lg font-bold text-primary-800">
-                      Mas convocatorias pronto
+                    <h3 className="font-display text-lg leading-snug tracking-wide text-primary-800 uppercase">
+                      Más convocatorias pronto
                     </h3>
                     <p className="mt-2 text-sm text-secondary-500">
-                      Nuevas convocatorias se publicaran proximamente.
+                      Nuevas convocatorias se publicarán próximamente.
                     </p>
                     <Button
                       asChild
                       variant="link"
                       className="mt-2 text-orange-600"
                     >
-                      <Link href="/convocatorias">Ver todos las convocatorias</Link>
+                      <Link href="/convocatorias">Ver todas las convocatorias</Link>
                     </Button>
                   </CardContent>
                 </Card>
@@ -108,7 +108,7 @@ export function ConvocatoriasActivasSection() {
         <div className="mt-6 text-center sm:hidden">
           <Button asChild variant="outline">
             <Link href="/convocatorias">
-              Ver todos las convocatorias
+              Ver todas las convocatorias
               <ArrowRight className="size-4" />
             </Link>
           </Button>

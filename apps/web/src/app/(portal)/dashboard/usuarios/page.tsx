@@ -117,7 +117,7 @@ function UsuariosContent() {
   const [filters, setFilters] = useQueryStates(
     {
       page: parseAsInteger.withDefault(1),
-      limit: parseAsInteger.withDefault(20),
+      limit: parseAsInteger.withDefault(10),
       search: parseAsString.withDefault(""),
       rol: parseAsString.withDefault(ALL),
       activo: parseAsString.withDefault(ALL),
@@ -213,6 +213,8 @@ function UsuariosContent() {
         page={filters.page}
         limit={filters.limit}
         onPageChange={(page) => setFilters({ page })}
+        itemName="usuarios"
+        onLimitChange={(limit) => setFilters({ limit, page: 1 })}
         isLoading={isLoading}
         emptyState={
           <EmptyState

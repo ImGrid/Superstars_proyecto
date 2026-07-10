@@ -7,7 +7,6 @@ import {
   CloudUpload,
   Download,
   Loader2,
-  MoreHorizontal,
   Pencil,
   Plus,
   Trash2,
@@ -54,16 +53,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { EmptyState } from "@/components/shared/empty-state";
+import { RowAction } from "@/components/shared/row-actions";
 import {
   uploadDocumento,
   updateDocumento,
@@ -71,7 +64,7 @@ import {
   deleteDocumento,
 } from "@/lib/api/documento.api";
 import { documentoQueries } from "@/lib/api/query-keys";
-import { formatDate, formatFileSize } from "@/lib/format";
+import { formatDate, formatFileSize, mimeTypeLabel } from "@/lib/format";
 
 // propositos con etiquetas para el coordinador (no tecnicas)
 const PROPOSITO_OPCIONES: {
@@ -203,7 +196,10 @@ export function DocumentosTab({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>Documentos de la convocatoria</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Icon icon="ph:folders-duotone" className="size-5 text-primary-600" />
+            Documentos de la convocatoria
+          </CardTitle>
           <CardDescription>
             Archivos adjuntos de la convocatoria (bases, reglamentos, anexos).
           </CardDescription>
@@ -216,6 +212,14 @@ export function DocumentosTab({
         )}
       </CardHeader>
       <CardContent>
+        {documentos && documentos.length > 0 && (
+          <p className="mb-4 text-sm text-secondary-500">
+            <span className="font-medium text-secondary-900">
+              {documentos.length}
+            </span>{" "}
+            {documentos.length === 1 ? "documento" : "documentos"}
+          </p>
+        )}
         {!documentos || documentos.length === 0 ? (
           <EmptyState
             icon="ph:file-text-duotone"
@@ -241,7 +245,7 @@ export function DocumentosTab({
                 <TableHead>Visible para</TableHead>
                 <TableHead>Archivo original</TableHead>
                 <TableHead>Tipo</TableHead>
-                <TableHead>Tamano</TableHead>
+                <TableHead>Tamaño</TableHead>
                 <TableHead>Subido</TableHead>
                 <TableHead className="w-12" />
               </TableRow>
@@ -257,7 +261,7 @@ export function DocumentosTab({
                     {doc.nombreOriginal}
                   </TableCell>
                   <TableCell className="text-sm text-secondary-500">
-                    {doc.mimeType}
+                    {mimeTypeLabel(doc.mimeType)}
                   </TableCell>
                   <TableCell className="text-sm text-secondary-500">
                     {formatFileSize(doc.tamanoBytes)}
@@ -266,36 +270,28 @@ export function DocumentosTab({
                     {formatDate(doc.createdAt)}
                   </TableCell>
                   <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="size-8">
-                          <MoreHorizontal className="size-4" />
-                          <span className="sr-only">Acciones</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleDownload(doc)}>
-                          <Download className="size-4" />
-                          Descargar
-                        </DropdownMenuItem>
-                        {canEdit && (
-                          <>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => setEditTarget(doc)}>
-                              <Pencil className="size-4" />
-                              Editar
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => setDeleteTarget(doc)}
-                              className="text-destructive focus:text-destructive"
-                            >
-                              <Trash2 className="size-4" />
-                              Eliminar
-                            </DropdownMenuItem>
-                          </>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div className="flex items-center justify-end gap-0.5">
+                      <RowAction
+                        icon={<Download className="size-4" />}
+                        label="Descargar"
+                        onClick={() => handleDownload(doc)}
+                      />
+                      {canEdit && (
+                        <RowAction
+                          icon={<Pencil className="size-4" />}
+                          label="Editar"
+                          onClick={() => setEditTarget(doc)}
+                        />
+                      )}
+                      {canEdit && (
+                        <RowAction
+                          icon={<Trash2 className="size-4" />}
+                          label="Eliminar"
+                          onClick={() => setDeleteTarget(doc)}
+                          destructive
+                        />
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -329,7 +325,7 @@ export function DocumentosTab({
             open={!!deleteTarget}
             onOpenChange={(open) => !open && setDeleteTarget(null)}
             title="Eliminar documento"
-            description={`Se eliminara permanentemente el documento "${deleteTarget.nombre}". Esta accion no se puede deshacer.`}
+            description={`Se eliminará permanentemente el documento "${deleteTarget.nombre}". Esta acción no se puede deshacer.`}
             confirmLabel="Eliminar"
             onConfirm={() => deleteMutation.mutate(deleteTarget.id)}
             isLoading={deleteMutation.isPending}
@@ -439,7 +435,7 @@ function UploadDialog({
         <DialogHeader>
           <DialogTitle>Subir documento</DialogTitle>
           <DialogDescription>
-            Arrastra un archivo o haz click para seleccionarlo (max 20 MB).
+            Arrastra un archivo o haz clic para seleccionarlo (max 20 MB).
           </DialogDescription>
         </DialogHeader>
 
@@ -469,10 +465,10 @@ function UploadDialog({
                 Arrastra para subir
               </p>
               <p className="text-xs text-secondary-500">
-                Suelta tu archivo aqui o haz click para seleccionar
+                Suelta tu archivo aquí o haz clic para seleccionar
               </p>
               <p className="text-xs text-secondary-400">
-                PDF, Word, Excel, PowerPoint o imagenes (max 20 MB)
+                PDF, Word, Excel, PowerPoint o imágenes (max 20 MB)
               </p>
             </div>
           ) : (

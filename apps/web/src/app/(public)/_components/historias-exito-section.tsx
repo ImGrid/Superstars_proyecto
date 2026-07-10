@@ -28,7 +28,7 @@ function HistoriaCard({ historia }: { historia: PublicHistoriaExitoItem }) {
             {historia.badge}
           </Badge>
         )}
-        <h3 className="font-heading text-lg font-bold text-primary-800">
+        <h3 className="font-display text-lg leading-snug tracking-[0.01em] text-primary-800">
           {historia.titulo}
         </h3>
         {historia.empresaNombre && (
@@ -151,7 +151,7 @@ function SectionHeader() {
       <p className="text-sm font-semibold tracking-wider text-orange-600 uppercase">
         Casos de éxito
       </p>
-      <h2 className="mt-2 font-heading text-3xl font-bold text-primary-800 sm:text-4xl">
+      <h2 className="mt-2 font-display text-3xl leading-[1.3] tracking-wide text-primary-800 uppercase sm:text-4xl">
         Historias que inspiran
       </h2>
       <p className="mt-4 text-lg text-secondary-600">

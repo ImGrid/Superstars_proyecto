@@ -2,7 +2,6 @@
 
 import { Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
 import { Eye } from "lucide-react";
 import { Icon } from "@iconify/react";
@@ -23,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { PageHeader } from "@/components/shared/page-header";
 import { DataTable, type Column } from "@/components/shared/data-table";
+import { RowActions, RowAction } from "@/components/shared/row-actions";
 import { StateBadge } from "@/components/shared/state-badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import { TableSkeleton } from "@/components/shared/loading-skeleton";
@@ -107,22 +107,28 @@ const columns: Column<PostulacionAdminListItem>[] = [
     key: "acciones",
     header: "",
     cell: (row) => (
-      <div className="flex items-center justify-end gap-1">
-        <Button asChild variant="ghost" size="sm" className="gap-1">
-          <Link href={`/dashboard/convocatorias/${row.convocatoriaId}/postulaciones/${row.id}`}>
-            <Eye className="size-3.5" />
-            Ver detalle
-          </Link>
-        </Button>
+      <RowActions>
         {row.calificacionesPendientes > 0 && (
-          <Button asChild variant="ghost" size="sm" className="gap-1 text-blue-600">
-            <Link href={`/dashboard/convocatorias/${row.convocatoriaId}/postulaciones/${row.id}`}>
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            className="gap-1 text-primary-700 hover:text-primary-800"
+          >
+            <Link
+              href={`/dashboard/convocatorias/${row.convocatoriaId}/postulaciones/${row.id}?tab=calificaciones`}
+            >
               <Icon icon="ph:clipboard-text-duotone" className="size-3.5" />
-              {row.calificacionesPendientes} por revisar
+              Revisar ({row.calificacionesPendientes})
             </Link>
           </Button>
         )}
-      </div>
+        <RowAction
+          icon={<Eye className="size-4" />}
+          label="Ver detalle"
+          href={`/dashboard/convocatorias/${row.convocatoriaId}/postulaciones/${row.id}`}
+        />
+      </RowActions>
     ),
     className: "text-right",
   },
@@ -137,13 +143,11 @@ export default function PostulacionesAdminPage() {
 }
 
 function PostulacionesContent() {
-  const router = useRouter();
-
   // filtros sincronizados con la URL
   const [filters, setFilters] = useQueryStates(
     {
       page: parseAsInteger.withDefault(1),
-      limit: parseAsInteger.withDefault(20),
+      limit: parseAsInteger.withDefault(10),
       estado: parseAsString.withDefault(ALL),
       convocatoriaId: parseAsString.withDefault(ALL),
     },
@@ -216,11 +220,6 @@ function PostulacionesContent() {
             ))}
           </SelectContent>
         </Select>
-
-        {/* conteo de resultados */}
-        <span className="text-sm text-secondary-500 sm:ml-auto">
-          {total} postulacion{total !== 1 ? "es" : ""}
-        </span>
       </div>
 
       {/* tabla */}
@@ -231,6 +230,8 @@ function PostulacionesContent() {
         page={filters.page}
         limit={filters.limit}
         onPageChange={(p) => setFilters({ page: p })}
+        itemName="postulaciones"
+        onLimitChange={(limit) => setFilters({ limit, page: 1 })}
         isLoading={isLoading}
         emptyState={
           <EmptyState

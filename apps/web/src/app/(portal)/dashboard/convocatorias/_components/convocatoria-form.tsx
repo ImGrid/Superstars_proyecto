@@ -45,7 +45,7 @@ const DEPARTAMENTOS_BOLIVIA = [
   "Chuquisaca",
   "Beni",
   "Pando",
-  "Potosi",
+  "Potosí",
   "Tarija",
 ];
 
@@ -73,6 +73,29 @@ function convocatoriaToFormValues(c: ConvocatoriaResponse): ConvocatoriaFormValu
     fechaAnuncioGanadores: c.fechaAnuncioGanadores ?? undefined,
     departamentos: c.departamentos,
   };
+}
+
+// encabezado de seccion con icono-guia (mismo estilo que el resto de las vistas)
+function SectionHead({
+  icon,
+  title,
+  description,
+}: {
+  icon: string;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="flex items-center gap-3">
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary-100 text-primary-700">
+        <Icon icon={icon} className="size-5" />
+      </div>
+      <div className="min-w-0">
+        <CardTitle>{title}</CardTitle>
+        <CardDescription className="mt-1">{description}</CardDescription>
+      </div>
+    </div>
+  );
 }
 
 interface ConvocatoriaFormProps {
@@ -106,10 +129,14 @@ export function ConvocatoriaForm({ initialData }: ConvocatoriaFormProps) {
   // mutacion crear
   const createMutation = useMutation({
     mutationFn: (dto: CreateConvocatoriaDto) => createConvocatoria(dto),
-    onSuccess: () => {
-      toast.success("Convocatoria creada correctamente");
+    onSuccess: (data) => {
+      // aviso al coordinador: la convocatoria nace con 2 categorias que hay que
+      // configurar (no es un adivino, se lo decimos y lo llevamos al detalle)
+      toast.success(
+        "Convocatoria creada con 2 categorías. Configura el formulario, la rúbrica y los evaluadores de cada categoría antes de publicar.",
+      );
       queryClient.invalidateQueries({ queryKey: convocatoriaQueries.all() });
-      router.push("/dashboard/convocatorias");
+      router.push(`/dashboard/convocatorias/${data.id}`);
     },
     onError: (error: any) => {
       const msg = error.response?.data?.message ?? "Error al crear la convocatoria";
@@ -179,107 +206,113 @@ export function ConvocatoriaForm({ initialData }: ConvocatoriaFormProps) {
           </div>
         )}
 
-        {/* seccion 1: informacion basica */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Información básica</CardTitle>
-            <CardDescription>
-              Nombre y descripción de la convocatoria.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <FormField
-              control={form.control}
-              name="nombre"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nombre de la convocatoria *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ej: Convocatoria de Impacto 2026" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="descripcion"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descripción</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Describe brevemente la convocatoria"
-                      rows={3}
-                      {...field}
-                      value={field.value ?? ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-        </Card>
+        {/* fila 1: informacion basica + fechas en 2 columnas (aprovecha el ancho) */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* seccion 1: informacion basica */}
+          <Card className="h-full">
+            <CardHeader>
+              <SectionHead
+                icon="ph:note-pencil-duotone"
+                title="Información básica"
+                description="Nombre y descripción de la convocatoria."
+              />
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <FormField
+                control={form.control}
+                name="nombre"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nombre de la convocatoria *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ej: Convocatoria de Impacto 2026" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="descripcion"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Descripción</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Describe brevemente la convocatoria"
+                        rows={5}
+                        {...field}
+                        value={field.value ?? ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
 
-        {/* seccion 2: fechas */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Fechas</CardTitle>
-            <CardDescription>
-              Período de postulación y anuncio de ganadores.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <FormField
-              control={form.control}
-              name="fechaInicioPostulacion"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Inicio de postulación *</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} value={field.value ?? ""} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="fechaCierrePostulacion"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Cierre de postulación *</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} value={field.value ?? ""} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="fechaAnuncioGanadores"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Anuncio de ganadores</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} value={field.value ?? ""} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-        </Card>
+          {/* seccion 2: fechas (apiladas dentro de su columna) */}
+          <Card className="h-full">
+            <CardHeader>
+              <SectionHead
+                icon="ph:calendar-dots-duotone"
+                title="Fechas"
+                description="Período de postulación y anuncio de ganadores."
+              />
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <FormField
+                control={form.control}
+                name="fechaInicioPostulacion"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Inicio de postulación *</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} value={field.value ?? ""} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="fechaCierrePostulacion"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cierre de postulación *</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} value={field.value ?? ""} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="fechaAnuncioGanadores"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Anuncio de ganadores</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} value={field.value ?? ""} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+        </div>
 
-        {/* seccion 3: departamentos */}
+        {/* seccion 3: departamentos (ancho completo) */}
         <Card>
           <CardHeader>
-            <CardTitle>Departamentos *</CardTitle>
-            <CardDescription>
-              Selecciona los departamentos donde estará disponible la convocatoria.
-            </CardDescription>
+            <SectionHead
+              icon="ph:map-pin-duotone"
+              title="Departamentos *"
+              description="Selecciona los departamentos donde estará disponible la convocatoria."
+            />
           </CardHeader>
           <CardContent>
             <FormField

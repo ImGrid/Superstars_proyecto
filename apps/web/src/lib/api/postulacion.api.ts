@@ -2,6 +2,7 @@ import { apiClient } from "./client";
 import type {
   SavePostulacionDraftDto,
   ObservarPostulacionDto,
+  RechazarPostulacionDto,
   ListPostulacionesQueryDto,
   PostulacionResponse,
   PostulacionListItem,
@@ -95,11 +96,16 @@ export function observarPostulacion(
     .then((r) => r.data);
 }
 
-// Rechazar postulacion
-export function rechazarPostulacion(convocatoriaId: number, id: number) {
+// Rechazar postulacion con motivo (sirve en revision y en evaluacion)
+export function rechazarPostulacion(
+  convocatoriaId: number,
+  id: number,
+  dto: RechazarPostulacionDto,
+) {
   return apiClient
     .post<PostulacionResponse>(
       `/convocatorias/${convocatoriaId}/postulaciones/${id}/rechazar`,
+      dto,
     )
     .then((r) => r.data);
 }

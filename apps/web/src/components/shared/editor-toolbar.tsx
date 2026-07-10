@@ -128,7 +128,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
         onPressedChange={() =>
           editor.chain().focus().toggleHeading({ level: 1 }).run()
         }
-        aria-label="Titulo 1"
+        aria-label="Título 1"
       >
         <Heading1 className="size-4" />
       </Toggle>
@@ -138,7 +138,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
         onPressedChange={() =>
           editor.chain().focus().toggleHeading({ level: 2 }).run()
         }
-        aria-label="Titulo 2"
+        aria-label="Título 2"
       >
         <Heading2 className="size-4" />
       </Toggle>
@@ -148,7 +148,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
         onPressedChange={() =>
           editor.chain().focus().toggleHeading({ level: 3 }).run()
         }
-        aria-label="Titulo 3"
+        aria-label="Título 3"
       >
         <Heading3 className="size-4" />
       </Toggle>
@@ -162,7 +162,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
         onPressedChange={() =>
           editor.chain().focus().toggleBulletList().run()
         }
-        aria-label="Lista con vinetas"
+        aria-label="Lista con viñetas"
       >
         <List className="size-4" />
       </Toggle>

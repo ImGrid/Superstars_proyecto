@@ -41,3 +41,30 @@ export function getEmpresa(id: number) {
     .get<EmpresaResponse>(`/empresas/${id}`)
     .then((r) => r.data);
 }
+
+// --- Logo de la empresa ---
+
+// URL publica para mostrar el logo como src de <img>. El backend sirve el binario
+// con cache de 24h, por lo que se puede usar directamente sin auth.
+export function getEmpresaLogoUrl(id: number): string {
+  return `${process.env.NEXT_PUBLIC_API_URL}/empresas/${id}/logo`;
+}
+
+// Proponente: subir/cambiar el logo de mi empresa
+export function uploadMyLogo(file: File) {
+  const formData = new FormData();
+  formData.append("logo", file);
+
+  return apiClient
+    .post<EmpresaResponse>("/empresas/me/logo", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+    .then((r) => r.data);
+}
+
+// Proponente: quitar el logo de mi empresa
+export function removeMyLogo() {
+  return apiClient
+    .delete<EmpresaResponse>("/empresas/me/logo")
+    .then((r) => r.data);
+}

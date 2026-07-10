@@ -245,7 +245,7 @@ export default function ConvocatoriaDetallePage({
             <div className="mb-1">
               <StateBadge tipo="convocatoria" valor={convocatoria.estado} />
             </div>
-            <h1 className="mt-2 font-heading text-3xl font-bold text-primary-800 sm:text-4xl">
+            <h1 className="mt-2 font-display text-3xl leading-[1.2] tracking-[0.01em] text-primary-800 sm:text-4xl">
               {convocatoria.nombre}
             </h1>
 
@@ -475,7 +475,7 @@ function SidebarCard({
         {/* CTA - solo si la convocatoria esta abierto */}
         {convocatoria.estado === "publicado" ? (
           <>
-            <Button asChild className="w-full bg-orange-600 hover:bg-orange-700">
+            <Button asChild variant="cta" className="w-full">
               <Link href="/auth/login">
                 Quiero participar
               </Link>

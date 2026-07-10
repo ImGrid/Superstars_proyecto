@@ -48,6 +48,8 @@ const columns: Column<ConvocatoriaResponse>[] = [
   {
     key: "nombre",
     header: "Nombre",
+    // ancho minimo para que el nombre no quede demasiado angosto al envolver
+    className: "min-w-[16rem]",
     cell: (row) => (
       <span className="font-medium text-secondary-900">{row.nombre}</span>
     ),
@@ -117,7 +119,7 @@ function ConvocatoriasAdminContent() {
   const [filters, setFilters] = useQueryStates(
     {
       page: parseAsInteger.withDefault(1),
-      limit: parseAsInteger.withDefault(20),
+      limit: parseAsInteger.withDefault(10),
       search: parseAsString.withDefault(""),
       estado: parseAsString.withDefault(ALL),
     },
@@ -193,6 +195,8 @@ function ConvocatoriasAdminContent() {
         page={filters.page}
         limit={filters.limit}
         onPageChange={(page) => setFilters({ page })}
+        itemName="convocatorias"
+        onLimitChange={(limit) => setFilters({ limit, page: 1 })}
         isLoading={isLoading}
         emptyState={
           <EmptyState

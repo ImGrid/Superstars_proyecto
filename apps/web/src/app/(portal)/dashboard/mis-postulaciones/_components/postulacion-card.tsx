@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Clock, FileEdit, Eye } from "lucide-react";
 import { Icon } from "@iconify/react";
-import { EstadoPostulacion } from "@superstars/shared";
+import { EstadoConvocatoria, EstadoPostulacion } from "@superstars/shared";
 import type { PostulacionListItem } from "@superstars/shared";
 import { Button } from "@/components/ui/button";
 import {
@@ -46,40 +46,54 @@ function CompletionBar({ porcentaje }: { porcentaje: string }) {
   );
 }
 
-// accion principal segun estado
-function getMainAction(estado: EstadoPostulacion): {
+// accion principal segun estado. Si la convocatoria ya no admite envios, no se
+// ofrece editar: el backend rechazaria el guardado y el usuario quedaria trabado.
+function getMainAction(
+  estado: EstadoPostulacion,
+  puedeEditar: boolean,
+): {
   label: string;
   icon: React.ReactNode;
   variant: "default" | "outline" | "destructive";
 } | null {
+  const verDetalle = {
+    label: "Ver detalle",
+    icon: <Eye className="size-4" />,
+    variant: "outline" as const,
+  };
+
   switch (estado) {
     case EstadoPostulacion.BORRADOR:
+      if (!puedeEditar) return verDetalle;
       return {
         label: "Continuar postulación",
         icon: <FileEdit className="size-4" />,
         variant: "default",
       };
     case EstadoPostulacion.OBSERVADO:
+      if (!puedeEditar) return verDetalle;
       return {
         label: "Corregir postulación",
         icon: <Icon icon="ph:warning-duotone" className="size-4" />,
         variant: "default",
       };
     default:
-      return {
-        label: "Ver detalle",
-        icon: <Eye className="size-4" />,
-        variant: "outline",
-      };
+      return verDetalle;
   }
 }
 
 export function PostulacionCard({ postulacion }: PostulacionCardProps) {
   const router = useRouter();
-  const action = getMainAction(postulacion.estado);
+  // el backend solo acepta guardar/enviar si la convocatoria esta publicada
+  const puedeEditar =
+    postulacion.convocatoriaEstado === undefined ||
+    postulacion.convocatoriaEstado === EstadoConvocatoria.PUBLICADO;
+  const action = getMainAction(postulacion.estado, puedeEditar);
   const isBorrador = postulacion.estado === EstadoPostulacion.BORRADOR;
   const isObservado = postulacion.estado === EstadoPostulacion.OBSERVADO;
   const isGanador = postulacion.estado === EstadoPostulacion.GANADOR;
+  // borrador que quedo sin enviar cuando la convocatoria cerro
+  const sinEnviarACierre = (isBorrador || isObservado) && !puedeEditar;
 
   return (
     <Card
@@ -117,6 +131,19 @@ export function PostulacionCard({ postulacion }: PostulacionCardProps) {
             <Icon icon="ph:warning-duotone" className="mt-0.5 size-4 shrink-0 text-amber-600" />
             <p className="text-sm text-amber-800 line-clamp-3">
               {postulacion.observacion}
+            </p>
+          </div>
+        )}
+
+        {/* la convocatoria cerro y la postulacion nunca se envio */}
+        {sinEnviarACierre && (
+          <div className="flex items-start gap-2 rounded-md bg-secondary-100 px-3 py-2">
+            <Icon
+              icon="ph:lock-simple-duotone"
+              className="mt-0.5 size-4 shrink-0 text-secondary-500"
+            />
+            <p className="text-sm text-secondary-600">
+              El plazo cerró y no llegaste a enviarla. Ya no se puede editar.
             </p>
           </div>
         )}

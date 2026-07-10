@@ -60,6 +60,25 @@ export function validateSchema(schema: SchemaDefinition): BuilderWarning[] {
         });
       }
 
+      // opciones vacias o repetidas en los campos de seleccion
+      if (campo.tipo === "seleccion_unica" || campo.tipo === "seleccion_multiple") {
+        const labels = campo.opciones.map((o) => o.label.trim().toLowerCase());
+        if (labels.some((l) => l === "")) {
+          warnings.push({
+            itemId: campo.id,
+            message: "Hay opciones sin texto",
+            severity: "error",
+          });
+        }
+        if (new Set(labels).size !== labels.length) {
+          warnings.push({
+            itemId: campo.id,
+            message: "Hay opciones repetidas",
+            severity: "error",
+          });
+        }
+      }
+
       // tabla sin columnas
       if (campo.tipo === "tabla" && campo.columnas.length < 1) {
         warnings.push({

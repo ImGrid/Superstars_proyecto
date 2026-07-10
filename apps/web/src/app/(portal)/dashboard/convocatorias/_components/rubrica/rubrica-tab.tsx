@@ -195,7 +195,7 @@ export function RubricaTab({ convocatoriaId, categoriaId, estadoConvocatoria }: 
               onClick={() => setDeleteOpen(true)}
             >
               <Trash2 className="size-4" />
-              Eliminar rubrica
+              Eliminar rúbrica
             </Button>
           </div>
           <ConfirmDialog

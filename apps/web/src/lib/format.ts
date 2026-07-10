@@ -84,3 +84,32 @@ export function formatFileSize(bytes: number): string {
   const size = bytes / Math.pow(1024, i);
   return `${size.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
 }
+
+// convierte un MIME type a una etiqueta legible: "Word", "PDF", "Imagen JPG".
+// El MIME crudo (ej. application/vnd.openxmlformats-...) confunde al usuario.
+const MIME_LABELS: Record<string, string> = {
+  "application/pdf": "PDF",
+  "application/msword": "Word",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+    "Word",
+  "application/vnd.ms-excel": "Excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "Excel",
+  "application/vnd.ms-powerpoint": "PowerPoint",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation":
+    "PowerPoint",
+  "image/png": "Imagen PNG",
+  "image/jpeg": "Imagen JPG",
+  "image/webp": "Imagen WebP",
+  "text/plain": "Texto",
+  "text/csv": "CSV",
+  "application/zip": "ZIP",
+};
+
+export function mimeTypeLabel(mime: string): string {
+  const label = MIME_LABELS[mime];
+  if (label) return label;
+  // fallback por tipo general para MIME no listados
+  if (mime.startsWith("image/")) return "Imagen";
+  if (mime.startsWith("text/")) return "Texto";
+  return "Documento";
+}

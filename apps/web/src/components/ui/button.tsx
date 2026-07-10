@@ -10,6 +10,10 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        // llamada a la accion naranja. El texto va en navy, no en blanco: blanco
+        // sobre orange-600 da 2.96:1 y no cumple WCAG AA. El hover ACLARA el
+        // fondo (orange-500) porque oscurecerlo bajaria el contraste del navy.
+        cta: "bg-orange-600 text-primary-600 hover:bg-orange-500",
         destructive:
           "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:

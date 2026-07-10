@@ -105,12 +105,12 @@ const CampoReadonly = memo(function CampoReadonly({
     || (Array.isArray(value) && value.length === 0);
 
   return (
-    <div className={wide ? "sm:col-span-2" : ""}>
+    <div className={`min-w-0 ${wide ? "sm:col-span-2" : ""}`}>
       <dt className="text-xs font-medium uppercase tracking-wide text-secondary-500">
         {campo.etiqueta}
         {campo.requerido && <span className="ml-0.5 text-destructive">*</span>}
       </dt>
-      <dd className={`mt-1 text-sm ${isEmpty ? "italic text-secondary-400" : "text-secondary-900"}`}>
+      <dd className={`mt-1 text-sm break-words ${isEmpty ? "italic text-secondary-400" : "text-secondary-900"}`}>
         <FieldValue
           campo={campo}
           value={value}
@@ -256,7 +256,7 @@ function FieldValue({
     case "si_no": {
       if (campo.tipo !== "si_no") return null;
       const label = value === true
-        ? (campo.labelSi ?? "Si")
+        ? (campo.labelSi ?? "Sí")
         : value === false
           ? (campo.labelNo ?? "No")
           : "";

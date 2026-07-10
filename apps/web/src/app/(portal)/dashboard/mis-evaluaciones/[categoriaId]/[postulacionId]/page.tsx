@@ -148,7 +148,7 @@ export default function CalificacionPage({ params }: PageProps) {
   if (!rubrica || !detalleData) {
     return (
       <Alert variant="destructive">
-        <AlertDescription>No se pudo cargar la informacion.</AlertDescription>
+        <AlertDescription>No se pudo cargar la información.</AlertDescription>
       </Alert>
     );
   }
@@ -177,7 +177,7 @@ export default function CalificacionPage({ params }: PageProps) {
         </Button>
         <div className="flex-1 min-w-0">
           <h1 className="font-heading text-lg font-bold text-secondary-900 truncate">
-            Evaluacion — Empresa #{detalleData.postulacion.empresaId}
+            Evaluación — Empresa #{detalleData.postulacion.empresaId}
           </h1>
           <div className="flex items-center gap-2 text-xs text-secondary-500">
             <Badge variant="outline" className="text-xs">
@@ -257,7 +257,7 @@ export default function CalificacionPage({ params }: PageProps) {
             <Alert className="border-emerald-300 bg-emerald-50">
               <Icon icon="ph:check-circle-duotone"className="size-4 text-emerald-600" />
               <AlertDescription className="text-emerald-800">
-                Calificacion aprobada. Solo lectura.
+                Calificación aprobada. Solo lectura.
               </AlertDescription>
             </Alert>
           )}
@@ -298,7 +298,7 @@ export default function CalificacionPage({ params }: PageProps) {
             <div className="h-full overflow-y-auto p-4 bg-secondary-50/30">
               <div className="mb-3">
                 <h2 className="text-sm font-semibold text-secondary-700 uppercase tracking-wide">
-                  Rubrica de evaluacion
+                  Rúbrica de evaluación
                 </h2>
               </div>
 
@@ -349,7 +349,7 @@ export default function CalificacionPage({ params }: PageProps) {
                             <div className="flex flex-wrap gap-1.5 text-[11px]">
                               {basico && (
                                 <span className="rounded bg-secondary-100 px-1.5 py-0.5 text-secondary-600">
-                                  Basico {basico.puntajeMin}-{basico.puntajeMax}
+                                  Básico {basico.puntajeMin}-{basico.puntajeMax}
                                 </span>
                               )}
                               {intermedio && (
@@ -387,7 +387,7 @@ export default function CalificacionPage({ params }: PageProps) {
                               </div>
                               <div>
                                 <Label className="text-xs text-secondary-500">
-                                  Justificacion
+                                  Justificación
                                 </Label>
                                 <Textarea
                                   rows={1}

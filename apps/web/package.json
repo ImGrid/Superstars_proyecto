@@ -28,6 +28,7 @@
     "class-variance-authority": "^0.7.1",
     "client-only": "^0.0.1",
     "clsx": "^2",
+    "d3-geo": "^3.1.1",
     "dompurify": "^3",
     "immer": "^11.1.4",
     "input-otp": "^1.4.2",
@@ -52,6 +53,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@tailwindcss/typography": "^0.5.19",
+    "@types/d3-geo": "^3.1.0",
     "@types/dompurify": "^3",
     "@types/node": "^20",
     "@types/react": "^19",

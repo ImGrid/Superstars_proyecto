@@ -91,7 +91,7 @@ export const ArchivoField = memo(function ArchivoField({
 
     // validar tamanio
     if (file.size > maxTamanoMb * 1024 * 1024) {
-      toast.error(`El archivo excede el limite de ${maxTamanoMb} MB`);
+      toast.error(`El archivo excede el límite de ${maxTamanoMb} MB`);
       return;
     }
 

@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { ConvocatoriasActivasSection } from "./_components/convocatorias-activas-section";
 import { HeroCarousel } from "./_components/hero-carousel";
 import { HistoriasExitoSection } from "./_components/historias-exito-section";
-import { SponsorsStrip } from "@/components/public/sponsors-strip";
+import { EsloganStrip } from "@/components/public/eslogan-strip";
+import { SectionDivider } from "@/components/public/section-divider";
 
 // pasos de "como funciona" - iconos de Phosphor duotone via Iconify
 const steps = [
@@ -37,8 +38,8 @@ export default function HomePage() {
       {/* ===== HERO CARRUSEL ===== */}
       <HeroCarousel />
 
-      {/* ===== SPONSORS ===== */}
-      <SponsorsStrip variant="landing" />
+      {/* ===== FRANJA DEL ESLOGAN (los patrocinadores siguen en el footer) ===== */}
+      <EsloganStrip />
 
       {/* ===== NOSOTROS ===== */}
       <section id="nosotros" className="py-20 lg:py-28">
@@ -60,14 +61,14 @@ export default function HomePage() {
               <p className="text-sm font-semibold tracking-wider text-orange-600 uppercase">
                 Sobre nosotros
               </p>
-              <h2 className="mt-2 font-heading text-3xl font-bold text-primary-800 sm:text-4xl">
-                SUPERSTAR 2026
+              <h2 className="mt-2 font-display text-3xl leading-[1.3] tracking-wide text-primary-800 uppercase sm:text-4xl">
+                ¿Qué es el programa SuperStar?
               </h2>
               <p className="mt-6 text-lg leading-relaxed text-secondary-600">
-                Impulsar una nueva generación de empresas innovadoras que, desde
-                su modelo de negocio, integren la equidad de género y la acción
-                climática como pilares estratégicos, acelerando la transición
-                hacia economías sostenibles, inclusivas y socialmente justas.
+                Buscamos emprendimientos y empresas innovadoras que integren
+                equidad de género y acción climática como parte de su modelo de
+                negocio, impulsando una economía más sostenible, inclusiva y
+                competitiva.
               </p>
               <Button
                 asChild
@@ -75,7 +76,7 @@ export default function HomePage() {
                 className="mt-4 px-0 text-orange-600 hover:text-orange-700"
               >
                 <Link href="/#como-funciona">
-                  Conoce como funciona
+                  Conoce cómo funciona
                   <ChevronRight className="size-4" />
                 </Link>
               </Button>
@@ -84,15 +85,18 @@ export default function HomePage() {
         </div>
       </section>
 
+      <SectionDivider />
+
       {/* ===== COMO FUNCIONA ===== */}
-      <section id="como-funciona" className="bg-secondary-50 py-20 lg:py-28">
+      {/* fondo claro continuo: el salto de seccion es ahora el unico separador */}
+      <section id="como-funciona" className="py-20 lg:py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
             <p className="text-sm font-semibold tracking-wider text-orange-600 uppercase">
               Proceso sencillo
             </p>
-            <h2 className="mt-2 font-heading text-3xl font-bold text-primary-800 sm:text-4xl">
-              Como funciona
+            <h2 className="mt-2 font-display text-3xl leading-[1.3] tracking-wide text-primary-800 uppercase sm:text-4xl">
+              Cómo funciona
             </h2>
             <p className="mt-4 text-lg text-secondary-600">
               Participar es simple. Tres pasos para llevar tu empresa al
@@ -110,7 +114,7 @@ export default function HomePage() {
                 <span className="mb-2 block text-sm font-bold text-orange-600">
                   Paso {index + 1}
                 </span>
-                <h3 className="font-heading text-xl font-bold text-primary-800">
+                <h3 className="font-display text-xl leading-snug tracking-wide text-primary-800 uppercase">
                   {step.title}
                 </h3>
                 <p className="mt-2 text-secondary-600">{step.description}</p>
@@ -120,31 +124,30 @@ export default function HomePage() {
         </div>
       </section>
 
+      <SectionDivider />
+
       {/* ===== CONVOCATORIAS ACTIVAS (datos reales del API) ===== */}
       <ConvocatoriasActivasSection />
 
       {/* ===== HISTORIAS DE EXITO (datos reales del API) ===== */}
+      {/* mantiene fondo gris: es la unica seccion que se destaca por color */}
       <HistoriasExitoSection />
 
       {/* ===== CTA FINAL ===== */}
       <section className="bg-primary-700 py-20 lg:py-28">
         <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
           <Icon icon="ph:trophy-duotone" className="mx-auto mb-6 size-12 text-orange-400" />
-          <h2 className="font-heading text-3xl font-bold text-white sm:text-4xl">
-            Listo para llevar tu empresa al siguiente nivel?
+          <h2 className="font-display text-3xl leading-[1.3] tracking-wide text-white uppercase sm:text-4xl">
+            ¿Listo para llevar tu empresa al siguiente nivel?
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-primary-200">
             Registra tu empresa, completa tu propuesta y compite por un monto de
             hasta Bs 58.000. El siguiente caso de éxito puedes ser tú.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
-            <Button
-              asChild
-              size="lg"
-              className="bg-orange-600 text-white hover:bg-orange-700"
-            >
+            <Button asChild size="lg" variant="cta">
               <Link href="/auth/registro">
-                Iniciar postulacion
+                Iniciar postulación
                 <ArrowRight className="size-4" />
               </Link>
             </Button>

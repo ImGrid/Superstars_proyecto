@@ -24,14 +24,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import { Lock } from "lucide-react";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { campoTypeMap } from "./_lib/campo-types";
 import { OpcionesEditor } from "./opciones-editor";
 import { ColumnasEditor } from "./columnas-editor";
@@ -89,27 +88,25 @@ export function CampoConfigSheet({ campo, open, onOpenChange, onApply }: CampoCo
   }
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="overflow-y-auto sm:max-w-md">
-        <SheetHeader>
-          <SheetTitle className="flex items-center gap-2">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
             <Icon className="size-5 text-secondary-500" />
             Configurar campo
             {isFijo && (
-              <Badge variant="secondary" className="gap-1 text-xs">
-                <Lock className="size-3" />
-                Fijo
+              <Badge
+                variant="secondary"
+                className="text-xs font-normal text-secondary-500"
+              >
+                De plantilla
               </Badge>
             )}
-          </SheetTitle>
-          <SheetDescription>
-            {isFijo
-              ? `Campo de la plantilla. Tipo: ${typeInfo.label}`
-              : `Tipo: ${typeInfo.label}`}
-          </SheetDescription>
-        </SheetHeader>
+          </DialogTitle>
+          <DialogDescription>Tipo: {typeInfo.label}</DialogDescription>
+        </DialogHeader>
 
-        <div className="space-y-6 py-4">
+        <div className="max-h-[62vh] space-y-6 overflow-y-auto py-1 pr-1">
           {/* propiedades comunes (los bloques informativos no capturan dato) */}
           {local.tipo !== "informativo" && (
             <>
@@ -156,16 +153,14 @@ export function CampoConfigSheet({ campo, open, onOpenChange, onApply }: CampoCo
           </div>
         </div>
 
-        <SheetFooter>
+        <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
-          <Button onClick={handleApply}>
-            Aplicar cambios
-          </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+          <Button onClick={handleApply}>Guardar cambios</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -225,7 +220,7 @@ function TypeSpecificConfig({
             />
           </div>
           <div className="space-y-2">
-            <Label>Maximo de palabras</Label>
+            <Label>Máximo de palabras</Label>
             <Input
               type="number"
               value={campo.maxPalabras ?? ""}
@@ -265,7 +260,7 @@ function TypeSpecificConfig({
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label>Minimo</Label>
+              <Label>Mínimo</Label>
               <Input
                 type="number"
                 value={campo.min ?? ""}
@@ -277,7 +272,7 @@ function TypeSpecificConfig({
               />
             </div>
             <div className="space-y-2">
-              <Label>Maximo</Label>
+              <Label>Máximo</Label>
               <Input
                 type="number"
                 value={campo.max ?? ""}

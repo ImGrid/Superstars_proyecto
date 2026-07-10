@@ -104,7 +104,7 @@ export function PublicacionForm({ initialData }: PublicacionFormProps) {
 
   function handleFileSelect(file: File) {
     if (!ACCEPTED_TYPES.includes(file.type)) {
-      toast.error("Solo se permiten imagenes JPEG, PNG o WebP");
+      toast.error("Solo se permiten imágenes JPEG, PNG o WebP");
       return;
     }
     if (file.size > MAX_SIZE) {
@@ -381,7 +381,7 @@ export function PublicacionForm({ initialData }: PublicacionFormProps) {
                       className={`size-8 ${isDragging ? "text-primary-500" : "text-secondary-400"}`}
                     />
                     <p className="text-xs font-medium text-secondary-700">
-                      Arrastra una imagen o haz click
+                      Arrastra una imagen o haz clic
                     </p>
                     <p className="text-xs text-secondary-400">
                       JPEG, PNG o WebP (max 5 MB)
