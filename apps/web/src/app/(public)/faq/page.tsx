@@ -1,19 +1,9 @@
-"use client";
-
-import { useQuery } from "@tanstack/react-query";
-import { Mail } from "lucide-react";
-import { Icon } from "@iconify/react";
+import type { Metadata } from "next";
 import Link from "next/link";
+import { CircleHelp, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Skeleton } from "@/components/ui/skeleton";
-import { faqQueries } from "@/lib/api/query-keys";
-import type { FaqResponse } from "@superstars/shared";
+import { getFaqPublico } from "@/lib/api/public.server";
+import { GrupoFaq } from "./_components/grupo-faq";
 
 // orden y labels de las categorias
 const CATEGORIAS = [
@@ -22,13 +12,26 @@ const CATEGORIAS = [
   { slug: "proceso", label: "Proceso de evaluación" },
 ] as const;
 
-export default function FaqPage() {
-  const { data: faqs, isLoading } = useQuery(faqQueries.public());
+export const metadata: Metadata = {
+  title: "Preguntas frecuentes",
+  description:
+    "Respuestas a las consultas más comunes sobre las convocatorias de SUPERIMPACT360: quiénes pueden postular, cómo se evalúan las propuestas y cuáles son los plazos.",
+  alternates: { canonical: "/faq" },
+  openGraph: {
+    title: "Preguntas frecuentes",
+    description:
+      "Respuestas a las consultas más comunes sobre las convocatorias para emprendedores y empresas en Bolivia.",
+    url: "/faq",
+  },
+};
+
+export default async function FaqPage() {
+  const faqs = await getFaqPublico();
 
   // agrupar por categoria manteniendo el orden definido
   const grupos = CATEGORIAS.map((cat) => ({
     ...cat,
-    items: (faqs ?? []).filter((f) => f.categoria === cat.slug),
+    items: faqs.filter((f) => f.categoria === cat.slug),
   })).filter((g) => g.items.length > 0);
 
   const hayPreguntas = grupos.length > 0;
@@ -38,11 +41,11 @@ export default function FaqPage() {
       {/* hero */}
       <section className="bg-primary-800 py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h1 className="font-heading text-3xl font-bold text-white sm:text-4xl">
+          <h1 className="font-display text-3xl leading-[1.3] tracking-wide text-white uppercase sm:text-4xl">
             Preguntas frecuentes
           </h1>
           <p className="mt-3 text-lg text-primary-200">
-            Encuentra respuestas a las consultas mas comunes sobre el programa.
+            Encuentra respuestas a las consultas más comunes sobre el programa.
           </p>
         </div>
       </section>
@@ -50,24 +53,17 @@ export default function FaqPage() {
       {/* contenido */}
       <section className="py-12">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-          {/* carga */}
-          {isLoading && <FaqSkeleton />}
-
-          {/* sin datos */}
-          {!isLoading && !hayPreguntas && (
+          {!hayPreguntas ? (
             <div className="flex flex-col items-center py-16 text-center">
-              <Icon icon="ph:question-duotone" className="size-12 text-secondary-300" />
+              <CircleHelp className="size-12 text-secondary-300" />
               <h2 className="mt-4 text-lg font-semibold text-secondary-900">
-                Aun no hay preguntas frecuentes
+                Aún no hay preguntas frecuentes
               </h2>
               <p className="mt-2 text-sm text-secondary-500">
-                Pronto publicaremos las respuestas a las consultas mas comunes.
+                Pronto publicaremos las respuestas a las consultas más comunes.
               </p>
             </div>
-          )}
-
-          {/* grupos por categoria */}
-          {!isLoading && hayPreguntas && (
+          ) : (
             <div className="space-y-10">
               {grupos.map((grupo) => (
                 <GrupoFaq
@@ -84,13 +80,13 @@ export default function FaqPage() {
       {/* CTA contacto */}
       <section className="border-t bg-secondary-50 py-12">
         <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-          <h2 className="font-heading text-xl font-semibold text-secondary-900">
-            No encontraste lo que buscabas?
+          <h2 className="font-display text-xl leading-snug tracking-wide text-secondary-900 uppercase">
+            ¿No encontraste lo que buscabas?
           </h2>
           <p className="mt-2 text-secondary-600">
-            Nuestro equipo esta disponible para resolver tus dudas.
+            Nuestro equipo está disponible para resolver tus dudas.
           </p>
-          <Button asChild className="mt-6 bg-orange-600 hover:bg-orange-700">
+          <Button asChild variant="cta" className="mt-6">
             <Link href="/contacto">
               <Mail className="size-4" />
               Contáctanos
@@ -99,49 +95,5 @@ export default function FaqPage() {
         </div>
       </section>
     </>
-  );
-}
-
-// grupo de preguntas bajo un header de categoria
-function GrupoFaq({ label, items }: { label: string; items: FaqResponse[] }) {
-  return (
-    <div>
-      <h2 className="mb-4 border-b border-secondary-200 pb-2 text-base font-semibold uppercase tracking-wide text-primary-700">
-        {label}
-      </h2>
-      {/* type="multiple" permite tener varias respuestas abiertas a la vez */}
-      <Accordion type="multiple" className="w-full">
-        {items.map((faq) => (
-          <AccordionItem key={faq.id} value={`faq-${faq.id}`}>
-            <AccordionTrigger className="text-base font-medium text-secondary-900 hover:no-underline hover:text-primary-700">
-              {faq.pregunta}
-            </AccordionTrigger>
-            <AccordionContent className="leading-relaxed text-secondary-600">
-              {faq.respuesta}
-            </AccordionContent>
-          </AccordionItem>
-        ))}
-      </Accordion>
-    </div>
-  );
-}
-
-// skeleton mientras carga
-function FaqSkeleton() {
-  return (
-    <div className="space-y-10">
-      {[1, 2].map((g) => (
-        <div key={g}>
-          <Skeleton className="mb-4 h-5 w-40" />
-          <div className="space-y-4">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="border-b pb-4">
-                <Skeleton className="h-6 w-3/4" />
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
   );
 }

@@ -4,6 +4,7 @@ import { NuqsAdapter } from "nuqs/adapters/next";
 import { QueryProvider } from "@/lib/query-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
+import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 const inter = Inter({
@@ -17,6 +18,8 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
+  // base para resolver URLs relativas (canonical, imagenes de Open Graph)
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "SUPERIMPACT360 - Plataforma de Competencias Empresariales",
     template: "%s | SUPERIMPACT360",

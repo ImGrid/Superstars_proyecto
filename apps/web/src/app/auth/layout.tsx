@@ -1,9 +1,17 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
 
+// Las pantallas de sesion no aportan nada en buscadores.
+// Se permite el rastreo (robots.txt no las bloquea) para que el bot lea este noindex.
+export const metadata: Metadata = {
+  robots: { index: false, follow: true },
+};
+
 // Layout split 50/50 para auth (server component — sin useAuth para evitar loop).
-// Columna izquierda: imagen del Salar de Uyuni con overlay de branding.
+// Lo comparten login, registro, verificar-cuenta y recuperar/restablecer password.
+// Columna izquierda: foto del apicultor con overlay de branding.
 // Solo visible en desktop (lg+); en mobile/tablet colapsa a single column con
 // el form ocupando todo el ancho.
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
@@ -12,17 +20,19 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       {/* Columna izquierda: imagen + branding overlay (solo desktop) */}
       <div className="relative hidden lg:block">
         <Image
-          src="/images/salar_uyuni.webp"
-          alt="Salar de Uyuni, Bolivia"
+          src="/images/auth-apicultor.webp"
+          alt="Apicultor boliviano trabajando entre sus colmenas en la montaña"
           fill
           priority
           quality={85}
           sizes="(min-width: 1024px) 50vw, 0px"
           className="object-cover"
         />
-        {/* Gradient sutil para que el branding y el copy sean legibles
-            sobre el cielo y el reflejo de la imagen */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-900/40 via-primary-900/15 to-primary-900/55" />
+        {/* La foto es clara (cielo y follaje al sol) y el texto va en blanco:
+            oscurecemos arriba (branding) y abajo (copy), y dejamos limpia la
+            franja del medio para que se vea la cara del apicultor.
+            Medido: con overlay al 20% el branding daba 2.6:1 y no cumplia AA. */}
+        <div className="absolute inset-0 bg-gradient-to-b from-primary-900/80 via-38% via-primary-900/12 to-primary-900/90" />
 
         {/* Branding superior + copy inferior */}
         <div className="relative z-10 flex h-full flex-col p-10 xl:p-12">

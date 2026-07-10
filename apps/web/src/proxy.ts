@@ -3,35 +3,22 @@ import type { NextRequest } from "next/server";
 import { verifyAccessToken } from "@/lib/auth/verify-token";
 import { isRoleAllowed, getDefaultRoute } from "@/lib/auth/route-config";
 
-// rutas que no requieren autenticacion
-const publicPaths = [
-  "/",
-  "/convocatorias",
-  "/resultados",
-  "/noticias",
-  "/faq",
-  "/contacto",
-  "/auth/login",
-  "/auth/registro",
-];
+// Todo el portal cuelga de /dashboard; el resto del sitio es publico o es /auth.
+// Antes se usaba una lista blanca de rutas publicas, pero eso hacia que cualquier
+// URL inexistente (ej. /pagina-que-no-existe) redirigiera a login con un 307 en vez
+// de devolver un 404. Los buscadores tomaban esas URLs fantasma como validas.
+const PORTAL_PREFIX = "/dashboard";
 
-function isPublicPath(pathname: string): boolean {
-  if (publicPaths.includes(pathname)) return true;
-
-  // sub-rutas publicas
-  if (pathname.startsWith("/convocatorias/")) return true;
-  if (pathname.startsWith("/resultados/")) return true;
-  if (pathname.startsWith("/noticias/")) return true;
-  if (pathname.startsWith("/auth/")) return true;
-
-  return false;
+function requiereAutenticacion(pathname: string): boolean {
+  return pathname === PORTAL_PREFIX || pathname.startsWith(`${PORTAL_PREFIX}/`);
 }
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // rutas publicas pasan directo
-  if (isPublicPath(pathname)) {
+  // publico, /auth y rutas inexistentes pasan directo
+  // (las inexistentes las resuelve Next con not-found.tsx y un 404 real)
+  if (!requiereAutenticacion(pathname)) {
     return NextResponse.next();
   }
 
@@ -65,7 +52,7 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // excluir archivos estaticos, imagenes y favicon
-    "/((?!_next/static|_next/image|images|favicon.ico|sitemap.xml|robots.txt).*)",
+    // excluir archivos estaticos, imagenes, datos geo e iconos del sitio
+    "/((?!_next/static|_next/image|images|geo|favicon.ico|icon.png|apple-icon.png|sitemap.xml|robots.txt).*)",
   ],
 };

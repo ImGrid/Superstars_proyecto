@@ -1,70 +1,85 @@
-"use client";
-
-import { use } from "react";
+import type { Metadata } from "next";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
+import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { publicQueries } from "@/lib/api/query-keys";
+import {
+  getPublicacion,
+  getTodasLasPublicacionesPublicadas,
+} from "@/lib/api/public.server";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { EmptyState } from "@/components/shared/empty-state";
 import { formatDate } from "@/lib/format";
 
-export default function NoticiaDetallePage({
-  params,
-}: {
+interface Props {
   params: Promise<{ slug: string }>;
-}) {
-  const { slug } = use(params);
+}
 
-  const { data: publicacion, isLoading, isError } = useQuery(
-    publicQueries.publicacionDetail(slug),
-  );
+// url publica de la imagen destacada (el endpoint es @Public y cachea 24h)
+function imagenUrl(id: number): string {
+  return `${process.env.NEXT_PUBLIC_API_URL}/publicaciones/${id}/imagen`;
+}
 
-  // estado de carga
-  if (isLoading) {
-    return (
-      <div className="mx-auto max-w-3xl px-4 pt-28 pb-12 sm:px-6 lg:px-8">
-        <Skeleton className="mb-6 h-5 w-40" />
-        <Skeleton className="mb-3 h-6 w-24" />
-        <Skeleton className="mb-2 h-10 w-full" />
-        <Skeleton className="mb-8 h-5 w-48" />
-        <Skeleton className="mb-8 aspect-video w-full rounded-xl" />
-        <div className="space-y-3">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-3/4" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-5/6" />
-        </div>
-      </div>
-    );
+// el API devuelve la fecha en formato Postgres ("2026-04-07 11:32:17.95-04")
+// y Open Graph exige ISO 8601
+function fechaIso(fecha: string | null): string | undefined {
+  if (!fecha) return undefined;
+  const d = new Date(fecha);
+  return isNaN(d.getTime()) ? undefined : d.toISOString();
+}
+
+// prerenderiza las noticias publicadas en el build
+export async function generateStaticParams() {
+  try {
+    const publicaciones = await getTodasLasPublicacionesPublicadas();
+    return publicaciones.map((p) => ({ slug: p.slug }));
+  } catch {
+    // sin API en el build, las paginas se generan al primer visitante
+    return [];
+  }
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const publicacion = await getPublicacion(slug);
+
+  if (!publicacion) {
+    return { title: "Publicación no encontrada" };
   }
 
-  // error o no encontrado
-  if (isError || !publicacion) {
-    return (
-      <div className="mx-auto max-w-3xl px-4 pt-28 pb-12 sm:px-6 lg:px-8">
-        <EmptyState
-          icon="ph:newspaper-duotone"
-          title="Publicación no encontrada"
-          description="La publicación que buscas no existe o fue removida."
-          action={
-            <Button asChild variant="outline">
-              <Link href="/noticias">
-                <ArrowLeft className="mr-2 size-4" />
-                Volver a noticias
-              </Link>
-            </Button>
-          }
-        />
-      </div>
-    );
-  }
+  const url = `/noticias/${slug}`;
+  // el extracto ya viene con la longitud de un snippet (107-162 caracteres)
+  const descripcion = publicacion.extracto ?? undefined;
+
+  return {
+    title: publicacion.titulo,
+    description: descripcion,
+    alternates: { canonical: url },
+    openGraph: {
+      type: "article",
+      title: publicacion.titulo,
+      description: descripcion,
+      url,
+      publishedTime: fechaIso(publicacion.fechaPublicacion),
+      images: publicacion.imagenDestacadaKey
+        ? [imagenUrl(publicacion.id)]
+        : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: publicacion.titulo,
+      description: descripcion,
+    },
+  };
+}
+
+export default async function NoticiaDetallePage({ params }: Props) {
+  const { slug } = await params;
+  const publicacion = await getPublicacion(slug);
+
+  // 404 real en vez de responder 200 con "no encontrada"
+  if (!publicacion) notFound();
 
   const imageUrl = publicacion.imagenDestacadaKey
-    ? `${process.env.NEXT_PUBLIC_API_URL}/publicaciones/${publicacion.id}/imagen`
+    ? imagenUrl(publicacion.id)
     : null;
 
   return (
@@ -72,23 +87,24 @@ export default function NoticiaDetallePage({
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         {/* titulo + categoria */}
         <div className="flex flex-wrap items-center gap-3">
-          <h1 className="font-heading text-3xl font-bold text-primary-800 sm:text-4xl">
+          <h1 className="font-display text-3xl leading-[1.2] tracking-[0.01em] text-primary-800 sm:text-4xl">
             {publicacion.titulo}
           </h1>
           {publicacion.categoriaNombre && (
-            <Badge variant="secondary">
-              {publicacion.categoriaNombre}
-            </Badge>
+            <Badge variant="secondary">{publicacion.categoriaNombre}</Badge>
           )}
         </div>
 
         {/* fecha */}
-        <p className="mt-3 text-sm text-secondary-500">
-          {formatDate(publicacion.fechaPublicacion)}
-        </p>
+        {publicacion.fechaPublicacion && (
+          <p className="mt-3 text-sm text-secondary-500">
+            {formatDate(publicacion.fechaPublicacion)}
+          </p>
+        )}
 
         {/* imagen de portada */}
         {imageUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={imageUrl}
             alt={publicacion.titulo}
@@ -96,7 +112,7 @@ export default function NoticiaDetallePage({
           />
         )}
 
-        {/* contenido */}
+        {/* contenido (ya sanitizado en el backend con sanitize-html) */}
         <div
           className="prose prose-lg mt-8 max-w-none"
           dangerouslySetInnerHTML={{ __html: publicacion.contenido }}
