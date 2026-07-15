@@ -147,8 +147,6 @@ export function EmpresaHero({ empresa }: { empresa: EmpresaResponse }) {
   return (
     <div className="space-y-4">
       {/* hero de identidad de la empresa */}
-      {/* el gradiente va en el contenedor: la banda de patrocinadores es hermana del
-          bloque de arriba y necesita el navy debajo para que su bg-black/15 contraste */}
       <div
         className="overflow-hidden rounded-2xl shadow-sm"
         style={{ background: "linear-gradient(135deg, var(--color-purple-600), var(--color-info-600))" }}
@@ -319,14 +317,6 @@ export function EmpresaHero({ empresa }: { empresa: EmpresaResponse }) {
               </>
             )}
           </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-x-1 gap-y-0.5 bg-black/15 px-5 py-2.5 text-[11px] text-white/70">
-          <Icon icon="ph:handshake-duotone" className="mr-1 size-4" />
-          En alianza con{" "}
-          <span className="font-semibold text-white">OXFAM</span> ·{" "}
-          <span className="font-semibold text-white">FUNDES Bolivia</span> ·{" "}
-          <span className="font-semibold text-white">Ayuda en Acción</span>
         </div>
       </div>
 

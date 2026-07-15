@@ -105,7 +105,7 @@ export function PublicNavbar() {
             variant="cta"
             className="hidden md:inline-flex"
           >
-            <Link href="/auth/login">Acceso Empresas</Link>
+            <Link href="/auth/registro">Postular ahora</Link>
           </Button>
 
           {/* hamburguesa mobile */}
@@ -161,8 +161,8 @@ export function PublicNavbar() {
                 {/* CTA mobile */}
                 <div className="border-t p-4">
                   <Button asChild variant="cta" className="w-full">
-                    <Link href="/auth/login" onClick={() => setOpen(false)}>
-                      Acceso Empresas
+                    <Link href="/auth/registro" onClick={() => setOpen(false)}>
+                      Postular ahora
                     </Link>
                   </Button>
                 </div>

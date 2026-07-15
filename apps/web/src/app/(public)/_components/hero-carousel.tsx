@@ -13,6 +13,8 @@ import Image from "next/image";
 import { ArrowRight, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { IconoBeneficio } from "./iconos-beneficios";
+import { IconoCalendario } from "./icono-calendario";
 import { cn } from "@/lib/utils";
 
 // duracion de cada slide en ms (NN/G recomienda 5-7s para headlines cortos)
@@ -44,6 +46,10 @@ interface Slide {
   eyebrow: string;
   title: ReactNode;
   subtitle: string;
+  // fila de beneficios (solo el slide 1 la tiene)
+  benefits?: { tipo: string; label: ReactNode }[];
+  // tarjeta de fechas clave (solo el slide 2 la tiene)
+  dateCard?: { titulo: string; label: string; fecha: string };
   // llamada a la accion propia de cada slide
   cta: { label: string; href: string };
 }
@@ -62,7 +68,49 @@ const slides: Slide[] = [
     ),
     subtitle:
       "SUPERIMPACT360 te brinda financiamiento, conocimiento y acompañamiento para que tu emprendimiento crezca y genere un triple impacto en Bolivia.",
+    benefits: [
+      {
+        tipo: "bs",
+        label: (
+          <>
+            Hasta{" "}
+            <span className="font-semibold text-amarillo-300">Bs 50.000</span> de
+            capital semilla
+          </>
+        ),
+      },
+      { tipo: "asistencia", label: "Asistencia técnica especializada" },
+      { tipo: "mentoria", label: "Mentorías" },
+      { tipo: "capacitacion", label: "Capacitación" },
+      {
+        tipo: "crecimiento",
+        label: "Acompañamiento para fortalecer el negocio",
+      },
+    ],
     cta: { label: "Postularme ahora", href: "/auth/registro" },
+  },
+  {
+    // la foto original tiene a la protagonista a la izquierda, justo donde va el
+    // texto. Se guarda espejada para que quede a la derecha, como las otras dos
+    image: "/images/banner-laboratorio.webp",
+    alt: "Quimica boliviana sonriendo en el laboratorio de su empresa, rodeada de equipos de destilacion",
+    overlay: [0.92, 0.7, 0.4],
+    eyebrow: "Convocatoria abierta",
+    title: (
+      <>
+        5.ª edición SuperStar.
+        <br />
+        <span className="text-amarillo-400">Convocatoria abierta.</span>
+      </>
+    ),
+    subtitle:
+      "Impulsa tu emprendimiento, genera impacto y sé parte del cambio en Bolivia.",
+    dateCard: {
+      titulo: "Fechas clave",
+      label: "Cierre de postulaciones:",
+      fecha: "31 de agosto de 2026",
+    },
+    cta: { label: "Postular ahora", href: "/auth/registro" },
   },
   {
     image: "/images/banner-energia.webp",
@@ -78,22 +126,6 @@ const slides: Slide[] = [
     subtitle:
       "Conoce a las empresas ganadoras de ediciones anteriores y descubre el impacto positivo que han generado en Bolivia.",
     cta: { label: "Resultados e impactos", href: "/resultados" },
-  },
-  {
-    // la foto original tiene a la protagonista a la izquierda, justo donde va el
-    // texto. Se guarda espejada para que quede a la derecha, como las otras dos
-    image: "/images/banner-laboratorio.webp",
-    alt: "Quimica boliviana sonriendo en el laboratorio de su empresa, rodeada de equipos de destilacion",
-    overlay: [0.92, 0.7, 0.4],
-    eyebrow: "Convocatoria abierta",
-    title: (
-      <>
-        5.ª edición <span className="text-amarillo-400">SuperStar</span>
-      </>
-    ),
-    subtitle:
-      "Postula tu empresa a la convocatoria 2026 y compite por financiamiento, mentoría y visibilidad en todo el país.",
-    cta: { label: "Postular ahora", href: "/auth/registro" },
   },
 ];
 
@@ -195,7 +227,7 @@ export function HeroCarousel() {
 
   return (
     <section
-      className="relative flex min-h-screen items-center overflow-hidden bg-primary-800"
+      className="relative flex min-h-screen items-start overflow-hidden bg-primary-800"
       aria-roledescription="carrusel"
       aria-label="Presentación de SUPERIMPACT360"
       onKeyDown={handleKeyDown}
@@ -235,11 +267,12 @@ export function HeroCarousel() {
         ))}
       </div>
 
-      {/* contenido */}
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-32 sm:px-6 lg:px-8">
+      {/* contenido: anclado arriba (no centrado) para que el slide con beneficios
+          crezca hacia abajo sin desplazar el titulo */}
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 pt-24 pb-24 sm:px-6 lg:px-8">
         {/* copy con crossfade y desplazamiento sutil */}
         <div
-          className="relative max-w-2xl min-h-[300px] sm:min-h-[340px]"
+          className="relative max-w-2xl min-h-[230px] sm:min-h-[260px]"
           aria-live="polite"
           aria-atomic="true"
         >
@@ -257,22 +290,62 @@ export function HeroCarousel() {
               <Badge className="mb-6 border-amarillo-500/30 bg-amarillo-500/10 px-3 py-1 text-sm text-amarillo-200">
                 {slide.eyebrow}
               </Badge>
-              <h1 className="font-display font-bold text-4xl leading-[1.05] tracking-tight text-balance text-white sm:text-5xl lg:text-6xl">
+              <h1 className="font-display font-bold text-4xl leading-[1.1] tracking-tight text-balance text-white sm:text-5xl">
                 {slide.title}
               </h1>
-              <p className="mt-6 text-lg leading-relaxed text-primary-200 sm:text-xl">
+              <p className="mt-4 text-lg leading-relaxed text-primary-200 sm:text-xl">
                 {slide.subtitle}
               </p>
             </div>
           ))}
         </div>
 
+        {/* fila de beneficios del programa: en flujo normal y solo del slide
+            actual, para no reservar altura ni afectar a los otros slides */}
+        {slides[current].benefits && (
+          <ul className="mt-5 flex max-w-3xl flex-wrap gap-x-6 gap-y-4">
+            {slides[current].benefits!.map((b) => (
+              <li
+                key={b.tipo}
+                className="flex w-[116px] flex-col items-center gap-2 text-center"
+              >
+                <span className="flex size-16 shrink-0 items-center justify-center rounded-full border border-amarillo-400/70 text-amarillo-400">
+                  <IconoBeneficio tipo={b.tipo} className="size-8" />
+                </span>
+                <span className="text-[12.5px] leading-tight text-white/90">
+                  {b.label}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {/* tarjeta de fechas clave (solo el slide que la tenga) */}
+        {slides[current].dateCard && (
+          <div className="mt-6 flex w-fit max-w-xl items-center gap-5 rounded-2xl border border-white/15 bg-white/[0.05] px-7 py-6 pr-10">
+            <span className="flex size-[68px] shrink-0 items-center justify-center rounded-full border border-amarillo-400/70 text-amarillo-400">
+              <IconoCalendario className="size-9" />
+            </span>
+            <div className="min-w-0">
+              <p className="font-display text-xl font-bold text-amarillo-300">
+                {slides[current].dateCard!.titulo}
+              </p>
+              <p className="text-base text-primary-100">
+                {slides[current].dateCard!.label}
+              </p>
+              <p className="text-lg font-bold text-amarillo-300">
+                {slides[current].dateCard!.fecha}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* CTA principal propio de cada slide + secundario fijo. Pause-on-hover/
             focus aqui. w-fit para que la zona de hover solo abarque los botones
             reales y no todo el ancho del padre (que sino dispara pausa "a la
             misma altura") */}
         <div
-          className="relative mt-8 flex w-fit flex-wrap gap-4"
+          className="relative mt-6 flex w-fit flex-wrap gap-4"
           onMouseEnter={handleZoneMouseEnter}
           onMouseLeave={handleZoneMouseLeave}
           onFocus={handleZoneFocus}

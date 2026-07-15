@@ -6,31 +6,10 @@ import { Button } from "@/components/ui/button";
 import { ConvocatoriasActivasSection } from "./_components/convocatorias-activas-section";
 import { HeroCarousel } from "./_components/hero-carousel";
 import { HistoriasExitoSection } from "./_components/historias-exito-section";
+import { ResultadosCifrasSection } from "./_components/resultados-cifras-section";
+import { PasosProgramaSection } from "./_components/pasos-programa-section";
 import { EsloganStrip } from "@/components/public/eslogan-strip";
 import { SectionDivider } from "@/components/public/section-divider";
-
-// pasos de "como funciona" - iconos de Phosphor duotone via Iconify
-const steps = [
-  {
-    icon: "ph:building-office-duotone",
-    title: "Registra tu empresa",
-    description:
-      "Crea tu perfil empresarial con los datos de tu empresa y documentación requerida.",
-  },
-  {
-    icon: "ph:note-pencil-duotone",
-    title: "Completa el formulario",
-    description:
-      "Llena el formulario dinámico de la convocatoria con tu propuesta de impacto.",
-  },
-  {
-    icon: "ph:trophy-duotone",
-    title: "Compite y gana",
-    description:
-      "Un jurado independiente evalúa las propuestas y selecciona a los ganadores.",
-  },
-];
-
 
 export default function HomePage() {
   return (
@@ -85,44 +64,14 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ===== RESULTADOS EN CIFRAS (impacto 2025) ===== */}
+      {/* su encabezado con lineas hace de separador; el cohete va despues */}
+      <ResultadosCifrasSection />
+
       <SectionDivider />
 
-      {/* ===== COMO FUNCIONA ===== */}
-      {/* fondo claro continuo: el salto de seccion es ahora el unico separador */}
-      <section id="como-funciona" className="py-20 lg:py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="text-sm font-semibold tracking-wider text-purple-600 uppercase">
-              Proceso sencillo
-            </p>
-            <h2 className="mt-2 font-display text-3xl leading-[1.3] tracking-wide text-primary-800 uppercase sm:text-4xl">
-              Cómo funciona
-            </h2>
-            <p className="mt-4 text-lg text-secondary-600">
-              Participar es simple. Tres pasos para llevar tu empresa al
-              siguiente nivel.
-            </p>
-          </div>
-
-          <div className="mt-16 grid gap-8 sm:grid-cols-3">
-            {steps.map((step, index) => (
-              <div key={step.title} className="relative text-center">
-                {/* número de paso */}
-                <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-2xl bg-purple-600 text-white shadow-lg shadow-purple-600/25">
-                  <Icon icon={step.icon} className="size-7" />
-                </div>
-                <span className="mb-2 block text-sm font-bold text-purple-600">
-                  Paso {index + 1}
-                </span>
-                <h3 className="font-display text-xl leading-snug tracking-wide text-primary-800 uppercase">
-                  {step.title}
-                </h3>
-                <p className="mt-2 text-secondary-600">{step.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* ===== COMO FUNCIONA (4 pasos del programa) ===== */}
+      <PasosProgramaSection />
 
       <SectionDivider />
 
@@ -130,7 +79,8 @@ export default function HomePage() {
       <ConvocatoriasActivasSection />
 
       {/* ===== HISTORIAS DE EXITO (datos reales del API) ===== */}
-      {/* mantiene fondo gris: es la unica seccion que se destaca por color */}
+      {/* fondo blanco + salto de seccion como el resto; el cohete va dentro del
+          componente para no quedar huerfano si no hay historias activas */}
       <HistoriasExitoSection />
 
       {/* ===== CTA FINAL ===== */}

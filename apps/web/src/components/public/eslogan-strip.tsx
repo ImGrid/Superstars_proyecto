@@ -101,7 +101,7 @@ export function EsloganStrip() {
       </div>
 
       {/* eslogan del programa */}
-      <p className="relative z-10 flex-1 text-center font-display text-xl leading-[1.45] tracking-[0.015em] text-white [text-shadow:0_2px_14px_rgba(5,20,48,0.85)] sm:text-2xl md:text-[26px]">
+      <p className="relative z-10 flex-1 text-center font-display text-xl leading-[1.45] font-bold tracking-[0.015em] text-white [text-shadow:0_2px_14px_rgba(5,20,48,0.85)] sm:text-2xl md:text-[26px]">
         <span className="block">Aceleramos empresas que crean valor</span>
         <span className="block">
           para las personas, la comunidad y el medio ambiente.

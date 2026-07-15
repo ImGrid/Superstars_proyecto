@@ -6,6 +6,7 @@ import type { PublicHistoriaExitoItem } from "@superstars/shared";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CardSkeleton } from "@/components/shared/loading-skeleton";
+import { SectionDivider } from "@/components/public/section-divider";
 import { publicQueries } from "@/lib/api/query-keys";
 
 // Card individual (visual igual al diseño actual de la landing)
@@ -113,17 +114,22 @@ function HistoriasGrid({ historias }: { historias: PublicHistoriaExitoItem[] }) 
 export function HistoriasExitoSection() {
   const { data, isLoading } = useQuery(publicQueries.historiasExito());
 
-  // mientras carga, mostrar skeleton (manteniendo la altura visual)
+  // mientras carga, mostrar skeleton (manteniendo la altura visual). El salto de
+  // seccion va dentro del componente para que aparezca/desaparezca junto con la
+  // seccion (si no hay historias, no queda un cohete huerfano en la pagina)
   if (isLoading) {
     return (
-      <section className="bg-secondary-50 py-20 lg:py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <SectionHeader />
-          <div className="mt-12">
-            <CardSkeleton count={3} />
+      <>
+        <SectionDivider />
+        <section className="py-20 lg:py-28">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <SectionHeader />
+            <div className="mt-12">
+              <CardSkeleton count={3} />
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </>
     );
   }
 
@@ -133,14 +139,17 @@ export function HistoriasExitoSection() {
   }
 
   return (
-    <section className="bg-secondary-50 py-20 lg:py-28">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <SectionHeader />
-        <div className="mt-12">
-          <HistoriasGrid historias={data} />
+    <>
+      <SectionDivider />
+      <section className="py-20 lg:py-28">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <SectionHeader />
+          <div className="mt-12">
+            <HistoriasGrid historias={data} />
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }
 
