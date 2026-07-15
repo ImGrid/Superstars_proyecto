@@ -1,24 +1,31 @@
 import Image from "next/image";
 
-// Logos oficiales de las organizaciones patrocinadoras
+// Logos oficiales de las organizaciones aliadas (PNG sin fondo, version blanca
+// para fondo navy). El orden sigue el material oficial.
 const SPONSORS = [
   {
     name: "OXFAM",
-    src: "/images/sponsors/logo-oxfam.png",
-    width: 900,
-    height: 320,
+    src: "/images/sponsors/oxfam.png",
+    width: 500,
+    height: 194,
   },
   {
     name: "FUNDES Bolivia",
-    src: "/images/sponsors/fundes_bolivia.jpeg",
-    width: 1022,
-    height: 404,
+    src: "/images/sponsors/fundes-blanco.png",
+    width: 500,
+    height: 96,
   },
   {
-    name: "Maria Marina Foundation",
-    src: "/images/sponsors/MariaMarina-logo.png",
-    width: 1920,
-    height: 470,
+    name: "MaríaMarina Foundation",
+    src: "/images/sponsors/mariamarina-blanco.png",
+    width: 500,
+    height: 106,
+  },
+  {
+    name: "Ayuda en Acción",
+    src: "/images/sponsors/ayuda-blanco.png",
+    width: 500,
+    height: 156,
   },
 ] as const;
 
@@ -29,30 +36,33 @@ type SponsorsStripProps = {
   className?: string;
 };
 
-// Banda de sponsors con fondo navy exacto al del logo FUNDES (#0C2140)
-// para que el JPEG de FUNDES se funda sin costura con el fondo
+// Banda de organizaciones aliadas sobre navy oficial. Los logos son PNG sin
+// fondo (version blanca), asi que ya no hay que casar el color con ningun JPEG.
 export function SponsorsStrip({ variant = "landing", className = "" }: SponsorsStripProps) {
   const paddingY = variant === "landing" ? "py-12 sm:py-14" : "py-8";
   const labelColor = variant === "landing" ? "text-primary-200" : "text-primary-300";
 
   return (
-    <section className={`bg-fundes ${paddingY} ${className}`}>
+    <section className={`bg-primary-700 ${paddingY} ${className}`}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <p className={`mb-6 text-center text-xs font-semibold tracking-[0.2em] uppercase ${labelColor}`}>
-          Con el apoyo de
+          En alianza con
         </p>
-        <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-8 sm:gap-x-16">
+        {/* cada logo se limita por caja (alto Y ancho) con object-contain: asi los
+            wordmarks anchos (FUNDES) no dominan sobre los que llevan icono (OXFAM)
+            y el conjunto queda en armonia */}
+        <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-7 sm:gap-x-14">
           {SPONSORS.map((sponsor) => (
             <div
               key={sponsor.name}
-              className="relative flex h-14 items-center sm:h-16"
+              className="flex h-11 w-[150px] items-center justify-center sm:h-12 sm:w-[170px]"
             >
               <Image
                 src={sponsor.src}
                 alt={sponsor.name}
                 width={sponsor.width}
                 height={sponsor.height}
-                className="h-full w-auto object-contain"
+                className="max-h-full w-auto max-w-full object-contain"
                 priority={variant === "landing"}
               />
             </div>

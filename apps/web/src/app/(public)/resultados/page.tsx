@@ -182,9 +182,9 @@ const posicionStyles: Record<
     label: "2do Lugar",
   },
   3: {
-    bg: "bg-orange-50",
-    border: "border-orange-300",
-    icon: "text-orange-400",
+    bg: "bg-warning-50",
+    border: "border-warning-300",
+    icon: "text-warning-700",
     label: "3er Lugar",
   },
 };

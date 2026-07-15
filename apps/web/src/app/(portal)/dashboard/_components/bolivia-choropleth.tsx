@@ -115,7 +115,7 @@ export function BoliviaChoropleth({ data, onSelectDepartamento }: Props) {
             d={p.d}
             className={cn(
               fillClass(p.total),
-              "cursor-pointer stroke-white transition-all [stroke-width:0.8] hover:stroke-orange-600 hover:[stroke-width:1.6]",
+              "cursor-pointer stroke-white transition-all [stroke-width:0.8] hover:stroke-amarillo-600 hover:[stroke-width:1.6]",
             )}
             onMouseMove={(e) => {
               const rect = wrapRef.current?.getBoundingClientRect();

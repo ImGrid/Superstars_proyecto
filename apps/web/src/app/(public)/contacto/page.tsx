@@ -93,14 +93,14 @@ export default function ContactoPage() {
 
                 <ul className="mt-6 space-y-4">
                   <li className="flex items-start gap-3">
-                    <Mail className="mt-0.5 size-5 shrink-0 text-orange-600" />
+                    <Mail className="mt-0.5 size-5 shrink-0 text-info-600" />
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-wider text-secondary-500">
                         Correo
                       </p>
                       <a
                         href={`mailto:${CONTACT_EMAIL}`}
-                        className="text-sm text-secondary-800 transition-colors hover:text-orange-600"
+                        className="text-sm text-secondary-800 transition-colors hover:text-azul-600"
                       >
                         {CONTACT_EMAIL}
                       </a>
@@ -108,7 +108,7 @@ export default function ContactoPage() {
                   </li>
 
                   <li className="flex items-start gap-3">
-                    <MapPin className="mt-0.5 size-5 shrink-0 text-orange-600" />
+                    <MapPin className="mt-0.5 size-5 shrink-0 text-info-600" />
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-wider text-secondary-500">
                         Ubicación
@@ -118,7 +118,7 @@ export default function ContactoPage() {
                   </li>
 
                   <li className="flex items-start gap-3">
-                    <Clock className="mt-0.5 size-5 shrink-0 text-orange-600" />
+                    <Clock className="mt-0.5 size-5 shrink-0 text-info-600" />
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-wider text-secondary-500">
                         Tiempo de respuesta

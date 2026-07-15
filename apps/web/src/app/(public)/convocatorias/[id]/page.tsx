@@ -249,13 +249,25 @@ export default function ConvocatoriaDetallePage({
               {convocatoria.nombre}
             </h1>
 
-            {/* sponsors — sincronizar con SponsorsStrip */}
-            <div className="mt-4 flex flex-wrap items-center gap-4 text-xs font-medium text-secondary-400">
-              <span>Con el apoyo de:</span>
-              {["OXFAM", "FUNDES Bolivia", "Maria Marina Foundation"].map((s) => (
-                <span key={s} className="font-semibold text-secondary-500">
-                  {s}
-                </span>
+            {/* organizaciones aliadas: logos a color discretos (pequenos + opacidad)
+                para no competir con la informacion de la convocatoria */}
+            <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-secondary-400">
+                En alianza con
+              </span>
+              {[
+                { name: "OXFAM", src: "/images/sponsors/oxfam.png" },
+                { name: "FUNDES Bolivia", src: "/images/sponsors/fundes-color.png" },
+                { name: "MaríaMarina Foundation", src: "/images/sponsors/mariamarina-color.png" },
+                { name: "Ayuda en Acción", src: "/images/sponsors/ayuda-color.png" },
+              ].map((a) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={a.name}
+                  src={a.src}
+                  alt={a.name}
+                  className="h-5 w-auto object-contain opacity-80"
+                />
               ))}
             </div>
 
@@ -334,7 +346,7 @@ export default function ConvocatoriaDetallePage({
                                   {doc.nombreOriginal} — {formatFileSize(doc.tamanoBytes)}
                                 </p>
                               </div>
-                              <span className="shrink-0 rounded-md bg-orange-600 px-3 py-1.5 text-xs font-medium text-white">
+                              <span className="shrink-0 rounded-md bg-purple-600 px-3 py-1.5 text-xs font-medium text-white">
                                 Descargar
                               </span>
                             </Link>
@@ -426,7 +438,7 @@ function SidebarCard({
           <div className="flex flex-col">
             <span className="text-sm text-secondary-500">Plazo</span>
             {plazoExtendido && (
-              <span className="text-xs text-orange-600 font-medium">Plazo extendido</span>
+              <span className="text-xs text-warning-700 font-medium">Plazo extendido</span>
             )}
           </div>
           <span className={cn("text-sm", deadlineText.className)}>
@@ -439,7 +451,7 @@ function SidebarCard({
         {/* premio */}
         <div className="flex items-center justify-between">
           <span className="text-sm text-secondary-500">Premio</span>
-          <span className="font-bold text-orange-600">{premioLabel}</span>
+          <span className="font-bold text-primary-700">{premioLabel}</span>
         </div>
 
         <Separator />

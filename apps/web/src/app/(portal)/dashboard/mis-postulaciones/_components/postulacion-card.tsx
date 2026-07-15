@@ -24,9 +24,9 @@ interface PostulacionCardProps {
 function CompletionBar({ porcentaje }: { porcentaje: string }) {
   const pct = Math.round(Number(porcentaje));
   let barColor = "bg-secondary-300";
-  if (pct >= 100) barColor = "bg-emerald-500";
+  if (pct >= 100) barColor = "bg-success-500";
   else if (pct >= 50) barColor = "bg-primary-500";
-  else if (pct > 0) barColor = "bg-amber-500";
+  else if (pct > 0) barColor = "bg-warning-500";
 
   return (
     <div className="space-y-1">
@@ -99,9 +99,9 @@ export function PostulacionCard({ postulacion }: PostulacionCardProps) {
     <Card
       className={`flex flex-col ${
         isObservado
-          ? "border-amber-300 bg-amber-50/30"
+          ? "border-warning-300 bg-warning-50/30"
           : isGanador
-            ? "border-emerald-300 bg-emerald-50/30"
+            ? "border-success-300 bg-success-50/30"
             : ""
       }`}
     >
@@ -117,9 +117,9 @@ export function PostulacionCard({ postulacion }: PostulacionCardProps) {
       <CardContent className="flex-1 space-y-3">
         {/* ganador: destacado especial */}
         {isGanador && (
-          <div className="flex items-center gap-2 rounded-md bg-emerald-100 px-3 py-2">
-            <Icon icon="ph:trophy-duotone" className="size-4 text-emerald-600" />
-            <span className="text-sm font-semibold text-emerald-700">
+          <div className="flex items-center gap-2 rounded-md bg-success-100 px-3 py-2">
+            <Icon icon="ph:trophy-duotone" className="size-4 text-success-600" />
+            <span className="text-sm font-semibold text-success-700">
               Tu empresa fue seleccionada como ganadora
             </span>
           </div>
@@ -127,9 +127,9 @@ export function PostulacionCard({ postulacion }: PostulacionCardProps) {
 
         {/* observacion del responsable */}
         {isObservado && postulacion.observacion && (
-          <div className="flex items-start gap-2 rounded-md bg-amber-100 px-3 py-2">
-            <Icon icon="ph:warning-duotone" className="mt-0.5 size-4 shrink-0 text-amber-600" />
-            <p className="text-sm text-amber-800 line-clamp-3">
+          <div className="flex items-start gap-2 rounded-md bg-warning-100 px-3 py-2">
+            <Icon icon="ph:warning-duotone" className="mt-0.5 size-4 shrink-0 text-warning-600" />
+            <p className="text-sm text-warning-800 line-clamp-3">
               {postulacion.observacion}
             </p>
           </div>

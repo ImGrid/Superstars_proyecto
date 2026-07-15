@@ -167,8 +167,8 @@ export function ImageUploadZone({
             className={cn(
               "flex items-start gap-2 rounded-md border px-3 py-2 text-sm",
               pendingWarning.level === "danger"
-                ? "border-orange-300 bg-orange-50 text-orange-800"
-                : "border-amber-300 bg-amber-50 text-amber-800",
+                ? "border-error-200 bg-error-50 text-error-700"
+                : "border-warning-200 bg-warning-50 text-warning-700",
             )}
           >
             <Icon

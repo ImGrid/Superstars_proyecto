@@ -23,7 +23,7 @@ export function PesoProgress({ actual, objetivo, label, className }: PesoProgres
           <span
             className={cn(
               "font-medium",
-              isExact && "text-emerald-600",
+              isExact && "text-success-600",
               isOver && "text-destructive",
               !isExact && !isOver && "text-secondary-700",
             )}
@@ -36,7 +36,7 @@ export function PesoProgress({ actual, objetivo, label, className }: PesoProgres
         <div
           className={cn(
             "h-2 rounded-full transition-all duration-300",
-            isExact && "bg-emerald-500",
+            isExact && "bg-success-500",
             isOver && "bg-destructive",
             !isExact && !isOver && "bg-primary",
           )}

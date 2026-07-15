@@ -109,7 +109,7 @@ export const ArchivoField = memo(function ArchivoField({
         <FormItem>
           <FormLabel>
             {campo.etiqueta}
-            {campo.requerido && <span className="text-red-500 ml-1">*</span>}
+            {campo.requerido && <span className="text-error-500 ml-1">*</span>}
           </FormLabel>
           {campo.descripcion && (
             <FormDescription>{campo.descripcion}</FormDescription>
@@ -136,7 +136,7 @@ export const ArchivoField = memo(function ArchivoField({
                     disabled={deleteMutation.isPending}
                     onClick={() => deleteMutation.mutate(arch.id)}
                   >
-                    <X className="size-3.5 text-red-500" />
+                    <X className="size-3.5 text-error-500" />
                   </Button>
                 </div>
               ))}

@@ -76,7 +76,7 @@ const columns: Column<PostulacionAdminListItem>[] = [
         <div className="flex items-center gap-2">
           <div className="h-2 w-16 rounded-full bg-secondary-100">
             <div
-              className={`h-2 rounded-full ${pct >= 100 ? "bg-emerald-500" : "bg-primary-500"}`}
+              className={`h-2 rounded-full ${pct >= 100 ? "bg-success-500" : "bg-primary-500"}`}
               style={{ width: `${Math.min(pct, 100)}%` }}
             />
           </div>

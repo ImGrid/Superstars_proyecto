@@ -26,15 +26,15 @@ const nivelConfig: Record<
 > = {
   [NivelEnum.BASICO]: {
     label: "Básico",
-    color: "border-amber-200 bg-amber-50/50",
+    color: "border-warning-200 bg-warning-50/50",
   },
   [NivelEnum.INTERMEDIO]: {
     label: "Intermedio",
-    color: "border-blue-200 bg-blue-50/50",
+    color: "border-info-200 bg-info-50/50",
   },
   [NivelEnum.AVANZADO]: {
     label: "Avanzado",
-    color: "border-emerald-200 bg-emerald-50/50",
+    color: "border-success-200 bg-success-50/50",
   },
 };
 

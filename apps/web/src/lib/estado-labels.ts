@@ -12,37 +12,50 @@ export interface EstadoConfig {
   className?: string;
 }
 
+// badges suaves: fondo tenue + texto oscuro del mismo tono + borde sutil.
+// Un color = un significado en toda la app (marca oficial Empresas SuperStar).
+const soft = {
+  neutral: "bg-secondary-100 text-secondary-700 border-secondary-200",
+  navy: "bg-primary-50 text-primary-700 border-primary-200",
+  teal: "bg-info-50 text-info-700 border-info-200",
+  verde: "bg-success-50 text-success-700 border-success-200",
+  ambar: "bg-warning-50 text-warning-700 border-warning-200",
+  rojo: "bg-error-50 text-error-700 border-error-200",
+  morado: "bg-purple-50 text-purple-700 border-purple-200",
+} as const;
+
 // --- Convocatoria (6 estados) ---
 
 export const convocatoriaEstadoConfig: Record<EstadoConvocatoria, EstadoConfig> = {
   [EstadoConvocatoria.BORRADOR]: {
     label: "Borrador",
-    variant: "secondary",
+    variant: "outline",
+    className: soft.neutral,
   },
   [EstadoConvocatoria.PUBLICADO]: {
     label: "Publicado",
-    variant: "default",
-    className: "bg-success-600 text-white border-transparent",
+    variant: "outline",
+    className: soft.verde,
   },
   [EstadoConvocatoria.CERRADO]: {
     label: "Cerrado",
-    variant: "default",
-    className: "bg-warning-600 text-white border-transparent",
+    variant: "outline",
+    className: soft.ambar,
   },
   [EstadoConvocatoria.EN_EVALUACION]: {
     label: "En Evaluación",
-    variant: "default",
-    className: "bg-primary-600 text-white border-transparent",
+    variant: "outline",
+    className: soft.teal,
   },
   [EstadoConvocatoria.RESULTADOS_LISTOS]: {
     label: "Resultados Listos",
-    variant: "default",
-    className: "bg-violet-600 text-white border-transparent",
+    variant: "outline",
+    className: soft.morado,
   },
   [EstadoConvocatoria.FINALIZADO]: {
     label: "Finalizado",
-    variant: "default",
-    className: "bg-secondary-700 text-white border-transparent",
+    variant: "outline",
+    className: soft.navy,
   },
 };
 
@@ -51,40 +64,43 @@ export const convocatoriaEstadoConfig: Record<EstadoConvocatoria, EstadoConfig> 
 export const postulacionEstadoConfig: Record<EstadoPostulacion, EstadoConfig> = {
   [EstadoPostulacion.BORRADOR]: {
     label: "Borrador",
-    variant: "secondary",
+    variant: "outline",
+    className: soft.neutral,
   },
   [EstadoPostulacion.ENVIADO]: {
     label: "Enviado",
-    variant: "default",
-    className: "bg-primary-600 text-white border-transparent",
+    variant: "outline",
+    className: soft.teal,
   },
   [EstadoPostulacion.OBSERVADO]: {
     label: "Observado",
-    variant: "default",
-    className: "bg-warning-600 text-white border-transparent",
+    variant: "outline",
+    className: soft.ambar,
   },
   [EstadoPostulacion.RECHAZADO]: {
     label: "Rechazado",
-    variant: "destructive",
+    variant: "outline",
+    className: soft.rojo,
   },
   [EstadoPostulacion.EN_EVALUACION]: {
     label: "En Evaluación",
-    variant: "default",
-    className: "bg-primary-700 text-white border-transparent",
+    variant: "outline",
+    className: soft.navy,
   },
   [EstadoPostulacion.CALIFICADO]: {
     label: "Calificado",
-    variant: "default",
-    className: "bg-secondary-600 text-white border-transparent",
+    variant: "outline",
+    className: soft.morado,
   },
   [EstadoPostulacion.GANADOR]: {
     label: "Ganador",
-    variant: "default",
-    className: "bg-success-600 text-white border-transparent",
+    variant: "outline",
+    className: soft.verde,
   },
   [EstadoPostulacion.NO_SELECCIONADO]: {
     label: "No Seleccionado",
-    variant: "secondary",
+    variant: "outline",
+    className: soft.neutral,
   },
 };
 
@@ -93,26 +109,28 @@ export const postulacionEstadoConfig: Record<EstadoPostulacion, EstadoConfig> = 
 export const publicacionEstadoConfig: Record<EstadoPublicacion, EstadoConfig> = {
   [EstadoPublicacion.BORRADOR]: {
     label: "Borrador",
-    variant: "secondary",
+    variant: "outline",
+    className: soft.neutral,
   },
   [EstadoPublicacion.PROGRAMADO]: {
     label: "Programado",
-    variant: "default",
-    className: "bg-primary-600 text-white border-transparent",
+    variant: "outline",
+    className: soft.teal,
   },
   [EstadoPublicacion.PUBLICADO]: {
     label: "Publicado",
-    variant: "default",
-    className: "bg-success-600 text-white border-transparent",
+    variant: "outline",
+    className: soft.verde,
   },
   [EstadoPublicacion.EXPIRADO]: {
     label: "Expirado",
-    variant: "default",
-    className: "bg-warning-600 text-white border-transparent",
+    variant: "outline",
+    className: soft.ambar,
   },
   [EstadoPublicacion.ARCHIVADO]: {
     label: "Archivado",
-    variant: "secondary",
+    variant: "outline",
+    className: soft.neutral,
   },
 };
 
@@ -121,23 +139,23 @@ export const publicacionEstadoConfig: Record<EstadoPublicacion, EstadoConfig> = 
 export const calificacionEstadoConfig: Record<EstadoCalificacion, EstadoConfig> = {
   [EstadoCalificacion.EN_PROGRESO]: {
     label: "En Progreso",
-    variant: "default",
-    className: "bg-primary-600 text-white border-transparent",
+    variant: "outline",
+    className: soft.navy,
   },
   [EstadoCalificacion.COMPLETADO]: {
     label: "Completado",
-    variant: "default",
-    className: "bg-success-600 text-white border-transparent",
+    variant: "outline",
+    className: soft.teal,
   },
   [EstadoCalificacion.APROBADO]: {
     label: "Aprobado",
-    variant: "default",
-    className: "bg-secondary-700 text-white border-transparent",
+    variant: "outline",
+    className: soft.verde,
   },
   [EstadoCalificacion.DEVUELTO]: {
     label: "Devuelto",
-    variant: "default",
-    className: "bg-warning-600 text-white border-transparent",
+    variant: "outline",
+    className: soft.ambar,
   },
 };
 
@@ -146,22 +164,23 @@ export const calificacionEstadoConfig: Record<EstadoCalificacion, EstadoConfig> 
 export const rolConfig: Record<RolUsuario, EstadoConfig> = {
   [RolUsuario.ADMINISTRADOR]: {
     label: "Administrador",
-    variant: "default",
+    variant: "outline",
+    className: soft.navy,
   },
   [RolUsuario.RESPONSABLE_CONVOCATORIA]: {
     label: "Responsable",
-    variant: "default",
-    className: "bg-primary-700 text-white border-transparent",
+    variant: "outline",
+    className: soft.teal,
   },
   [RolUsuario.PROPONENTE]: {
     label: "Proponente",
-    variant: "default",
-    className: "bg-success-600 text-white border-transparent",
+    variant: "outline",
+    className: soft.verde,
   },
   [RolUsuario.EVALUADOR]: {
     label: "Evaluador",
-    variant: "default",
-    className: "bg-warning-600 text-white border-transparent",
+    variant: "outline",
+    className: soft.morado,
   },
 };
 

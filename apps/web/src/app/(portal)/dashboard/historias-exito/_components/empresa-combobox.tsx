@@ -87,7 +87,7 @@ export function EmpresaCombobox({ value, onChange, placeholder, disabled }: Empr
           {value.empresaId !== null && (
             <Badge
               variant="outline"
-              className="border-green-200 bg-green-50 px-1.5 py-0 text-[10px] font-medium text-green-700"
+              className="border-success-200 bg-success-50 px-1.5 py-0 text-[10px] font-medium text-success-700"
             >
               <Building2 className="mr-0.5 size-2.5" />
               Vinculada

@@ -18,10 +18,10 @@ function MedalBadge({ posicion }: { posicion: number }) {
   if (posicion <= 3) {
     const estilo =
       posicion === 1
-        ? "bg-amber-400 text-amber-950"
+        ? "bg-amarillo-600 text-primary-800"
         : posicion === 2
-          ? "bg-slate-300 text-slate-800"
-          : "bg-amber-700 text-white";
+          ? "bg-secondary-300 text-secondary-800"
+          : "bg-warning-700 text-white";
     return (
       <span
         className={`inline-grid size-5 place-items-center rounded-full text-[11px] font-bold tabular-nums ${estilo}`}
@@ -193,9 +193,9 @@ function CategoriaRankingBlock({
           {ganadores.map((g) => (
             <span
               key={g.postulacionId}
-              className="inline-flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-sm"
+              className="inline-flex items-center gap-2 rounded-lg border border-amarillo-200 bg-amarillo-50 px-3 py-1.5 text-sm"
             >
-              <span className="font-bold tabular-nums text-amber-600">
+              <span className="font-bold tabular-nums text-primary-700">
                 {g.posicionFinal}º
               </span>
               <span className="font-medium text-secondary-900">
@@ -256,14 +256,14 @@ function RankingTable({
                 key={row.postulacionId}
                 className={`border-b border-secondary-50 last:border-0 ${
                   esGanador
-                    ? "bg-amber-50/70"
+                    ? "bg-amarillo-50/70"
                     : "hover:bg-secondary-50/60"
                 }`}
               >
                 {/* posicion (con borde dorado a la izquierda si es ganador) */}
                 <td
                   className={`px-4 py-0 text-center ${
-                    esGanador ? "shadow-[inset_3px_0_0_#fbbf24]" : ""
+                    esGanador ? "shadow-[inset_3px_0_0_var(--color-amarillo-600)]" : ""
                   }`}
                   style={{ height: 46 }}
                 >
@@ -290,7 +290,7 @@ function RankingTable({
                     <div className="relative ml-auto h-6 w-32">
                       <div
                         className={`absolute inset-y-0 right-0 rounded ${
-                          esGanador ? "bg-amber-200" : "bg-primary-100"
+                          esGanador ? "bg-amarillo-200" : "bg-primary-100"
                         }`}
                         style={{
                           width: `${Math.min(Math.max(puntaje, 0), 100)}%`,
@@ -298,7 +298,7 @@ function RankingTable({
                       />
                       <span
                         className={`absolute inset-0 flex items-center justify-end pr-2 font-semibold tabular-nums ${
-                          esGanador ? "text-amber-800" : "text-secondary-900"
+                          esGanador ? "text-primary-800" : "text-secondary-900"
                         }`}
                       >
                         {puntaje.toFixed(1)}

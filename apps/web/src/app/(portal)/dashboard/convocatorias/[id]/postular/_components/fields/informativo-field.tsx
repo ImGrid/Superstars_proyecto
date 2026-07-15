@@ -38,8 +38,8 @@ export const InformativoField = memo(function InformativoField({
 
     case "advertencia":
       return (
-        <div className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm leading-relaxed text-amber-800">
-          <Icon icon="ph:warning-duotone" className="size-4 shrink-0 mt-0.5 text-amber-600" />
+        <div className="flex items-start gap-2 rounded-lg border border-warning-300 bg-warning-50 p-4 text-sm leading-relaxed text-warning-800">
+          <Icon icon="ph:warning-duotone" className="size-4 shrink-0 mt-0.5 text-warning-600" />
           <div className={prosa} dangerouslySetInnerHTML={html} />
         </div>
       );

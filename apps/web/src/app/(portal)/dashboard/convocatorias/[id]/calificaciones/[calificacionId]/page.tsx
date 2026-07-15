@@ -174,11 +174,11 @@ export default function RevisionCalificacionPage({ params }: PageProps) {
               variant="outline"
               className={
                 calif.estado === EstadoCalificacion.COMPLETADO
-                  ? "border-blue-300 text-blue-700"
+                  ? "border-info-300 text-info-700"
                   : calif.estado === EstadoCalificacion.APROBADO
-                    ? "border-emerald-300 text-emerald-700"
+                    ? "border-success-300 text-success-700"
                     : calif.estado === EstadoCalificacion.DEVUELTO
-                      ? "border-amber-300 text-amber-700"
+                      ? "border-warning-300 text-warning-700"
                       : "text-secondary-500"
               }
             >
@@ -196,7 +196,7 @@ export default function RevisionCalificacionPage({ params }: PageProps) {
             <Button
               variant="outline"
               size="sm"
-              className="gap-1 text-amber-600 border-amber-300 hover:bg-amber-50"
+              className="gap-1 text-warning-600 border-warning-300 hover:bg-warning-50"
               onClick={() => { setComentarioDevolucion(""); setDevolverOpen(true); }}
               disabled={isBusy}
             >
@@ -223,9 +223,9 @@ export default function RevisionCalificacionPage({ params }: PageProps) {
       {/* alerta si fue devuelta */}
       {calif.estado === EstadoCalificacion.DEVUELTO && calif.comentarioResponsable && (
         <div className="px-4 pt-3 shrink-0">
-          <Alert className="border-amber-300 bg-amber-50">
-            <Icon icon="ph:warning-duotone"className="size-4 text-amber-600" />
-            <AlertDescription className="text-amber-800">
+          <Alert className="border-warning-300 bg-warning-50">
+            <Icon icon="ph:warning-duotone"className="size-4 text-warning-600" />
+            <AlertDescription className="text-warning-800">
               <span className="font-medium">Motivo de devolucion: </span>
               {calif.comentarioResponsable}
             </AlertDescription>
@@ -311,10 +311,10 @@ export default function RevisionCalificacionPage({ params }: PageProps) {
                                   key={n.nivel}
                                   className={`rounded px-1.5 py-0.5 ${
                                     n.nivel === "basico"
-                                      ? "bg-secondary-100 text-secondary-600"
+                                      ? "bg-warning-50 text-warning-700"
                                       : n.nivel === "intermedio"
-                                        ? "bg-blue-50 text-blue-600"
-                                        : "bg-emerald-50 text-emerald-600"
+                                        ? "bg-info-50 text-info-700"
+                                        : "bg-success-50 text-success-700"
                                   }`}
                                 >
                                   {n.nivel === "basico" ? "Básico" : n.nivel === "intermedio" ? "Intermedio" : "Avanzado"}{" "}

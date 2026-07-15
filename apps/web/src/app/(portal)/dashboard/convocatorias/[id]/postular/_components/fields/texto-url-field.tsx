@@ -26,7 +26,7 @@ export const TextoUrlField = memo(function TextoUrlField({
         <FormItem>
           <FormLabel>
             {campo.etiqueta}
-            {campo.requerido && <span className="text-red-500 ml-1">*</span>}
+            {campo.requerido && <span className="text-error-500 ml-1">*</span>}
           </FormLabel>
           <FormControl>
             <Input

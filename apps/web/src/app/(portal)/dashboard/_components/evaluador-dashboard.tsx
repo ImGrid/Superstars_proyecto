@@ -215,7 +215,7 @@ function PorCalificarCard({
                 Sin empezar
               </Badge>
             )}
-            <span className="shrink-0 text-xs font-semibold text-orange-700">
+            <span className="shrink-0 text-xs font-semibold text-purple-600">
               {p.estadoCalificacion === "en_progreso" ? "Continuar →" : "Calificar →"}
             </span>
           </Link>

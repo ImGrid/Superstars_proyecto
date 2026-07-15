@@ -213,9 +213,9 @@ export default function PostulacionDetallePage({ params, searchParams }: PagePro
 
       {/* observacion existente */}
       {postulacion.observacion && (
-        <Alert className="border-amber-300 bg-amber-50">
-          <Icon icon="ph:warning-duotone"className="size-4 text-amber-600" />
-          <AlertDescription className="text-amber-800">
+        <Alert className="border-warning-300 bg-warning-50">
+          <Icon icon="ph:warning-duotone"className="size-4 text-warning-600" />
+          <AlertDescription className="text-warning-800">
             <span className="font-medium">Observacion: </span>
             {postulacion.observacion}
           </AlertDescription>
@@ -307,11 +307,11 @@ export default function PostulacionDetallePage({ params, searchParams }: PagePro
                               variant="outline"
                               className={
                                 c.estado === EstadoCalificacion.COMPLETADO
-                                  ? "border-blue-300 text-blue-700"
+                                  ? "border-info-300 text-info-700"
                                   : c.estado === EstadoCalificacion.APROBADO
-                                    ? "border-emerald-300 text-emerald-700"
+                                    ? "border-success-300 text-success-700"
                                     : c.estado === EstadoCalificacion.DEVUELTO
-                                      ? "border-amber-300 text-amber-700"
+                                      ? "border-warning-300 text-warning-700"
                                       : "text-secondary-500"
                               }
                             >
@@ -360,7 +360,7 @@ export default function PostulacionDetallePage({ params, searchParams }: PagePro
             </Button>
             <Button
               variant="outline"
-              className="gap-1 text-amber-600 border-amber-300 hover:bg-amber-50"
+              className="gap-1 text-warning-600 border-warning-300 hover:bg-warning-50"
               onClick={() => { setObservacion(""); setObservarOpen(true); }}
               disabled={isBusy}
             >

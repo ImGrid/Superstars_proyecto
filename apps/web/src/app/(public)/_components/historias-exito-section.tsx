@@ -148,7 +148,7 @@ export function HistoriasExitoSection() {
 function SectionHeader() {
   return (
     <div className="mx-auto max-w-2xl text-center">
-      <p className="text-sm font-semibold tracking-wider text-orange-600 uppercase">
+      <p className="text-sm font-semibold tracking-wider text-purple-600 uppercase">
         Casos de éxito
       </p>
       <h2 className="mt-2 font-display text-3xl leading-[1.3] tracking-wide text-primary-800 uppercase sm:text-4xl">

@@ -85,7 +85,7 @@ function lleno(v: unknown): boolean {
 const COLORES_SECCION = {
   primary: "bg-primary-50 text-primary-600",
   info: "bg-info-50 text-info-600",
-  orange: "bg-orange-50 text-orange-600",
+  purple: "bg-purple-50 text-purple-600",
 } as const;
 
 // cabecera de seccion: icono en cuadro de color + titulo + microcopy + estado
@@ -119,7 +119,7 @@ function SeccionHeader({
           Completa
         </span>
       ) : (
-        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-orange-50 px-2.5 py-1 text-xs font-semibold text-orange-700">
+        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-warning-50 px-2.5 py-1 text-xs font-semibold text-warning-700">
           <Icon icon="ph:warning-circle-duotone" className="size-3.5" />
           {faltan === 1 ? "Falta 1 dato" : `Faltan ${faltan} datos`}
         </span>
@@ -460,7 +460,7 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
           <CardHeader>
             <SeccionHeader
               icon="ph:buildings-duotone"
-              color="orange"
+              color="purple"
               title="Datos generales"
               subtitle="Cuéntanos de tu empresa para que el jurado te conozca mejor."
               faltan={faltanEn(CAMPOS_GENERALES)}

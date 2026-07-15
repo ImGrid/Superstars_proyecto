@@ -107,7 +107,7 @@ export const TablaField = memo(function TablaField({
           <FormItem>
             <FormLabel>
               {campo.etiqueta}
-              {campo.requerido && <span className="text-red-500 ml-1">*</span>}
+              {campo.requerido && <span className="text-error-500 ml-1">*</span>}
             </FormLabel>
             {campo.descripcion && (
               <FormDescription>{campo.descripcion}</FormDescription>
@@ -120,7 +120,7 @@ export const TablaField = memo(function TablaField({
                       <TableHead key={col.id}>
                         {col.titulo}
                         {col.requerido && (
-                          <span className="text-red-500 ml-1">*</span>
+                          <span className="text-error-500 ml-1">*</span>
                         )}
                       </TableHead>
                     ))}
@@ -164,7 +164,7 @@ export const TablaField = memo(function TablaField({
                             onClick={() => removeRow(rowIdx)}
                             disabled={rows.length <= 1}
                           >
-                            <Trash2 className="size-3.5 text-red-500" />
+                            <Trash2 className="size-3.5 text-error-500" />
                           </Button>
                         </TableCell>
                       )}

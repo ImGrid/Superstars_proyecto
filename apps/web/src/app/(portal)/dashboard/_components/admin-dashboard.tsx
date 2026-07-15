@@ -64,7 +64,7 @@ export function AdminDashboard({ nombre }: Props) {
                 Nuevo usuario
               </Link>
             </Button>
-            <Button asChild size="sm" className="bg-orange-600 hover:bg-orange-700">
+            <Button asChild size="sm">
               <Link href="/dashboard/convocatorias/nuevo">
                 <Icon icon="ph:plus-circle-duotone" className="size-4" />
                 Nueva convocatoria
@@ -125,7 +125,7 @@ export function AdminDashboard({ nombre }: Props) {
           label="Impacto en premios"
           value={formatBs(data.montoComprometidoTotal)}
           unit="Bs"
-          tone="orange"
+          tone="premio"
           icon={<Icon icon="ph:medal-duotone" className="size-5" />}
           href="/dashboard/resultados"
           foot={`${data.totalGanadoresHistoricos} ${data.totalGanadoresHistoricos === 1 ? "ganador" : "ganadores"}`}
@@ -404,7 +404,7 @@ function ConvocatoriasActivasCard({ items }: { items: AdminConvocatoriaResumenIt
               <p className="text-sm font-medium text-secondary-900">No hay convocatorias activas</p>
               <p className="mt-1 text-xs text-secondary-500">Empieza creando una convocatoria.</p>
             </div>
-            <Button asChild size="sm" className="bg-orange-600 hover:bg-orange-700">
+            <Button asChild size="sm">
               <Link href="/dashboard/convocatorias/nuevo">Crear primera convocatoria</Link>
             </Button>
           </div>

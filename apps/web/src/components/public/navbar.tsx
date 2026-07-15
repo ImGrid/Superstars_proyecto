@@ -85,8 +85,8 @@ export function PublicNavbar() {
               className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                 isActive(link.href)
                   ? scrolled
-                    ? "text-orange-600"
-                    : "text-orange-400"
+                    ? "text-purple-600"
+                    : "text-purple-300"
                   : scrolled
                     ? "text-secondary-700 hover:text-primary-700"
                     : "text-white/80 hover:text-white"
@@ -149,7 +149,7 @@ export function PublicNavbar() {
                       onClick={handleLinkClick}
                       className={`block px-6 py-3 text-sm font-medium transition-colors ${
                         isActive(link.href)
-                          ? "bg-orange-50 text-orange-600"
+                          ? "bg-purple-50 text-purple-600"
                           : "text-secondary-700 hover:bg-secondary-50"
                       }`}
                     >

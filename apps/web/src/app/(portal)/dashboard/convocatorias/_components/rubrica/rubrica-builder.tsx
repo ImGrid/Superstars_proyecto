@@ -159,7 +159,7 @@ export function RubricaBuilder({
                 {validacion.completa ? (
                   <Badge
                     variant="outline"
-                    className="gap-1 border-emerald-300 text-emerald-600"
+                    className="gap-1 border-success-300 text-success-600"
                   >
                     <Icon icon="ph:check-circle-duotone"className="size-3" />
                     Completa

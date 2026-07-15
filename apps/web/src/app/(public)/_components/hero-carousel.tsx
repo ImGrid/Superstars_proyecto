@@ -57,7 +57,7 @@ const slides: Slide[] = [
     title: (
       <>
         Impulsamos tu empresa en{" "}
-        <span className="text-orange-400">cada etapa</span> de crecimiento
+        <span className="text-amarillo-400">cada etapa</span> de crecimiento
       </>
     ),
     subtitle:
@@ -72,7 +72,7 @@ const slides: Slide[] = [
     title: (
       <>
         Historias que inspiran,{" "}
-        <span className="text-orange-400">impactos</span> que transforman
+        <span className="text-amarillo-400">impactos</span> que transforman
       </>
     ),
     subtitle:
@@ -88,7 +88,7 @@ const slides: Slide[] = [
     eyebrow: "Convocatoria abierta",
     title: (
       <>
-        5.ª edición <span className="text-orange-400">SuperStar</span>
+        5.ª edición <span className="text-amarillo-400">SuperStar</span>
       </>
     ),
     subtitle:
@@ -239,7 +239,7 @@ export function HeroCarousel() {
       <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-32 sm:px-6 lg:px-8">
         {/* copy con crossfade y desplazamiento sutil */}
         <div
-          className="relative max-w-2xl min-h-[280px] sm:min-h-[300px]"
+          className="relative max-w-2xl min-h-[300px] sm:min-h-[340px]"
           aria-live="polite"
           aria-atomic="true"
         >
@@ -254,10 +254,10 @@ export function HeroCarousel() {
               )}
               aria-hidden={i !== current}
             >
-              <Badge className="mb-6 border-orange-500/30 bg-orange-500/10 px-3 py-1 text-sm text-orange-300">
+              <Badge className="mb-6 border-amarillo-500/30 bg-amarillo-500/10 px-3 py-1 text-sm text-amarillo-200">
                 {slide.eyebrow}
               </Badge>
-              <h1 className="font-display text-4xl leading-[1.15] tracking-[0.01em] text-white sm:text-5xl lg:text-6xl">
+              <h1 className="font-display font-bold text-4xl leading-[1.05] tracking-tight text-balance text-white sm:text-5xl lg:text-6xl">
                 {slide.title}
               </h1>
               <p className="mt-6 text-lg leading-relaxed text-primary-200 sm:text-xl">
@@ -310,7 +310,7 @@ export function HeroCarousel() {
           <button
             type="button"
             onClick={handlePauseClick}
-            className="inline-flex size-11 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white transition-colors hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 focus-visible:ring-offset-primary-800 focus-visible:outline-none"
+            className="inline-flex size-11 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white transition-colors hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-amarillo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-primary-800 focus-visible:outline-none"
             aria-label={showPlayIcon ? "Reanudar carrusel" : "Pausar carrusel"}
           >
             {showPlayIcon ? (
@@ -334,7 +334,7 @@ export function HeroCarousel() {
                 aria-label={`Ir al slide ${i + 1}: ${slide.eyebrow}`}
                 onClick={() => goTo(i, true)}
                 className={cn(
-                  "relative h-1 cursor-pointer overflow-hidden rounded-full bg-white/25 transition-all duration-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange-400",
+                  "relative h-1 cursor-pointer overflow-hidden rounded-full bg-white/25 transition-all duration-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amarillo-400",
                   i === current ? "w-16" : "w-8",
                 )}
               >
@@ -342,7 +342,7 @@ export function HeroCarousel() {
                   <span
                     // key fuerza el remount al cambiar de slide para que la animacion reinicie
                     key={`fill-${current}`}
-                    className="absolute inset-y-0 left-0 bg-orange-500"
+                    className="absolute inset-y-0 left-0 bg-amarillo-500"
                     style={{
                       animationName: isAnimating ? "hero-fill-bar" : "none",
                       animationDuration: "var(--hero-slide-duration)",
@@ -372,7 +372,7 @@ export function HeroCarousel() {
           <button
             type="button"
             onClick={() => goTo(current - 1, true)}
-            className="inline-flex size-11 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white transition-colors hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 focus-visible:ring-offset-primary-800 focus-visible:outline-none"
+            className="inline-flex size-11 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white transition-colors hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-amarillo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-primary-800 focus-visible:outline-none"
             aria-label="Slide anterior"
           >
             <ChevronLeft className="size-5" />
@@ -380,7 +380,7 @@ export function HeroCarousel() {
           <button
             type="button"
             onClick={() => goTo(current + 1, true)}
-            className="inline-flex size-11 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white transition-colors hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 focus-visible:ring-offset-primary-800 focus-visible:outline-none"
+            className="inline-flex size-11 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white transition-colors hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-amarillo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-primary-800 focus-visible:outline-none"
             aria-label="Slide siguiente"
           >
             <ChevronRight className="size-5" />

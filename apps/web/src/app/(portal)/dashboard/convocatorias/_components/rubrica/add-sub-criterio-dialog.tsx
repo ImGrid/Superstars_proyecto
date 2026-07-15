@@ -203,7 +203,7 @@ export function AddSubCriterioDialog({
           {/* nivel basico */}
           <NivelInput
             label="Básico"
-            color="text-amber-700 bg-amber-50 border-amber-200"
+            color="text-warning-700 bg-warning-50 border-warning-200"
             minVal={bMin}
             maxVal={bMax}
             desc={descBasico}
@@ -216,7 +216,7 @@ export function AddSubCriterioDialog({
           {/* nivel intermedio */}
           <NivelInput
             label="Intermedio"
-            color="text-blue-700 bg-blue-50 border-blue-200"
+            color="text-info-700 bg-info-50 border-info-200"
             minVal={iMin}
             maxVal={iMax}
             desc={descIntermedio}
@@ -229,7 +229,7 @@ export function AddSubCriterioDialog({
           {/* nivel avanzado */}
           <NivelInput
             label="Avanzado"
-            color="text-emerald-700 bg-emerald-50 border-emerald-200"
+            color="text-success-700 bg-success-50 border-success-200"
             minVal={aMin}
             maxVal={aMax}
             desc={descAvanzado}

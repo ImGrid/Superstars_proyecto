@@ -610,7 +610,7 @@ function ConvocatoriaDetailAdmin({
           <div>
             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2">
-                <Icon icon="ph:trophy-duotone" className="size-5 text-amber-500" />
+                <Icon icon="ph:trophy-duotone" className="size-5 text-amarillo-700" />
                 <h2 className="font-heading text-lg font-semibold text-secondary-900">
                   Categorías
                 </h2>
@@ -861,7 +861,7 @@ function CategoriaResumenCard({
   onEliminar: () => void;
 }) {
   const icono = (
-    <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+    <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-amarillo-50 text-amarillo-700">
       <Icon icon="ph:trophy-duotone" className="size-5" />
     </div>
   );
@@ -872,7 +872,7 @@ function CategoriaResumenCard({
         {categoria.nombre}
       </p>
       <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-        <span className="inline-flex items-center rounded-md bg-amber-50 px-2 py-0.5 text-xs font-semibold tabular-nums text-amber-700">
+        <span className="inline-flex items-center rounded-md bg-amarillo-50 px-2 py-0.5 text-xs font-semibold tabular-nums text-amarillo-800">
           {formatMoney(categoria.monto)}
         </span>
         <span className="text-xs text-secondary-500">
@@ -1066,17 +1066,17 @@ function PostulacionCTA({
 
   if (estado === EstadoPostulacion.OBSERVADO) {
     return (
-      <div className="space-y-3 rounded-lg border border-amber-300 bg-amber-50/50 p-4">
+      <div className="space-y-3 rounded-lg border border-warning-300 bg-warning-50/50 p-4">
         <div>
-          <p className="font-semibold text-amber-900">Tu postulación fue observada</p>
-          <p className="mt-0.5 text-sm text-amber-700">
+          <p className="font-semibold text-warning-800">Tu postulación fue observada</p>
+          <p className="mt-0.5 text-sm text-warning-700">
             El responsable devolvió tu postulación con observaciones. Corrige lo indicado y vuelve a enviar.
           </p>
         </div>
         {miPostulacion.observacion && (
-          <div className="rounded-md bg-amber-100 px-4 py-3">
-            <p className="text-sm font-medium text-amber-800">Observación:</p>
-            <p className="mt-1 text-sm text-amber-700">{miPostulacion.observacion}</p>
+          <div className="rounded-md bg-warning-100 px-4 py-3">
+            <p className="text-sm font-medium text-warning-800">Observación:</p>
+            <p className="mt-1 text-sm text-warning-700">{miPostulacion.observacion}</p>
           </div>
         )}
         <Button className="w-full gap-2" onClick={() => router.push(postularHref)}>
@@ -1089,11 +1089,11 @@ function PostulacionCTA({
 
   if (estado === EstadoPostulacion.ENVIADO) {
     return (
-      <div className="flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50/50 p-4">
-        <Icon icon="ph:check-circle-duotone" className="size-5 shrink-0 text-blue-600" />
+      <div className="flex items-center gap-3 rounded-lg border border-info-200 bg-info-50/50 p-4">
+        <Icon icon="ph:check-circle-duotone" className="size-5 shrink-0 text-info-600" />
         <div className="flex-1">
-          <p className="font-semibold text-blue-900">Tu postulación fue enviada</p>
-          <p className="mt-0.5 text-sm text-blue-700">
+          <p className="font-semibold text-info-800">Tu postulación fue enviada</p>
+          <p className="mt-0.5 text-sm text-info-700">
             Está pendiente de revisión por el responsable de la convocatoria.
           </p>
         </div>
@@ -1104,12 +1104,12 @@ function PostulacionCTA({
 
   if (estado === EstadoPostulacion.RECHAZADO) {
     return (
-      <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50/50 p-4">
-        <Icon icon="ph:warning-duotone" className="size-5 shrink-0 text-red-600" />
+      <div className="flex items-center gap-3 rounded-lg border border-error-200 bg-error-50/50 p-4">
+        <Icon icon="ph:warning-duotone" className="size-5 shrink-0 text-error-600" />
         <div>
-          <p className="font-semibold text-red-900">Tu postulación fue rechazada</p>
+          <p className="font-semibold text-error-800">Tu postulación fue rechazada</p>
           {miPostulacion.observacion && (
-            <p className="mt-0.5 text-sm text-red-700">{miPostulacion.observacion}</p>
+            <p className="mt-0.5 text-sm text-error-700">{miPostulacion.observacion}</p>
           )}
         </div>
       </div>

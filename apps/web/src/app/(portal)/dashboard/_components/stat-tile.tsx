@@ -2,7 +2,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 // tono semantico del icono y del pie de la metrica
-type Tone = "primary" | "success" | "warning" | "error" | "orange" | "neutral";
+type Tone = "primary" | "success" | "warning" | "error" | "premio" | "neutral";
 
 interface StatTileProps {
   label: string;
@@ -22,7 +22,7 @@ const iconBg: Record<Tone, string> = {
   success: "bg-success-100 text-success-700",
   warning: "bg-warning-100 text-warning-700",
   error: "bg-error-100 text-error-700",
-  orange: "bg-orange-100 text-orange-700",
+  premio: "bg-amarillo-100 text-amarillo-800",
   neutral: "bg-secondary-100 text-secondary-600",
 };
 
@@ -31,7 +31,7 @@ const footText: Record<Tone, string> = {
   success: "text-success-600",
   warning: "text-warning-700",
   error: "text-error-600",
-  orange: "text-orange-700",
+  premio: "text-amarillo-800",
   neutral: "text-secondary-500",
 };
 

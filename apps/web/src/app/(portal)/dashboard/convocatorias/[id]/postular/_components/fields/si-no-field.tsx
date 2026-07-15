@@ -33,7 +33,7 @@ export const SiNoField = memo(function SiNoField({
           <FormItem>
             <FormLabel>
               {campo.etiqueta}
-              {campo.requerido && <span className="text-red-500 ml-1">*</span>}
+              {campo.requerido && <span className="text-error-500 ml-1">*</span>}
             </FormLabel>
             <FormControl>
               <RadioGroup

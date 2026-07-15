@@ -126,7 +126,7 @@ export function AppSidebar() {
                     className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                   >
                     <Avatar className="size-8 rounded-lg">
-                      <AvatarFallback className="rounded-lg bg-orange-700 text-white text-xs">
+                      <AvatarFallback className="rounded-lg bg-purple-600 text-white text-xs">
                         {user.nombre.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>

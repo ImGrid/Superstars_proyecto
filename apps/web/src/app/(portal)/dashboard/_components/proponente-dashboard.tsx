@@ -136,7 +136,7 @@ function ProximoPaso({ data }: { data: ProponenteDashboardStats }) {
       {cta && (
         <Link
           href={href}
-          className="shrink-0 rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-orange-700"
+          className="shrink-0 rounded-lg bg-amarillo-600 px-4 py-2.5 text-sm font-semibold text-primary-600 transition-colors hover:bg-amarillo-500"
         >
           {cta} →
         </Link>
@@ -233,7 +233,7 @@ function OportunidadCard({ c }: { c: ProponenteConvocatoriaAbiertaItem }) {
           ) : (
             <Link
               href={`/dashboard/convocatorias/${c.id}`}
-              className="shrink-0 rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-orange-700"
+              className="shrink-0 rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-purple-700"
             >
               Postularme →
             </Link>
@@ -311,7 +311,7 @@ function HistoriasSection({ historias }: { historias: PublicHistoriaExitoItem[] 
           {historias.slice(0, 2).map((h) => (
             <Panel key={h.id} className="flex flex-col gap-2.5 p-4">
               <div className="flex items-center gap-3">
-                <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-orange-600 to-orange-400 text-sm font-bold text-white">
+                <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 text-sm font-bold text-white">
                   {iniciales(h.empresaNombre ?? h.titulo)}
                 </div>
                 <div className="min-w-0">

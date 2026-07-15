@@ -58,7 +58,7 @@ export default function HomePage() {
 
             {/* texto */}
             <div>
-              <p className="text-sm font-semibold tracking-wider text-orange-600 uppercase">
+              <p className="text-sm font-semibold tracking-wider text-purple-600 uppercase">
                 Sobre nosotros
               </p>
               <h2 className="mt-2 font-display text-3xl leading-[1.3] tracking-wide text-primary-800 uppercase sm:text-4xl">
@@ -73,7 +73,7 @@ export default function HomePage() {
               <Button
                 asChild
                 variant="link"
-                className="mt-4 px-0 text-orange-600 hover:text-orange-700"
+                className="mt-4 px-0 text-azul-600 hover:text-azul-700"
               >
                 <Link href="/#como-funciona">
                   Conoce cómo funciona
@@ -92,7 +92,7 @@ export default function HomePage() {
       <section id="como-funciona" className="py-20 lg:py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
-            <p className="text-sm font-semibold tracking-wider text-orange-600 uppercase">
+            <p className="text-sm font-semibold tracking-wider text-purple-600 uppercase">
               Proceso sencillo
             </p>
             <h2 className="mt-2 font-display text-3xl leading-[1.3] tracking-wide text-primary-800 uppercase sm:text-4xl">
@@ -108,10 +108,10 @@ export default function HomePage() {
             {steps.map((step, index) => (
               <div key={step.title} className="relative text-center">
                 {/* número de paso */}
-                <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-2xl bg-orange-600 text-white shadow-lg shadow-orange-600/25">
+                <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-2xl bg-purple-600 text-white shadow-lg shadow-purple-600/25">
                   <Icon icon={step.icon} className="size-7" />
                 </div>
-                <span className="mb-2 block text-sm font-bold text-orange-600">
+                <span className="mb-2 block text-sm font-bold text-purple-600">
                   Paso {index + 1}
                 </span>
                 <h3 className="font-display text-xl leading-snug tracking-wide text-primary-800 uppercase">
@@ -136,7 +136,7 @@ export default function HomePage() {
       {/* ===== CTA FINAL ===== */}
       <section className="bg-primary-700 py-20 lg:py-28">
         <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
-          <Icon icon="ph:trophy-duotone" className="mx-auto mb-6 size-12 text-orange-400" />
+          <Icon icon="ph:trophy-duotone" className="mx-auto mb-6 size-12 text-amarillo-400" />
           <h2 className="font-display text-3xl leading-[1.3] tracking-wide text-white uppercase sm:text-4xl">
             ¿Listo para llevar tu empresa al siguiente nivel?
           </h2>
@@ -163,13 +163,13 @@ export default function HomePage() {
           <div className="mt-6 flex justify-center gap-6 text-sm text-primary-300">
             <Link
               href="/convocatorias"
-              className="transition-colors hover:text-orange-400"
+              className="transition-colors hover:text-amarillo-400"
             >
               Ver bases de la convocatoria
             </Link>
             <Link
               href="/contacto"
-              className="transition-colors hover:text-orange-400"
+              className="transition-colors hover:text-amarillo-400"
             >
               Contáctanos
             </Link>

@@ -32,7 +32,7 @@ export const TextoLargoField = memo(function TextoLargoField({
           <FormItem>
             <FormLabel>
               {campo.etiqueta}
-              {campo.requerido && <span className="text-red-500 ml-1">*</span>}
+              {campo.requerido && <span className="text-error-500 ml-1">*</span>}
             </FormLabel>
             <FormControl>
               <Textarea
@@ -52,7 +52,7 @@ export const TextoLargoField = memo(function TextoLargoField({
                 <span
                   className={`text-xs ${
                     wordCount > maxPalabras
-                      ? "text-red-500 font-medium"
+                      ? "text-error-500 font-medium"
                       : "text-secondary-400"
                   }`}
                 >

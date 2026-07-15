@@ -14,7 +14,7 @@ export const ESTADO_POSTULACION_ORDEN: {
   { key: EstadoPostulacion.EN_EVALUACION, label: "En evaluación", bar: "bg-primary-500" },
   { key: EstadoPostulacion.CALIFICADO, label: "Calificado", bar: "bg-primary-700" },
   { key: EstadoPostulacion.GANADOR, label: "Ganador", bar: "bg-success-600" },
-  { key: EstadoPostulacion.NO_SELECCIONADO, label: "No seleccionado", bar: "bg-orange-600" },
+  { key: EstadoPostulacion.NO_SELECCIONADO, label: "No seleccionado", bar: "bg-secondary-500" },
 ];
 
 // barras horizontales compactas de la distribucion de postulaciones por estado.

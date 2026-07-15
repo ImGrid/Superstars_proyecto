@@ -34,7 +34,7 @@ export const SeleccionMultipleField = memo(function SeleccionMultipleField({
           <FormItem>
             <FormLabel>
               {campo.etiqueta}
-              {campo.requerido && <span className="text-red-500 ml-1">*</span>}
+              {campo.requerido && <span className="text-error-500 ml-1">*</span>}
             </FormLabel>
             <FormControl>
               <div className="grid gap-2 sm:grid-cols-2">

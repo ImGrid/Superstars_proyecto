@@ -43,7 +43,7 @@ export const SeleccionUnicaField = memo(function SeleccionUnicaField({
             <FormItem>
               <FormLabel>
                 {campo.etiqueta}
-                {campo.requerido && <span className="text-red-500 ml-1">*</span>}
+                {campo.requerido && <span className="text-error-500 ml-1">*</span>}
               </FormLabel>
               <Select
                 onValueChange={(val) => {
@@ -96,7 +96,7 @@ export const SeleccionUnicaField = memo(function SeleccionUnicaField({
           <FormItem>
             <FormLabel>
               {campo.etiqueta}
-              {campo.requerido && <span className="text-red-500 ml-1">*</span>}
+              {campo.requerido && <span className="text-error-500 ml-1">*</span>}
             </FormLabel>
             <FormControl>
               <RadioGroup

@@ -199,15 +199,15 @@ export function PostulacionesTab({ convocatoriaId, categoriaId, estadoConvocator
       <CardContent className="space-y-4">
         {/* banner de calificaciones pendientes de revision */}
         {pendientesRevision.length > 0 && (
-          <div className="flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
-            <Icon icon="ph:clipboard-text-duotone" className="size-5 text-blue-600 shrink-0" />
+          <div className="flex items-center gap-3 rounded-lg border border-info-200 bg-info-50 px-4 py-3">
+            <Icon icon="ph:clipboard-text-duotone" className="size-5 text-info-600 shrink-0" />
             <div className="flex-1">
-              <p className="text-sm font-medium text-blue-800">
+              <p className="text-sm font-medium text-info-800">
                 {pendientesRevision.length}{" "}
                 {pendientesRevision.length !== 1 ? "calificaciones" : "calificación"}{" "}
                 pendiente{pendientesRevision.length !== 1 ? "s" : ""} de revisión
               </p>
-              <p className="text-xs text-blue-600">
+              <p className="text-xs text-info-600">
                 Los evaluadores han enviado sus calificaciones y esperan tu aprobación.
               </p>
             </div>
@@ -217,7 +217,7 @@ export function PostulacionesTab({ convocatoriaId, categoriaId, estadoConvocator
                   key={c.id}
                   variant="outline"
                   size="sm"
-                  className="text-xs gap-1 border-blue-300 text-blue-700 hover:bg-blue-100"
+                  className="text-xs gap-1 border-info-300 text-info-700 hover:bg-info-100"
                   onClick={() =>
                     router.push(`/dashboard/convocatorias/${convocatoriaId}/calificaciones/${c.id}`)
                   }
@@ -232,14 +232,14 @@ export function PostulacionesTab({ convocatoriaId, categoriaId, estadoConvocator
         {/* banner-guia: hay postulaciones aun en evaluacion que bloquean elegir ganadores */}
         {estadoConvocatoria === EstadoConvocatoria.EN_EVALUACION &&
           pendientesEvaluacion.length > 0 && (
-          <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-            <Icon icon="ph:info-duotone" className="mt-0.5 size-5 shrink-0 text-amber-600" />
+          <div className="flex items-start gap-3 rounded-lg border border-warning-200 bg-warning-50 px-4 py-3">
+            <Icon icon="ph:info-duotone" className="mt-0.5 size-5 shrink-0 text-warning-600" />
             <div className="flex-1 space-y-2">
               <div>
-                <p className="text-sm font-medium text-amber-800">
+                <p className="text-sm font-medium text-warning-800">
                   Aún no puedes elegir ganadores
                 </p>
-                <p className="text-xs text-amber-700">
+                <p className="text-xs text-warning-700">
                   {pendientesEvaluacion.length === 1
                     ? "Esta postulación sigue en evaluación. Ábrela para asignarle un evaluador, revisar su calificación, o sacarla de la convocatoria si no se pudo evaluar."
                     : `Estas ${pendientesEvaluacion.length} postulaciones siguen en evaluación. Ábrelas para asignarles un evaluador, revisar su calificación, o sacarlas de la convocatoria si no se pudieron evaluar.`}
@@ -251,7 +251,7 @@ export function PostulacionesTab({ convocatoriaId, categoriaId, estadoConvocator
                     key={p.id}
                     variant="outline"
                     size="sm"
-                    className="gap-1 border-amber-300 text-xs text-amber-700 hover:bg-amber-100"
+                    className="gap-1 border-warning-300 text-xs text-warning-700 hover:bg-warning-100"
                     onClick={() =>
                       router.push(`/dashboard/convocatorias/${convocatoriaId}/postulaciones/${p.id}`)
                     }
@@ -266,20 +266,20 @@ export function PostulacionesTab({ convocatoriaId, categoriaId, estadoConvocator
 
         {/* banner de seleccion de ganadores */}
         {puedeSeleccionarGanadores && todasCalificadas && (
-          <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-            <Icon icon="ph:trophy-duotone" className="size-5 text-amber-600 shrink-0" />
+          <div className="flex items-center gap-3 rounded-lg border border-amarillo-200 bg-amarillo-50 px-4 py-3">
+            <Icon icon="ph:trophy-duotone" className="size-5 text-amarillo-700 shrink-0" />
             <div className="flex-1">
-              <p className="text-sm font-medium text-amber-800">
+              <p className="text-sm font-medium text-primary-900">
                 Todas las postulaciones están calificadas
               </p>
-              <p className="text-xs text-amber-600">
+              <p className="text-xs text-primary-700">
                 Selecciona hasta {numeroGanadores} ganador{numeroGanadores !== 1 ? "es" : ""} en la tabla y confirma la selección.
               </p>
             </div>
             <Button
               variant="outline"
               size="sm"
-              className="shrink-0 border-amber-300 text-amber-700 hover:bg-amber-100"
+              className="shrink-0 border-amarillo-300 text-primary-700 hover:bg-amarillo-100"
               onClick={seleccionarTopN}
             >
               Seleccionar top {Math.min(numeroGanadores, calificadas.length)}
@@ -336,11 +336,12 @@ export function PostulacionesTab({ convocatoriaId, categoriaId, estadoConvocator
           </div>
         )}
 
-        {/* barra flotante de accion cuando hay seleccionados */}
+        {/* barra de accion pegajosa: vive dentro de la columna de contenido (no
+            tapa el sidebar) y flota cerca del fondo mientras se hace scroll */}
         {selectedIds.size > 0 && (
-          <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white p-4 shadow-lg">
-            <div className="mx-auto flex max-w-7xl items-center justify-between">
-              <div className="flex items-center gap-3">
+          <div className="sticky bottom-4 z-10 rounded-xl border border-secondary-200 bg-white p-3 shadow-lg">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
                 <Icon icon="ph:check-circle-duotone" className="size-5 text-success-600" />
                 <span className="text-sm font-medium">
                   {selectedIds.size} de {Math.min(numeroGanadores, calificadas.length)} ganador{selectedIds.size !== 1 ? "es" : ""} seleccionado{selectedIds.size !== 1 ? "s" : ""}
@@ -356,7 +357,7 @@ export function PostulacionesTab({ convocatoriaId, categoriaId, estadoConvocator
                 </Button>
                 <Button
                   size="sm"
-                  className="bg-amber-600 hover:bg-amber-700"
+                  className="bg-amarillo-600 text-primary-600 hover:bg-amarillo-500"
                   onClick={() => setConfirmOpen(true)}
                 >
                   <Icon icon="ph:trophy-duotone" className="size-4" />
@@ -426,7 +427,7 @@ function PostulacionRow({
 
   return (
     <TableRow
-      className={isSelected ? "bg-amber-50" : undefined}
+      className={isSelected ? "bg-amarillo-50" : undefined}
       onClick={showCheckbox && esCalificado ? onToggle : undefined}
       style={showCheckbox && esCalificado ? { cursor: "pointer" } : undefined}
     >
@@ -449,7 +450,7 @@ function PostulacionRow({
         <div className="flex items-center gap-1.5">
           <StateBadge tipo="postulacion" valor={postulacion.estado} />
           {pendientes > 0 && (
-            <Badge className="bg-blue-100 text-blue-700 text-[10px] px-1.5 py-0">
+            <Badge className="bg-info-100 text-info-700 text-[10px] px-1.5 py-0">
               {pendientes} por revisar
             </Badge>
           )}
@@ -459,7 +460,7 @@ function PostulacionRow({
         <div className="flex items-center gap-2">
           <div className="h-2 w-16 rounded-full bg-secondary-100">
             <div
-              className={`h-2 rounded-full ${pct >= 100 ? "bg-emerald-500" : "bg-primary-500"}`}
+              className={`h-2 rounded-full ${pct >= 100 ? "bg-success-500" : "bg-primary-500"}`}
               style={{ width: `${Math.min(pct, 100)}%` }}
             />
           </div>
@@ -473,10 +474,10 @@ function PostulacionRow({
             size="sm"
             className={`gap-1 text-xs ${
               evaluadoresAsignados === 0
-                ? "text-red-600 hover:text-red-700"
+                ? "text-error-600 hover:text-error-700"
                 : evaluadoresAsignados < totalEvaluadores
-                  ? "text-amber-600 hover:text-amber-700"
-                  : "text-emerald-600 hover:text-emerald-700"
+                  ? "text-warning-600 hover:text-warning-700"
+                  : "text-success-600 hover:text-success-700"
             }`}
             onClick={(e) => {
               e.stopPropagation();

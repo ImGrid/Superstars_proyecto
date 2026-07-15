@@ -343,9 +343,9 @@ function PostularFormContent({
 
       {/* alerta de observacion */}
       {estado === EstadoPostulacion.OBSERVADO && observacion && (
-        <Alert className="border-amber-300 bg-amber-50">
-          <Icon icon="ph:warning-duotone"className="size-4 text-amber-600" />
-          <AlertDescription className="text-amber-800">
+        <Alert className="border-warning-300 bg-warning-50">
+          <Icon icon="ph:warning-duotone"className="size-4 text-warning-600" />
+          <AlertDescription className="text-warning-800">
             <span className="font-medium">Observacion del responsable:</span>{" "}
             {observacion}
           </AlertDescription>
@@ -398,7 +398,7 @@ function PostularFormContent({
                       </p>
                     )}
                     <p className="mt-1 text-xs text-secondary-400">
-                      Los campos con <span className="text-red-500">*</span> son obligatorios.
+                      Los campos con <span className="text-error-500">*</span> son obligatorios.
                     </p>
                   </div>
                 </div>

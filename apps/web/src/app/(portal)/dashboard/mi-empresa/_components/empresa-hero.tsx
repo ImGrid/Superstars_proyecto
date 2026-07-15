@@ -151,7 +151,7 @@ export function EmpresaHero({ empresa }: { empresa: EmpresaResponse }) {
           bloque de arriba y necesita el navy debajo para que su bg-black/15 contraste */}
       <div
         className="overflow-hidden rounded-2xl shadow-sm"
-        style={{ background: "linear-gradient(135deg, #0d2b5b, #1b4d87)" }}
+        style={{ background: "linear-gradient(135deg, var(--color-purple-600), var(--color-info-600))" }}
       >
         <div className="flex flex-col md:flex-row md:items-stretch">
           <input
@@ -182,7 +182,7 @@ export function EmpresaHero({ empresa }: { empresa: EmpresaResponse }) {
               ) : (
                 <span
                   className="flex size-full items-center justify-center font-heading text-5xl font-bold text-white"
-                  style={{ background: "linear-gradient(135deg, #e87722, #f5a623)" }}
+                  style={{ background: "linear-gradient(135deg, var(--color-purple-600), var(--color-purple-800))" }}
                 >
                   {iniciales(empresa.razonSocial)}
                 </span>
@@ -190,7 +190,7 @@ export function EmpresaHero({ empresa }: { empresa: EmpresaResponse }) {
             </button>
 
             {/* afordancia de subida: badge de camara (o spinner mientras procesa) */}
-            <span className="pointer-events-none absolute bottom-2 right-2 flex size-7 items-center justify-center rounded-full bg-white text-primary-700 shadow ring-2 ring-[#0d2b5b]">
+            <span className="pointer-events-none absolute bottom-2 right-2 flex size-7 items-center justify-center rounded-full bg-white text-primary-700 shadow ring-2 ring-primary-600">
               <Icon
                 icon={procesando ? "ph:spinner-gap-duotone" : "ph:camera-duotone"}
                 className={procesando ? "size-4 animate-spin" : "size-4"}
@@ -242,7 +242,7 @@ export function EmpresaHero({ empresa }: { empresa: EmpresaResponse }) {
               ) : (
                 <>
                   Sube el logo de tu empresa para que te reconozcan. Toca el
-                  recuadro naranja y elige una imagen.
+                  recuadro morado y elige una imagen.
                 </>
               )}
             </p>
@@ -268,7 +268,7 @@ export function EmpresaHero({ empresa }: { empresa: EmpresaResponse }) {
                 </div>
                 <Link
                   href="/dashboard/convocatorias"
-                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-orange-700"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-amarillo-600 px-4 py-2.5 text-sm font-semibold text-primary-600 transition-colors hover:bg-amarillo-500"
                 >
                   Ver convocatorias abiertas
                   <Icon icon="ph:arrow-right-bold" className="size-4" />
@@ -299,7 +299,7 @@ export function EmpresaHero({ empresa }: { empresa: EmpresaResponse }) {
                   {faltantes.slice(0, 4).map((f) => (
                     <span
                       key={f.key as string}
-                      className="rounded-md border border-orange-600/60 bg-orange-600/20 px-2 py-0.5 text-[11px] font-medium text-orange-100"
+                      className="rounded-md border border-white/25 bg-white/15 px-2 py-0.5 text-[11px] font-medium text-white"
                     >
                       {f.label}
                     </span>
@@ -323,7 +323,7 @@ export function EmpresaHero({ empresa }: { empresa: EmpresaResponse }) {
 
         <div className="flex flex-wrap items-center gap-x-1 gap-y-0.5 bg-black/15 px-5 py-2.5 text-[11px] text-white/70">
           <Icon icon="ph:handshake-duotone" className="mr-1 size-4" />
-          Una iniciativa de{" "}
+          En alianza con{" "}
           <span className="font-semibold text-white">OXFAM</span> ·{" "}
           <span className="font-semibold text-white">FUNDES Bolivia</span> ·{" "}
           <span className="font-semibold text-white">Ayuda en Acción</span>

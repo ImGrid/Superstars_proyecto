@@ -19,15 +19,15 @@ import { FaqActions } from "./_components/faq-actions";
 const CATEGORIA_BADGE: Record<string, { label: string; className: string }> = {
   general: {
     label: "General",
-    className: "bg-blue-100 text-blue-700 border-blue-200",
+    className: "bg-info-100 text-info-700 border-info-200",
   },
   participacion: {
     label: "Participación",
-    className: "bg-green-100 text-green-700 border-green-200",
+    className: "bg-success-100 text-success-700 border-success-200",
   },
   proceso: {
     label: "Proceso",
-    className: "bg-orange-100 text-orange-700 border-orange-200",
+    className: "bg-purple-100 text-purple-700 border-purple-200",
   },
 };
 

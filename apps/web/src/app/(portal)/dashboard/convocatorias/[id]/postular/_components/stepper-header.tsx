@@ -37,7 +37,7 @@ export const StepperHeader = memo(function StepperHeader({
                   isActive
                     ? "bg-primary-100 text-primary-700 font-medium"
                     : isCompleted
-                      ? "bg-emerald-50 text-emerald-700"
+                      ? "bg-success-50 text-success-700"
                       : "bg-secondary-50 text-secondary-500 hover:bg-secondary-100"
                 }`}
               >
@@ -46,7 +46,7 @@ export const StepperHeader = memo(function StepperHeader({
                     isActive
                       ? "bg-primary-600 text-white"
                       : isCompleted
-                        ? "bg-emerald-500 text-white"
+                        ? "bg-success-500 text-white"
                         : "bg-secondary-200 text-secondary-600"
                   }`}
                 >
@@ -57,7 +57,7 @@ export const StepperHeader = memo(function StepperHeader({
               {idx < totalSteps - 1 && (
                 <div
                   className={`h-px w-6 ${
-                    isCompleted ? "bg-emerald-300" : "bg-secondary-200"
+                    isCompleted ? "bg-success-300" : "bg-secondary-200"
                   }`}
                 />
               )}

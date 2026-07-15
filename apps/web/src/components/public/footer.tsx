@@ -50,7 +50,7 @@ export function PublicFooter() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-primary-300 transition-colors hover:text-orange-400"
+                    className="text-sm text-primary-300 transition-colors hover:text-amarillo-400"
                   >
                     {link.label}
                   </Link>
@@ -69,7 +69,7 @@ export function PublicFooter() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-primary-300 transition-colors hover:text-orange-400"
+                    className="text-sm text-primary-300 transition-colors hover:text-amarillo-400"
                   >
                     {link.label}
                   </Link>
@@ -85,14 +85,14 @@ export function PublicFooter() {
             </h3>
             <ul className="space-y-3">
               <li className="flex items-start gap-2 text-sm text-primary-300">
-                <MapPin className="mt-0.5 size-4 shrink-0 text-orange-500" />
+                <MapPin className="mt-0.5 size-4 shrink-0 text-info-400" />
                 <span>La Paz, Bolivia</span>
               </li>
               <li className="flex items-start gap-2 text-sm text-primary-300">
-                <Mail className="mt-0.5 size-4 shrink-0 text-orange-500" />
+                <Mail className="mt-0.5 size-4 shrink-0 text-info-400" />
                 <a
                   href="mailto:superimpact@ecv-impactobo.com"
-                  className="transition-colors hover:text-orange-400"
+                  className="transition-colors hover:text-amarillo-400"
                 >
                   superimpact@ecv-impactobo.com
                 </a>
