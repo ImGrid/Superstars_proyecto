@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { CircleHelp, Mail } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { CircleHelp } from "lucide-react";
 import { getFaqPublico } from "@/lib/api/public.server";
 import { GrupoFaq } from "./_components/grupo-faq";
+import { ContactBanner } from "@/components/public/contact-banner";
 
 // orden y labels de las categorias
 const CATEGORIAS = [
@@ -77,23 +76,8 @@ export default async function FaqPage() {
         </div>
       </section>
 
-      {/* CTA contacto */}
-      <section className="border-t bg-secondary-50 py-12">
-        <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-          <h2 className="font-display text-xl leading-snug tracking-wide text-secondary-900 uppercase">
-            ¿No encontraste lo que buscabas?
-          </h2>
-          <p className="mt-2 text-secondary-600">
-            Nuestro equipo está disponible para resolver tus dudas.
-          </p>
-          <Button asChild variant="cta" className="mt-6">
-            <Link href="/contacto">
-              <Mail className="size-4" />
-              Contáctanos
-            </Link>
-          </Button>
-        </div>
-      </section>
+      {/* banner de contacto */}
+      <ContactBanner />
     </>
   );
 }

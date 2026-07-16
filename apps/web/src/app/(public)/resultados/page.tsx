@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/empty-state";
 import { formatDate, formatMoney } from "@/lib/format";
 import type { PublicResultadosResponse } from "@superstars/shared";
+import { ContactBanner } from "@/components/public/contact-banner";
 
 export const metadata: Metadata = {
   title: "Resultados y ganadores",
@@ -99,6 +100,8 @@ export default async function ResultadosPage() {
           )}
         </div>
       </section>
+
+      <ContactBanner />
     </>
   );
 }

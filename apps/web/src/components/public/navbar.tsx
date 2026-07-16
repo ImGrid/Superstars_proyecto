@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -65,8 +66,16 @@ export function PublicNavbar() {
       }`}
     >
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* logo */}
+        {/* logo: cohete oficial + wordmark */}
         <Link href="/" className="flex items-center gap-2.5">
+          <Image
+            src="/images/cohete-logo.png"
+            alt=""
+            width={549}
+            height={544}
+            className="size-8 shrink-0"
+            priority
+          />
           <span
             className={`font-heading text-xl font-bold tracking-tight transition-colors ${
               scrolled ? "text-primary-700" : "text-white"
@@ -101,11 +110,11 @@ export function PublicNavbar() {
         <div className="flex items-center gap-3">
           <Button
             asChild
-            size="sm"
+            size="lg"
             variant="cta"
             className="hidden md:inline-flex"
           >
-            <Link href="/auth/registro">Postular ahora</Link>
+            <Link href="/auth/registro">Postularme ahora</Link>
           </Button>
 
           {/* hamburguesa mobile */}
@@ -134,6 +143,13 @@ export function PublicNavbar() {
                     className="flex items-center gap-2"
                     onClick={() => setOpen(false)}
                   >
+                    <Image
+                      src="/images/cohete-logo.png"
+                      alt=""
+                      width={549}
+                      height={544}
+                      className="size-8 shrink-0"
+                    />
                     <span className="font-heading text-lg font-bold tracking-tight text-primary-700">
                       SUPERIMPACT360
                     </span>
@@ -162,7 +178,7 @@ export function PublicNavbar() {
                 <div className="border-t p-4">
                   <Button asChild variant="cta" className="w-full">
                     <Link href="/auth/registro" onClick={() => setOpen(false)}>
-                      Postular ahora
+                      Postularme ahora
                     </Link>
                   </Button>
                 </div>

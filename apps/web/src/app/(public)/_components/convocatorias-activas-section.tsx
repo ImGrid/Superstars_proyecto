@@ -16,14 +16,14 @@ export function ConvocatoriasActivasSection() {
   );
 
   return (
-    <section className="py-20 lg:py-28">
+    <section className="py-12 lg:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex items-end justify-between">
           <div>
             <p className="text-sm font-semibold tracking-wider text-purple-600 uppercase">
               Oportunidades
             </p>
-            <h2 className="mt-2 font-display text-3xl leading-[1.3] tracking-wide text-primary-800 uppercase sm:text-4xl">
+            <h2 className="mt-2 font-display text-3xl leading-[1.3] tracking-wide text-primary-600 uppercase sm:text-4xl">
               Convocatorias activas
             </h2>
           </div>

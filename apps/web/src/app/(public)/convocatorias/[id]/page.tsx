@@ -256,10 +256,10 @@ export default function ConvocatoriaDetallePage({
                 En alianza con
               </span>
               {[
-                { name: "OXFAM", src: "/images/sponsors/oxfam.png" },
                 { name: "FUNDES Bolivia", src: "/images/sponsors/fundes-color.png" },
-                { name: "MaríaMarina Foundation", src: "/images/sponsors/mariamarina-color.png" },
                 { name: "Ayuda en Acción", src: "/images/sponsors/ayuda-color.png" },
+                { name: "MaríaMarina Foundation", src: "/images/sponsors/mariamarina-color.png" },
+                { name: "OXFAM", src: "/images/sponsors/oxfam.png" },
               ].map((a) => (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img

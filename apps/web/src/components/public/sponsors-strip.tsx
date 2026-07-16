@@ -1,19 +1,20 @@
 import Image from "next/image";
 
 // Logos oficiales de las organizaciones aliadas (PNG sin fondo, version blanca
-// para fondo navy). El orden sigue el material oficial.
+// para fondo navy). Orden pedido por el cliente: Fundes, Ayuda en Accion,
+// MariaMarina, Oxfam.
 const SPONSORS = [
-  {
-    name: "OXFAM",
-    src: "/images/sponsors/oxfam.png",
-    width: 500,
-    height: 194,
-  },
   {
     name: "FUNDES Bolivia",
     src: "/images/sponsors/fundes-blanco.png",
     width: 500,
     height: 96,
+  },
+  {
+    name: "Ayuda en Acción",
+    src: "/images/sponsors/ayuda-blanco.png",
+    width: 500,
+    height: 156,
   },
   {
     name: "MaríaMarina Foundation",
@@ -22,10 +23,10 @@ const SPONSORS = [
     height: 106,
   },
   {
-    name: "Ayuda en Acción",
-    src: "/images/sponsors/ayuda-blanco.png",
+    name: "OXFAM",
+    src: "/images/sponsors/oxfam.png",
     width: 500,
-    height: 156,
+    height: 194,
   },
 ] as const;
 

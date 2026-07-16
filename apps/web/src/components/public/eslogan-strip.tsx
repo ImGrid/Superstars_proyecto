@@ -51,9 +51,8 @@ export function EsloganStrip() {
     <section
       className="relative flex min-h-[168px] flex-col items-center gap-4 overflow-hidden px-6 py-8 text-center sm:px-10 md:flex-row md:gap-8 md:text-left"
       style={{
-        // el degradado radial ilumina detras del cohete, como si fuera la luz
-        background:
-          "radial-gradient(120% 180% at 12% 50%, #123465 0%, #0C2140 45%, #051430 100%)",
+        // navy oficial plano (Pantone 282 C, primary-600) pedido por el cliente
+        background: "#041f6b",
       }}
     >
       {/* campo de estrellas, decorativo */}

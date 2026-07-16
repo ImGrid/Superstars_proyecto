@@ -166,13 +166,13 @@ export function ResultadosCifrasSection() {
   }, []);
 
   return (
-    <section ref={ref} className="py-20 lg:py-28">
+    <section ref={ref} className="py-12 lg:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* encabezado con lineas a los lados, como la imagen del cliente */}
         <div className="mx-auto mb-14 flex max-w-3xl items-center gap-4 sm:gap-6">
           <span className="h-0.5 flex-1 rounded bg-secondary-200" />
-          <h2 className="font-display text-2xl leading-tight tracking-wide whitespace-nowrap text-primary-800 uppercase sm:text-3xl">
-            Resultados en cifras
+          <h2 className="font-display text-2xl leading-tight tracking-wide whitespace-nowrap text-primary-600 uppercase sm:text-3xl">
+            Resultados e impactos 2025
           </h2>
           <span className="h-0.5 flex-1 rounded bg-secondary-200" />
         </div>

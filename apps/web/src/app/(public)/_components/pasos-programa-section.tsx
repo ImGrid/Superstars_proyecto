@@ -61,10 +61,10 @@ function Arco({ color }: { color: string }) {
 
 export function PasosProgramaSection() {
   return (
-    <section id="como-funciona" className="py-20 lg:py-28">
+    <section id="como-funciona" className="py-12 lg:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <h2 className="text-center font-display text-3xl leading-[1.3] tracking-wide text-primary-800 uppercase sm:text-4xl">
-          Cómo funciona
+        <h2 className="text-center font-display text-3xl leading-[1.3] tracking-wide text-primary-600 uppercase sm:text-4xl">
+          ¿Cómo funciona?
         </h2>
 
         {/* ESCRITORIO: linea de tiempo horizontal */}

@@ -10,7 +10,13 @@ import {
 } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
+import {
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
+  Pause,
+  Play,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { IconoBeneficio } from "./iconos-beneficios";
@@ -41,6 +47,9 @@ function getReducedMotionServerSnapshot() {
 interface Slide {
   image: string;
   alt: string;
+  // anclaje vertical de la foto en escritorio (Tailwind). Por defecto object-right
+  // (centro vertical). El slide 0 sube el anclaje para no cortar la cara.
+  objectPosition?: string;
   // intensidades del overlay degradado: izquierda, medio, derecha
   overlay: [number, number, number];
   eyebrow: string;
@@ -58,6 +67,9 @@ const slides: Slide[] = [
   {
     image: "/images/banner-agricultura.webp",
     alt: "Productora boliviana sonriendo junto a sacos de papa recien cosechada en el campo",
+    // la cara queda en la parte alta de la foto: subimos el anclaje para no
+    // cortarla. Movil centrado; desktop pegado arriba a la derecha.
+    objectPosition: "object-center md:object-[100%_1%]",
     overlay: [0.92, 0.72, 0.45],
     eyebrow: "Beneficios del programa",
     title: (
@@ -74,8 +86,8 @@ const slides: Slide[] = [
         label: (
           <>
             Hasta{" "}
-            <span className="font-semibold text-amarillo-300">Bs 50.000</span> de
-            capital semilla
+            <span className="font-semibold text-amarillo-300">Bs 50.000</span>{" "}
+            de capital semilla
           </>
         ),
       },
@@ -94,6 +106,9 @@ const slides: Slide[] = [
     // texto. Se guarda espejada para que quede a la derecha, como las otras dos
     image: "/images/banner-laboratorio.webp",
     alt: "Quimica boliviana sonriendo en el laboratorio de su empresa, rodeada de equipos de destilacion",
+    // su cara esta arriba a la derecha: en movil subimos el anclaje para no
+    // cortarla; en desktop object-right ya la muestra bien.
+    objectPosition: "object-[58%_5%] md:object-right",
     overlay: [0.92, 0.7, 0.4],
     eyebrow: "Convocatoria abierta",
     title: (
@@ -128,6 +143,26 @@ const slides: Slide[] = [
     cta: { label: "Resultados e impactos", href: "/resultados" },
   },
 ];
+
+// contenido de texto de un slide (badge + titulo + subtitulo). Se usa en las
+// capas absolutas del crossfade y tambien en un "sizer" invisible que le da al
+// contenedor la altura del slide actual, para que el texto no se solape con los
+// beneficios o la tarjeta de fechas en pantallas angostas.
+function CopyContenido({ slide }: { slide: Slide }) {
+  return (
+    <>
+      <Badge className="mb-6 border-amarillo-500/30 bg-amarillo-500/10 px-3 py-1 text-sm text-amarillo-200">
+        {slide.eyebrow}
+      </Badge>
+      <h1 className="font-display font-bold text-4xl leading-[1.1] tracking-tight text-balance text-white sm:text-5xl">
+        {slide.title}
+      </h1>
+      <p className="mt-4 text-lg leading-relaxed text-primary-200 sm:text-xl">
+        {slide.subtitle}
+      </p>
+    </>
+  );
+}
 
 export function HeroCarousel() {
   const [current, setCurrent] = useState(0);
@@ -222,7 +257,8 @@ export function HeroCarousel() {
     }
   };
 
-  const isAnimating = !reducedMotion && !isPaused && !userInteracted && !pauseZoneActive;
+  const isAnimating =
+    !reducedMotion && !isPaused && !userInteracted && !pauseZoneActive;
   const showPlayIcon = isPaused || userInteracted;
 
   return (
@@ -234,7 +270,9 @@ export function HeroCarousel() {
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       tabIndex={-1}
-      style={{ "--hero-slide-duration": `${SLIDE_DURATION}ms` } as CSSProperties}
+      style={
+        { "--hero-slide-duration": `${SLIDE_DURATION}ms` } as CSSProperties
+      }
     >
       {/* capa de imagenes con crossfade */}
       <div className="absolute inset-0" aria-hidden="true">
@@ -251,9 +289,14 @@ export function HeroCarousel() {
               alt={slide.alt}
               fill
               sizes="100vw"
-              // mobile: sujeto al centro de la foto. Desktop: object-right para
-              // Z-pattern (texto izquierda + sujeto derecha en los 3 slides)
-              className="object-cover object-center md:object-right"
+              // anclaje del recorte por slide. Por defecto: centro en movil y
+              // object-right en desktop (Z-pattern: texto izquierda + sujeto
+              // derecha). Cada slide lo ajusta para no cortar la cara segun donde
+              // este en su foto (movil y desktop pueden diferir).
+              className={cn(
+                "object-cover",
+                slide.objectPosition ?? "object-center md:object-right",
+              )}
               priority={i === 0}
             />
             {/* overlay degradado direccional, intensidad variable por slide */}
@@ -267,105 +310,99 @@ export function HeroCarousel() {
         ))}
       </div>
 
-      {/* contenido: anclado arriba (no centrado) para que el slide con beneficios
-          crezca hacia abajo sin desplazar el titulo */}
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 pt-24 pb-24 sm:px-6 lg:px-8">
-        {/* copy con crossfade y desplazamiento sutil */}
-        <div
-          className="relative max-w-2xl min-h-[230px] sm:min-h-[260px]"
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          {slides.map((slide, i) => (
-            <div
-              key={slide.eyebrow}
-              className={cn(
-                "absolute inset-0 transition-all duration-500 ease-out",
-                i === current
-                  ? "translate-y-0 opacity-100"
-                  : "pointer-events-none translate-y-2 opacity-0",
-              )}
-              aria-hidden={i !== current}
-            >
-              <Badge className="mb-6 border-amarillo-500/30 bg-amarillo-500/10 px-3 py-1 text-sm text-amarillo-200">
-                {slide.eyebrow}
-              </Badge>
-              <h1 className="font-display font-bold text-4xl leading-[1.1] tracking-tight text-balance text-white sm:text-5xl">
-                {slide.title}
-              </h1>
-              <p className="mt-4 text-lg leading-relaxed text-primary-200 sm:text-xl">
-                {slide.subtitle}
-              </p>
+      {/* contenido: los 3 slides van apilados en la MISMA celda de un grid
+          (col-start-1 row-start-1). Asi el contenedor toma la altura del slide
+          mas alto y NO cambia de tamano al pasar de slide (evita el salto
+          vertical en responsive). Cada slide fluye normal dentro de su capa, por
+          lo que el texto nunca se solapa con los beneficios ni la tarjeta.
+          Anclado arriba (items-start del section). */}
+      <div
+        className="relative z-10 mx-auto grid w-full max-w-7xl px-4 pt-24 pb-24 sm:px-6 lg:px-8"
+        aria-live="polite"
+      >
+        {slides.map((slide, i) => (
+          <div
+            key={slide.eyebrow}
+            className={cn(
+              "col-start-1 row-start-1 transition-all duration-500 ease-out",
+              i === current
+                ? "translate-y-0 opacity-100"
+                : "pointer-events-none translate-y-2 opacity-0",
+            )}
+            // inert saca de foco/lectura las capas ocultas (no se puede tabular a
+            // un boton invisible de otro slide)
+            inert={i !== current}
+          >
+            {/* texto: badge + titulo + subtitulo */}
+            <div className="max-w-2xl">
+              <CopyContenido slide={slide} />
             </div>
-          ))}
-        </div>
 
-        {/* fila de beneficios del programa: en flujo normal y solo del slide
-            actual, para no reservar altura ni afectar a los otros slides */}
-        {slides[current].benefits && (
-          <ul className="mt-5 flex max-w-3xl flex-wrap gap-x-6 gap-y-4">
-            {slides[current].benefits!.map((b) => (
-              <li
-                key={b.tipo}
-                className="flex w-[116px] flex-col items-center gap-2 text-center"
+            {/* fila de beneficios del programa (solo el slide que la tenga) */}
+            {slide.benefits && (
+              <ul className="mt-5 flex max-w-3xl flex-wrap gap-x-6 gap-y-4">
+                {slide.benefits.map((b) => (
+                  <li
+                    key={b.tipo}
+                    className="flex w-[116px] flex-col items-center gap-2 text-center"
+                  >
+                    <span className="flex size-16 shrink-0 items-center justify-center rounded-full border border-amarillo-400/70 text-amarillo-400">
+                      <IconoBeneficio tipo={b.tipo} className="size-8" />
+                    </span>
+                    <span className="text-[12.5px] leading-tight text-white/90">
+                      {b.label}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {/* tarjeta de fechas clave (solo el slide que la tenga) */}
+            {slide.dateCard && (
+              <div className="mt-6 flex w-fit max-w-xl items-center gap-5 rounded-2xl border border-white/15 bg-white/[0.05] px-7 py-6 pr-10">
+                <span className="flex size-[68px] shrink-0 items-center justify-center rounded-full border border-amarillo-400/70 text-amarillo-400">
+                  <IconoCalendario className="size-9" />
+                </span>
+                <div className="min-w-0">
+                  <p className="font-display text-xl font-bold text-amarillo-300">
+                    {slide.dateCard.titulo}
+                  </p>
+                  <p className="text-base text-primary-100">
+                    {slide.dateCard.label}
+                  </p>
+                  <p className="text-lg font-bold text-amarillo-300">
+                    {slide.dateCard.fecha}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* CTA principal del slide + secundario fijo. Pause-on-hover/focus
+                aqui. w-fit para que la zona de hover solo abarque los botones */}
+            <div
+              className="relative mt-6 flex w-fit flex-wrap gap-4"
+              onMouseEnter={handleZoneMouseEnter}
+              onMouseLeave={handleZoneMouseLeave}
+              onFocus={handleZoneFocus}
+              onBlur={handleZoneBlur}
+            >
+              <Button asChild size="lg" variant="cta">
+                <Link href={slide.cta.href}>
+                  {slide.cta.label}
+                  <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="border-white/30 bg-white/5 text-white hover:bg-white/10 hover:text-white"
               >
-                <span className="flex size-16 shrink-0 items-center justify-center rounded-full border border-amarillo-400/70 text-amarillo-400">
-                  <IconoBeneficio tipo={b.tipo} className="size-8" />
-                </span>
-                <span className="text-[12.5px] leading-tight text-white/90">
-                  {b.label}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {/* tarjeta de fechas clave (solo el slide que la tenga) */}
-        {slides[current].dateCard && (
-          <div className="mt-6 flex w-fit max-w-xl items-center gap-5 rounded-2xl border border-white/15 bg-white/[0.05] px-7 py-6 pr-10">
-            <span className="flex size-[68px] shrink-0 items-center justify-center rounded-full border border-amarillo-400/70 text-amarillo-400">
-              <IconoCalendario className="size-9" />
-            </span>
-            <div className="min-w-0">
-              <p className="font-display text-xl font-bold text-amarillo-300">
-                {slides[current].dateCard!.titulo}
-              </p>
-              <p className="text-base text-primary-100">
-                {slides[current].dateCard!.label}
-              </p>
-              <p className="text-lg font-bold text-amarillo-300">
-                {slides[current].dateCard!.fecha}
-              </p>
+                <Link href="/convocatorias">Ver convocatorias</Link>
+              </Button>
             </div>
           </div>
-        )}
-
-        {/* CTA principal propio de cada slide + secundario fijo. Pause-on-hover/
-            focus aqui. w-fit para que la zona de hover solo abarque los botones
-            reales y no todo el ancho del padre (que sino dispara pausa "a la
-            misma altura") */}
-        <div
-          className="relative mt-6 flex w-fit flex-wrap gap-4"
-          onMouseEnter={handleZoneMouseEnter}
-          onMouseLeave={handleZoneMouseLeave}
-          onFocus={handleZoneFocus}
-          onBlur={handleZoneBlur}
-        >
-          <Button asChild size="lg" variant="cta">
-            <Link href={slides[current].cta.href}>
-              {slides[current].cta.label}
-              <ArrowRight className="size-4" />
-            </Link>
-          </Button>
-          <Button
-            asChild
-            variant="outline"
-            size="lg"
-            className="border-white/30 bg-white/5 text-white hover:bg-white/10 hover:text-white"
-          >
-            <Link href="/convocatorias">Ver convocatorias</Link>
-          </Button>
-        </div>
+        ))}
       </div>
 
       {/* controles del carrusel. El contenedor exterior NO tiene handler porque

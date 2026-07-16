@@ -6,7 +6,6 @@ import type { PublicHistoriaExitoItem } from "@superstars/shared";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CardSkeleton } from "@/components/shared/loading-skeleton";
-import { SectionDivider } from "@/components/public/section-divider";
 import { publicQueries } from "@/lib/api/query-keys";
 
 // Card individual (visual igual al diseño actual de la landing)
@@ -114,22 +113,18 @@ function HistoriasGrid({ historias }: { historias: PublicHistoriaExitoItem[] }) 
 export function HistoriasExitoSection() {
   const { data, isLoading } = useQuery(publicQueries.historiasExito());
 
-  // mientras carga, mostrar skeleton (manteniendo la altura visual). El salto de
-  // seccion va dentro del componente para que aparezca/desaparezca junto con la
-  // seccion (si no hay historias, no queda un cohete huerfano en la pagina)
+  // mientras carga, mostrar skeleton (manteniendo la altura visual). El separador
+  // de seccion ahora va ANTES de la seccion de cifras (en page.tsx), no aqui.
   if (isLoading) {
     return (
-      <>
-        <SectionDivider />
-        <section className="py-20 lg:py-28">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <SectionHeader />
-            <div className="mt-12">
-              <CardSkeleton count={3} />
-            </div>
+      <section className="py-12 lg:py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <SectionHeader />
+          <div className="mt-12">
+            <CardSkeleton count={3} />
           </div>
-        </section>
-      </>
+        </div>
+      </section>
     );
   }
 
@@ -139,17 +134,14 @@ export function HistoriasExitoSection() {
   }
 
   return (
-    <>
-      <SectionDivider />
-      <section className="py-20 lg:py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <SectionHeader />
-          <div className="mt-12">
-            <HistoriasGrid historias={data} />
-          </div>
+    <section className="py-12 lg:py-16">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <SectionHeader />
+        <div className="mt-12">
+          <HistoriasGrid historias={data} />
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   );
 }
 
@@ -160,7 +152,7 @@ function SectionHeader() {
       <p className="text-sm font-semibold tracking-wider text-purple-600 uppercase">
         Casos de éxito
       </p>
-      <h2 className="mt-2 font-display text-3xl leading-[1.3] tracking-wide text-primary-800 uppercase sm:text-4xl">
+      <h2 className="mt-2 font-display text-3xl leading-[1.3] tracking-wide text-primary-600 uppercase sm:text-4xl">
         Historias que inspiran
       </h2>
       <p className="mt-4 text-lg text-secondary-600">

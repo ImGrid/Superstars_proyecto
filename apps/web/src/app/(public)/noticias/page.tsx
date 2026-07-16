@@ -16,6 +16,7 @@ import {
   PaginationEllipsis,
 } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
+import { ContactBanner } from "@/components/public/contact-banner";
 
 const ITEMS_PER_PAGE = 12;
 
@@ -118,6 +119,8 @@ export default function NoticiasPage() {
           )}
         </div>
       </section>
+
+      <ContactBanner />
     </>
   );
 }
