@@ -69,10 +69,10 @@ export function PublicNavbar() {
         {/* logo: cohete oficial + wordmark */}
         <Link href="/" className="flex items-center gap-2.5">
           <Image
-            src="/images/cohete-logo.png"
+            src="/images/cohete-hd.png"
             alt=""
-            width={549}
-            height={544}
+            width={900}
+            height={913}
             className="size-8 shrink-0"
             priority
           />
@@ -144,10 +144,10 @@ export function PublicNavbar() {
                     onClick={() => setOpen(false)}
                   >
                     <Image
-                      src="/images/cohete-logo.png"
+                      src="/images/cohete-hd.png"
                       alt=""
-                      width={549}
-                      height={544}
+                      width={900}
+                      height={913}
                       className="size-8 shrink-0"
                     />
                     <span className="font-heading text-lg font-bold tracking-tight text-primary-700">

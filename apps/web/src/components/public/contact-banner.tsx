@@ -4,7 +4,7 @@ import { Mail, MailQuestion } from "lucide-react";
 // Banner de contacto del material del cliente (Contactanos-HD.png). Reemplaza al
 // antiguo CTA. El naranja es un capricho del cliente: esta hardcodeado SOLO aqui,
 // no pertenece a la paleta oficial y no debe usarse en ningun otro lugar.
-const CONTACT_EMAIL = "superimpact@ecv-impactobo.com";
+const CONTACT_EMAIL = "bolivia@fundes.org";
 const NARANJA = "#FE5901";
 const PEACH = "#FEE8DB";
 

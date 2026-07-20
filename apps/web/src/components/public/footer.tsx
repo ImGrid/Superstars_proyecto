@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Mail, MapPin } from "lucide-react";
-import { SponsorsStrip } from "@/components/public/sponsors-strip";
+import { EsloganStrip } from "@/components/public/eslogan-strip";
 
 const quickLinks = [
   { label: "Inicio", href: "/" },
@@ -20,8 +20,8 @@ const legalLinks = [
 export function PublicFooter() {
   return (
     <footer className="bg-primary-800 text-primary-100">
-      {/* sponsors - banda navy con logos reales */}
-      <SponsorsStrip variant="footer" />
+      {/* eslogan del programa - banda navy con el cohete de la marca */}
+      <EsloganStrip />
 
       {/* contenido principal */}
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -91,10 +91,10 @@ export function PublicFooter() {
               <li className="flex items-start gap-2 text-sm text-primary-300">
                 <Mail className="mt-0.5 size-4 shrink-0 text-info-400" />
                 <a
-                  href="mailto:superimpact@ecv-impactobo.com"
+                  href="mailto:bolivia@fundes.org"
                   className="transition-colors hover:text-amarillo-400"
                 >
-                  superimpact@ecv-impactobo.com
+                  bolivia@fundes.org
                 </a>
               </li>
             </ul>

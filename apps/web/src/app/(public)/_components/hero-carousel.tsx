@@ -23,8 +23,8 @@ import { IconoBeneficio } from "./iconos-beneficios";
 import { IconoCalendario } from "./icono-calendario";
 import { cn } from "@/lib/utils";
 
-// duracion de cada slide en ms (NN/G recomienda 5-7s para headlines cortos)
-const SLIDE_DURATION = 7000;
+// duracion de cada slide en ms (el cliente pidio 12s: el cambio era muy rapido para leer)
+const SLIDE_DURATION = 12000;
 
 // suscripcion a prefers-reduced-motion via useSyncExternalStore
 const reducedMotionQuery = "(prefers-reduced-motion: reduce)";
@@ -44,6 +44,21 @@ function getReducedMotionServerSnapshot() {
   return false;
 }
 
+// recolorea un PNG de linea (vienen en naranja) al color de fondo del span via
+// mask CSS: asi los iconos del banner del cliente quedan en amarillo de la marca
+function maskStyle(url: string): CSSProperties {
+  return {
+    maskImage: `url(${url})`,
+    WebkitMaskImage: `url(${url})`,
+    maskRepeat: "no-repeat",
+    WebkitMaskRepeat: "no-repeat",
+    maskPosition: "center",
+    WebkitMaskPosition: "center",
+    maskSize: "contain",
+    WebkitMaskSize: "contain",
+  };
+}
+
 interface Slide {
   image: string;
   alt: string;
@@ -59,6 +74,17 @@ interface Slide {
   benefits?: { tipo: string; label: ReactNode }[];
   // tarjeta de fechas clave (solo el slide 2 la tiene)
   dateCard?: { titulo: string; label: string; fecha: string };
+  // tarjeta de impacto del ganador (solo el slide de casos de exito la tiene).
+  // Replica fiel del banner del cliente: logo + badge + descripcion + impactos
+  impactCard?: {
+    logo: string;
+    logoAlt: string;
+    badge: string;
+    description: string;
+    impactIcon: string;
+    impactLabel: string;
+    items: { icon: string; num: string; label: string }[];
+  };
   // llamada a la accion propia de cada slide
   cta: { label: string; href: string };
 }
@@ -138,8 +164,34 @@ const slides: Slide[] = [
         <span className="text-amarillo-400">impactos</span> que transforman
       </>
     ),
-    subtitle:
-      "Conoce a las empresas ganadoras de ediciones anteriores y descubre el impacto positivo que han generado en Bolivia.",
+    // sin subtitulo: la descripcion completa vive en la tarjeta de impacto
+    subtitle: "",
+    impactCard: {
+      logo: "/images/impacto/logo-apicola-tocana.png",
+      logoAlt: "Logo de Apícola Tocaña, empresa ganadora 2025",
+      badge: "Ganador 2025",
+      description:
+        "Apícola Tocaña fortalece la apicultura sostenible en los Yungas mediante el mejoramiento genético de abejas y la capacitación de productores, incrementando la productividad y promoviendo un desarrollo apícola más resiliente.",
+      impactIcon: "/images/impacto/icono-abeja-panal.png",
+      impactLabel: "Impacto generado:",
+      items: [
+        {
+          icon: "/images/impacto/icono-apicultor.png",
+          num: "20",
+          label: "apicultores beneficiados",
+        },
+        {
+          icon: "/images/impacto/icono-reina.png",
+          num: "40",
+          label: "reinas genéticamente mejoradas producidas",
+        },
+        {
+          icon: "/images/impacto/icono-nucleo.png",
+          num: "30",
+          label: "núcleos de fecundación implementados",
+        },
+      ],
+    },
     cta: { label: "Resultados e impactos", href: "/resultados" },
   },
 ];
@@ -157,9 +209,13 @@ function CopyContenido({ slide }: { slide: Slide }) {
       <h1 className="font-display font-bold text-4xl leading-[1.1] tracking-tight text-balance text-white sm:text-5xl">
         {slide.title}
       </h1>
-      <p className="mt-4 text-lg leading-relaxed text-primary-200 sm:text-xl">
-        {slide.subtitle}
-      </p>
+      {/* algunos slides omiten el subtitulo (ej. el de casos de exito, cuya
+          descripcion vive completa en la tarjeta de impacto) */}
+      {slide.subtitle && (
+        <p className="mt-4 text-lg leading-relaxed text-primary-200 sm:text-xl">
+          {slide.subtitle}
+        </p>
+      )}
     </>
   );
 }
@@ -373,6 +429,67 @@ export function HeroCarousel() {
                   <p className="text-lg font-bold text-amarillo-300">
                     {slide.dateCard.fecha}
                   </p>
+                </div>
+              </div>
+            )}
+
+            {/* tarjeta de impacto del ganador (solo el slide que la tenga).
+                Replica fiel del banner del cliente: logo | badge + descripcion +
+                impactos. Los iconos vienen en naranja: mask CSS los pone amarillos */}
+            {slide.impactCard && (
+              <div className="mt-6 flex w-full max-w-4xl flex-col gap-5 rounded-2xl border border-white/15 bg-white/[0.05] p-5 sm:flex-row sm:items-stretch sm:gap-6 sm:p-6">
+                {/* logo del ganador en su tarjeta blanca. En escritorio llena la
+                    altura de la tarjeta (casi de lado a lado), como en el banner */}
+                <div className="flex shrink-0 items-center justify-center">
+                  <Image
+                    src={slide.impactCard.logo}
+                    alt={slide.impactCard.logoAlt}
+                    width={480}
+                    height={518}
+                    className="w-28 object-contain sm:h-full sm:max-h-64 sm:w-auto"
+                  />
+                </div>
+
+                {/* columna derecha: badge + descripcion + impacto generado */}
+                <div className="min-w-0 flex-1">
+                  <Badge className="border-amarillo-500/30 bg-amarillo-500/10 px-3 py-1 text-sm text-amarillo-200">
+                    {slide.impactCard.badge}
+                  </Badge>
+                  <p className="mt-3 max-w-[32rem] text-sm leading-relaxed text-primary-100 sm:text-[15px]">
+                    {slide.impactCard.description}
+                  </p>
+
+                  <div className="mt-4 flex items-center gap-4">
+                    {/* icono grande de abeja + panal (decorativo). Casi tan alto
+                        como el bloque de impacto, como en el banner del cliente */}
+                    <span
+                      aria-hidden="true"
+                      className="hidden size-28 shrink-0 bg-amarillo-400 sm:block"
+                      style={maskStyle(slide.impactCard.impactIcon)}
+                    />
+                    <div className="min-w-0">
+                      <p className="mb-2 font-display text-base font-bold text-amarillo-300">
+                        {slide.impactCard.impactLabel}
+                      </p>
+                      <ul className="space-y-1.5">
+                        {slide.impactCard.items.map((it) => (
+                          <li key={it.label} className="flex items-start gap-3">
+                            <span
+                              aria-hidden="true"
+                              className="mt-0.5 block size-5 shrink-0 bg-amarillo-400"
+                              style={maskStyle(it.icon)}
+                            />
+                            <p className="text-sm leading-snug text-primary-100">
+                              <span className="font-bold text-amarillo-300">
+                                {it.num}
+                              </span>{" "}
+                              {it.label}
+                            </p>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

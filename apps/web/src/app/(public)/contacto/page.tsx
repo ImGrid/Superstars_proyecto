@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 // correo destino del formulario
-const CONTACT_EMAIL = "superimpact@ecv-impactobo.com";
+const CONTACT_EMAIL = "bolivia@fundes.org";
 
 // schema local (no se comparte con backend porque no hay endpoint)
 const contactoSchema = z.object({

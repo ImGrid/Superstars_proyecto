@@ -37,10 +37,10 @@ export function SectionDivider({
         />
         <EstrellaSuperStar tam={12} className="shrink-0" style={{ color: DORADO }} />
         <Image
-          src="/images/cohete-superstar.webp"
+          src="/images/cohete-hd.png"
           alt=""
-          width={360}
-          height={357}
+          width={900}
+          height={913}
           className="h-auto w-10 shrink-0 sm:w-11"
         />
         <EstrellaSuperStar tam={12} className="shrink-0" style={{ color: DORADO }} />

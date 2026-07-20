@@ -1,7 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
-import { ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { ConvocatoriasActivasSection } from "./_components/convocatorias-activas-section";
 import { HeroCarousel } from "./_components/hero-carousel";
 import { HistoriasExitoSection } from "./_components/historias-exito-section";
@@ -9,7 +6,7 @@ import { ResultadosCifrasSection } from "./_components/resultados-cifras-section
 import { PasosProgramaSection } from "./_components/pasos-programa-section";
 import { PostulateSection } from "./_components/postulate-section";
 import { DocumentosSection } from "./_components/documentos-section";
-import { EsloganStrip } from "@/components/public/eslogan-strip";
+import { SponsorsStrip } from "@/components/public/sponsors-strip";
 import { SectionDivider } from "@/components/public/section-divider";
 import { ContactBanner } from "@/components/public/contact-banner";
 
@@ -19,8 +16,8 @@ export default function HomePage() {
       {/* ===== HERO CARRUSEL ===== */}
       <HeroCarousel />
 
-      {/* ===== FRANJA DEL ESLOGAN (los patrocinadores siguen en el footer) ===== */}
-      <EsloganStrip />
+      {/* ===== FRANJA DE PATROCINADORES (el eslogan pasa al footer) ===== */}
+      <SponsorsStrip variant="landing" />
 
       {/* ===== NOSOTROS ===== */}
       <section id="nosotros" className="py-12 lg:py-16">
@@ -51,16 +48,6 @@ export default function HomePage() {
                 negocio, impulsando una economía más sostenible, inclusiva y
                 competitiva.
               </p>
-              <Button
-                asChild
-                variant="link"
-                className="mt-4 px-0 text-azul-600 hover:text-azul-700"
-              >
-                <Link href="/#como-funciona">
-                  Conoce cómo funciona
-                  <ChevronRight className="size-4" />
-                </Link>
-              </Button>
             </div>
           </div>
         </div>
