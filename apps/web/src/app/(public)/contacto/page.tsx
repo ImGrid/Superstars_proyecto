@@ -113,7 +113,7 @@ export default function ContactoPage() {
                       <p className="text-xs font-semibold uppercase tracking-wider text-secondary-500">
                         Ubicación
                       </p>
-                      <p className="text-sm text-secondary-800">La Paz, Bolivia</p>
+                      <p className="text-sm text-secondary-800">Bolivia</p>
                     </div>
                   </li>
 
