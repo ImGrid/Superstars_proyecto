@@ -9,8 +9,8 @@ import {
 import type { FaqResponse } from "@superstars/shared";
 
 // Isla de cliente: solo el acordeon necesita interactividad.
-// forceMount deja las respuestas en el HTML aunque el item este cerrado,
-// para que los buscadores las lean. Radix las oculta con data-state=closed.
+// Sin forceMount: con esa prop Radix nunca aplica hidden y el panel cerrado
+// queda visible para siempre. El SEO se cubre con el JSON-LD FAQPage de la pagina.
 export function GrupoFaq({
   label,
   items,
@@ -30,10 +30,7 @@ export function GrupoFaq({
             <AccordionTrigger className="text-base font-medium text-secondary-900 hover:no-underline hover:text-primary-700">
               {faq.pregunta}
             </AccordionTrigger>
-            <AccordionContent
-              forceMount
-              className="leading-relaxed text-secondary-600"
-            >
+            <AccordionContent className="leading-relaxed text-secondary-600">
               {faq.respuesta}
             </AccordionContent>
           </AccordionItem>

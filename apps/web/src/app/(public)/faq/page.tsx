@@ -35,8 +35,32 @@ export default async function FaqPage() {
 
   const hayPreguntas = grupos.length > 0;
 
+  // JSON-LD FAQPage: es lo que leen los buscadores para las preguntas frecuentes.
+  // Reemplaza al viejo forceMount del acordeon, que dejaba las respuestas siempre abiertas.
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.pregunta,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.respuesta,
+      },
+    })),
+  };
+
   return (
     <>
+      {hayPreguntas && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+          }}
+        />
+      )}
+
       {/* hero */}
       <section className="bg-primary-800 py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
