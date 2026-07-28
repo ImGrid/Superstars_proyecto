@@ -57,10 +57,14 @@ export function EmpresaCombobox({ value, onChange, placeholder, disabled }: Empr
 
   function handleInputChange(text: string) {
     // al editar el texto, se desvincula del id (debe re-seleccionar para vincular de nuevo)
+    // se compara con trim: un texto de solo espacios equivale a vacio, si no el
+    // schema lo rechaza y el formulario se queda mudo
     onChange({
       empresaId: null,
-      empresaNombre: text.length > 0 ? text : null,
+      empresaNombre: text.trim().length > 0 ? text : null,
     });
+    // al escribir se abre la lista para filtrar
+    setShowList(true);
   }
 
   function handleSelectEmpresa(emp: { id: number; razonSocial: string }) {
@@ -79,7 +83,15 @@ export function EmpresaCombobox({ value, onChange, placeholder, disabled }: Empr
           value={input}
           onChange={(e) => handleInputChange(e.target.value)}
           onFocus={() => setShowList(true)}
-          placeholder={placeholder ?? "Buscar empresa o escribir manualmente"}
+          // Escape cierra la lista sin cerrar el dialogo entero
+          onKeyDown={(e) => {
+            if (e.key === "Escape" && showList) {
+              e.preventDefault();
+              e.stopPropagation();
+              setShowList(false);
+            }
+          }}
+          placeholder={placeholder ?? "Escribe el nombre de la empresa"}
           disabled={disabled}
           className="pr-24"
         />
@@ -90,7 +102,7 @@ export function EmpresaCombobox({ value, onChange, placeholder, disabled }: Empr
               className="border-success-200 bg-success-50 px-1.5 py-0 text-[10px] font-medium text-success-700"
             >
               <Building2 className="mr-0.5 size-2.5" />
-              Vinculada
+              Registrada
             </Badge>
           )}
           {input && !disabled && (
@@ -106,8 +118,11 @@ export function EmpresaCombobox({ value, onChange, placeholder, disabled }: Empr
         </div>
       </div>
 
+      {/* la lista se despliega hacia ARRIBA: empresa es el ultimo campo del
+          formulario y hacia abajo tapaba los botones Cancelar / Crear historia,
+          que se quedaban sin poder recibir el clic */}
       {showList && sugerencias.length > 0 && (
-        <div className="absolute z-50 mt-1 w-full rounded-md border border-secondary-200 bg-white shadow-md">
+        <div className="absolute bottom-full z-50 mb-1 w-full rounded-md border border-secondary-200 bg-white shadow-md">
           <div className="max-h-60 overflow-auto py-1">
             {sugerencias.map((emp) => (
               <button
@@ -126,10 +141,10 @@ export function EmpresaCombobox({ value, onChange, placeholder, disabled }: Empr
 
       <p className="mt-1.5 text-xs text-secondary-500">
         {value.empresaId !== null
-          ? "Vinculada a una empresa del sistema."
+          ? "Esta historia queda conectada con una empresa ya registrada."
           : value.empresaNombre
-            ? "Texto manual (no vinculado a ninguna empresa del sistema)."
-            : "Opcional. Puedes buscar una empresa del sistema o escribir el nombre manualmente."}
+            ? "El nombre se guardará tal como lo escribiste. La empresa no necesita estar registrada."
+            : "Opcional. Puedes elegir una empresa ya registrada o escribir el nombre de cualquier otra."}
       </p>
     </div>
   );

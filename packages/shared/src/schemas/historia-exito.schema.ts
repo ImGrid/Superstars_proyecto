@@ -11,7 +11,7 @@ export const createHistoriaExitoSchema = z.object({
   badge: z
     .string()
     .trim()
-    .min(1)
+    .min(1, 'La etiqueta no puede quedar solo con espacios. Déjala vacía si no la necesitas.')
     .max(50, 'La etiqueta no puede superar los 50 caracteres')
     .nullable()
     .optional(),
@@ -24,7 +24,7 @@ export const createHistoriaExitoSchema = z.object({
   empresaNombre: z
     .string()
     .trim()
-    .min(1)
+    .min(1, 'El nombre de la empresa no puede quedar solo con espacios. Déjalo vacío si no la necesitas.')
     .max(200, 'El nombre de la empresa no puede superar los 200 caracteres')
     .nullable()
     .optional(),
@@ -42,7 +42,7 @@ export const updateHistoriaExitoSchema = z.object({
   badge: z
     .string()
     .trim()
-    .min(1)
+    .min(1, 'La etiqueta no puede quedar solo con espacios. Déjala vacía si no la necesitas.')
     .max(50, 'La etiqueta no puede superar los 50 caracteres')
     .nullable()
     .optional(),
@@ -56,7 +56,7 @@ export const updateHistoriaExitoSchema = z.object({
   empresaNombre: z
     .string()
     .trim()
-    .min(1)
+    .min(1, 'El nombre de la empresa no puede quedar solo con espacios. Déjalo vacío si no la necesitas.')
     .max(200, 'El nombre de la empresa no puede superar los 200 caracteres')
     .nullable()
     .optional(),

@@ -72,7 +72,40 @@ export function HistoriaFormDialog({
   const [imagenFile, setImagenFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  // error de la imagen: va junto al campo, no solo en un toast que se va solo
+  const [imagenError, setImagenError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Reparte los errores que devuelve el backend en cada campo del formulario.
+  // El backend responde { message, errors: [{ path, message }] }; antes solo se
+  // usaba message ("Error de validación"), que no dice cual campo fallo.
+  function aplicarErroresDelServidor(error: any): void {
+    const data = error?.response?.data;
+    const errores = data?.errors;
+    const campos = new Set(["titulo", "badge", "descripcion", "empresaId", "empresaNombre"]);
+
+    let algunoAplicado = false;
+    if (Array.isArray(errores)) {
+      for (const e of errores) {
+        const campo = String(e?.path ?? "").split(".")[0];
+        if (campos.has(campo) && e?.message) {
+          form.setError(campo as keyof FormValues, {
+            type: "server",
+            message: e.message,
+          });
+          algunoAplicado = true;
+        }
+      }
+    }
+
+    if (algunoAplicado) {
+      toast.error("Revisa los campos marcados en rojo.");
+      return;
+    }
+
+    const msg = data?.message ?? "No se pudo guardar la historia.";
+    toast.error(Array.isArray(msg) ? msg[0] : msg);
+  }
 
   // resetear cuando se abre/cierra o cambia la historia
   useEffect(() => {
@@ -96,6 +129,7 @@ export function HistoriaFormDialog({
     }
     // limpiar preview de archivo nuevo al abrir/cerrar
     setImagenFile(null);
+    setImagenError(null);
     setPreviewUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev);
       return null;
@@ -112,9 +146,11 @@ export function HistoriaFormDialog({
   function validateAndSetFile(file: File) {
     const error = validateImageFile(file);
     if (error) {
+      setImagenError(error);
       toast.error(error);
       return;
     }
+    setImagenError(null);
     setImagenFile(file);
     const url = URL.createObjectURL(file);
     setPreviewUrl((prev) => {
@@ -166,10 +202,7 @@ export function HistoriaFormDialog({
       queryClient.invalidateQueries({ queryKey: ["public", "historias-exito"] });
       onOpenChange(false);
     },
-    onError: (error: any) => {
-      const msg = error.response?.data?.message ?? "Error al guardar la historia.";
-      toast.error(Array.isArray(msg) ? msg[0] : msg);
-    },
+    onError: aplicarErroresDelServidor,
   });
 
   // mutacion editar (campos texto + opcionalmente nueva imagen en pasos secuenciales)
@@ -189,19 +222,20 @@ export function HistoriaFormDialog({
       queryClient.invalidateQueries({ queryKey: ["public", "historias-exito"] });
       onOpenChange(false);
     },
-    onError: (error: any) => {
-      const msg = error.response?.data?.message ?? "Error al guardar la historia.";
-      toast.error(Array.isArray(msg) ? msg[0] : msg);
-    },
+    onError: aplicarErroresDelServidor,
   });
 
   const isLoading = createMutation.isPending || updateMutation.isPending;
 
   function onSubmit(values: FormValues) {
     if (!isEditing && !imagenFile) {
+      // el mensaje va tambien junto al campo: el toast se desvanece y el usuario
+      // se queda sin saber que le falta
+      setImagenError("La imagen es obligatoria.");
       toast.error("La imagen es obligatoria.");
       return;
     }
+    setImagenError(null);
     if (isEditing) {
       updateMutation.mutate(values);
     } else {
@@ -215,7 +249,6 @@ export function HistoriaFormDialog({
       ? `${process.env.NEXT_PUBLIC_API_URL}/historias-exito/${historia.id}/imagen`
       : null;
 
-  const showDropZone = !previewUrl && !imagenActualUrl;
   const descripcionActual = form.watch("descripcion") ?? "";
 
   return (
@@ -330,6 +363,9 @@ export function HistoriaFormDialog({
                     if (fileInputRef.current) fileInputRef.current.value = "";
                   }}
                 />
+                {imagenError && (
+                  <p className="mt-2 text-sm text-destructive">{imagenError}</p>
+                )}
               </div>
             </div>
 
@@ -364,13 +400,18 @@ export function HistoriaFormDialog({
                       placeholder="Ejemplo: Manufactura, Tecnología, Medio Ambiente"
                       maxLength={50}
                       value={field.value ?? ""}
+                      // con trim: un texto de solo espacios equivale a vacio, si
+                      // no el schema lo rechaza por un campo que es opcional
                       onChange={(e) =>
-                        field.onChange(e.target.value === "" ? null : e.target.value)
+                        field.onChange(
+                          e.target.value.trim() === "" ? null : e.target.value,
+                        )
                       }
                     />
                   </FormControl>
                   <p className="text-xs text-secondary-500">
-                    Opcional. Aparece como badge en la card.
+                    Opcional. Una o dos palabras que se muestran encima del
+                    título, en la página de inicio.
                   </p>
                   <FormMessage />
                 </FormItem>
@@ -417,6 +458,9 @@ export function HistoriaFormDialog({
                       form.setValue("empresaNombre", v.empresaNombre, { shouldDirty: true });
                     }}
                   />
+                  {/* sin esto, un error en este campo dejaba el boton mudo: no se
+                      enviaba nada y no aparecia ningun mensaje */}
+                  <FormMessage />
                 </FormItem>
               )}
             />
