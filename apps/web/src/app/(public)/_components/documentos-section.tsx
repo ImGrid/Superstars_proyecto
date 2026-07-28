@@ -1,11 +1,29 @@
 import Image from "next/image";
-import Link from "next/link";
-import { Download } from "lucide-react";
+import {
+  DocumentoDescarga,
+  type OpcionDescarga,
+} from "./documento-descarga";
 
 // Tarjetas de documentos del material del cliente (Doc1-HD .. Doc6-HD). Cada una
 // tiene su color de acento, hardcodeado a proposito: son los tonos exactos del
-// material (no de la paleta oficial). Los botones NO descargan: redirigen a
-// registro para incentivar la creacion de cuenta.
+// material (no de la paleta oficial). Los PDF son publicos y se descargan sin
+// cuenta: viven en public/documentos y los sirve Next como archivo estatico.
+// Las tarjetas con 2 opciones abren un dialogo para elegir la categoria.
+// las 2 categorias de la convocatoria, para las tarjetas que tienen una version
+// de cada una
+const POR_CATEGORIA = (archivo1: string, archivo2: string): OpcionDescarga[] => [
+  {
+    etiqueta: "Categoría 1",
+    detalle: "Empresas de Triple Impacto",
+    archivo: archivo1,
+  },
+  {
+    etiqueta: "Categoría 2",
+    detalle: "Agricultura Sostenible",
+    archivo: archivo2,
+  },
+];
+
 const DOCUMENTOS = [
   {
     numero: 1,
@@ -15,6 +33,13 @@ const DOCUMENTOS = [
       "Consulta las bases del concurso y conoce todas las condiciones para participar.",
     acento: "#016AE5",
     borde: "#BBD6F7",
+    opciones: [
+      {
+        etiqueta: "Documento de bases",
+        detalle: "SuperStar 2026",
+        archivo: "/documentos/Bases-Superstar2026.pdf",
+      },
+    ],
   },
   {
     numero: 2,
@@ -24,6 +49,13 @@ const DOCUMENTOS = [
       "Revisa los requisitos que deben cumplir los participantes para ser elegibles.",
     acento: "#18761B",
     borde: "#C1E0C2",
+    opciones: [
+      {
+        etiqueta: "Criterios de elegibilidad",
+        detalle: "SuperStar 2026",
+        archivo: "/documentos/Criterios-Elegibilidad-2026.pdf",
+      },
+    ],
   },
   {
     numero: 3,
@@ -33,6 +65,13 @@ const DOCUMENTOS = [
       "Conoce los aspectos que serán evaluados y cómo se seleccionarán las propuestas ganadoras.",
     acento: "#3E1887",
     borde: "#CDBBE7",
+    opciones: [
+      {
+        etiqueta: "Criterios de evaluación",
+        detalle: "SuperStar 2026",
+        archivo: "/documentos/Criterios-Evaluacion-2026.pdf",
+      },
+    ],
   },
   {
     numero: 4,
@@ -42,6 +81,10 @@ const DOCUMENTOS = [
       "Descarga el formulario oficial para presentar tu propuesta.",
     acento: "#E85601",
     borde: "#F8CDB0",
+    opciones: POR_CATEGORIA(
+      "/documentos/Formulario-Postulacion-Categoria1-2026.pdf",
+      "/documentos/Formulario-Postulacion-Categoria2-2026.pdf",
+    ),
   },
   {
     numero: 5,
@@ -51,6 +94,8 @@ const DOCUMENTOS = [
       "Descarga el formato oficial para elaborar el presupuesto de tu propuesta.",
     acento: "#B9131F",
     borde: "#EDBCC0",
+    // el cliente todavia no envio este PDF: por ahora el boton lleva al login
+    opciones: [] as OpcionDescarga[],
   },
   {
     numero: 6,
@@ -60,6 +105,13 @@ const DOCUMENTOS = [
       "Aclara tus dudas sobre el proceso de postulación, requisitos y más.",
     acento: "#058793",
     borde: "#B4DBDF",
+    opciones: [
+      {
+        etiqueta: "Preguntas frecuentes",
+        detalle: "SuperStar 2026",
+        archivo: "/documentos/Preguntas-Frecuentes-Superstar2026.pdf",
+      },
+    ],
   },
 ];
 
@@ -107,26 +159,29 @@ function DocumentoCard({ doc }: { doc: Documento }) {
         {doc.descripcion}
       </p>
 
-      {/* boton: redirige a registro (no descarga), mt-auto lo fija al fondo */}
-      <Link
-        href="/auth/registro"
-        className="mt-auto flex w-full items-center justify-center gap-1.5 rounded-lg py-2.5 font-display text-sm font-bold text-white transition-opacity hover:opacity-90"
-        style={{ backgroundColor: doc.acento }}
-      >
-        <Download className="size-4" />
-        Descargar
-      </Link>
+      {/* descarga libre del PDF. Con 1 opcion baja directo; con 2 (una por
+          categoria) abre un dialogo para elegir. mt-auto lo fija al fondo */}
+      <DocumentoDescarga
+        opciones={doc.opciones}
+        acento={doc.acento}
+        titulo={doc.titulo.replace("\n", " ")}
+      />
     </div>
   );
 }
 
 // Seccion de documentos del concurso, replica del material del cliente. Va debajo
-// de "Como funciona". Los botones incentivan la creacion de cuenta.
+// de "Como funciona". Las descargas son libres: no piden cuenta.
 export function DocumentosSection() {
   return (
     <section id="documentos" className="py-12 lg:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <h2 className="text-center font-display text-3xl leading-[1.3] tracking-wide text-primary-600 uppercase sm:text-4xl">
+        {/* etiqueta de la edicion vigente, pedida por el cliente. Sin uppercase
+            para respetar la caja de "SuperStar" */}
+        <p className="text-center text-sm font-semibold tracking-wider text-purple-600">
+          Convocatoria SuperStar 2026
+        </p>
+        <h2 className="mt-2 text-center font-display text-3xl leading-[1.3] tracking-wide text-primary-600 uppercase sm:text-4xl">
           Documentos de postulación
         </h2>
         <div className="mx-auto mt-12 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
