@@ -91,12 +91,15 @@ interface Slide {
 
 const slides: Slide[] = [
   {
-    image: "/images/banner-agricultura.webp",
-    alt: "Productora boliviana sonriendo junto a sacos de papa recien cosechada en el campo",
-    // la cara queda en la parte alta de la foto: subimos el anclaje para no
-    // cortarla. Movil centrado; desktop pegado arriba a la derecha.
-    objectPosition: "object-center md:object-[100%_1%]",
-    overlay: [0.92, 0.72, 0.45],
+    image: "/images/banner-limpieza.webp",
+    alt: "Dos trabajadoras bolivianas de una empresa de limpieza saludando a la cámara",
+    // las dos protagonistas ocupan la mitad derecha; en movil solo entra un 26%
+    // del ancho, asi que anclamos en ellas para no cortarlas. En escritorio la
+    // foto tiene la misma proporcion que la pantalla y se ve completa.
+    objectPosition: "object-[64%_center] md:object-right",
+    // la pared de la izquierda es casi blanca (luminancia 197, la mas clara del
+    // set): el overlay va mas fuerte que en las otras para sostener el texto
+    overlay: [0.95, 0.78, 0.5],
     eyebrow: "Beneficios del programa",
     title: (
       <>
@@ -128,14 +131,14 @@ const slides: Slide[] = [
     cta: { label: "Postularme ahora", href: "/auth/registro" },
   },
   {
-    // la foto original tiene a la protagonista a la izquierda, justo donde va el
-    // texto. Se guarda espejada para que quede a la derecha, como las otras dos
-    image: "/images/banner-laboratorio.webp",
-    alt: "Quimica boliviana sonriendo en el laboratorio de su empresa, rodeada de equipos de destilacion",
-    // su cara esta arriba a la derecha: en movil subimos el anclaje para no
-    // cortarla; en desktop object-right ya la muestra bien.
-    objectPosition: "object-[58%_5%] md:object-right",
-    overlay: [0.92, 0.7, 0.4],
+    image: "/images/banner-reciclaje.webp",
+    alt: "Trabajadora boliviana empacando láminas recicladas en la planta de su empresa",
+    // la protagonista esta en el centro-izquierda: anclamos a la derecha para
+    // alejarla del bloque de texto. En movil object-center ya la encuadra bien.
+    objectPosition: "object-center md:object-[70%_center]",
+    // escena industrial oscura de por si (luminancia 82/107/62): con el overlay
+    // de las otras quedaria una mancha plana, por eso va mas suave
+    overlay: [0.86, 0.62, 0.3],
     eyebrow: "Convocatoria abierta",
     title: (
       <>
@@ -154,9 +157,13 @@ const slides: Slide[] = [
     cta: { label: "Postular ahora", href: "/auth/registro" },
   },
   {
-    image: "/images/banner-energia.webp",
-    alt: "Pareja aymara sosteniendo paneles solares y un equipo de energia limpia frente a su casa",
-    overlay: [0.94, 0.76, 0.5],
+    image: "/images/banner-laboratorio.webp",
+    alt: "Química boliviana sonriendo en el laboratorio de su empresa, rodeada de equipos de destilación",
+    // la foto es mas alta que las otras (1537x1023), asi que sobra recorte
+    // vertical: bajamos el anclaje para centrar la escena y en movil lo corremos
+    // a la derecha porque su cara queda al filo del recorte
+    objectPosition: "object-[58%_35%] md:object-[right_40%]",
+    overlay: [0.94, 0.76, 0.48],
     eyebrow: "Casos de éxito",
     title: (
       <>
