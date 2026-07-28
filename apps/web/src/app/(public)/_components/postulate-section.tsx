@@ -101,7 +101,12 @@ export function PostulateSection() {
   return (
     <section id="postulate" className="py-12 lg:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <h2 className="text-center font-display text-3xl leading-[1.3] tracking-wide text-primary-600 uppercase sm:text-4xl">
+        {/* etiqueta de la edicion vigente, pedida por el cliente. Sin uppercase
+            para respetar la caja de "SuperStar" */}
+        <p className="text-center text-sm font-semibold tracking-wider text-purple-600">
+          Convocatoria SuperStar 2026
+        </p>
+        <h2 className="mt-2 text-center font-display text-3xl leading-[1.3] tracking-wide text-primary-600 uppercase sm:text-4xl">
           ¡Postúlate ahora!
         </h2>
         <div className="mx-auto mt-14 grid max-w-2xl gap-8 sm:grid-cols-2">
