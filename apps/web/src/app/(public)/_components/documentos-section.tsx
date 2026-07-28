@@ -94,8 +94,14 @@ const DOCUMENTOS = [
       "Descarga el formato oficial para elaborar el presupuesto de tu propuesta.",
     acento: "#B9131F",
     borde: "#EDBCC0",
-    // el cliente todavia no envio este PDF: por ahora el boton lleva al login
-    opciones: [] as OpcionDescarga[],
+    // unico que no es PDF: es la planilla que el postulante llena
+    opciones: [
+      {
+        etiqueta: "Formato de presupuesto",
+        detalle: "SuperStar 2026",
+        archivo: "/documentos/Formato-Presupuesto-2026.xlsx",
+      },
+    ],
   },
   {
     numero: 6,
