@@ -17,6 +17,7 @@ import {
   removeMyLogo,
 } from "@/lib/api/empresa.api";
 import { empresaQueries } from "@/lib/api/query-keys";
+import { mensajeErrorSubida } from "@/lib/api/error-archivo";
 import { validateImageFile, IMAGE_INPUT_ACCEPT } from "@/lib/image-validation";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 
@@ -99,10 +100,9 @@ export function EmpresaHero({ empresa }: { empresa: EmpresaResponse }) {
       invalidarEmpresa();
     },
     onError: (error: any) => {
-      const msg =
-        error?.response?.data?.message ??
-        "No se pudo guardar el logo. Intenta de nuevo.";
-      toast.error(Array.isArray(msg) ? msg[0] : msg);
+      toast.error(
+        mensajeErrorSubida(error, "No se pudo guardar el logo. Intenta de nuevo."),
+      );
     },
   });
 

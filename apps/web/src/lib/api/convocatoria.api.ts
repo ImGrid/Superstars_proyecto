@@ -1,4 +1,4 @@
-import { apiClient } from "./client";
+import { apiClient, apiFileClient } from "./client";
 import type {
   PaginatedResponse,
   CreateConvocatoriaDto,
@@ -155,7 +155,7 @@ export function uploadImagenConvocatoria(id: number, file: File) {
   const formData = new FormData();
   formData.append("imagen", file);
 
-  return apiClient
+  return apiFileClient
     .post<ConvocatoriaResponse>(`/convocatorias/${id}/imagen`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     })

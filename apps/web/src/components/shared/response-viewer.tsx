@@ -1,6 +1,7 @@
 "use client";
 
 import { memo } from "react";
+import { toast } from "sonner";
 import { Download, FileIcon, ExternalLink } from "lucide-react";
 import type { SchemaDefinition, FormField, ArchivoResponse } from "@superstars/shared";
 import { esCampoDeDato } from "@superstars/shared";
@@ -9,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatFileSize } from "@/lib/format";
 import { downloadArchivo } from "@/lib/api/archivo.api";
+import { mensajeErrorDescarga } from "@/lib/api/error-archivo";
 
 interface ResponseViewerProps {
   schema: SchemaDefinition;
@@ -279,13 +281,19 @@ function ArchivoItem({
   postulacionId: number;
 }) {
   const handleDownload = async () => {
-    const blob = await downloadArchivo(convocatoriaId, postulacionId, archivo.id);
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = archivo.nombreOriginal;
-    a.click();
-    URL.revokeObjectURL(url);
+    try {
+      const blob = await downloadArchivo(convocatoriaId, postulacionId, archivo.id);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = archivo.nombreOriginal;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      toast.error(
+        mensajeErrorDescarga(error, "No se pudo descargar el archivo. Intenta de nuevo."),
+      );
+    }
   };
 
   return (

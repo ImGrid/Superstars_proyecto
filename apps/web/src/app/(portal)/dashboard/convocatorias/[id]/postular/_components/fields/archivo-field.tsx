@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useRef } from "react";
+import { memo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Upload, X, FileIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -12,8 +12,10 @@ import {
   FormDescription,
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { uploadArchivo, deleteArchivo } from "@/lib/api/archivo.api";
 import { archivoQueries } from "@/lib/api/query-keys";
+import { mensajeErrorSubida } from "@/lib/api/error-archivo";
 import type { FieldRendererProps } from "./field-props";
 
 interface ArchivoFieldProps extends FieldRendererProps {
@@ -31,6 +33,7 @@ export const ArchivoField = memo(function ArchivoField({
 
   const inputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
+  const [progreso, setProgreso] = useState(0);
 
   const { tiposPermitidos, maxTamanoMb, maxArchivos } = campo;
 
@@ -46,8 +49,16 @@ export const ArchivoField = memo(function ArchivoField({
 
   // subir archivo
   const uploadMutation = useMutation({
-    mutationFn: (file: File) =>
-      uploadArchivo(convocatoriaId, postulacionId!, campo.id, file),
+    mutationFn: (file: File) => {
+      setProgreso(0);
+      return uploadArchivo(
+        convocatoriaId,
+        postulacionId!,
+        campo.id,
+        file,
+        setProgreso,
+      );
+    },
     onSuccess: (newArchivo) => {
       queryClient.invalidateQueries({
         queryKey: archivoQueries.list(convocatoriaId, postulacionId!).queryKey,
@@ -58,8 +69,9 @@ export const ArchivoField = memo(function ArchivoField({
       toast.success("Archivo subido");
     },
     onError: (err: any) => {
-      const msg = err.response?.data?.message ?? "Error al subir archivo";
-      toast.error(msg);
+      toast.error(
+        mensajeErrorSubida(err, "No se pudo subir el archivo. Intenta de nuevo."),
+      );
     },
   });
 
@@ -171,8 +183,26 @@ export const ArchivoField = memo(function ArchivoField({
                 ) : (
                   <Upload className="size-3.5" />
                 )}
-                Subir archivo
+                {isUploading ? "Subiendo…" : "Subir archivo"}
               </Button>
+
+              {/* avance de la subida: con conexion lenta puede tardar bastante */}
+              {isUploading && (
+                <div className="mt-2 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Progress value={progreso} className="h-1.5 flex-1" />
+                    <span className="shrink-0 text-xs font-medium text-secondary-600">
+                      {progreso}%
+                    </span>
+                  </div>
+                  <p className="text-xs text-secondary-500">
+                    {progreso < 100
+                      ? "Subiendo el archivo. No cierres esta página."
+                      : "Guardando el archivo…"}
+                  </p>
+                </div>
+              )}
+
               <p className="mt-1 text-xs text-secondary-400">
                 Formatos: {tiposPermitidos.join(", ")} | Max: {maxTamanoMb} MB |
                 {archivosList.length}/{maxArchivos} archivos

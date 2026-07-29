@@ -1,4 +1,4 @@
-import { apiClient } from "./client";
+import { apiClient, apiFileClient } from "./client";
 import type {
   PaginatedResponse,
   CreateHistoriaExitoDto,
@@ -19,7 +19,7 @@ export function createHistoriaExito(dto: CreateHistoriaExitoDto, imagen: File) {
   if (dto.empresaNombre) formData.append("empresaNombre", dto.empresaNombre);
   formData.append("imagen", imagen);
 
-  return apiClient
+  return apiFileClient
     .post<HistoriaExitoResponse>("/historias-exito", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     })
@@ -59,7 +59,7 @@ export function cambiarImagenHistoriaExito(id: number, imagen: File) {
   const formData = new FormData();
   formData.append("imagen", imagen);
 
-  return apiClient
+  return apiFileClient
     .post<HistoriaExitoResponse>(`/historias-exito/${id}/imagen`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     })

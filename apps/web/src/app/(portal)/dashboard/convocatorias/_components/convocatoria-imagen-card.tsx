@@ -16,6 +16,7 @@ import {
   getConvocatoriaImagenUrl,
 } from "@/lib/api/convocatoria.api";
 import { convocatoriaQueries, publicQueries } from "@/lib/api/query-keys";
+import { mensajeErrorSubida } from "@/lib/api/error-archivo";
 
 interface ConvocatoriaImagenCardProps {
   convocatoriaId: number;
@@ -56,9 +57,9 @@ export function ConvocatoriaImagenCard({
       invalidateConvocatoriaCaches();
     },
     onError: (error: any) => {
-      const msg =
-        error?.response?.data?.message ?? "No se pudo guardar la imagen. Intenta de nuevo.";
-      toast.error(Array.isArray(msg) ? msg[0] : msg);
+      toast.error(
+        mensajeErrorSubida(error, "No se pudo guardar la imagen. Intenta de nuevo."),
+      );
     },
   });
 

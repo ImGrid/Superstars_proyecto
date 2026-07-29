@@ -1,22 +1,29 @@
-import { apiClient } from "./client";
+import { apiClient, apiFileClient, porcentajeSubida } from "./client";
 import type { ArchivoResponse } from "@superstars/shared";
 
 // Subir archivo de postulacion (multipart/form-data)
+// onProgress recibe el porcentaje ya enviado, para poder mostrar una barra
 export function uploadArchivo(
   convocatoriaId: number,
   postulacionId: number,
   fieldId: string,
   file: File,
+  onProgress?: (porcentaje: number) => void,
 ) {
   const formData = new FormData();
   formData.append("file", file);
   formData.append("fieldId", fieldId);
 
-  return apiClient
+  return apiFileClient
     .post<ArchivoResponse>(
       `/convocatorias/${convocatoriaId}/postulaciones/${postulacionId}/archivos`,
       formData,
-      { headers: { "Content-Type": "multipart/form-data" } },
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+        onUploadProgress: onProgress
+          ? (e) => onProgress(porcentajeSubida(e))
+          : undefined,
+      },
     )
     .then((r) => r.data);
 }
@@ -36,7 +43,7 @@ export function downloadArchivo(
   postulacionId: number,
   archivoId: number,
 ) {
-  return apiClient
+  return apiFileClient
     .get(
       `/convocatorias/${convocatoriaId}/postulaciones/${postulacionId}/archivos/${archivoId}/download`,
       { responseType: "blob" },

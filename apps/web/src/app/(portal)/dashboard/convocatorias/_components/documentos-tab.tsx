@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,
@@ -64,6 +65,10 @@ import {
   deleteDocumento,
 } from "@/lib/api/documento.api";
 import { documentoQueries } from "@/lib/api/query-keys";
+import {
+  mensajeErrorSubida,
+  mensajeErrorDescarga,
+} from "@/lib/api/error-archivo";
 import { formatDate, formatFileSize, mimeTypeLabel } from "@/lib/format";
 
 // propositos con etiquetas para el coordinador (no tecnicas)
@@ -171,8 +176,10 @@ export function DocumentosTab({
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch {
-      toast.error("Error al descargar el documento");
+    } catch (error) {
+      toast.error(
+        mensajeErrorDescarga(error, "No se pudo descargar el documento. Intenta de nuevo."),
+      );
     }
   }
 
@@ -356,10 +363,12 @@ function UploadDialog({
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [proposito, setProposito] = useState<PropositoDocumento>("informativo");
+  const [progreso, setProgreso] = useState(0);
 
   const uploadMutation = useMutation({
     mutationFn: () => {
       if (!file || !nombre.trim()) throw new Error("Datos incompletos");
+      setProgreso(0);
       return uploadDocumento(
         convocatoriaId,
         categoriaId,
@@ -367,6 +376,7 @@ function UploadDialog({
         nombre.trim(),
         currentCount + 1,
         proposito,
+        setProgreso,
       );
     },
     onSuccess: () => {
@@ -378,9 +388,9 @@ function UploadDialog({
       onOpenChange(false);
     },
     onError: (error: any) => {
-      const msg =
-        error.response?.data?.message ?? "Error al subir el documento";
-      toast.error(Array.isArray(msg) ? msg[0] : msg);
+      toast.error(
+        mensajeErrorSubida(error, "No se pudo subir el documento. Intenta de nuevo."),
+      );
     },
   });
 
@@ -389,6 +399,7 @@ function UploadDialog({
     setFile(null);
     setIsDragging(false);
     setProposito("informativo");
+    setProgreso(0);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
@@ -537,6 +548,23 @@ function UploadDialog({
               {PROPOSITO_OPCIONES.find((o) => o.value === proposito)?.descripcion}
             </p>
           </div>
+
+          {/* avance de la subida: en conexiones lentas puede tardar minutos */}
+          {uploadMutation.isPending && (
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-3">
+                <Progress value={progreso} className="h-2 flex-1" />
+                <span className="shrink-0 text-sm font-medium text-secondary-600">
+                  {progreso}%
+                </span>
+              </div>
+              <p className="text-xs text-secondary-500">
+                {progreso < 100
+                  ? "Subiendo el archivo. No cierres esta ventana."
+                  : "Guardando el documento…"}
+              </p>
+            </div>
+          )}
         </div>
 
         <DialogFooter>
@@ -559,7 +587,7 @@ function UploadDialog({
             ) : (
               <Upload className="size-4" />
             )}
-            Subir
+            {uploadMutation.isPending ? "Subiendo…" : "Subir"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,4 +1,4 @@
-import { apiClient } from "./client";
+import { apiClient, apiFileClient } from "./client";
 import type {
   PaginatedResponse,
   CreatePublicacionDto,
@@ -21,13 +21,14 @@ export function createPublicacion(dto: CreatePublicacionDto, imagen?: File) {
     formData.append("destacado", String(dto.destacado ?? false));
     formData.append("imagen", imagen);
 
-    return apiClient
+    return apiFileClient
       .post<PublicacionResponse>("/publicaciones", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
       .then((r) => r.data);
   }
 
+  // sin imagen es un POST de solo texto: va por el cliente normal
   return apiClient
     .post<PublicacionResponse>("/publicaciones", dto)
     .then((r) => r.data);
@@ -105,7 +106,7 @@ export function uploadImagenPublicacion(id: number, file: File) {
   const formData = new FormData();
   formData.append("imagen", file);
 
-  return apiClient
+  return apiFileClient
     .post<PublicacionResponse>(`/publicaciones/${id}/imagen`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     })

@@ -41,6 +41,7 @@ import {
 import { StateBadge } from "@/components/shared/state-badge";
 import { createPublicacion, updatePublicacion } from "@/lib/api/publicacion.api";
 import { publicacionQueries, publicQueries } from "@/lib/api/query-keys";
+import { mensajeErrorSubida } from "@/lib/api/error-archivo";
 import { PublicacionImageUpload } from "./publicacion-image-upload";
 import { PublicacionEstadoActions } from "./publicacion-estado-actions";
 
@@ -162,9 +163,10 @@ export function PublicacionForm({ initialData }: PublicacionFormProps) {
       router.push("/dashboard/publicaciones");
     },
     onError: (error: any) => {
-      const msg =
-        error.response?.data?.message ?? "Error al crear la publicación";
-      toast.error(Array.isArray(msg) ? msg[0] : msg);
+      // puede llevar imagen adjunta, asi que el fallo puede ser de transferencia
+      toast.error(
+        mensajeErrorSubida(error, "No se pudo crear la publicación. Intenta de nuevo."),
+      );
     },
   });
 

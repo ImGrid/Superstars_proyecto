@@ -1,4 +1,4 @@
-import { apiClient } from "./client";
+import { apiClient, apiFileClient, porcentajeSubida } from "./client";
 import type { UpdateDocumentoDto, DocumentoResponse } from "@superstars/shared";
 
 // Documentos por categoria (ruta anidada). El `proposito` (informativo/plantilla/jurado)
@@ -7,6 +7,7 @@ const base = (convocatoriaId: number, categoriaId: number) =>
   `/convocatorias/${convocatoriaId}/categorias/${categoriaId}/documentos`;
 
 // Subir documento (multipart/form-data)
+// onProgress recibe el porcentaje ya enviado, para poder mostrar una barra
 export function uploadDocumento(
   convocatoriaId: number,
   categoriaId: number,
@@ -14,6 +15,7 @@ export function uploadDocumento(
   nombre: string,
   orden?: number,
   proposito?: string,
+  onProgress?: (porcentaje: number) => void,
 ) {
   const formData = new FormData();
   formData.append("file", file);
@@ -25,9 +27,12 @@ export function uploadDocumento(
     formData.append("proposito", proposito);
   }
 
-  return apiClient
+  return apiFileClient
     .post<DocumentoResponse>(base(convocatoriaId, categoriaId), formData, {
       headers: { "Content-Type": "multipart/form-data" },
+      onUploadProgress: onProgress
+        ? (e) => onProgress(porcentajeSubida(e))
+        : undefined,
     })
     .then((r) => r.data);
 }
@@ -45,7 +50,7 @@ export function downloadDocumento(
   categoriaId: number,
   documentoId: number,
 ) {
-  return apiClient
+  return apiFileClient
     .get(`${base(convocatoriaId, categoriaId)}/${documentoId}/download`, {
       responseType: "blob",
     })

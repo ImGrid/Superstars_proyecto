@@ -36,6 +36,7 @@ import {
   cambiarImagenHistoriaExito,
 } from "@/lib/api/historia-exito.api";
 import { historiaExitoQueries } from "@/lib/api/query-keys";
+import { mensajeErrorSubida } from "@/lib/api/error-archivo";
 import { IMAGE_INPUT_ACCEPT, validateImageFile } from "@/lib/image-validation";
 import { EmpresaCombobox } from "./empresa-combobox";
 
@@ -103,8 +104,9 @@ export function HistoriaFormDialog({
       return;
     }
 
-    const msg = data?.message ?? "No se pudo guardar la historia.";
-    toast.error(Array.isArray(msg) ? msg[0] : msg);
+    // la historia se guarda junto con su imagen, asi que el fallo puede venir
+    // de la transferencia y no del contenido del formulario
+    toast.error(mensajeErrorSubida(error, "No se pudo guardar la historia."));
   }
 
   // resetear cuando se abre/cierra o cambia la historia

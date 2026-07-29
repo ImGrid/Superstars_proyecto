@@ -1,4 +1,4 @@
-import { apiClient } from "./client";
+import { apiClient, apiFileClient } from "./client";
 import type {
   PaginatedResponse,
   CreateEmpresaDto,
@@ -55,7 +55,7 @@ export function uploadMyLogo(file: File) {
   const formData = new FormData();
   formData.append("logo", file);
 
-  return apiClient
+  return apiFileClient
     .post<EmpresaResponse>("/empresas/me/logo", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     })

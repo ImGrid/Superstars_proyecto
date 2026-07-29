@@ -9,6 +9,7 @@ import {
   getPublicacionImagenUrl,
 } from "@/lib/api/publicacion.api";
 import { publicacionQueries } from "@/lib/api/query-keys";
+import { mensajeErrorSubida } from "@/lib/api/error-archivo";
 
 interface PublicacionImageUploadProps {
   publicacionId: number;
@@ -46,9 +47,9 @@ export function PublicacionImageUpload({
       invalidatePublicacionCaches();
     },
     onError: (error: any) => {
-      const msg =
-        error?.response?.data?.message ?? "No se pudo guardar la imagen. Intenta de nuevo.";
-      toast.error(Array.isArray(msg) ? msg[0] : msg);
+      toast.error(
+        mensajeErrorSubida(error, "No se pudo guardar la imagen. Intenta de nuevo."),
+      );
     },
   });
 
