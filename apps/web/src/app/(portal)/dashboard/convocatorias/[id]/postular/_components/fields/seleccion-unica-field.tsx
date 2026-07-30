@@ -4,7 +4,6 @@ import { memo } from "react";
 import {
   FormField,
   FormItem,
-  FormLabel,
   FormControl,
   FormMessage,
   FormDescription,
@@ -18,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { CampoLabel } from "./campo-label";
 import type { FieldRendererProps } from "./field-props";
 import { OTRA_VALUE, getOtraFieldId, OtraInput } from "./otra-input";
 
@@ -41,10 +41,7 @@ export const SeleccionUnicaField = memo(function SeleccionUnicaField({
 
           return (
             <FormItem>
-              <FormLabel>
-                {campo.etiqueta}
-                {campo.requerido && <span className="text-error-500 ml-1">*</span>}
-              </FormLabel>
+              <CampoLabel etiqueta={campo.etiqueta} requerido={campo.requerido} />
               <Select
                 onValueChange={(val) => {
                   field.onChange(val);
@@ -94,10 +91,7 @@ export const SeleccionUnicaField = memo(function SeleccionUnicaField({
 
         return (
           <FormItem>
-            <FormLabel>
-              {campo.etiqueta}
-              {campo.requerido && <span className="text-error-500 ml-1">*</span>}
-            </FormLabel>
+            <CampoLabel etiqueta={campo.etiqueta} requerido={campo.requerido} />
             <FormControl>
               <RadioGroup
                 onValueChange={(val) => {

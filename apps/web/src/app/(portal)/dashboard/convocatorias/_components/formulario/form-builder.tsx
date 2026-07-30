@@ -22,6 +22,7 @@ import { seccionId } from "./_lib/id-utils";
 import { validateSchema, hasErrors } from "./_lib/builder-validation";
 import { SeccionItem } from "./seccion-item";
 import { CampoConfigSheet } from "./campo-config-sheet";
+import { FormularioPreviewDialog } from "./preview/formulario-preview-dialog";
 
 interface FormBuilderProps {
   convocatoriaId: number;
@@ -46,6 +47,9 @@ export function FormBuilder({ convocatoriaId, categoriaId, formulario, canEdit }
 
   // campo en edicion (sheet lateral)
   const [editingCampo, setEditingCampo] = useState<EditingCampo | null>(null);
+
+  // vista previa: como se vera el formulario para el proponente
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   // validaciones en tiempo real
   const warnings = useMemo(() => validateSchema(schema), [schema]);
@@ -202,6 +206,17 @@ export function FormBuilder({ convocatoriaId, categoriaId, formulario, canEdit }
             </Badge>
           )}
 
+          {/* fuera del canEdit a proposito: con la convocatoria ya publicada el
+              formulario no se puede tocar, pero si mirar como lo ve el proponente */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPreviewOpen(true)}
+          >
+            <Icon icon="ph:eye-duotone" className="size-4" />
+            Vista previa
+          </Button>
+
           {canEdit && (
             <Button
               size="sm"
@@ -242,6 +257,14 @@ export function FormBuilder({ convocatoriaId, categoriaId, formulario, canEdit }
           Agregar seccion
         </Button>
       )}
+
+      {/* vista previa: usa el schema del editor, con cambios sin guardar incluidos */}
+      <FormularioPreviewDialog
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+        schema={schema}
+        isDirty={isDirty}
+      />
 
       {/* sheet de configuracion de campo */}
       <CampoConfigSheet

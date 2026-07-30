@@ -33,6 +33,7 @@ import { CampoRenderer } from "./_components/campo-renderer";
 import { ReviewStep } from "./_components/review-step";
 import { useDraftSave } from "./_hooks/use-draft-save";
 import { buildAutoFilledDefaults } from "./_hooks/use-auto-fill";
+import { iconParaSeccion } from "./_lib/icono-seccion";
 
 interface PostularPageProps {
   params: Promise<{ id: string }>;
@@ -444,18 +445,4 @@ function PostularFormContent({
       )}
     </div>
   );
-}
-
-// Map de seccion.id → icono Phosphor. Las dos secciones del template default son
-// fijas (sec_contacto y sec_empresa); para secciones custom que el responsable
-// agregue, devolvemos un icono generico de "lista" para no romper la UI.
-function iconParaSeccion(seccionId: string): string {
-  switch (seccionId) {
-    case "sec_contacto":
-      return "ph:user-circle-duotone";
-    case "sec_empresa":
-      return "ph:buildings-duotone";
-    default:
-      return "ph:list-bullets-duotone";
-  }
 }

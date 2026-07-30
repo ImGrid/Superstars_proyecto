@@ -4,13 +4,13 @@ import { memo } from "react";
 import {
   FormField,
   FormItem,
-  FormLabel,
   FormControl,
   FormMessage,
   FormDescription,
 } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { CampoLabel } from "./campo-label";
 import type { FieldRendererProps } from "./field-props";
 
 export const SiNoField = memo(function SiNoField({
@@ -31,10 +31,7 @@ export const SiNoField = memo(function SiNoField({
 
         return (
           <FormItem>
-            <FormLabel>
-              {campo.etiqueta}
-              {campo.requerido && <span className="text-error-500 ml-1">*</span>}
-            </FormLabel>
+            <CampoLabel etiqueta={campo.etiqueta} requerido={campo.requerido} />
             <FormControl>
               <RadioGroup
                 onValueChange={(val) => field.onChange(val === "true")}

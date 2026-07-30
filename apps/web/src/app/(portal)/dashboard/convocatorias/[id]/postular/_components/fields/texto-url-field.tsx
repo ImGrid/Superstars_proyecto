@@ -4,12 +4,12 @@ import { memo } from "react";
 import {
   FormField,
   FormItem,
-  FormLabel,
   FormControl,
   FormMessage,
   FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { CampoLabel } from "./campo-label";
 import type { FieldRendererProps } from "./field-props";
 
 export const TextoUrlField = memo(function TextoUrlField({
@@ -24,10 +24,7 @@ export const TextoUrlField = memo(function TextoUrlField({
       name={campo.id}
       render={({ field }) => (
         <FormItem>
-          <FormLabel>
-            {campo.etiqueta}
-            {campo.requerido && <span className="text-error-500 ml-1">*</span>}
-          </FormLabel>
+          <CampoLabel etiqueta={campo.etiqueta} requerido={campo.requerido} />
           <FormControl>
             <Input
               type="url"

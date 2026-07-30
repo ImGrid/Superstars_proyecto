@@ -19,6 +19,8 @@ interface CampoRendererProps {
   form: UseFormReturn<Record<string, unknown>>;
   convocatoriaId: number;
   postulacionId: number | undefined;
+  // vista previa del builder: el campo archivo no sube nada
+  modoPreview?: boolean;
 }
 
 // renderiza un campo segun su tipo
@@ -27,6 +29,7 @@ export const CampoRenderer = memo(function CampoRenderer({
   form,
   convocatoriaId,
   postulacionId,
+  modoPreview = false,
 }: CampoRendererProps) {
   switch (campo.tipo) {
     case "texto_corto":
@@ -54,6 +57,7 @@ export const CampoRenderer = memo(function CampoRenderer({
           form={form}
           convocatoriaId={convocatoriaId}
           postulacionId={postulacionId}
+          modoPreview={modoPreview}
         />
       );
 

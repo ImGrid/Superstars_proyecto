@@ -4,12 +4,12 @@ import { memo } from "react";
 import {
   FormField,
   FormItem,
-  FormLabel,
   FormControl,
   FormMessage,
   FormDescription,
 } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
+import { CampoLabel } from "./campo-label";
 import type { FieldRendererProps } from "./field-props";
 import { OTRA_VALUE, getOtraFieldId, OtraInput } from "./otra-input";
 
@@ -32,10 +32,7 @@ export const SeleccionMultipleField = memo(function SeleccionMultipleField({
 
         return (
           <FormItem>
-            <FormLabel>
-              {campo.etiqueta}
-              {campo.requerido && <span className="text-error-500 ml-1">*</span>}
-            </FormLabel>
+            <CampoLabel etiqueta={campo.etiqueta} requerido={campo.requerido} />
             <FormControl>
               <div className="grid gap-2 sm:grid-cols-2">
                 {opciones.map((opt) => (

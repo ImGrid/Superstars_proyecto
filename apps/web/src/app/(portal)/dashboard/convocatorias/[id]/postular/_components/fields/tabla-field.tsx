@@ -5,7 +5,6 @@ import { Plus, Trash2 } from "lucide-react";
 import {
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
   FormDescription,
 } from "@/components/ui/form";
@@ -19,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { CampoLabel } from "./campo-label";
 import type { FieldRendererProps } from "./field-props";
 
 // tipo para una fila de la tabla
@@ -105,10 +105,7 @@ export const TablaField = memo(function TablaField({
 
         return (
           <FormItem>
-            <FormLabel>
-              {campo.etiqueta}
-              {campo.requerido && <span className="text-error-500 ml-1">*</span>}
-            </FormLabel>
+            <CampoLabel etiqueta={campo.etiqueta} requerido={campo.requerido} />
             {campo.descripcion && (
               <FormDescription>{campo.descripcion}</FormDescription>
             )}

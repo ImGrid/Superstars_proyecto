@@ -109,14 +109,16 @@ export const ReviewStep = memo(function ReviewStep({
                         requeridoSinCompletar ? "bg-warning-50/60" : ""
                       }`}
                     >
-                      <span className={`shrink-0 ${requeridoSinCompletar ? "text-warning-800 font-medium" : "text-secondary-500"}`}>
+                      {/* la etiqueta es la pregunta completa y puede ser larga: tiene que
+                          poder envolver, si no empuja el ancho y aparece scroll horizontal */}
+                      <span className={`min-w-0 flex-1 break-words ${requeridoSinCompletar ? "text-warning-800 font-medium" : "text-secondary-500"}`}>
                         {campo.etiqueta}
                         {campo.requerido && (
                           <span className={`ml-1 ${requeridoSinCompletar ? "text-warning-600" : "text-error-500"}`}>*</span>
                         )}
                       </span>
                       <span
-                        className={`text-right ${
+                        className={`max-w-[45%] shrink-0 text-right break-words ${
                           requeridoSinCompletar
                             ? "text-warning-700 font-medium inline-flex items-center gap-1"
                             : opcionalSinCompletar

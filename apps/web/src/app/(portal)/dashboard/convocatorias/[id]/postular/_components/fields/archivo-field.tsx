@@ -7,7 +7,6 @@ import { toast } from "sonner";
 import {
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
   FormDescription,
 } from "@/components/ui/form";
@@ -16,11 +15,14 @@ import { Progress } from "@/components/ui/progress";
 import { uploadArchivo, deleteArchivo } from "@/lib/api/archivo.api";
 import { archivoQueries } from "@/lib/api/query-keys";
 import { mensajeErrorSubida } from "@/lib/api/error-archivo";
+import { CampoLabel } from "./campo-label";
 import type { FieldRendererProps } from "./field-props";
 
 interface ArchivoFieldProps extends FieldRendererProps {
   convocatoriaId: number;
   postulacionId: number | undefined;
+  // vista previa del builder: se ve la caja real pero no se sube nada
+  modoPreview?: boolean;
 }
 
 export const ArchivoField = memo(function ArchivoField({
@@ -28,6 +30,7 @@ export const ArchivoField = memo(function ArchivoField({
   form,
   convocatoriaId,
   postulacionId,
+  modoPreview = false,
 }: ArchivoFieldProps) {
   if (campo.tipo !== "archivo") return null;
 
@@ -119,10 +122,7 @@ export const ArchivoField = memo(function ArchivoField({
       name={campo.id}
       render={() => (
         <FormItem>
-          <FormLabel>
-            {campo.etiqueta}
-            {campo.requerido && <span className="text-error-500 ml-1">*</span>}
-          </FormLabel>
+          <CampoLabel etiqueta={campo.etiqueta} requerido={campo.requerido} />
           {campo.descripcion && (
             <FormDescription>{campo.descripcion}</FormDescription>
           )}
@@ -156,7 +156,28 @@ export const ArchivoField = memo(function ArchivoField({
           )}
 
           {/* boton upload */}
-          {!postulacionId ? (
+          {modoPreview ? (
+            // vista previa: se ve la misma caja que vera el proponente, apagada
+            <div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-1"
+                disabled
+              >
+                <Upload className="size-3.5" />
+                Subir archivo
+              </Button>
+              <p className="mt-1 text-xs text-secondary-400">
+                Formatos: {tiposPermitidos.join(", ")} | Máx: {maxTamanoMb} MB |
+                hasta {maxArchivos} {maxArchivos === 1 ? "archivo" : "archivos"}
+              </p>
+              <p className="mt-1 text-xs text-secondary-400">
+                En la vista previa no se suben archivos.
+              </p>
+            </div>
+          ) : !postulacionId ? (
             <p className="text-xs text-secondary-400">
               Guarda el borrador primero para poder subir archivos.
             </p>
