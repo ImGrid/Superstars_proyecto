@@ -171,7 +171,10 @@ export function ResultadosCifrasSection() {
         {/* encabezado con lineas a los lados, como la imagen del cliente */}
         <div className="mx-auto mb-14 flex max-w-3xl items-center gap-4 sm:gap-6">
           <span className="h-0.5 flex-1 rounded bg-secondary-200" />
-          <h2 className="font-display text-2xl leading-tight tracking-wide whitespace-nowrap text-primary-600 uppercase sm:text-3xl">
+          {/* en movil el titulo no cabe en una linea (mide mas que la pantalla) y
+              forzarlo con nowrap hacia que TODA la portada se pudiera desplazar de
+              lado. A partir de sm si cabe, y ahi se mantiene en una sola linea */}
+          <h2 className="font-display text-center text-2xl leading-tight tracking-wide text-primary-600 uppercase sm:whitespace-nowrap sm:text-3xl">
             Resultados e impactos 2025
           </h2>
           <span className="h-0.5 flex-1 rounded bg-secondary-200" />
