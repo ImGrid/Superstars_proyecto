@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Mail, MapPin } from "lucide-react";
 import { EsloganStrip } from "@/components/public/eslogan-strip";
+import { SponsorsStripFooter } from "@/components/public/sponsors-strip-footer";
 
 const quickLinks = [
   { label: "Inicio", href: "/" },
@@ -22,6 +23,9 @@ export function PublicFooter() {
     <footer className="bg-primary-800 text-primary-100">
       {/* eslogan del programa - banda navy con el cohete de la marca */}
       <EsloganStrip />
+
+      {/* aliados: se repite en todas las paginas menos la portada (alli va arriba) */}
+      <SponsorsStripFooter />
 
       {/* contenido principal */}
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">

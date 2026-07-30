@@ -42,9 +42,15 @@ type SponsorsStripProps = {
 export function SponsorsStrip({ variant = "landing", className = "" }: SponsorsStripProps) {
   const paddingY = variant === "landing" ? "py-12 sm:py-14" : "py-8";
   const labelColor = variant === "landing" ? "text-primary-200" : "text-primary-300";
+  // en el footer la banda usa el mismo navy del footer para no cortar el bloque;
+  // solo una linea sutil la separa del eslogan
+  const fondo =
+    variant === "landing"
+      ? "bg-primary-700"
+      : "bg-primary-800 border-t border-primary-700/50";
 
   return (
-    <section className={`bg-primary-700 ${paddingY} ${className}`}>
+    <section className={`${fondo} ${paddingY} ${className}`}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <p className={`mb-6 text-center text-xs font-semibold tracking-[0.2em] uppercase ${labelColor}`}>
           En alianza con
