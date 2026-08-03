@@ -42,13 +42,14 @@ export default function HomePage() {
                 Sobre nosotros
               </p>
               <h2 className="mt-2 font-display text-3xl leading-[1.3] tracking-wide text-primary-600 uppercase sm:text-4xl">
-                ¿Qué es el programa SuperStar?
+                Impulsamos empresas que transforman
               </h2>
               <p className="mt-6 text-lg leading-relaxed text-secondary-600">
-                Buscamos emprendimientos y empresas innovadoras que integren
-                equidad de género y acción climática como parte de su modelo de
-                negocio, impulsando una economía más sostenible, inclusiva y
-                competitiva.
+                SuperImpact360 impulsa emprendimientos que crecen con propósito
+                y generan bienestar colectivo. Conectamos ideas, talento,
+                capital y oportunidades para fortalecer empresas con impacto
+                positivo, transformar realidades y contribuir a una economía más
+                inclusiva, sostenible y justa en Bolivia.
               </p>
             </div>
           </div>

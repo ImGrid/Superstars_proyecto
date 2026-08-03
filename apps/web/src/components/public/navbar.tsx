@@ -22,7 +22,8 @@ interface NavLink {
 const navLinks: NavLink[] = [
   { label: "Inicio", href: "/" },
   { label: "Convocatorias", href: "/convocatorias" },
-  { label: "Noticias", href: "/noticias" },
+  // la ruta sigue siendo /noticias; solo cambia la etiqueta visible
+  { label: "Publicaciones", href: "/noticias" },
   { label: "Resultados", href: "/resultados" },
   { label: "FAQ", href: "/faq" },
   { label: "Contacto", href: "/contacto" },

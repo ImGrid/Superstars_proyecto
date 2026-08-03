@@ -6,7 +6,7 @@ import { SponsorsStripFooter } from "@/components/public/sponsors-strip-footer";
 const quickLinks = [
   { label: "Inicio", href: "/" },
   { label: "Convocatorias", href: "/convocatorias" },
-  { label: "Noticias", href: "/noticias" },
+  { label: "Publicaciones", href: "/noticias" },
   { label: "Resultados", href: "/resultados" },
   { label: "FAQ", href: "/faq" },
   { label: "Contacto", href: "/contacto" },
