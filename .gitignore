@@ -31,6 +31,7 @@ superstars_backup_*.sql
 
 # Credenciales del servidor (NUNCA commitear)
 vps.txt
+correo.txt
 
 # Backups de base de datos
 *.sql.bak
