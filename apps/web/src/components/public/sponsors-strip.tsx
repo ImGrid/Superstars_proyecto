@@ -1,32 +1,43 @@
 import Image from "next/image";
 
-// Logos oficiales de las organizaciones aliadas (PNG sin fondo, version blanca
-// para fondo navy). Orden pedido por el cliente: Fundes, Ayuda en Accion,
-// MariaMarina, Oxfam.
+// Logos oficiales de las organizaciones aliadas, version blanca ("positivo")
+// para fondo navy. Los PNG estan recortados a su caja de tinta, asi que el
+// ancho en pantalla es el ancho real del logo.
+//
+// El tamano NO se normaliza por alto: se replica el lockup del ejemplo que
+// mando el cliente (material/Logos-Organizaciones/ejemplo-logos.png), medido
+// tambien en banner-concurso.png. Ahi los cuatro van al mismo factor de escala
+// sobre su archivo original, salvo MariaMarina que va ~11% mas grande.
+// El resultado, tomando FUNDES como unidad, son estos anchos relativos.
+// Por eso OXFAM se ve mas alto: su lockup lleva el icono circular.
 const SPONSORS = [
   {
     name: "FUNDES Bolivia",
     src: "/images/sponsors/fundes-blanco.png",
-    width: 500,
-    height: 96,
+    width: 600,
+    height: 116,
+    factor: 1.0,
   },
   {
     name: "Ayuda en Acción",
     src: "/images/sponsors/ayuda-blanco.png",
-    width: 500,
-    height: 156,
+    width: 600,
+    height: 157,
+    factor: 1.038,
   },
   {
     name: "MaríaMarina Foundation",
     src: "/images/sponsors/mariamarina-blanco.png",
-    width: 500,
-    height: 106,
+    width: 600,
+    height: 128,
+    factor: 1.24,
   },
   {
     name: "OXFAM",
-    src: "/images/sponsors/oxfam.png",
-    width: 500,
-    height: 194,
+    src: "/images/sponsors/oxfam-blanco.png",
+    width: 600,
+    height: 226,
+    factor: 1.119,
   },
 ] as const;
 
@@ -37,8 +48,7 @@ type SponsorsStripProps = {
   className?: string;
 };
 
-// Banda de organizaciones aliadas sobre navy oficial. Los logos son PNG sin
-// fondo (version blanca), asi que ya no hay que casar el color con ningun JPEG.
+// Banda de organizaciones aliadas sobre navy oficial.
 export function SponsorsStrip({ variant = "landing", className = "" }: SponsorsStripProps) {
   const paddingY = variant === "landing" ? "py-12 sm:py-14" : "py-8";
   const labelColor = variant === "landing" ? "text-primary-200" : "text-primary-300";
@@ -55,24 +65,23 @@ export function SponsorsStrip({ variant = "landing", className = "" }: SponsorsS
         <p className={`mb-6 text-center text-xs font-semibold tracking-[0.2em] uppercase ${labelColor}`}>
           En alianza con
         </p>
-        {/* cada logo se limita por caja (alto Y ancho) con object-contain: asi los
-            wordmarks anchos (FUNDES) no dominan sobre los que llevan icono (OXFAM)
-            y el conjunto queda en armonia */}
-        <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-7 sm:gap-x-14">
+        {/* --logo = ancho de FUNDES, la unidad del lockup. Los demas anchos y la
+            separacion (0.4 de esa unidad) se calculan a partir de ella, asi que
+            la tira entera escala en bloque y conserva las proporciones */}
+        <div
+          className="flex flex-wrap items-center justify-center gap-y-8 [--logo:112px] gap-x-[calc(var(--logo)*0.4)] sm:[--logo:145px] lg:[--logo:170px]"
+        >
           {SPONSORS.map((sponsor) => (
-            <div
+            <Image
               key={sponsor.name}
-              className="flex h-11 w-[150px] items-center justify-center sm:h-12 sm:w-[170px]"
-            >
-              <Image
-                src={sponsor.src}
-                alt={sponsor.name}
-                width={sponsor.width}
-                height={sponsor.height}
-                className="max-h-full w-auto max-w-full object-contain"
-                priority={variant === "landing"}
-              />
-            </div>
+              src={sponsor.src}
+              alt={sponsor.name}
+              width={sponsor.width}
+              height={sponsor.height}
+              style={{ width: `calc(var(--logo) * ${sponsor.factor})` }}
+              className="h-auto max-w-full"
+              priority={variant === "landing"}
+            />
           ))}
         </div>
       </div>

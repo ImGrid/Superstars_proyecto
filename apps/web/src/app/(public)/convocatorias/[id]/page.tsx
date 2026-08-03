@@ -249,24 +249,26 @@ export default function ConvocatoriaDetallePage({
               {convocatoria.nombre}
             </h1>
 
-            {/* organizaciones aliadas: logos a color discretos (pequenos + opacidad)
-                para no competir con la informacion de la convocatoria */}
-            <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3">
+            {/* organizaciones aliadas: version a color porque el fondo es claro.
+                Los anchos relativos son los del lockup oficial (ver
+                sponsors-strip.tsx); --logo es el ancho de FUNDES */}
+            <div className="mt-4 flex flex-wrap items-center gap-y-3 [--logo:84px] gap-x-[calc(var(--logo)*0.4)] sm:[--logo:96px]">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-secondary-400">
                 En alianza con
               </span>
               {[
-                { name: "FUNDES Bolivia", src: "/images/sponsors/fundes-color.png" },
-                { name: "Ayuda en Acción", src: "/images/sponsors/ayuda-color.png" },
-                { name: "MaríaMarina Foundation", src: "/images/sponsors/mariamarina-color.png" },
-                { name: "OXFAM", src: "/images/sponsors/oxfam.png" },
+                { name: "FUNDES Bolivia", src: "/images/sponsors/fundes-color.png", factor: 1.0 },
+                { name: "Ayuda en Acción", src: "/images/sponsors/ayuda-color.png", factor: 1.038 },
+                { name: "MaríaMarina Foundation", src: "/images/sponsors/mariamarina-color.png", factor: 1.24 },
+                { name: "OXFAM", src: "/images/sponsors/oxfam-color.png", factor: 1.119 },
               ].map((a) => (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   key={a.name}
                   src={a.src}
                   alt={a.name}
-                  className="h-5 w-auto object-contain opacity-80"
+                  style={{ width: `calc(var(--logo) * ${a.factor})` }}
+                  className="h-auto opacity-80"
                 />
               ))}
             </div>
