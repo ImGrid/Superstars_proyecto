@@ -116,7 +116,7 @@ const slides: Slide[] = [
           <>
             Hasta{" "}
             <span className="font-semibold text-amarillo-300">Bs 50.000</span>{" "}
-            de capital semilla
+            en subvención
           </>
         ),
       },
@@ -152,18 +152,20 @@ const slides: Slide[] = [
     dateCard: {
       titulo: "Fechas clave",
       label: "Cierre de postulaciones:",
-      fecha: "31 de agosto de 2026",
+      fecha: "7 de septiembre de 2026",
     },
     cta: { label: "Postular ahora", href: "/auth/registro" },
   },
   {
-    image: "/images/banner-laboratorio.webp",
-    alt: "Química boliviana sonriendo en el laboratorio de su empresa, rodeada de equipos de destilación",
-    // la foto es mas alta que las otras (1537x1023), asi que sobra recorte
-    // vertical: bajamos el anclaje para centrar la escena y en movil lo corremos
-    // a la derecha porque su cara queda al filo del recorte
-    objectPosition: "object-[58%_35%] md:object-[right_40%]",
-    overlay: [0.94, 0.76, 0.48],
+    image: "/images/banner-bonifrut.webp",
+    alt: "Equipo de Bonifrut en el laboratorio de control de calidad de su planta",
+    // el equipo ocupa del 55% al 95% del ancho; en movil solo entra un tercio de
+    // la foto, asi que anclamos en ellos. En escritorio sobra alto: subimos algo
+    // el anclaje para dejar las caras dentro del recorte
+    objectPosition: "object-[68%_center] md:object-[center_40%]",
+    // la foto es la mas clara del set (luminancia 204/178/183 por tercio, contra
+    // 197/151/108 de la de limpieza): el overlay va mas fuerte en los tres tramos
+    overlay: [0.96, 0.82, 0.58],
     eyebrow: "Casos de éxito",
     title: (
       <>
