@@ -87,11 +87,18 @@ export default function ConvocatoriaDetailPage({ params }: ConvocatoriaDetailPag
   const { id } = use(params);
   const convocatoriaId = Number(id);
   const router = useRouter();
-  const { data: user } = useAuth();
+  const { data: user, isLoading: isLoadingUser } = useAuth();
 
-  const { data, isLoading, isError } = useQuery(convocatoriaQueries.detail(convocatoriaId));
+  const { data, isLoading: isLoadingConvocatoria, isError } = useQuery(
+    convocatoriaQueries.detail(convocatoriaId),
+  );
 
   const isProponente = user?.rol === RolUsuario.PROPONENTE;
+
+  // se espera a saber el rol antes de decidir que vista mostrar: si no, el
+  // postulante ve por un instante la pantalla de administrador (y se dispara
+  // una consulta que no le corresponde)
+  const isLoading = isLoadingConvocatoria || isLoadingUser;
 
   if (isLoading) {
     return (
@@ -111,7 +118,10 @@ export default function ConvocatoriaDetailPage({ params }: ConvocatoriaDetailPag
       <div className="space-y-6">
         <Alert variant="destructive">
           <AlertDescription>
-            No se pudo cargar la convocatoria. Verifica que el ID sea correcto.
+            {/* al postulante no le sirve saber del "ID": se le explica en sus terminos */}
+            {isProponente
+              ? "No pudimos abrir esta convocatoria. Es posible que ya no esté disponible. Si postulaste a ella y necesitas consultarla, escríbenos por el formulario de contacto."
+              : "No se pudo cargar la convocatoria. Verifica que el enlace sea correcto o vuelve al listado."}
           </AlertDescription>
         </Alert>
         <Button variant="outline" onClick={() => router.push("/dashboard/convocatorias")}>

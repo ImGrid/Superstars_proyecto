@@ -146,14 +146,19 @@ export class DocumentoService {
       return ['jurado', 'informativo'];
     }
 
-    // Proponente: solo si la convocatoria no esta en borrador; ve informativo + plantilla
+    // Proponente: solo si la convocatoria no esta en borrador; ve informativo +
+    // plantilla. Excepcion: si ya postulo, puede consultar los documentos de su
+    // convocatoria aunque esta ya no sea visible para el resto.
     if (user.rol === RolUsuario.PROPONENTE) {
       const estado = await this.convocatoriaRepo.getEstado(convocatoriaId);
       if (!estado) {
         throw new NotFoundException('Convocatoria no encontrada');
       }
       if (estado === EstadoConvocatoria.BORRADOR) {
-        throw new ForbiddenException('La convocatoria no está disponible');
+        const yaPostulo = await this.convocatoriaRepo.tienePostulacionDeUsuario(convocatoriaId, user.id);
+        if (!yaPostulo) {
+          throw new ForbiddenException('La convocatoria no está disponible');
+        }
       }
       return ['informativo', 'plantilla'];
     }

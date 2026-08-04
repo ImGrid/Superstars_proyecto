@@ -78,9 +78,15 @@ export class ConvocatoriaService {
     const c = await this.convocatoriaRepo.findById(id);
     if (!c) throw new NotFoundException('Convocatoria no encontrada');
 
-    // Proponente no puede ver convocatorias en borrador
+    // El proponente no ve convocatorias en borrador, SALVO que ya tenga una
+    // postulacion en ella: en ese caso tiene derecho a consultarla, porque es
+    // su propia postulacion la que esta en juego. Sin esta excepcion, "Mis
+    // postulaciones" mostraba una tarjeta cuyo boton llevaba a un error.
     if (user?.rol === RolUsuario.PROPONENTE && c.estado === EstadoConvocatoria.BORRADOR) {
-      throw new NotFoundException('Convocatoria no encontrada');
+      const yaPostulo = await this.convocatoriaRepo.tienePostulacionDeUsuario(id, user.id);
+      if (!yaPostulo) {
+        throw new NotFoundException('Convocatoria no encontrada');
+      }
     }
 
     return c;
