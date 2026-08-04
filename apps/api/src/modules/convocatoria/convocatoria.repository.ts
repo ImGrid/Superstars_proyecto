@@ -365,6 +365,22 @@ export class ConvocatoriaRepository {
   // vive en el modulo categoria. Aqui solo queda el check que usa el guard.
 
   // el evaluador esta en el pool de ALGUNA categoria de esta convocatoria
+  // ¿este usuario (proponente) ya tiene una postulacion en esta convocatoria?
+  // Se usa para dejarlo consultar la convocatoria aunque no sea visible por su
+  // estado: si ya postulo, tiene un interes legitimo en verla.
+  async tienePostulacionDeUsuario(convocatoriaId: number, usuarioId: number): Promise<boolean> {
+    const rows = await this.db
+      .select({ id: postulacion.id })
+      .from(postulacion)
+      .innerJoin(empresa, eq(empresa.id, postulacion.empresaId))
+      .where(and(
+        eq(postulacion.convocatoriaId, convocatoriaId),
+        eq(empresa.usuarioId, usuarioId),
+      ))
+      .limit(1);
+    return rows.length > 0;
+  }
+
   async isEvaluador(convocatoriaId: number, evaluadorId: number): Promise<boolean> {
     const rows = await this.db
       .select({ id: evaluadorCategoria.id })
@@ -411,9 +427,11 @@ export class ConvocatoriaRepository {
   }
 
   // calificaciones no aprobadas de las postulaciones de una categoria.
-  // Solo cuenta las de postulaciones que siguen en juego (en_evaluacion o
-  // calificado); las de postulaciones rechazadas quedan de auditoria pero no
-  // deben bloquear la seleccion de ganadores.
+  // Solo cuenta las de postulaciones que SIGUEN EN EVALUACION: si el
+  // responsable ya cerro la evaluacion de una propuesta, decidio conscientemente
+  // que los jurados que no entregaron quedaban fuera, y esas notas inconclusas
+  // no deben volver a bloquear la seleccion de ganadores. Las de postulaciones
+  // rechazadas o ya cerradas quedan de auditoria, sin frenar el proceso.
   async countCalificacionesNoAprobadas(categoriaId: number): Promise<number> {
     const [result] = await this.db
       .select({ count: count() })
@@ -421,7 +439,7 @@ export class ConvocatoriaRepository {
       .innerJoin(postulacion, eq(calificacion.postulacionId, postulacion.id))
       .where(and(
         eq(postulacion.categoriaId, categoriaId),
-        sql`${postulacion.estado} in ('en_evaluacion', 'calificado')`,
+        sql`${postulacion.estado} = 'en_evaluacion'`,
         sql`${calificacion.estado} != 'aprobado'`,
       ));
     return Number(result.count);

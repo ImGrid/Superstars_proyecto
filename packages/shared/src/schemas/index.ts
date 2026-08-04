@@ -74,6 +74,7 @@ export {
   type AssignEvaluadorDto,
   type CategoriaResponse,
   type EvaluadorCategoriaResponse,
+  type RemoverEvaluadorResponse,
 } from './categoria.schema';
 
 export {
@@ -164,7 +165,11 @@ export {
   type SaveCalificacionDto,
   type DevolverCalificacionDto,
   type AssignEvaluadorPostulacionDto,
+  repartirEvaluadoresSchema,
+  type RepartirEvaluadoresDto,
+  type RepartirEvaluadoresResponse,
   type AsignacionEvaluadorResponse,
+  type CerrarEvaluacionResponse,
   type EvaluadorCategoriaItem,
   type PostulacionEvaluableItem,
   type PostulacionDetalleEvaluador,

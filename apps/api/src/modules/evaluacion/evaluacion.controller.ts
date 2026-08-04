@@ -15,8 +15,15 @@ import {
   saveCalificacionSchema,
   devolverCalificacionSchema,
   assignEvaluadorPostulacionSchema,
+  repartirEvaluadoresSchema,
 } from '@superstars/shared';
-import type { AuthUser, SaveCalificacionDto, DevolverCalificacionDto, AssignEvaluadorPostulacionDto } from '@superstars/shared';
+import type {
+  AuthUser,
+  SaveCalificacionDto,
+  DevolverCalificacionDto,
+  AssignEvaluadorPostulacionDto,
+  RepartirEvaluadoresDto,
+} from '@superstars/shared';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { CheckConvocatoria } from '../convocatoria/decorators/check-convocatoria.decorator';
@@ -129,6 +136,47 @@ export class EvaluacionResponsableController {
   ) {
     const dto = devolverCalificacionSchema.parse(body);
     return this.evaluacionService.devolverCalificacion(convocatoriaId, calificacionId, dto);
+  }
+}
+
+// --- Reparto automatico de jurados en una categoria (responsable/admin) ---
+@Controller('convocatorias/:convocatoriaId/categorias/:categoriaId')
+export class RepartoEvaluadoresController {
+  constructor(private readonly evaluacionService: EvaluacionService) {}
+
+  // reparte el jurado de la categoria entre sus postulaciones en evaluacion
+  @Post('repartir-evaluadores')
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
+  @CheckConvocatoria('convocatoriaId')
+  @HttpCode(HttpStatus.OK)
+  async repartir(
+    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
+    @Param('categoriaId', ParseIntPipe) categoriaId: number,
+    @Body() body: RepartirEvaluadoresDto,
+    @CurrentUser() user: AuthUser,
+  ) {
+    const dto = repartirEvaluadoresSchema.parse(body);
+    return this.evaluacionService.repartirEvaluadores(
+      convocatoriaId, categoriaId, dto, user.id,
+    );
+  }
+}
+
+// --- Cierre de la evaluacion de una postulacion (responsable/admin) ---
+@Controller('convocatorias/:convocatoriaId/postulaciones/:postulacionId')
+export class CierreEvaluacionController {
+  constructor(private readonly evaluacionService: EvaluacionService) {}
+
+  // da por terminada la evaluacion y calcula el puntaje con las notas aprobadas
+  @Post('cerrar-evaluacion')
+  @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
+  @CheckConvocatoria('convocatoriaId')
+  @HttpCode(HttpStatus.OK)
+  async cerrarEvaluacion(
+    @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
+    @Param('postulacionId', ParseIntPipe) postulacionId: number,
+  ) {
+    return this.evaluacionService.cerrarEvaluacion(convocatoriaId, postulacionId);
   }
 }
 

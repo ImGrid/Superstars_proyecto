@@ -8,6 +8,8 @@ import type {
   CalificacionListItem,
   CalificacionDetalleResponsable,
   AsignacionEvaluadorResponse,
+  CerrarEvaluacionResponse,
+  RepartirEvaluadoresResponse,
 } from "@superstars/shared";
 
 // --- Evaluador ---
@@ -99,6 +101,34 @@ export function listAsignacionesEvaluador(convocatoriaId: number, postulacionId:
 }
 
 // asignar evaluador a una postulacion
+// Reparte automaticamente el jurado de una categoria entre sus propuestas
+// en evaluacion. Se puede volver a ejecutar: completa lo que falta.
+export function repartirEvaluadores(
+  convocatoriaId: number,
+  categoriaId: number,
+  evaluadoresPorPostulacion: number,
+) {
+  return apiClient
+    .post<RepartirEvaluadoresResponse>(
+      `/convocatorias/${convocatoriaId}/categorias/${categoriaId}/repartir-evaluadores`,
+      { evaluadoresPorPostulacion },
+    )
+    .then((r) => r.data);
+}
+
+// Cierra la evaluacion de una propuesta: calcula el puntaje con las notas
+// aprobadas y deja fuera a los jurados que no entregaron.
+export function cerrarEvaluacionPostulacion(
+  convocatoriaId: number,
+  postulacionId: number,
+) {
+  return apiClient
+    .post<CerrarEvaluacionResponse>(
+      `/convocatorias/${convocatoriaId}/postulaciones/${postulacionId}/cerrar-evaluacion`,
+    )
+    .then((r) => r.data);
+}
+
 export function assignEvaluadorPostulacion(
   convocatoriaId: number,
   postulacionId: number,

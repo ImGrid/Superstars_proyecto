@@ -398,7 +398,7 @@ export default function RevisionCalificacionPage({ params }: PageProps) {
         open={aprobarOpen}
         onOpenChange={setAprobarOpen}
         title="Aprobar calificación"
-        description="Al aprobar, el puntaje del evaluador será considerado para el cálculo final. Si todos los evaluadores están aprobados, se calculará el puntaje final automáticamente."
+        description="Al aprobar, el puntaje de este evaluador quedará considerado para el cálculo final. El puntaje de la propuesta se calcula cuando cierras su evaluación, desde la pestaña Evaluadores de la postulación."
         confirmLabel="Aprobar"
         onConfirm={() => aprobarMutation.mutate()}
         isLoading={aprobarMutation.isPending}

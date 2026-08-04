@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { eq, and, desc, sql } from 'drizzle-orm';
+import { eq, and, desc, inArray, sql } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/drizzle.provider';
 import type { DrizzleDB } from '../../database/drizzle.provider';
 import {
@@ -76,6 +76,17 @@ export class EvaluacionRepository {
         sql`${postulacion.estado} IN ('en_evaluacion', 'calificado', 'ganador', 'no_seleccionado')`,
       ))
       .orderBy(desc(postulacion.updatedAt));
+  }
+
+  // razon social de la empresa de una postulacion. El jurado necesita saber a
+  // quien esta calificando: en el listado ya lo ve, y sin esto la pantalla de
+  // calificacion solo mostraba el numero interno de la empresa.
+  async findEmpresaRazonSocial(empresaId: number): Promise<string | null> {
+    const rows = await this.db
+      .select({ razonSocial: empresa.razonSocial })
+      .from(empresa)
+      .where(eq(empresa.id, empresaId));
+    return rows[0]?.razonSocial ?? null;
   }
 
   // detalle de una postulacion (sin responseData para el listado)
@@ -239,6 +250,36 @@ export class EvaluacionRepository {
     };
   }
 
+  // Resumen para cerrar la evaluacion de una postulacion: cuantos jurados
+  // tiene asignados y en que estado dejo su nota cada uno. Sirve tanto para
+  // validar el cierre como para informarle al responsable que se descarta.
+  async resumenParaCierre(postulacionId: number) {
+    const asignados = await this.db
+      .select({ count: sql<number>`count(*)` })
+      .from(asignacionEvaluador)
+      .where(eq(asignacionEvaluador.postulacionId, postulacionId));
+
+    const califs = await this.db
+      .select({ estado: calificacion.estado, puntajeTotal: calificacion.puntajeTotal })
+      .from(calificacion)
+      .where(eq(calificacion.postulacionId, postulacionId));
+
+    const aprobadas = califs.filter(c => c.estado === 'aprobado');
+    const promedio = aprobadas.length > 0
+      ? aprobadas.reduce((sum, c) => sum + Number(c.puntajeTotal ?? 0), 0) / aprobadas.length
+      : null;
+
+    return {
+      evaluadoresAsignados: Number(asignados[0].count),
+      aprobadas: aprobadas.length,
+      // enviadas pero todavia sin revisar por el responsable
+      pendientesDeRevision: califs.filter(c => c.estado === 'completado').length,
+      // empezadas y nunca enviadas
+      sinTerminar: califs.filter(c => c.estado === 'en_progreso' || c.estado === 'devuelto').length,
+      promedioAprobadas: promedio,
+    };
+  }
+
   // actualizar puntaje final y estado de postulacion
   async updatePostulacionPuntaje(
     postulacionId: number,
@@ -322,6 +363,47 @@ export class EvaluacionRepository {
       .innerJoin(usuario, eq(asignacionEvaluador.evaluadorId, usuario.id))
       .where(eq(asignacionEvaluador.postulacionId, postulacionId))
       .orderBy(desc(asignacionEvaluador.createdAt));
+  }
+
+  // postulaciones de una categoria que estan en evaluacion (las unicas a las
+  // que tiene sentido asignarles jurados)
+  async findPostulacionesEnEvaluacion(categoriaId: number) {
+    return this.db
+      .select({ id: postulacion.id })
+      .from(postulacion)
+      .where(and(
+        eq(postulacion.categoriaId, categoriaId),
+        eq(postulacion.estado, 'en_evaluacion'),
+      ))
+      .orderBy(postulacion.id);
+  }
+
+  // asignaciones ya existentes sobre un conjunto de postulaciones. Sirven para
+  // respetar lo que el responsable asigno a mano y para arrancar el reparto
+  // contando la carga que cada jurado ya tiene.
+  async findAsignacionesDePostulaciones(postulacionIds: number[]) {
+    if (postulacionIds.length === 0) return [];
+    return this.db
+      .select({
+        postulacionId: asignacionEvaluador.postulacionId,
+        evaluadorId: asignacionEvaluador.evaluadorId,
+      })
+      .from(asignacionEvaluador)
+      .where(inArray(asignacionEvaluador.postulacionId, postulacionIds));
+  }
+
+  // alta masiva de asignaciones, todo o nada
+  async crearAsignacionesEnLote(
+    filas: { postulacionId: number; evaluadorId: number; asignadoPor: number }[],
+  ): Promise<number> {
+    if (filas.length === 0) return 0;
+    return this.db.transaction(async (tx) => {
+      const creadas = await tx
+        .insert(asignacionEvaluador)
+        .values(filas)
+        .returning({ id: asignacionEvaluador.id });
+      return creadas.length;
+    });
   }
 
   // asignar evaluador a postulacion

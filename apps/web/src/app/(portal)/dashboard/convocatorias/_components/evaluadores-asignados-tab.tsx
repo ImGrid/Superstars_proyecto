@@ -36,6 +36,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import {
   assignEvaluadorPostulacion,
   removeAsignacionEvaluador,
+  cerrarEvaluacionPostulacion,
 } from "@/lib/api/evaluacion.api";
 import {
   asignacionQueries,
@@ -49,12 +50,15 @@ interface EvaluadoresAsignadosTabProps {
   convocatoriaId: number;
   categoriaId: number;
   postulacionId: number;
+  // solo se puede cerrar la evaluacion mientras la propuesta esta en evaluacion
+  enEvaluacion: boolean;
 }
 
 export function EvaluadoresAsignadosTab({
   convocatoriaId,
   categoriaId,
   postulacionId,
+  enEvaluacion,
 }: EvaluadoresAsignadosTabProps) {
   const queryClient = useQueryClient();
 
@@ -132,6 +136,56 @@ export function EvaluadoresAsignadosTab({
     if (!selectedUserId) return;
     addMutation.mutate(Number(selectedUserId));
   }
+
+  // --- Cierre de la evaluacion ---
+
+  // se clasifica a los jurados asignados por lo que hicieron con su nota
+  const aprobados = (asignaciones ?? []).filter(
+    (a) => califMap.get(a.evaluadorId)?.estado === EstadoCalificacion.APROBADO,
+  );
+  const porRevisar = (asignaciones ?? []).filter(
+    (a) => califMap.get(a.evaluadorId)?.estado === EstadoCalificacion.COMPLETADO,
+  );
+  const sinEntregar = (asignaciones ?? []).filter((a) => {
+    const estado = califMap.get(a.evaluadorId)?.estado;
+    return estado !== EstadoCalificacion.APROBADO && estado !== EstadoCalificacion.COMPLETADO;
+  });
+
+  const [cerrarOpen, setCerrarOpen] = useState(false);
+
+  const cerrarMutation = useMutation({
+    mutationFn: () => cerrarEvaluacionPostulacion(convocatoriaId, postulacionId),
+    onSuccess: (resultado) => {
+      toast.success(
+        `Evaluación cerrada. Puntaje final: ${resultado.puntajeFinal} (calculado con ${resultado.calificacionesConsideradas} ${
+          resultado.calificacionesConsideradas === 1 ? "calificación" : "calificaciones"
+        }).`,
+      );
+      queryClient.invalidateQueries();
+      setCerrarOpen(false);
+    },
+    onError: (error: any) => {
+      const msg = error.response?.data?.message ?? "No se pudo cerrar la evaluación";
+      toast.error(Array.isArray(msg) ? msg[0] : msg);
+      setCerrarOpen(false);
+    },
+  });
+
+  // texto del aviso: cambia segun cuantos jurados quedarian fuera
+  const descripcionCierre =
+    sinEntregar.length === 0
+      ? `La propuesta quedará calificada con el promedio de las ${aprobados.length} calificaciones aprobadas. Esta acción no se puede deshacer.`
+      : `${sinEntregar.length} de los ${asignaciones?.length ?? 0} evaluadores asignados ${
+          sinEntregar.length === 1 ? "no entregó" : "no entregaron"
+        } su calificación: ${sinEntregar
+          .map((a) => a.evaluadorNombre)
+          .join(", ")}. Si cierras la evaluación, el puntaje se calculará solo con ${
+          aprobados.length === 1
+            ? "la calificación aprobada"
+            : `las ${aprobados.length} calificaciones aprobadas`
+        } y ${
+          sinEntregar.length === 1 ? "ese evaluador ya no podrá" : "esos evaluadores ya no podrán"
+        } calificar esta propuesta. Esta acción no se puede deshacer.`;
 
   if (isLoading) {
     return (
@@ -252,6 +306,53 @@ export function EvaluadoresAsignadosTab({
             </Table>
           </div>
         )}
+
+        {/* cierre de la evaluacion: solo mientras la propuesta esta en evaluacion
+            y hay al menos una calificacion aprobada con la que calcular */}
+        {enEvaluacion && totalAsignados > 0 && (
+          <div className="rounded-md border border-secondary-200 bg-secondary-50/60 p-4">
+            <p className="text-sm font-medium text-secondary-900">
+              Cerrar la evaluación de esta propuesta
+            </p>
+            <p className="mt-1 text-sm text-secondary-500">
+              {porRevisar.length > 0
+                ? `Hay ${porRevisar.length} ${
+                    porRevisar.length === 1
+                      ? "calificación enviada que todavía no revisaste"
+                      : "calificaciones enviadas que todavía no revisaste"
+                  }. Apruébalas o devuélvelas antes de cerrar.`
+                : aprobados.length === 0
+                  ? "Todavía no hay ninguna calificación aprobada, así que no hay con qué calcular el puntaje."
+                  : sinEntregar.length === 0
+                    ? `Los ${aprobados.length} evaluadores entregaron su calificación y ya fueron aprobadas.`
+                    : `${aprobados.length} de ${totalAsignados} evaluadores entregaron su calificación. Al cerrar, el puntaje se calculará solo con esas notas.`}
+            </p>
+            <Button
+              className="mt-3"
+              variant="secondary"
+              disabled={porRevisar.length > 0 || aprobados.length === 0 || cerrarMutation.isPending}
+              onClick={() => setCerrarOpen(true)}
+            >
+              {cerrarMutation.isPending ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <UserCheck className="size-4" />
+              )}
+              Cerrar evaluación y calcular puntaje
+            </Button>
+          </div>
+        )}
+
+        {/* dialogo confirmar cierre */}
+        <ConfirmDialog
+          open={cerrarOpen}
+          onOpenChange={setCerrarOpen}
+          title="Cerrar la evaluación de esta propuesta"
+          description={descripcionCierre}
+          confirmLabel="Cerrar evaluación"
+          onConfirm={() => cerrarMutation.mutate()}
+          isLoading={cerrarMutation.isPending}
+        />
 
         {/* dialogo confirmar remocion */}
         {deleteTarget && (
