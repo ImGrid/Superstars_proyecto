@@ -44,7 +44,11 @@ export function ResponseViewer({
 
   return (
     <Tabs defaultValue={firstId}>
-      <TabsList className="flex-wrap h-auto gap-1">
+      {/* Los titulos de seccion son largos y las pestañas pasan a una segunda
+          fila. La altura fija de TabsList viene con el prefijo de orientacion,
+          asi que hay que anularla con el mismo prefijo: un "h-auto" pelado no
+          la reemplaza y la segunda fila queda fuera de la barra. */}
+      <TabsList className="flex-wrap group-data-[orientation=horizontal]/tabs:h-auto gap-1">
         {schema.secciones.map((sec) => (
           <TabsTrigger key={sec.id} value={sec.id} className="text-xs">
             {sec.titulo}

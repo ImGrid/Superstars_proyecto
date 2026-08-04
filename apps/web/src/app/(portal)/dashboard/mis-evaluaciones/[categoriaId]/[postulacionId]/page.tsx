@@ -177,7 +177,9 @@ export default function CalificacionPage({ params }: PageProps) {
         </Button>
         <div className="flex-1 min-w-0">
           <h1 className="font-heading text-lg font-bold text-secondary-900 truncate">
-            Evaluación — Empresa #{detalleData.postulacion.empresaId}
+            {detalleData.postulacion.empresaRazonSocial
+              ? `Evaluación — ${detalleData.postulacion.empresaRazonSocial}`
+              : `Evaluación — Empresa #${detalleData.postulacion.empresaId}`}
           </h1>
           <div className="flex items-center gap-2 text-xs text-secondary-500">
             <Badge variant="outline" className="text-xs">
