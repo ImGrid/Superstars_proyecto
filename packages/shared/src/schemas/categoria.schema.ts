@@ -62,3 +62,14 @@ export interface EvaluadorCategoriaResponse {
   nombre: string;
   createdAt: string;
 }
+
+// DELETE /convocatorias/:convocatoriaId/categorias/:categoriaId/evaluadores/:evaluadorId
+// Al quitar a un jurado de la categoria se le retiran las postulaciones que
+// tenia asignadas y se eliminan sus calificaciones. Los puntajes de las
+// propuestas afectadas se recalculan sin su nota. Los conteos permiten
+// informarle al responsable el alcance real de la accion.
+export interface RemoverEvaluadorResponse {
+  asignacionesEliminadas: number;
+  calificacionesEliminadas: number;
+  puntajesRecalculados: number;
+}

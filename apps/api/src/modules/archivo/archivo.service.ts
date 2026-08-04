@@ -14,6 +14,7 @@ import { ArchivoRepository } from './archivo.repository';
 import { PostulacionRepository } from '../postulacion/postulacion.repository';
 import { FormularioService } from '../formulario/formulario.service';
 import { ConvocatoriaAccessService } from '../convocatoria/convocatoria-access.service';
+import { CategoriaService } from '../categoria/categoria.service';
 import { EvaluacionRepository } from '../evaluacion/evaluacion.repository';
 import { STORAGE_SERVICE, type StorageService } from '../storage/storage.interface';
 
@@ -32,6 +33,7 @@ export class ArchivoService {
     private readonly postulacionRepo: PostulacionRepository,
     private readonly formularioService: FormularioService,
     private readonly convocatoriaAccess: ConvocatoriaAccessService,
+    private readonly categoriaService: CategoriaService,
     private readonly evaluacionRepo: EvaluacionRepository,
     @Inject(STORAGE_SERVICE) private readonly storage: StorageService,
   ) {}
@@ -187,11 +189,17 @@ export class ArchivoService {
     }
   }
 
-  // Verifica que el evaluador este asignado a la postulacion
+  // Verifica que el evaluador siga en el jurado de la categoria y tenga la
+  // postulacion asignada. Se exigen los dos niveles: sin el primero, un
+  // evaluador retirado del jurado seguia descargando los archivos adjuntos.
   private async verificarAccesoEvaluador(postulacionId: number, userId: number): Promise<void> {
     const post = await this.getPostulacionOrFail(postulacionId);
     if (!ESTADOS_EVALUABLES.includes(post.estado as EstadoPostulacion)) {
       throw new ForbiddenException('La postulación no está en estado de evaluación');
+    }
+    const enJurado = await this.categoriaService.esEvaluadorDeCategoria(post.categoriaId, userId);
+    if (!enJurado) {
+      throw new ForbiddenException('No estás asignado como evaluador a esta categoría');
     }
     const esAsignado = await this.evaluacionRepo.isAsignadoAPostulacion(postulacionId, userId);
     if (!esAsignado) {

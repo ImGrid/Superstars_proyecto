@@ -1,6 +1,11 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { RolUsuario, EstadoConvocatoria } from '@superstars/shared';
-import type { CreateCategoriaDto, UpdateCategoriaDto, AuthUser } from '@superstars/shared';
+import type {
+  CreateCategoriaDto,
+  UpdateCategoriaDto,
+  AuthUser,
+  RemoverEvaluadorResponse,
+} from '@superstars/shared';
 import { CategoriaRepository } from './categoria.repository';
 
 @Injectable()
@@ -33,16 +38,20 @@ export class CategoriaService {
     return this.categoriaRepo.isEvaluadorDeCategoria(categoriaId, evaluadorId);
   }
 
+  // jurado de la categoria, sin revalidar la convocatoria: lo usa el reparto
+  // automatico, que ya verifico la coherencia antes de llamar
+  async getPoolEvaluadores(categoriaId: number) {
+    return this.categoriaRepo.findEvaluadores(categoriaId);
+  }
+
   // --- CRUD ---
 
   async findByConvocatoria(convocatoriaId: number, user?: AuthUser) {
     // Proponente no ve categorias de convocatorias en borrador, y recibe la
     // version SIN conteos (no exponemos volumen de jurado ni de postulaciones).
+    // Excepcion: si ya postulo, puede consultarlas, igual que la convocatoria.
     if (user?.rol === RolUsuario.PROPONENTE) {
-      const estado = await this.categoriaRepo.getConvocatoriaEstado(convocatoriaId);
-      if (!estado || estado === EstadoConvocatoria.BORRADOR) {
-        throw new NotFoundException('Convocatoria no encontrada');
-      }
+      await this.verificarVisibleParaProponente(convocatoriaId, user.id, 'Convocatoria no encontrada');
       return this.categoriaRepo.findByConvocatoriaId(convocatoriaId);
     }
     // admin/responsable: incluye el resumen de configuracion y actividad por categoria
@@ -52,10 +61,7 @@ export class CategoriaService {
   async getOne(convocatoriaId: number, categoriaId: number, user?: AuthUser) {
     const categoria = await this.verificarPerteneceAConvocatoria(categoriaId, convocatoriaId);
     if (user?.rol === RolUsuario.PROPONENTE) {
-      const estado = await this.categoriaRepo.getConvocatoriaEstado(convocatoriaId);
-      if (!estado || estado === EstadoConvocatoria.BORRADOR) {
-        throw new NotFoundException('Categoría no encontrada');
-      }
+      await this.verificarVisibleParaProponente(convocatoriaId, user.id, 'Categoría no encontrada');
     }
     return categoria;
   }
@@ -125,12 +131,24 @@ export class CategoriaService {
     }
   }
 
-  async removeEvaluador(convocatoriaId: number, categoriaId: number, evaluadorId: number) {
+  // Quitar a un jurado de la categoria le retira las postulaciones asignadas y
+  // elimina sus calificaciones; los puntajes afectados se recalculan sin su nota.
+  // Devuelve los conteos para poder informarle el alcance al responsable.
+  async removeEvaluador(
+    convocatoriaId: number,
+    categoriaId: number,
+    evaluadorId: number,
+  ): Promise<RemoverEvaluadorResponse> {
     await this.verificarPerteneceAConvocatoria(categoriaId, convocatoriaId);
-    const removed = await this.categoriaRepo.removeEvaluador(categoriaId, evaluadorId);
-    if (!removed) {
+    const resultado = await this.categoriaRepo.removeEvaluador(categoriaId, evaluadorId);
+    if (!resultado.removed) {
       throw new NotFoundException('El usuario no es evaluador de esta categoría');
     }
+    return {
+      asignacionesEliminadas: resultado.asignacionesEliminadas,
+      calificacionesEliminadas: resultado.calificacionesEliminadas,
+      puntajesRecalculados: resultado.puntajesRecalculados,
+    };
   }
 
   // --- Resolucion (consumido por ConvocatoriaService al seleccionar ganadores) ---
@@ -147,7 +165,29 @@ export class CategoriaService {
 
   // --- Helpers privados ---
 
-  // solo se pueden modificar categorias (y su pool) mientras la convocatoria esta en borrador
+  // El proponente no ve convocatorias en borrador, salvo que ya tenga una
+  // postulacion en ellas: en ese caso tiene un interes legitimo y necesita
+  // poder consultarlas desde "Mis postulaciones".
+  private async verificarVisibleParaProponente(
+    convocatoriaId: number,
+    usuarioId: number,
+    mensaje: string,
+  ) {
+    const estado = await this.categoriaRepo.getConvocatoriaEstado(convocatoriaId);
+    if (!estado) {
+      throw new NotFoundException(mensaje);
+    }
+    if (estado === EstadoConvocatoria.BORRADOR) {
+      const yaPostulo = await this.categoriaRepo.tienePostulacionDeUsuario(convocatoriaId, usuarioId);
+      if (!yaPostulo) {
+        throw new NotFoundException(mensaje);
+      }
+    }
+  }
+
+  // Solo se pueden crear, editar o borrar categorias mientras la convocatoria
+  // esta en borrador. El pool de evaluadores NO pasa por aqui a proposito: el
+  // jurado se arma y se ajusta despues de publicar la convocatoria.
   private async verificarEditable(convocatoriaId: number) {
     const estado = await this.categoriaRepo.getConvocatoriaEstado(convocatoriaId);
     if (!estado) {

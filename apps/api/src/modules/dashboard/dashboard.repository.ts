@@ -376,6 +376,11 @@ export class DashboardRepository {
         eq(calificacion.evaluadorId, asignacionEvaluador.evaluadorId),
       ))
       .innerJoin(postulacion, eq(postulacion.id, asignacionEvaluador.postulacionId))
+      // solo cuenta si sigue en el jurado de la categoria de esa postulacion
+      .innerJoin(evaluadorCategoria, and(
+        eq(evaluadorCategoria.categoriaId, postulacion.categoriaId),
+        eq(evaluadorCategoria.evaluadorId, asignacionEvaluador.evaluadorId),
+      ))
       .where(and(
         eq(asignacionEvaluador.evaluadorId, evaluadorId),
         eq(postulacion.estado, 'en_evaluacion'),
@@ -419,6 +424,11 @@ export class DashboardRepository {
       .innerJoin(postulacion, eq(postulacion.id, asignacionEvaluador.postulacionId))
       .innerJoin(empresa, eq(empresa.id, postulacion.empresaId))
       .innerJoin(convocatoria, eq(convocatoria.id, postulacion.convocatoriaId))
+      // solo lista si sigue en el jurado de la categoria de esa postulacion
+      .innerJoin(evaluadorCategoria, and(
+        eq(evaluadorCategoria.categoriaId, postulacion.categoriaId),
+        eq(evaluadorCategoria.evaluadorId, asignacionEvaluador.evaluadorId),
+      ))
       .leftJoin(calificacion, and(
         eq(calificacion.postulacionId, asignacionEvaluador.postulacionId),
         eq(calificacion.evaluadorId, asignacionEvaluador.evaluadorId),

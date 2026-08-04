@@ -119,16 +119,17 @@ export class CategoriaController {
     return this.categoriaService.addEvaluador(convocatoriaId, categoriaId, dto.evaluadorId, user.id);
   }
 
-  // Remover evaluador del pool de la categoria
+  // Remover evaluador del pool de la categoria. Devuelve cuantas postulaciones
+  // asignadas se le retiraron, para poder informarlo en pantalla.
   @Delete(':categoriaId/evaluadores/:evaluadorId')
   @Roles(RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA)
   @CheckConvocatoria('convocatoriaId')
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(HttpStatus.OK)
   async removeEvaluador(
     @Param('convocatoriaId', ParseIntPipe) convocatoriaId: number,
     @Param('categoriaId', ParseIntPipe) categoriaId: number,
     @Param('evaluadorId', ParseIntPipe) evaluadorId: number,
   ) {
-    await this.categoriaService.removeEvaluador(convocatoriaId, categoriaId, evaluadorId);
+    return this.categoriaService.removeEvaluador(convocatoriaId, categoriaId, evaluadorId);
   }
 }

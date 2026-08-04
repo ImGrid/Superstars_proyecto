@@ -5,6 +5,7 @@ import type {
   CategoriaResponse,
   AssignEvaluadorDto,
   EvaluadorCategoriaResponse,
+  RemoverEvaluadorResponse,
 } from "@superstars/shared";
 
 // --- CRUD de categorias (anidado bajo la convocatoria) ---
@@ -74,12 +75,16 @@ export function addCategoriaEvaluador(
     .then((r) => r.data);
 }
 
+// Quitar a un jurado de la categoria. La respuesta informa cuantas
+// postulaciones asignadas se le retiraron junto con el acceso.
 export function removeCategoriaEvaluador(
   convocatoriaId: number,
   categoriaId: number,
   evaluadorId: number,
 ) {
-  return apiClient.delete(
-    `/convocatorias/${convocatoriaId}/categorias/${categoriaId}/evaluadores/${evaluadorId}`,
-  );
+  return apiClient
+    .delete<RemoverEvaluadorResponse>(
+      `/convocatorias/${convocatoriaId}/categorias/${categoriaId}/evaluadores/${evaluadorId}`,
+    )
+    .then((r) => r.data);
 }

@@ -9,10 +9,26 @@ import {
   EstadoCalificacion,
   EstadoPostulacion,
 } from '@superstars/shared';
-import type { SaveCalificacionDto, DevolverCalificacionDto, AssignEvaluadorPostulacionDto } from '@superstars/shared';
+import type {
+  SaveCalificacionDto,
+  DevolverCalificacionDto,
+  AssignEvaluadorPostulacionDto,
+  CerrarEvaluacionResponse,
+  RepartirEvaluadoresDto,
+  RepartirEvaluadoresResponse,
+} from '@superstars/shared';
 import { EvaluacionRepository } from './evaluacion.repository';
 import { CalificacionStateMachine } from './calificacion.state-machine';
 import { CategoriaService } from '../categoria/categoria.service';
+
+// estados en los que el jurado puede ver una propuesta. Antes de llegar a
+// evaluacion la propuesta es material privado del postulante.
+const ESTADOS_VISIBLES_EVALUADOR = [
+  EstadoPostulacion.EN_EVALUACION,
+  EstadoPostulacion.CALIFICADO,
+  EstadoPostulacion.GANADOR,
+  EstadoPostulacion.NO_SELECCIONADO,
+];
 
 @Injectable()
 export class EvaluacionService {
@@ -38,7 +54,10 @@ export class EvaluacionService {
 
   // detalle de postulacion (para que el evaluador vea la propuesta)
   async findPostulacionDetalle(categoriaId: number, postulacionId: number, evaluadorId: number) {
-    // el gate real es la asignacion (nivel 2); la categoria da coherencia de la ruta
+    // se exigen los dos niveles: seguir en el jurado de la categoria y tener la
+    // postulacion asignada. Sin el primero, un evaluador retirado del jurado
+    // seguia leyendo las propuestas que ya tenia asignadas.
+    await this.verificarPoolCategoria(categoriaId, evaluadorId);
     await this.verificarAsignacionPostulacion(postulacionId, evaluadorId);
 
     const post = await this.evaluacionRepo.findPostulacionById(postulacionId);
@@ -48,15 +67,21 @@ export class EvaluacionService {
     if (post.categoriaId !== categoriaId) {
       throw new ForbiddenException('La postulación no pertenece a esta categoría');
     }
+    // el jurado solo ve propuestas que llegaron a evaluacion; nunca un borrador
+    // ni una propuesta enviada que el responsable todavia no aprobo
+    if (!ESTADOS_VISIBLES_EVALUADOR.includes(post.estado as EstadoPostulacion)) {
+      throw new ForbiddenException('Esta propuesta no está disponible para evaluar');
+    }
 
     // obtener calificacion del evaluador si existe
     const calif = await this.evaluacionRepo.findCalificacion(postulacionId, evaluadorId);
     const detalles = calif
       ? await this.evaluacionRepo.findDetalles(calif.id)
       : [];
+    const empresaRazonSocial = await this.evaluacionRepo.findEmpresaRazonSocial(post.empresaId);
 
     return {
-      postulacion: post,
+      postulacion: { ...post, empresaRazonSocial },
       calificacion: calif,
       detalles,
     };
@@ -74,8 +99,10 @@ export class EvaluacionService {
     if (!post) {
       throw new NotFoundException('Postulación no encontrada');
     }
+    // debe seguir en el jurado de la categoria, no solo tener la asignacion
+    await this.verificarPoolCategoria(post.categoriaId, evaluadorId);
     if (post.estado !== EstadoPostulacion.EN_EVALUACION) {
-      throw new ConflictException('La postulación no está en estado de evaluación');
+      throw new ConflictException(this.mensajeEvaluacionCerrada(post.estado));
     }
 
     // validar puntajes contra los rangos de la rubrica de la categoria de la postulacion
@@ -131,6 +158,12 @@ export class EvaluacionService {
     const post = await this.evaluacionRepo.findPostulacionById(postulacionId);
     if (!post) {
       throw new NotFoundException('Postulación no encontrada');
+    }
+    // debe seguir en el jurado de la categoria, no solo tener la asignacion
+    await this.verificarPoolCategoria(post.categoriaId, evaluadorId);
+    // si la evaluacion ya se cerro, tampoco se puede enviar una nota a medias
+    if (post.estado !== EstadoPostulacion.EN_EVALUACION) {
+      throw new ConflictException(this.mensajeEvaluacionCerrada(post.estado));
     }
 
     const calif = await this.evaluacionRepo.findCalificacion(postulacionId, evaluadorId);
@@ -190,14 +223,14 @@ export class EvaluacionService {
       );
     }
 
-    const updated = await this.evaluacionRepo.updateCalificacion(calificacionId, {
+    // Aprobar solo aprueba. El cierre de la evaluacion de la postulacion (y con
+    // el, el calculo del puntaje) es una accion aparte y explicita del
+    // responsable: ver cerrarEvaluacion(). Antes se cerraba aqui de forma
+    // automatica contando solo las calificaciones existentes, lo que dejaba
+    // fuera a los jurados que aun no habian empezado y los bloqueaba sin aviso.
+    return this.evaluacionRepo.updateCalificacion(calificacionId, {
       estado: EstadoCalificacion.APROBADO,
     });
-
-    // verificar si TODAS las calificaciones de la postulacion estan aprobadas
-    await this.verificarYCalcularPuntajeFinal(calif.postulacionId);
-
-    return updated;
   }
 
   // devolver calificacion al evaluador
@@ -214,6 +247,57 @@ export class EvaluacionService {
       estado: EstadoCalificacion.DEVUELTO,
       comentarioResponsable: dto.comentarioResponsable,
     });
+  }
+
+  // Cerrar la evaluacion de una postulacion (en_evaluacion -> calificado).
+  // Es la accion explicita que reemplaza al viejo cierre automatico: el
+  // responsable decide dar por terminada la evaluacion y el puntaje se calcula
+  // con las notas aprobadas. Los jurados que no entregaron quedan fuera.
+  async cerrarEvaluacion(
+    convocatoriaId: number,
+    postulacionId: number,
+  ): Promise<CerrarEvaluacionResponse> {
+    const post = await this.verificarPostulacionEnConvocatoria(postulacionId, convocatoriaId);
+
+    if (post.estado !== EstadoPostulacion.EN_EVALUACION) {
+      throw new ConflictException(
+        `Solo se puede cerrar la evaluación de una postulación que está en evaluación. Esta postulación está en estado "${post.estado}".`,
+      );
+    }
+
+    const resumen = await this.evaluacionRepo.resumenParaCierre(postulacionId);
+
+    // Las notas ya enviadas tienen que resolverse antes: cerrar sin revisarlas
+    // descartaria trabajo que el jurado si entrego.
+    if (resumen.pendientesDeRevision > 0) {
+      throw new BadRequestException(
+        `Hay ${resumen.pendientesDeRevision} calificación(es) enviadas que todavía no revisaste. Apruébalas o devuélvelas antes de cerrar la evaluación.`,
+      );
+    }
+
+    // sin ninguna nota aprobada no hay con que calcular un puntaje
+    if (resumen.aprobadas === 0 || resumen.promedioAprobadas === null) {
+      throw new BadRequestException(
+        'No se puede cerrar la evaluación porque no hay ninguna calificación aprobada. Si esta postulación no se pudo evaluar, recházala indicando el motivo.',
+      );
+    }
+
+    const puntajeFinal = resumen.promedioAprobadas.toFixed(2);
+    const actualizada = await this.evaluacionRepo.updatePostulacionPuntaje(
+      postulacionId,
+      puntajeFinal,
+      EstadoPostulacion.CALIFICADO,
+    );
+    if (!actualizada) {
+      throw new ConflictException('La postulación fue modificada por otro proceso');
+    }
+
+    return {
+      postulacionId,
+      puntajeFinal,
+      calificacionesConsideradas: resumen.aprobadas,
+      evaluadoresSinEntregar: resumen.evaluadoresAsignados - resumen.aprobadas,
+    };
   }
 
   // --- Asignacion de evaluadores a postulaciones (admin/responsable) ---
@@ -240,11 +324,20 @@ export class EvaluacionService {
       throw new ForbiddenException('La postulación no pertenece a esta convocatoria');
     }
 
+    // solo se asignan jurados a propuestas que ya fueron aprobadas para evaluar.
+    // Sin este filtro se podia asignar un jurado a un borrador sin enviar, y el
+    // jurado terminaba leyendo datos que el postulante todavia no habia entregado.
+    if (post.estado !== EstadoPostulacion.EN_EVALUACION) {
+      throw new BadRequestException(
+        'Solo se pueden asignar evaluadores a postulaciones aprobadas para evaluación. Primero apruébala desde la revisión.',
+      );
+    }
+
     // coherencia: solo se asigna (nivel 2) si el evaluador esta en el pool (nivel 1) de la categoria
     const enPool = await this.categoriaService.esEvaluadorDeCategoria(post.categoriaId, dto.evaluadorId);
     if (!enPool) {
       throw new BadRequestException(
-        'El evaluador no está en el pool de esta categoría. Primero asígnalo a la categoría.',
+        'El evaluador no está en el jurado de esta categoría. Primero agrégalo al jurado.',
       );
     }
 
@@ -261,6 +354,108 @@ export class EvaluacionService {
       }
       throw error;
     }
+  }
+
+  // Reparto automatico de jurados entre las propuestas de una categoria.
+  // Se puede volver a ejecutar: respeta lo ya asignado (a mano o en un reparto
+  // anterior) y solo completa lo que falta, contando la carga previa para que
+  // el resultado quede parejo igual.
+  async repartirEvaluadores(
+    convocatoriaId: number,
+    categoriaId: number,
+    dto: RepartirEvaluadoresDto,
+    asignadoPor: number,
+  ): Promise<RepartirEvaluadoresResponse> {
+    await this.categoriaService.verificarPerteneceAConvocatoria(categoriaId, convocatoriaId);
+
+    const pool = await this.categoriaService.getPoolEvaluadores(categoriaId);
+    if (pool.length === 0) {
+      throw new BadRequestException(
+        'Esta categoría todavía no tiene jurados. Agrega evaluadores al jurado antes de repartir.',
+      );
+    }
+
+    const porPropuesta = dto.evaluadoresPorPostulacion;
+    if (porPropuesta > pool.length) {
+      throw new BadRequestException(
+        `Pediste ${porPropuesta} evaluadores por propuesta, pero el jurado de esta categoría tiene ${pool.length}. Agrega más evaluadores al jurado o pide un número menor.`,
+      );
+    }
+
+    const postulaciones = await this.evaluacionRepo.findPostulacionesEnEvaluacion(categoriaId);
+    if (postulaciones.length === 0) {
+      throw new BadRequestException(
+        'No hay postulaciones en evaluación en esta categoría. Aprueba las postulaciones antes de repartir el jurado.',
+      );
+    }
+
+    // punto de partida: lo que ya esta asignado
+    const ids = postulaciones.map(p => p.id);
+    const existentes = await this.evaluacionRepo.findAsignacionesDePostulaciones(ids);
+
+    const carga = new Map<number, number>(pool.map(e => [e.evaluadorId, 0]));
+    const asignadosPorPropuesta = new Map<number, Set<number>>(ids.map(id => [id, new Set<number>()]));
+    for (const a of existentes) {
+      asignadosPorPropuesta.get(a.postulacionId)?.add(a.evaluadorId);
+      // solo cuenta la carga de quienes siguen en el jurado
+      if (carga.has(a.evaluadorId)) {
+        carga.set(a.evaluadorId, carga.get(a.evaluadorId)! + 1);
+      }
+    }
+
+    // Se baraja el jurado una vez y despues se ordena por carga. El orden de
+    // JavaScript es estable, asi que entre jurados con la misma carga se
+    // conserva el orden barajado: reparto parejo, sin patron repetitivo.
+    const idsPool = this.barajar(pool.map(e => e.evaluadorId));
+
+    const nuevas: { postulacionId: number; evaluadorId: number; asignadoPor: number }[] = [];
+    let postulacionesYaCompletas = 0;
+    let postulacionesAfectadas = 0;
+
+    for (const p of postulaciones) {
+      const yaAsignados = asignadosPorPropuesta.get(p.id)!;
+      const faltan = porPropuesta - yaAsignados.size;
+      if (faltan <= 0) {
+        postulacionesYaCompletas++;
+        continue;
+      }
+
+      const candidatos = idsPool
+        .filter(id => !yaAsignados.has(id))
+        .sort((a, b) => carga.get(a)! - carga.get(b)!)
+        .slice(0, faltan);
+
+      for (const evaluadorId of candidatos) {
+        nuevas.push({ postulacionId: p.id, evaluadorId, asignadoPor });
+        carga.set(evaluadorId, carga.get(evaluadorId)! + 1);
+      }
+      if (candidatos.length > 0) postulacionesAfectadas++;
+    }
+
+    const asignacionesCreadas = await this.evaluacionRepo.crearAsignacionesEnLote(nuevas);
+
+    return {
+      asignacionesCreadas,
+      postulacionesAfectadas,
+      postulacionesYaCompletas,
+      evaluadoresPorPostulacion: porPropuesta,
+      cargaPorEvaluador: pool.map(e => ({
+        evaluadorId: e.evaluadorId,
+        nombre: e.nombre,
+        totalAsignadas: carga.get(e.evaluadorId) ?? 0,
+      })),
+    };
+  }
+
+  // mezcla al azar (Fisher-Yates) para que el desempate por carga no siga
+  // siempre el mismo orden de jurados
+  private barajar(ids: number[]): number[] {
+    const copia = [...ids];
+    for (let i = copia.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copia[i], copia[j]] = [copia[j], copia[i]];
+    }
+    return copia;
   }
 
   // desasignar evaluador de una postulacion
@@ -281,6 +476,17 @@ export class EvaluacionService {
   }
 
   // --- Helpers privados ---
+
+  // Explica al jurado por que ya no puede cargar su nota, en lugar de
+  // devolverle el nombre tecnico del estado.
+  private mensajeEvaluacionCerrada(estado: string): string {
+    if (estado === EstadoPostulacion.CALIFICADO
+      || estado === EstadoPostulacion.GANADOR
+      || estado === EstadoPostulacion.NO_SELECCIONADO) {
+      return 'La evaluación de esta propuesta ya fue cerrada por el responsable, así que no se pueden registrar más calificaciones. Si necesitas cargar la tuya, comunícate con la persona responsable de la convocatoria.';
+    }
+    return 'Esta propuesta no está disponible para evaluar en este momento.';
+  }
 
   // el evaluador debe estar en el pool (nivel 1) de la categoria
   private async verificarPoolCategoria(categoriaId: number, evaluadorId: number) {
@@ -362,16 +568,4 @@ export class EvaluacionService {
     }
   }
 
-  // si todas las calificaciones de una postulacion estan aprobadas, calcular promedio
-  private async verificarYCalcularPuntajeFinal(postulacionId: number) {
-    const stats = await this.evaluacionRepo.countCalificacionesByPostulacion(postulacionId);
-
-    if (stats.todasAprobadas && stats.promedioPuntaje !== null) {
-      await this.evaluacionRepo.updatePostulacionPuntaje(
-        postulacionId,
-        stats.promedioPuntaje.toFixed(2),
-        EstadoPostulacion.CALIFICADO,
-      );
-    }
-  }
 }
