@@ -212,6 +212,28 @@ export default function ConvocatoriaDetallePage({
         ? formatMoney(String(Math.max(...montos)))
         : `${formatMoney(String(Math.min(...montos)))} – ${formatMoney(String(Math.max(...montos)))}`;
 
+  // Los documentos que se repiten en todas las categorias se muestran una sola
+  // vez, arriba. En la practica casi todos lo son: el responsable esta obligado
+  // a subir las bases y los criterios a cada categoria, asi que sin agrupar la
+  // misma lista aparece dos veces y ocupa mas de un cuarto de la pagina.
+  const categorias = convocatoria.categorias;
+  const nombresComunes =
+    categorias.length > 1
+      ? categorias[0].documentos
+          .map((d) => d.nombre)
+          .filter((nombre) =>
+            categorias.every((c) => c.documentos.some((d) => d.nombre === nombre)),
+          )
+      : [];
+  const documentosComunes = categorias.length > 1
+    ? categorias[0].documentos.filter((d) => nombresComunes.includes(d.nombre))
+    : [];
+  const documentosPropios = (categoriaId: number) => {
+    const categoria = categorias.find((c) => c.id === categoriaId);
+    if (!categoria) return [];
+    return categoria.documentos.filter((d) => !nombresComunes.includes(d.nombre));
+  };
+
   return (
     <div className="pt-28 pb-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -227,25 +249,17 @@ export default function ConvocatoriaDetallePage({
           </div>
         )}
 
-        {/* sidebar mobile (antes de contenido principal) */}
-        <div className="mb-8 lg:hidden">
-          <SidebarCard
-            convocatoria={convocatoria}
-            premioLabel={premioLabel}
-            deptos={deptos}
-            deadlineText={deadlineText}
-            plazoExtendido={plazoExtendido}
-          />
-        </div>
-
         <div className="grid gap-8 lg:grid-cols-3">
-          {/* columna izquierda */}
-          <div className="lg:col-span-2">
+          {/* columna izquierda. min-w-0 es imprescindible: por defecto un item de
+              grid no baja de su ancho de contenido minimo, asi que una sola palabra
+              larga en la descripcion (una URL, un correo) estiraba la columna y
+              hacia que TODA la pagina se pudiera arrastrar de lado en el celular */}
+          <div className="min-w-0 lg:col-span-2">
             {/* estado + titulo */}
             <div className="mb-1">
               <StateBadge tipo="convocatoria" valor={convocatoria.estado} />
             </div>
-            <h1 className="mt-2 font-display text-3xl leading-[1.2] tracking-[0.01em] text-primary-800 sm:text-4xl">
+            <h1 className="mt-2 font-display text-3xl leading-[1.2] tracking-[0.01em] break-words text-primary-800 sm:text-4xl">
               {convocatoria.nombre}
             </h1>
 
@@ -253,7 +267,7 @@ export default function ConvocatoriaDetallePage({
                 Los anchos relativos son los del lockup oficial (ver
                 sponsors-strip.tsx); --logo es el ancho de FUNDES */}
             <div className="mt-4 flex flex-wrap items-center gap-y-3 [--logo:84px] gap-x-[calc(var(--logo)*0.4)] sm:[--logo:96px]">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-secondary-400">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-secondary-600">
                 En alianza con
               </span>
               {[
@@ -273,6 +287,18 @@ export default function ConvocatoriaDetallePage({
               ))}
             </div>
 
+            {/* En el celular la ficha va despues del titulo: antes aparecia arriba
+                de todo y se leia el plazo y el premio sin saber de que convocatoria */}
+            <div className="mt-6 lg:hidden">
+              <SidebarCard
+                convocatoria={convocatoria}
+                premioLabel={premioLabel}
+                deptos={deptos}
+                deadlineText={deadlineText}
+                plazoExtendido={plazoExtendido}
+              />
+            </div>
+
             {/* tabs */}
             <Tabs defaultValue="descripcion" className="mt-8">
               <TabsList className="w-full justify-start">
@@ -286,78 +312,86 @@ export default function ConvocatoriaDetallePage({
 
               {/* tab: descripcion + bases + documentos */}
               <TabsContent value="descripcion" className="mt-6 space-y-8">
-                {/* descripcion de la convocatoria */}
+                {/* descripcion de la convocatoria. max-w-[68ch] mantiene la linea
+                    en el rango legible (50-75 caracteres); break-words evita que
+                    una palabra o enlace largo desborde la pantalla en el celular */}
                 {convocatoria.descripcion && (
-                  <div className="prose prose-lg max-w-none text-secondary-700">
+                  <div className="prose prose-lg max-w-[68ch] break-words text-secondary-700">
                     <p className="whitespace-pre-line">{convocatoria.descripcion}</p>
                   </div>
                 )}
 
-                {/* categorias: cada una con su premio, bases y documentos */}
-                {convocatoria.categorias.map((categoria) => (
-                  <div
-                    key={categoria.id}
-                    className="rounded-xl border border-secondary-200 p-6"
-                  >
-                    <div className="mb-3 flex flex-wrap items-center gap-3">
-                      <h3 className="text-lg font-semibold text-primary-800">
+                {/* categorias: cada una con su premio, descripcion y bases */}
+                {categorias.map((categoria) => {
+                  const propios = documentosPropios(categoria.id);
+                  return (
+                    <div
+                      key={categoria.id}
+                      className="rounded-xl border border-secondary-200 p-5 sm:p-6"
+                    >
+                      <h3 className="text-lg font-semibold break-words text-primary-800">
                         {categoria.nombre}
                       </h3>
-                      <Badge variant="secondary" className="text-sm">
-                        Premio: {formatMoney(categoria.monto)} · {categoria.numeroGanadores} ganadores
-                      </Badge>
-                    </div>
 
-                    {categoria.descripcion && (
-                      <p className="mb-4 whitespace-pre-line text-secondary-700">
-                        {categoria.descripcion}
+                      {/* el premio es el dato que mas pesa al elegir: va destacado
+                          y no escondido en una etiqueta gris */}
+                      <p className="mt-2 font-display text-2xl font-bold text-primary-700">
+                        {formatMoney(categoria.monto)}
                       </p>
-                    )}
+                      <p className="text-sm text-secondary-600">
+                        para cada una de las {categoria.numeroGanadores} empresas ganadoras
+                      </p>
 
-                    {categoria.bases && (
-                      <div className="mb-4">
-                        <h4 className="mb-2 font-semibold text-primary-800">
-                          Bases y requisitos
-                        </h4>
-                        <div className="prose max-w-none text-secondary-700">
-                          <p className="whitespace-pre-line">{categoria.bases}</p>
-                        </div>
-                      </div>
-                    )}
+                      {categoria.descripcion && (
+                        <p className="mt-4 max-w-[68ch] break-words whitespace-pre-line text-secondary-700">
+                          {categoria.descripcion}
+                        </p>
+                      )}
 
-                    {categoria.documentos.length > 0 && (
-                      <div>
-                        <h4 className="mb-2 font-semibold text-primary-800">
-                          Documentos
-                        </h4>
-                        <div className="space-y-2">
-                          {categoria.documentos.map((doc) => (
-                            <Link
-                              key={doc.id}
-                              href="/auth/login"
-                              className="flex items-center gap-3 rounded-lg border p-4 transition-colors hover:bg-secondary-50"
-                            >
-                              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary-100">
-                                <FileSearch className="size-5 text-primary-700" />
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <p className="text-sm font-medium text-secondary-900">
-                                  {doc.nombre}
-                                </p>
-                                <p className="text-xs text-secondary-500">
-                                  {doc.nombreOriginal} — {formatFileSize(doc.tamanoBytes)}
-                                </p>
-                              </div>
-                              <span className="shrink-0 rounded-md bg-purple-600 px-3 py-1.5 text-xs font-medium text-white">
-                                Descargar
-                              </span>
-                            </Link>
-                          ))}
+                      {categoria.bases && (
+                        <div className="mt-4">
+                          <h4 className="mb-2 font-semibold text-primary-800">
+                            Bases y requisitos
+                          </h4>
+                          <p className="max-w-[68ch] break-words whitespace-pre-line text-secondary-700">
+                            {categoria.bases}
+                          </p>
                         </div>
-                      </div>
-                    )}
+                      )}
+
+                      {propios.length > 0 && (
+                        <div className="mt-4">
+                          <h4 className="mb-2 font-semibold text-primary-800">
+                            Documentos de esta categoría
+                          </h4>
+                          <div className="space-y-2">
+                            {propios.map((doc) => (
+                              <DocumentoItem key={doc.id} documento={doc} />
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* documentos que valen para todas las categorias: se listan una
+                    sola vez para no repetir la misma lista en cada una */}
+                {documentosComunes.length > 0 && (
+                  <div className="rounded-xl border border-secondary-200 p-5 sm:p-6">
+                    <h3 className="text-lg font-semibold text-primary-800">
+                      Documentos de la convocatoria
+                    </h3>
+                    <p className="mt-1 mb-4 text-sm text-secondary-600">
+                      Aplican a todas las categorías.
+                    </p>
+                    <div className="space-y-2">
+                      {documentosComunes.map((doc) => (
+                        <DocumentoItem key={doc.id} documento={doc} />
+                      ))}
+                    </div>
                   </div>
-                ))}
+                )}
 
                 {/* sin descripcion ni categorias */}
                 {!convocatoria.descripcion && convocatoria.categorias.length === 0 && (
@@ -410,6 +444,50 @@ export default function ConvocatoriaDetallePage({
   );
 }
 
+// Fila compacta de documento. Sigue llevando a crear cuenta, igual que antes:
+// la descarga esta reservada a quienes se registran.
+function DocumentoItem({
+  documento,
+}: {
+  documento: {
+    id: number;
+    nombre: string;
+    nombreOriginal: string;
+    tamanoBytes: number;
+  };
+}) {
+  const extension =
+    documento.nombreOriginal.split(".").pop()?.toUpperCase() ?? "Archivo";
+
+  return (
+    <Link
+      href="/auth/login"
+      className="flex items-center gap-3 rounded-lg border border-secondary-200 px-3 py-2.5 transition-colors hover:border-primary-300 hover:bg-secondary-50"
+    >
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary-100">
+        <FileSearch className="size-4 text-primary-700" />
+      </div>
+      <div className="min-w-0 flex-1">
+        {/* los nombres del cliente son largos y repiten el nombre del programa
+            en cada archivo; dos lineas alcanzan porque lo que distingue va al
+            principio. El nombre completo queda en el title */}
+        <p
+          className="line-clamp-2 text-sm font-medium break-words text-secondary-900"
+          title={documento.nombre}
+        >
+          {documento.nombre}
+        </p>
+        <p className="text-xs text-secondary-600">
+          {extension} · {formatFileSize(documento.tamanoBytes)}
+        </p>
+      </div>
+      <span className="shrink-0 rounded-md bg-purple-600 px-2.5 py-1.5 text-xs font-medium text-white">
+        Descargar
+      </span>
+    </Link>
+  );
+}
+
 // card lateral con info clave y CTA
 function SidebarCard({
   convocatoria,
@@ -450,10 +528,10 @@ function SidebarCard({
 
         <Separator />
 
-        {/* premio */}
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-secondary-500">Premio</span>
-          <span className="font-bold text-primary-700">{premioLabel}</span>
+        {/* premio: con varias categorias es un rango, asi que la etiqueta lo aclara */}
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-sm text-secondary-600">Premio por categoría</span>
+          <span className="text-right font-bold text-primary-700">{premioLabel}</span>
         </div>
 
         <Separator />
@@ -477,7 +555,7 @@ function SidebarCard({
                 </Badge>
               ))
             ) : (
-              <span className="text-xs text-secondary-400">
+              <span className="text-xs text-secondary-600">
                 No especificado
               </span>
             )}
@@ -494,7 +572,7 @@ function SidebarCard({
                 Quiero participar
               </Link>
             </Button>
-            <p className="text-center text-xs text-secondary-400">
+            <p className="text-center text-xs text-secondary-600">
               Necesitas una cuenta para participar
             </p>
           </>

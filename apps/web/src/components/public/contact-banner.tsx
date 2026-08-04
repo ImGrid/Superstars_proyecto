@@ -1,14 +1,11 @@
 import Link from "next/link";
 import { Mail, MailQuestion } from "lucide-react";
-import { Icon } from "@iconify/react";
-import { CONTACT_EMAIL, WHATSAPP_URL } from "@/lib/contacto";
+import { CONTACT_EMAIL } from "@/lib/contacto";
 
 // Banner de contacto del material del cliente (Contactanos-HD.png). Reemplaza al
 // antiguo CTA. El naranja es un capricho del cliente: esta hardcodeado SOLO aqui,
 // no pertenece a la paleta oficial y no debe usarse en ningun otro lugar.
 const NARANJA = "#FE5901";
-// verde oficial de WhatsApp, solo para su boton
-const VERDE_WHATSAPP = "#25D366";
 const PEACH = "#FEE8DB";
 
 type ContactBannerProps = {
@@ -47,8 +44,8 @@ export function ContactBanner({ className = "" }: ContactBannerProps) {
             </p>
           </div>
 
-          {/* dos formas de escribir: correo o WhatsApp */}
-          <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto">
+          {/* contacto por correo */}
+          <div className="w-full shrink-0 sm:w-auto">
             <Link
               href={`mailto:${CONTACT_EMAIL}`}
               className="flex items-center justify-center gap-2.5 rounded-xl px-4 py-3 font-display text-xs font-bold text-white transition-opacity hover:opacity-90 sm:text-base"
@@ -56,16 +53,6 @@ export function ContactBanner({ className = "" }: ContactBannerProps) {
             >
               <Mail className="size-5 shrink-0" />
               <span className="whitespace-nowrap">{CONTACT_EMAIL}</span>
-            </Link>
-            <Link
-              href={WHATSAPP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2.5 rounded-xl px-4 py-3 font-display text-xs font-bold text-white transition-opacity hover:opacity-90 sm:text-base"
-              style={{ backgroundColor: VERDE_WHATSAPP }}
-            >
-              <Icon icon="ph:whatsapp-logo-fill" className="size-5 shrink-0" />
-              <span className="whitespace-nowrap">Escríbenos por WhatsApp</span>
             </Link>
           </div>
         </div>

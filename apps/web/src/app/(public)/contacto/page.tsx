@@ -126,9 +126,6 @@ export default function ContactoPage() {
                       >
                         {WHATSAPP_DISPLAY}
                       </a>
-                      <p className="mt-0.5 text-xs text-secondary-500">
-                        Escríbenos y te respondemos por ahí mismo
-                      </p>
                     </div>
                   </li>
 
