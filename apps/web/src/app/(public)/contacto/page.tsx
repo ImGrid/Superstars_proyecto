@@ -4,14 +4,15 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Mail, MapPin, Clock, Loader2 } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-// correo destino del formulario
-const CONTACT_EMAIL = "bolivia@fundes.org";
+// correo y WhatsApp del programa (definidos en un solo lugar)
+import { CONTACT_EMAIL, WHATSAPP_URL, WHATSAPP_DISPLAY } from "@/lib/contacto";
 
 // schema local (no se comparte con backend porque no hay endpoint)
 const contactoSchema = z.object({
@@ -104,6 +105,30 @@ export default function ContactoPage() {
                       >
                         {CONTACT_EMAIL}
                       </a>
+                    </div>
+                  </li>
+
+                  {/* abre WhatsApp directamente, con un mensaje ya escrito */}
+                  <li className="flex items-start gap-3">
+                    <Icon
+                      icon="ph:whatsapp-logo-duotone"
+                      className="mt-0.5 size-5 shrink-0 text-info-600"
+                    />
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-secondary-500">
+                        WhatsApp
+                      </p>
+                      <a
+                        href={WHATSAPP_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-secondary-800 transition-colors hover:text-azul-600"
+                      >
+                        {WHATSAPP_DISPLAY}
+                      </a>
+                      <p className="mt-0.5 text-xs text-secondary-500">
+                        Escríbenos y te respondemos por ahí mismo
+                      </p>
                     </div>
                   </li>
 

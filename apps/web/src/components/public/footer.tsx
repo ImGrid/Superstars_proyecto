@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { Mail, MapPin } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { EsloganStrip } from "@/components/public/eslogan-strip";
 import { SponsorsStripFooter } from "@/components/public/sponsors-strip-footer";
+import { WHATSAPP_URL, WHATSAPP_DISPLAY } from "@/lib/contacto";
 
 const quickLinks = [
   { label: "Inicio", href: "/" },
@@ -99,6 +101,21 @@ export function PublicFooter() {
                   className="transition-colors hover:text-amarillo-400"
                 >
                   bolivia@fundes.org
+                </a>
+              </li>
+              {/* abre WhatsApp directamente con el numero del programa */}
+              <li className="flex items-start gap-2 text-sm text-primary-300">
+                <Icon
+                  icon="ph:whatsapp-logo-duotone"
+                  className="mt-0.5 size-4 shrink-0 text-info-400"
+                />
+                <a
+                  href={WHATSAPP_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-colors hover:text-amarillo-400"
+                >
+                  {WHATSAPP_DISPLAY}
                 </a>
               </li>
             </ul>

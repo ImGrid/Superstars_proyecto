@@ -24,8 +24,8 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
             {/* logo oficial del programa. El contenedor sigue la proporcion de la
-                imagen (2.25) para que no queden franjas vacias arriba y abajo */}
-            <div className="relative aspect-[2.25/1] overflow-hidden rounded-2xl">
+                imagen (1.81) para que no queden franjas vacias arriba y abajo */}
+            <div className="relative aspect-[1.81/1] overflow-hidden rounded-2xl">
               <Image
                 src="/images/programa-superstar.webp"
                 alt="Empresas SUPERSTAR - Impulsando empresas con impacto en Bolivia"
