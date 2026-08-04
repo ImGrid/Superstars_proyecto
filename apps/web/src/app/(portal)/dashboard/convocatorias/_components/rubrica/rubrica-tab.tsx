@@ -63,7 +63,7 @@ export function RubricaTab({ convocatoriaId, categoriaId, estadoConvocatoria }: 
         puntajeTotal: 100,
       }),
     onSuccess: () => {
-      toast.success("Rubrica creada correctamente");
+      toast.success("Rúbrica creada correctamente");
       queryClient.invalidateQueries({
         queryKey: rubricaQueries.detail(convocatoriaId, categoriaId).queryKey,
       });
@@ -117,7 +117,7 @@ export function RubricaTab({ convocatoriaId, categoriaId, estadoConvocatoria }: 
           <EmptyState
             icon="ph:clipboard-text-duotone"
             title="Sin rúbrica"
-            description="Esta convocatoria no tiene una rúbrica de evaluación configurada."
+            description="Esta categoría no tiene una rúbrica de evaluación configurada."
             action={
               canEdit ? (
                 <Button onClick={() => setCreateOpen(true)}>

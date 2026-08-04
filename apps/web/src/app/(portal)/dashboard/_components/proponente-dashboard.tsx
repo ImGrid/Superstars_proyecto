@@ -105,7 +105,10 @@ function ProximoPaso({ data }: { data: ProponenteDashboardStats }) {
   } else if (data.postulacionesObservadas > 0) {
     const n = data.postulacionesObservadas;
     icon = "ph:note-pencil-duotone";
-    titulo = `Tienes ${n} postulación${n === 1 ? "" : "es"} con observaciones`;
+    // el plural pierde la tilde: "postulacion" -> "postulaciones"
+    titulo = n === 1
+      ? "Tienes 1 postulación con observaciones"
+      : `Tienes ${n} postulaciones con observaciones`;
     detalle = "Un responsable revisó tu postulación y pide ajustes. Corrige para seguir en carrera.";
     cta = "Ver y corregir";
     href = "/dashboard/mis-postulaciones";
@@ -113,7 +116,9 @@ function ProximoPaso({ data }: { data: ProponenteDashboardStats }) {
     const n = data.misPostulacionesPorEstado.borrador;
     icon = "ph:pencil-line-duotone";
     titulo = "Te falta poco: termina tu postulación";
-    detalle = `Tienes ${n} postulación${n === 1 ? "" : "es"} sin enviar. Puedes guardar y seguir cuando quieras.`;
+    detalle = n === 1
+      ? "Tienes 1 postulación sin enviar. Puedes guardar y seguir cuando quieras."
+      : `Tienes ${n} postulaciones sin enviar. Puedes guardar y seguir cuando quieras.`;
     cta = "Continuar";
     href = "/dashboard/mis-postulaciones";
   } else if (data.convocatoriasAbiertas > 0) {

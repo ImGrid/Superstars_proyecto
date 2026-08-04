@@ -376,8 +376,12 @@ export function PostulacionesTab({ convocatoriaId, categoriaId, estadoConvocator
           description={
             `Se seleccionarán ${selectedIds.size} ganador${selectedIds.size !== 1 ? "es" : ""}:\n\n` +
             seleccionadosInfo.join("\n") +
+            // el plural de "postulacion" pierde la tilde, asi que no se puede
+            // armar pegando un sufijo: se escriben las dos frases completas
             (noSeleccionadosCount > 0
-              ? `\n\nLas ${noSeleccionadosCount} postulación${noSeleccionadosCount !== 1 ? "es" : ""} restante${noSeleccionadosCount !== 1 ? "s" : ""} serán marcadas como no seleccionadas.`
+              ? noSeleccionadosCount === 1
+                ? "\n\nLa postulación restante será marcada como no seleccionada."
+                : `\n\nLas ${noSeleccionadosCount} postulaciones restantes serán marcadas como no seleccionadas.`
               : "") +
             "\n\nEsta acción no se puede deshacer."
           }

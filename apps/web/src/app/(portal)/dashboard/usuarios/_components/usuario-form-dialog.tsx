@@ -299,7 +299,7 @@ export function UsuarioFormDialog({
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Contrasena</FormLabel>
+                    <FormLabel>Contraseña</FormLabel>
                     <FormControl>
                       <Input
                         type="password"

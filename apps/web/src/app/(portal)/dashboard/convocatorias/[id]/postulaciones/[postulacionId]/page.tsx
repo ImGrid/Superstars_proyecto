@@ -269,6 +269,7 @@ export default function PostulacionDetallePage({ params, searchParams }: PagePro
             convocatoriaId={convocatoriaId}
             categoriaId={postulacion.categoriaId}
             postulacionId={postulacionId}
+            enEvaluacion={isEnEvaluacion}
           />
         </TabsContent>
 
@@ -290,7 +291,7 @@ export default function PostulacionDetallePage({ params, searchParams }: PagePro
                         <TableHead>Evaluador</TableHead>
                         <TableHead>Estado</TableHead>
                         <TableHead>Puntaje</TableHead>
-                        <TableHead className="text-right">Accion</TableHead>
+                        <TableHead className="text-right">Acción</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>

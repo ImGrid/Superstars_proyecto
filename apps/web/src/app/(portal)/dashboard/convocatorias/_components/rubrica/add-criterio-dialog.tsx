@@ -95,7 +95,7 @@ export function AddCriterioDialog({
           <DialogTitle>Nuevo criterio de evaluación</DialogTitle>
           <DialogDescription>
             Define el nombre, tipo y peso porcentual del criterio. Los pesos de
-            todos los criterios deben sumar el puntaje total de la rubrica.
+            todos los criterios deben sumar el puntaje total de la rúbrica.
           </DialogDescription>
         </DialogHeader>
 
