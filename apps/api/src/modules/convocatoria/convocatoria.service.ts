@@ -101,7 +101,11 @@ export class ConvocatoriaService {
       // Proponente: filtra entre abiertas (publicado), anteriores (cerrado/en_evaluacion/
       // resultados_listos/finalizado) o todas las visibles. tipo=undefined preserva
       // compat para selectores que quieren todas las visibles.
-      result = await this.convocatoriaRepo.findAllVisiblesParaProponente(query, query.tipo);
+      result = await this.convocatoriaRepo.findAllVisiblesParaProponente(
+        query,
+        query.tipo,
+        user.id,
+      );
     } else if (user.rol === RolUsuario.ADMINISTRADOR) {
       result = await this.convocatoriaRepo.findAll(query);
     } else {

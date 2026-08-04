@@ -80,6 +80,11 @@ export interface ConvocatoriaResponse {
   createdBy: number;
   createdAt: string;
   updatedAt: string;
+  // Solo vienen en el listado del proponente (GET /convocatorias con rol
+  // proponente): el premio de cada categoria para mostrarlo en la tarjeta, y
+  // la categoria en la que esta empresa ya postulo, si postulo.
+  categorias?: { nombre: string; monto: string }[];
+  miCategoria?: string | null;
 }
 
 // GET /convocatorias/:id/responsables

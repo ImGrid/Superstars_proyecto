@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { eq, and, or, ilike, count, desc, sql, inArray } from 'drizzle-orm';
+import { eq, and, or, ilike, count, desc, sql, inArray, getTableColumns } from 'drizzle-orm';
 import {
   ESTADOS_CONVOCATORIA_VISIBLE_PROPONENTE,
   ESTADOS_CONVOCATORIA_ANTERIORES_PROPONENTE,
@@ -74,9 +74,13 @@ export class ConvocatoriaRepository {
   // - tipo='anteriores' : CERRADO/EN_EVALUACION/RESULTADOS_LISTOS/FINALIZADO
   // - tipo undefined    : todas las visibles (no borrador). Mantiene compat. para
   //                       casos donde el cliente quiere todas (ej. selector de filtros)
+  // usuarioId permite marcar en cada tarjeta si esta empresa ya postulo y a que
+  // categoria. Sin ese dato el listado no puede decir "ya postulaste", que era
+  // justamente lo que obligaba al proponente a entrar al detalle para saberlo.
   async findAllVisiblesParaProponente(
     params: FindAllConvocatoriasParams,
     tipo?: TipoListadoProponente,
+    usuarioId?: number,
   ) {
     const { page, limit, search } = params;
     const offset = (page - 1) * limit;
@@ -102,8 +106,32 @@ export class ConvocatoriaRepository {
 
     const where = and(...conditions);
 
+    // Nota Drizzle: la correlacion con la tabla del FROM va como literal
+    // (convocatoria.id), no interpolada, porque en posicion SELECT Drizzle la
+    // renderiza sin calificar y da "column reference ambiguous".
     const [data, totalResult] = await Promise.all([
-      this.db.select().from(convocatoria).where(where)
+      this.db.select({
+        ...getTableColumns(convocatoria),
+        // categorias con su premio, para mostrar el gancho en la tarjeta
+        categorias: sql<{ nombre: string; monto: string }[]>`(
+          select coalesce(
+            json_agg(json_build_object('nombre', nombre, 'monto', monto::text) order by orden),
+            '[]'::json
+          )
+          from categoria_convocatoria where convocatoria_id = convocatoria.id
+        )`,
+        // nombre de la categoria en la que esta empresa ya postulo (null si no)
+        miCategoria: usuarioId === undefined
+          ? sql<string | null>`null::text`
+          : sql<string | null>`(
+              select k.nombre
+              from postulacion p
+              join categoria_convocatoria k on k.id = p.categoria_id
+              join empresa e on e.id = p.empresa_id
+              where p.convocatoria_id = convocatoria.id and e.usuario_id = ${usuarioId}
+              limit 1
+            )`,
+      }).from(convocatoria).where(where)
         .orderBy(desc(convocatoria.createdAt))
         .limit(limit).offset(offset),
       this.db.select({ count: count() }).from(convocatoria).where(where),

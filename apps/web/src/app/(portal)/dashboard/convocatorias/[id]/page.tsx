@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueries, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -9,7 +9,6 @@ import {
   Pencil,
   Plus,
   Trash2,
-  Calendar,
   MapPin,
   Download,
   Eye,
@@ -28,7 +27,6 @@ import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -64,6 +62,8 @@ import {
   formatFileSize,
   formatPercent,
 } from "@/lib/format";
+import { acentoCategoria, iconoCategoria } from "@/lib/acento-categoria";
+import { LienzoProponente } from "@/components/portal/lienzo-proponente";
 import { downloadDocumento } from "@/lib/api/documento.api";
 import { useAuth } from "@/hooks/use-auth";
 import { ConvocatoriaEstadoActions } from "../_components/convocatoria-estado-actions";
@@ -178,94 +178,65 @@ function ConvocatoriaDetailProponente({
   });
 
   return (
-    <div className="space-y-6">
+    <LienzoProponente>
+    <div className="space-y-5">
       {/* header */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-start gap-2">
         <Button
           variant="ghost"
           size="icon"
+          className="mt-0.5 shrink-0"
           onClick={() => router.push("/dashboard/convocatorias")}
+          aria-label="Volver a convocatorias"
         >
           <ArrowLeft className="size-4" />
         </Button>
-        <div className="flex-1">
-          <h1 className="font-heading text-2xl font-bold text-secondary-900">
+        <div className="min-w-0 flex-1">
+          <h1 className="font-heading text-2xl leading-tight font-bold text-balance text-primary-800">
             {data.nombre}
           </h1>
-          {data.descripcion && (
-            <p className="mt-1 text-sm text-secondary-500">{data.descripcion}</p>
-          )}
+
+          {/* una sola linea con todo lo que hay que saber de plazos y alcance */}
+          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-warning-200 bg-warning-50 px-2.5 py-0.5 font-semibold text-warning-800">
+              <Icon icon="ph:clock-countdown-duotone" className="size-4" />
+              {isAbierto
+                ? `Cierra el ${formatDate(fechaCierreReal)}`
+                : motivoNoPostulable(data.estado as EstadoConvocatoria)}
+              {plazoExtendido && " (extendido)"}
+            </span>
+            {data.fechaAnuncioGanadores && (
+              <span className="inline-flex items-center gap-1.5 text-secondary-700">
+                <Icon icon="ph:trophy-duotone" className="size-4 text-amarillo-700" />
+                Ganadores: {formatDate(data.fechaAnuncioGanadores)}
+              </span>
+            )}
+            <span className="inline-flex items-center gap-1.5 text-secondary-700">
+              <MapPin className="size-4 text-info-600" />
+              {data.departamentos.join(" · ")}
+            </span>
+          </div>
+
+          {data.descripcion && <DescripcionPlegable texto={data.descripcion} />}
         </div>
       </div>
 
-      {/* fechas + departamentos */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="size-4 text-secondary-400" />
-              Fechas importantes
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <InfoRow
-              label="Inicio de postulación"
-              value={formatDate(data.fechaInicioPostulacion)}
-            />
-            <InfoRow
-              label="Cierre de postulación"
-              value={
-                plazoExtendido
-                  ? `${formatDate(fechaCierreReal)} (extendido)`
-                  : formatDate(data.fechaCierrePostulacion)
-              }
-            />
-            {data.fechaAnuncioGanadores && (
-              <InfoRow
-                label="Anuncio de ganadores"
-                value={formatDate(data.fechaAnuncioGanadores)}
-              />
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MapPin className="size-4 text-secondary-400" />
-              Departamentos elegibles
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {data.departamentos.map((dep: string) => (
-                <Badge key={dep} variant="outline" className="text-sm">
-                  {dep}
-                </Badge>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Separator />
-
       {/* categorias: el proponente elige una para postular */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         <div>
           <h2 className="font-heading text-lg font-semibold text-secondary-900">
-            Categorías
+            {miPostulacion ? "Categorías de esta convocatoria" : "Elige tu categoría"}
           </h2>
-          <p className="text-sm text-secondary-500">
-            Elige la categoría a la que quieres postular. Solo puedes participar en una por convocatoria.
+          <p className="text-sm text-secondary-600">
+            Solo puedes participar en una categoría por convocatoria.
           </p>
         </div>
         {!categorias || categorias.length === 0 ? (
-          <p className="text-sm text-secondary-500">
+          <p className="text-sm text-secondary-600">
             Esta convocatoria todavía no tiene categorías configuradas.
           </p>
         ) : (
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="grid gap-4 lg:grid-cols-2">
             {categorias.map((cat) => (
               <CategoriaCardProponente
                 key={cat.id}
@@ -280,6 +251,47 @@ function ConvocatoriaDetailProponente({
           </div>
         )}
       </div>
+
+      {/* documentos: primero el propio de cada categoria, despues los que
+          aplican a todas */}
+      {categorias && categorias.length > 0 && (
+        <DocumentosAgrupados convocatoriaId={convocatoriaId} categorias={categorias} />
+      )}
+    </div>
+    </LienzoProponente>
+  );
+}
+
+// La descripcion de la convocatoria suele ser larga y se llevaba toda la
+// primera pantalla antes de que apareciera nada accionable. Se muestran dos
+// lineas y el resto queda a un clic.
+function DescripcionPlegable({ texto }: { texto: string }) {
+  const [abierta, setAbierta] = useState(false);
+  // con textos cortos no tiene sentido ofrecer "Ver más"
+  const esLargo = texto.length > 180;
+
+  return (
+    <div className="mt-2.5">
+      <p
+        className={`text-sm leading-relaxed break-words whitespace-pre-line text-secondary-700 ${
+          esLargo && !abierta ? "line-clamp-2" : ""
+        }`}
+      >
+        {texto}
+      </p>
+      {esLargo && (
+        <button
+          type="button"
+          onClick={() => setAbierta((v) => !v)}
+          className="mt-1 inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-azul-600 hover:underline"
+        >
+          {abierta ? "Ver menos" : "Ver más"}
+          <Icon
+            icon={abierta ? "ph:caret-up-bold" : "ph:caret-down-bold"}
+            className="size-3.5"
+          />
+        </button>
+      )}
     </div>
   );
 }
@@ -302,29 +314,63 @@ function CategoriaCardProponente({
 }) {
   const esMiCategoria = miPostulacion?.categoriaId === categoria.id;
   const yaPostuladoEnOtra = !!miPostulacion && !esMiCategoria;
+  // identidad de color por categoria: es lo que permite reconocer "la mia" de
+  // un vistazo, aca y en el resto del portal
+  const acento = acentoCategoria(categoria.orden);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{categoria.nombre}</CardTitle>
-        <CardDescription>
-          Premio: {formatMoney(categoria.monto)} · {categoria.numeroGanadores} ganadores
-        </CardDescription>
+    <Card className={`${acento.borde} ${esMiCategoria ? acento.fondo : ""}`}>
+      <CardHeader className="pb-3">
+        <div className="flex items-start gap-3">
+          <span
+            className={`grid size-11 shrink-0 place-items-center rounded-xl ${acento.iconoFondo}`}
+            aria-hidden="true"
+          >
+            <Icon icon={iconoCategoria(categoria.orden)} className={`size-6 ${acento.icono}`} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <CardTitle className={`text-base leading-tight ${acento.texto}`}>
+                {categoria.nombre}
+              </CardTitle>
+              {esMiCategoria && (
+                <Badge
+                  variant="outline"
+                  className="border-success-300 bg-success-50 text-success-700"
+                >
+                  Tu categoría
+                </Badge>
+              )}
+            </div>
+            {/* el premio es el gancho: deja de ser texto gris chico */}
+            <p className="mt-1.5">
+              <span className={`font-display text-2xl font-bold tracking-tight ${acento.texto}`}>
+                {formatMoney(categoria.monto)}
+              </span>
+              <span className="ml-1.5 text-sm text-secondary-600">
+                para cada una de las {categoria.numeroGanadores} ganadoras
+              </span>
+            </p>
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {categoria.descripcion && (
-          <p className="text-sm text-secondary-700">{categoria.descripcion}</p>
+          <p className="max-w-[68ch] text-sm break-words whitespace-pre-line text-secondary-700">
+            {categoria.descripcion}
+          </p>
         )}
         {categoria.bases && (
           <div>
-            <p className="text-sm font-medium text-secondary-800">Bases</p>
-            <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-secondary-600">
+            <p className="flex items-center gap-1.5 text-sm font-semibold text-secondary-800">
+              <Icon icon="ph:list-checks-duotone" className={`size-4 ${acento.icono}`} />
+              Bases y requisitos
+            </p>
+            <p className="mt-1 max-w-[68ch] text-sm leading-relaxed break-words whitespace-pre-line text-secondary-700">
               {categoria.bases}
             </p>
           </div>
         )}
-
-        <DocumentosProponente convocatoriaId={convocatoriaId} categoriaId={categoria.id} />
 
         {/* llamado a la accion segun el estado de la postulacion */}
         {esMiCategoria ? (
@@ -362,25 +408,133 @@ function CategoriaCardProponente({
   );
 }
 
-// documentos de una categoria para el proponente (solo lectura + descarga)
-function DocumentosProponente({
+// Documentos de todas las categorias, agrupados.
+//
+// El responsable esta obligado a subir las bases y los criterios a cada
+// categoria, asi que la misma lista aparecia repetida una vez por categoria.
+// Los que estan en TODAS se muestran una sola vez; los propios quedan bajo su
+// categoria. La deteccion es por nombre, igual que en la web publica.
+function DocumentosAgrupados({
+  convocatoriaId,
+  categorias,
+}: {
+  convocatoriaId: number;
+  categorias: CategoriaResponse[];
+}) {
+  const consultas = useQueries({
+    queries: categorias.map((c) => documentoQueries.list(convocatoriaId, c.id)),
+  });
+
+  if (consultas.some((q) => q.isLoading)) {
+    return <Skeleton className="h-24 w-full" />;
+  }
+
+  const porCategoria = categorias.map((c, i) => ({
+    categoria: c,
+    documentos: consultas[i].data ?? [],
+  }));
+  const total = porCategoria.reduce((n, x) => n + x.documentos.length, 0);
+  if (total === 0) return null;
+
+  const nombresComunes =
+    categorias.length > 1
+      ? porCategoria[0].documentos
+          .map((d) => d.nombre)
+          .filter((nombre) =>
+            porCategoria.every((x) => x.documentos.some((d) => d.nombre === nombre)),
+          )
+      : [];
+  const comunes =
+    categorias.length > 1
+      ? porCategoria[0].documentos.filter((d) => nombresComunes.includes(d.nombre))
+      : [];
+
+  const conPropios = porCategoria
+    .map(({ categoria, documentos }) => ({
+      categoria,
+      propios: documentos.filter((d) => !nombresComunes.includes(d.nombre)),
+    }))
+    .filter((x) => x.propios.length > 0);
+
+  return (
+    <div className="space-y-3">
+      <div>
+        <h2 className="font-heading text-lg font-semibold text-secondary-900">Documentos</h2>
+        <p className="text-sm text-secondary-600">
+          Descárgalos para conocer las bases y los requisitos antes de postular.
+        </p>
+      </div>
+
+      {/* primero el formulario propio de cada categoria: es el documento que
+          la persona necesita para la categoria que eligio. Van uno al lado del
+          otro, alineados con las tarjetas de categoria de arriba. */}
+      {conPropios.length > 0 && (
+        <div className="grid gap-3 lg:grid-cols-2">
+          {conPropios.map(({ categoria, propios }) => {
+            const acento = acentoCategoria(categoria.orden);
+            return (
+              <Card key={categoria.id} className={acento.borde}>
+                <CardContent className="space-y-2 p-3">
+                  <p className={`flex items-center gap-1.5 text-xs font-semibold ${acento.texto}`}>
+                    <Icon
+                      icon={iconoCategoria(categoria.orden)}
+                      className={`size-4 ${acento.icono}`}
+                    />
+                    Solo para {categoria.nombre}
+                  </p>
+                  {propios.map((doc) => (
+                    <FilaDocumento
+                      key={doc.id}
+                      doc={doc}
+                      convocatoriaId={convocatoriaId}
+                      categoriaId={categoria.id}
+                    />
+                  ))}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      {/* despues los que aplican a todas las categorias, en dos columnas */}
+      {comunes.length > 0 && (
+        <div>
+          {conPropios.length > 0 && (
+            <p className="mb-2 text-xs font-semibold text-secondary-600">
+              Aplican a todas las categorías
+            </p>
+          )}
+          <Card>
+            <CardContent className="grid gap-2 p-3 lg:grid-cols-2">
+              {comunes.map((doc) => (
+                <FilaDocumento
+                  key={doc.id}
+                  doc={doc}
+                  convocatoriaId={convocatoriaId}
+                  categoriaId={porCategoria[0].categoria.id}
+                />
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FilaDocumento({
+  doc,
   convocatoriaId,
   categoriaId,
 }: {
+  doc: { id: number; nombre: string; nombreOriginal: string; tamanoBytes: number };
   convocatoriaId: number;
   categoriaId: number;
 }) {
-  const { data: documentos, isLoading } = useQuery(
-    documentoQueries.list(convocatoriaId, categoriaId),
-  );
+  const extension = doc.nombreOriginal.split(".").pop()?.toUpperCase() ?? "Archivo";
 
-  if (isLoading) {
-    return <Skeleton className="h-12 w-full" />;
-  }
-
-  if (!documentos || documentos.length === 0) return null;
-
-  async function handleDownload(doc: { id: number; nombreOriginal: string }) {
+  async function handleDownload() {
     try {
       const blob = await downloadDocumento(convocatoriaId, categoriaId, doc.id);
       const url = URL.createObjectURL(blob);
@@ -397,30 +551,27 @@ function DocumentosProponente({
   }
 
   return (
-    <div className="space-y-2">
-      <p className="text-sm font-medium text-secondary-800">Documentos</p>
-      {documentos.map((doc) => (
-        <div
-          key={doc.id}
-          className="flex items-center gap-3 rounded-lg border p-3"
+    <div className="flex items-center gap-3 rounded-lg border border-secondary-200 p-2.5">
+      <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-azul-50">
+        <Icon icon="ph:file-text-duotone" className="size-5 text-azul-700" />
+      </div>
+      <div className="min-w-0 flex-1">
+        {/* el nombre del archivo repetia el titulo casi entero; con tipo y peso
+            alcanza, y el nombre completo queda en el title */}
+        <p
+          className="line-clamp-2 text-sm font-medium break-words text-secondary-900"
+          title={doc.nombre}
         >
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary-100">
-            <Icon icon="ph:file-text-duotone" className="size-4 text-primary-700" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-secondary-900">
-              {doc.nombre}
-            </p>
-            <p className="text-xs text-secondary-500">
-              {doc.nombreOriginal} — {formatFileSize(doc.tamanoBytes)}
-            </p>
-          </div>
-          <Button variant="outline" size="sm" onClick={() => handleDownload(doc)}>
-            <Download className="size-4" />
-            Descargar
-          </Button>
-        </div>
-      ))}
+          {doc.nombre}
+        </p>
+        <p className="text-xs text-secondary-600">
+          {extension} · {formatFileSize(doc.tamanoBytes)}
+        </p>
+      </div>
+      <Button variant="outline" size="sm" className="min-h-11 shrink-0" onClick={handleDownload}>
+        <Download className="size-4" />
+        Descargar
+      </Button>
     </div>
   );
 }

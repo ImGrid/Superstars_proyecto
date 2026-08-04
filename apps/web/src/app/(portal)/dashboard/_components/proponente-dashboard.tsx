@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { Icon } from "@iconify/react";
+import { EstadoPostulacion } from "@superstars/shared";
 import type {
   ProponenteDashboardStats,
   ProponenteConvocatoriaAbiertaItem,
@@ -12,12 +13,24 @@ import { PageHeader } from "@/components/shared/page-header";
 import { dashboardQueries, publicQueries } from "@/lib/api/query-keys";
 import { getConvocatoriaImagenUrl } from "@/lib/api/convocatoria.api";
 import { cn } from "@/lib/utils";
-import { Panel, PanelHeader } from "./panel";
+import { LienzoProponente } from "@/components/portal/lienzo-proponente";
+import { Panel } from "./panel";
 import { DashboardSkeleton } from "./dashboard-skeleton";
 
 function formatBs(monto: string | null): string {
   if (!monto) return "—";
   return new Intl.NumberFormat("es-BO").format(Math.round(Number(monto) || 0));
+}
+
+// "30 de octubre de 2026". Se arma en UTC porque la fecha viene sin hora y la
+// zona local podria correrla un dia.
+function formatFechaLarga(fecha: string): string {
+  return new Date(`${fecha}T12:00:00Z`).toLocaleDateString("es-BO", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
 }
 
 function iniciales(nombre: string): string {
@@ -42,6 +55,7 @@ export function ProponenteDashboard({ nombre }: Props) {
   }
 
   return (
+    <LienzoProponente>
     <div className="space-y-5">
       <PageHeader
         title={`Hola, ${data.empresaRazonSocial ?? nombre}`}
@@ -77,14 +91,10 @@ export function ProponenteDashboard({ nombre }: Props) {
         </section>
       )}
 
-      {/* mis postulaciones: resumen por estado */}
-      {data.totalMisPostulaciones > 0 && (
-        <MisPostulacionesResumen dist={data.misPostulacionesPorEstado} />
-      )}
-
       {/* historias de exito: prueba social */}
       <HistoriasSection historias={historias ?? []} />
     </div>
+    </LienzoProponente>
   );
 }
 
@@ -102,8 +112,10 @@ function ProximoPaso({ data }: { data: ProponenteDashboardStats }) {
     detalle = "Necesitas completar los datos de tu empresa antes de competir por los premios.";
     cta = "Registrar empresa";
     href = "/dashboard/mi-empresa";
-  } else if (data.postulacionesObservadas > 0) {
-    const n = data.postulacionesObservadas;
+  } else if (data.pendientesEditables.observadas > 0) {
+    // solo las que siguen siendo corregibles: si la convocatoria ya cerro, el
+    // backend rechaza el guardado y la invitacion a corregir no lleva a nada
+    const n = data.pendientesEditables.observadas;
     icon = "ph:note-pencil-duotone";
     // el plural pierde la tilde: "postulacion" -> "postulaciones"
     titulo = n === 1
@@ -112,14 +124,33 @@ function ProximoPaso({ data }: { data: ProponenteDashboardStats }) {
     detalle = "Un responsable revisó tu postulación y pide ajustes. Corrige para seguir en carrera.";
     cta = "Ver y corregir";
     href = "/dashboard/mis-postulaciones";
-  } else if (data.misPostulacionesPorEstado.borrador > 0) {
-    const n = data.misPostulacionesPorEstado.borrador;
+  } else if (data.pendientesEditables.borradores > 0) {
+    const n = data.pendientesEditables.borradores;
     icon = "ph:pencil-line-duotone";
     titulo = "Te falta poco: termina tu postulación";
     detalle = n === 1
       ? "Tienes 1 postulación sin enviar. Puedes guardar y seguir cuando quieras."
       : `Tienes ${n} postulaciones sin enviar. Puedes guardar y seguir cuando quieras.`;
     cta = "Continuar";
+    href = "/dashboard/mis-postulaciones";
+  } else if (data.postulacionEnCurso) {
+    // ya envio y esta esperando: antes caia en "Estas al dia" o en "hay
+    // convocatorias abiertas", y no se le decia ni que su postulacion estaba
+    // viva ni cuando se anuncian los ganadores
+    const p = data.postulacionEnCurso;
+    icon = "ph:magnifying-glass-duotone";
+    titulo =
+      p.estado === EstadoPostulacion.ENVIADO
+        ? "Tu postulación fue recibida"
+        : "Tu postulación está en evaluación";
+    const cuando = p.fechaAnuncioGanadores
+      ? ` Los ganadores se anuncian el ${formatFechaLarga(p.fechaAnuncioGanadores)}.`
+      : "";
+    detalle =
+      p.estado === EstadoPostulacion.ENVIADO
+        ? `Postulaste a ${p.categoriaNombre}. Cuando comience la evaluación te avisaremos por correo.${cuando}`
+        : `El jurado está revisando tu postulación a ${p.categoriaNombre}. Te avisaremos por correo.${cuando}`;
+    cta = "Ver mi postulación";
     href = "/dashboard/mis-postulaciones";
   } else if (data.convocatoriasAbiertas > 0) {
     icon = "ph:rocket-launch-duotone";
@@ -246,50 +277,6 @@ function OportunidadCard({ c }: { c: ProponenteConvocatoriaAbiertaItem }) {
         </div>
       </div>
     </div>
-  );
-}
-
-// resumen compacto de mis postulaciones por estado (solo los estados con al menos una)
-const ESTADOS_POST: { key: string; label: string; cls: string }[] = [
-  { key: "borrador", label: "En borrador", cls: "bg-secondary-100 text-secondary-700" },
-  { key: "enviado", label: "Enviadas", cls: "bg-info-50 text-info-700" },
-  { key: "observado", label: "Con observaciones", cls: "bg-warning-100 text-warning-700" },
-  { key: "en_evaluacion", label: "En evaluación", cls: "bg-primary-100 text-primary-700" },
-  { key: "calificado", label: "Calificadas", cls: "bg-primary-100 text-primary-700" },
-  { key: "ganador", label: "Ganadoras", cls: "bg-success-100 text-success-700" },
-  { key: "no_seleccionado", label: "No seleccionadas", cls: "bg-secondary-100 text-secondary-600" },
-  { key: "rechazado", label: "Rechazadas", cls: "bg-error-100 text-error-700" },
-];
-
-function MisPostulacionesResumen({
-  dist,
-}: {
-  dist: ProponenteDashboardStats["misPostulacionesPorEstado"];
-}) {
-  const items = ESTADOS_POST.filter((i) => dist[i.key as keyof typeof dist] > 0);
-
-  return (
-    <Panel>
-      <PanelHeader
-        title="Mis postulaciones"
-        right={
-          <Link
-            href="/dashboard/mis-postulaciones"
-            className="text-sm font-medium text-primary-700 hover:text-primary-800"
-          >
-            Ver todas →
-          </Link>
-        }
-      />
-      <div className="flex flex-wrap gap-2 p-4">
-        {items.map((i) => (
-          <div key={i.key} className={cn("flex items-center gap-2 rounded-lg px-3 py-2", i.cls)}>
-            <span className="text-lg font-bold tabular-nums">{dist[i.key as keyof typeof dist]}</span>
-            <span className="text-xs font-medium">{i.label}</span>
-          </div>
-        ))}
-      </div>
-    </Panel>
   );
 }
 

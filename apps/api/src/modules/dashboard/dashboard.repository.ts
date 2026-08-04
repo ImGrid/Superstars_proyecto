@@ -550,6 +550,25 @@ export class DashboardRepository {
     };
   }
 
+  // Borradores y observadas que TODAVIA se pueden editar, es decir cuya
+  // convocatoria sigue publicada. Sin este filtro el inicio invitaba a
+  // "continuar" postulaciones de convocatorias ya cerradas, que el backend
+  // rechaza: la persona hacia clic y no podia hacer nada.
+  async getProponentePendientesEditables(empresaId: number) {
+    const [row] = await this.db
+      .select({
+        borradores: sql<number>`count(*) filter (where ${postulacion.estado} = 'borrador')`.mapWith(Number),
+        observadas: sql<number>`count(*) filter (where ${postulacion.estado} = 'observado')`.mapWith(Number),
+      })
+      .from(postulacion)
+      .innerJoin(convocatoria, eq(convocatoria.id, postulacion.convocatoriaId))
+      .where(and(
+        eq(postulacion.empresaId, empresaId),
+        eq(convocatoria.estado, 'publicado'),
+      ));
+    return { borradores: row?.borradores ?? 0, observadas: row?.observadas ?? 0 };
+  }
+
   // distribucion de las postulaciones del proponente por estado
   async getProponenteDistribucionEstados(empresaId: number) {
     return this.db
@@ -557,6 +576,32 @@ export class DashboardRepository {
       .from(postulacion)
       .where(eq(postulacion.empresaId, empresaId))
       .groupBy(postulacion.estado);
+  }
+
+  // La postulacion del proponente que esta esperando resultado. Sirve para
+  // decirle en que anda y cuando se anuncian los ganadores: sin esto, quien ya
+  // envio todo y espera veia "Estas al dia", que no le dice nada.
+  // Se elige la de anuncio mas proximo. Las que no tienen fecha de anuncio
+  // quedan al final (en Postgres ASC pone los NULL al final).
+  async getProponentePostulacionEnCurso(empresaId: number) {
+    const rows = await this.db
+      .select({
+        convocatoriaId: convocatoria.id,
+        convocatoriaNombre: convocatoria.nombre,
+        categoriaNombre: categoriaConvocatoria.nombre,
+        estado: postulacion.estado,
+        fechaAnuncioGanadores: convocatoria.fechaAnuncioGanadores,
+      })
+      .from(postulacion)
+      .innerJoin(convocatoria, eq(convocatoria.id, postulacion.convocatoriaId))
+      .innerJoin(categoriaConvocatoria, eq(categoriaConvocatoria.id, postulacion.categoriaId))
+      .where(and(
+        eq(postulacion.empresaId, empresaId),
+        sql`${postulacion.estado} in ('enviado', 'en_evaluacion', 'calificado')`,
+      ))
+      .orderBy(asc(convocatoria.fechaAnuncioGanadores))
+      .limit(1);
+    return rows[0] ?? null;
   }
 
   // top 5 convocatorias abiertas mas urgentes (por fecha de cierre real ascendente).

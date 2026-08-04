@@ -286,13 +286,18 @@ export class DashboardService {
         tieneEmpresa: false,
         empresaRazonSocial: null,
         convocatoriasAbiertasResumen: [],
+        pendientesEditables: { borradores: 0, observadas: 0 },
+        postulacionEnCurso: null,
       };
     }
 
-    const [distribucionRows, abiertasResumen] = await Promise.all([
-      this.repo.getProponenteDistribucionEstados(kpis.empresaId),
-      this.repo.getProponenteConvocatoriasAbiertasResumen(kpis.empresaId),
-    ]);
+    const [distribucionRows, abiertasResumen, postulacionEnCurso, pendientesEditables] =
+      await Promise.all([
+        this.repo.getProponenteDistribucionEstados(kpis.empresaId),
+        this.repo.getProponenteConvocatoriasAbiertasResumen(kpis.empresaId),
+        this.repo.getProponentePostulacionEnCurso(kpis.empresaId),
+        this.repo.getProponentePendientesEditables(kpis.empresaId),
+      ]);
 
     const distribucion = this.emptyPostulacionRecord();
     for (const row of distribucionRows) {
@@ -312,6 +317,10 @@ export class DashboardService {
       misPostulacionesPorEstado: distribucion,
       tieneEmpresa: true,
       empresaRazonSocial: kpis.empresaRazonSocial,
+      pendientesEditables,
+      postulacionEnCurso: postulacionEnCurso
+        ? { ...postulacionEnCurso, estado: postulacionEnCurso.estado as EstadoPostulacion }
+        : null,
       convocatoriasAbiertasResumen: abiertasResumen.map((c) => ({
         id: c.id,
         nombre: c.nombre,

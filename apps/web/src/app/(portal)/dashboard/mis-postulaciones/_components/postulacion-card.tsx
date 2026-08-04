@@ -1,89 +1,106 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { Clock, FileEdit, Eye } from "lucide-react";
+import Link from "next/link";
+import { CalendarDays, ChevronRight } from "lucide-react";
 import { Icon } from "@iconify/react";
 import { EstadoConvocatoria, EstadoPostulacion } from "@superstars/shared";
 import type { PostulacionListItem } from "@superstars/shared";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { StateBadge } from "@/components/shared/state-badge";
 import { formatShortDate, formatPercent } from "@/lib/format";
+import { acentoCategoria, iconoCategoria } from "@/lib/acento-categoria";
 
 interface PostulacionCardProps {
   postulacion: PostulacionListItem;
 }
 
-// barra de progreso del formulario
-function CompletionBar({ porcentaje }: { porcentaje: string }) {
-  const pct = Math.round(Number(porcentaje));
-  let barColor = "bg-secondary-300";
-  if (pct >= 100) barColor = "bg-success-500";
-  else if (pct >= 50) barColor = "bg-primary-500";
-  else if (pct > 0) barColor = "bg-warning-500";
-
-  return (
-    <div className="space-y-1">
-      <div className="flex items-center justify-between">
-        <span className="text-xs text-secondary-500">Formulario completado</span>
-        <span className="text-xs font-medium text-secondary-700">
-          {formatPercent(porcentaje)}
-        </span>
-      </div>
-      <div className="h-2 w-full rounded-full bg-secondary-100">
-        <div
-          className={`h-2 rounded-full transition-all ${barColor}`}
-          style={{ width: `${Math.min(pct, 100)}%` }}
-        />
-      </div>
-    </div>
-  );
-}
+// Icono, color y etiqueta propia del proponente. No se usa StateBadge porque ese
+// componente es compartido con administrador, responsable y evaluador, y ahi
+// los estados se pintan todos en gris casi identico: "Borrador" y "No
+// Seleccionado" comparten exactamente el mismo color, que para quien postula
+// son las dos situaciones mas distintas que existen.
+// Ademas el texto cambia: al postulante le sirve "Sin enviar", no "Borrador".
+const VISUAL_POR_ESTADO: Record<
+  EstadoPostulacion,
+  { icono: string; color: string; fondo: string; titulo: string; etiqueta: string; badge: string }
+> = {
+  [EstadoPostulacion.BORRADOR]: {
+    icono: "ph:pencil-line-duotone",
+    color: "text-warning-700",
+    fondo: "bg-warning-100",
+    titulo: "text-warning-900",
+    etiqueta: "Sin enviar",
+    badge: "bg-warning-100 text-warning-800 border-warning-300",
+  },
+  [EstadoPostulacion.ENVIADO]: {
+    icono: "ph:paper-plane-tilt-duotone",
+    color: "text-info-700",
+    fondo: "bg-info-100",
+    titulo: "text-info-900",
+    etiqueta: "Recibida",
+    badge: "bg-info-100 text-info-800 border-info-300",
+  },
+  [EstadoPostulacion.OBSERVADO]: {
+    icono: "ph:warning-duotone",
+    color: "text-warning-700",
+    fondo: "bg-warning-100",
+    titulo: "text-warning-900",
+    etiqueta: "Debes corregir",
+    badge: "bg-warning-200 text-warning-900 border-warning-400",
+  },
+  [EstadoPostulacion.RECHAZADO]: {
+    icono: "ph:x-circle-duotone",
+    color: "text-error-700",
+    fondo: "bg-error-100",
+    titulo: "text-error-900",
+    etiqueta: "Rechazada",
+    badge: "bg-error-100 text-error-800 border-error-300",
+  },
+  [EstadoPostulacion.EN_EVALUACION]: {
+    icono: "ph:magnifying-glass-duotone",
+    color: "text-azul-700",
+    fondo: "bg-azul-100",
+    titulo: "text-azul-900",
+    etiqueta: "En evaluación",
+    badge: "bg-azul-100 text-azul-800 border-azul-300",
+  },
+  [EstadoPostulacion.CALIFICADO]: {
+    icono: "ph:check-square-offset-duotone",
+    color: "text-purple-700",
+    fondo: "bg-purple-100",
+    titulo: "text-purple-900",
+    etiqueta: "Ya calificada",
+    badge: "bg-purple-100 text-purple-800 border-purple-300",
+  },
+  [EstadoPostulacion.GANADOR]: {
+    icono: "ph:trophy-duotone",
+    color: "text-success-700",
+    fondo: "bg-success-100",
+    titulo: "text-success-900",
+    etiqueta: "Ganadora",
+    badge: "bg-success-200 text-success-900 border-success-400",
+  },
+  [EstadoPostulacion.NO_SELECCIONADO]: {
+    icono: "ph:flag-duotone",
+    color: "text-secondary-600",
+    fondo: "bg-secondary-200",
+    titulo: "text-secondary-800",
+    etiqueta: "No seleccionada",
+    badge: "bg-secondary-200 text-secondary-800 border-secondary-400",
+  },
+};
 
 // accion principal segun estado. Si la convocatoria ya no admite envios, no se
 // ofrece editar: el backend rechazaria el guardado y el usuario quedaria trabado.
-function getMainAction(
-  estado: EstadoPostulacion,
-  puedeEditar: boolean,
-): {
-  label: string;
-  icon: React.ReactNode;
-  variant: "default" | "outline" | "destructive";
-} | null {
-  const verDetalle = {
-    label: "Ver detalle",
-    icon: <Eye className="size-4" />,
-    variant: "outline" as const,
-  };
-
-  switch (estado) {
-    case EstadoPostulacion.BORRADOR:
-      if (!puedeEditar) return verDetalle;
-      return {
-        label: "Continuar postulación",
-        icon: <FileEdit className="size-4" />,
-        variant: "default",
-      };
-    case EstadoPostulacion.OBSERVADO:
-      if (!puedeEditar) return verDetalle;
-      return {
-        label: "Corregir postulación",
-        icon: <Icon icon="ph:warning-duotone" className="size-4" />,
-        variant: "default",
-      };
-    default:
-      return verDetalle;
+function getMainAction(estado: EstadoPostulacion, puedeEditar: boolean) {
+  if (estado === EstadoPostulacion.BORRADOR && puedeEditar) {
+    return { label: "Continuar postulación", destacada: true };
   }
+  if (estado === EstadoPostulacion.OBSERVADO && puedeEditar) {
+    return { label: "Corregir postulación", destacada: true };
+  }
+  return { label: "Ver detalle", destacada: false };
 }
 
 export function PostulacionCard({ postulacion }: PostulacionCardProps) {
-  const router = useRouter();
   // el backend solo acepta guardar/enviar si la convocatoria esta publicada
   const puedeEditar =
     postulacion.convocatoriaEstado === undefined ||
@@ -92,98 +109,119 @@ export function PostulacionCard({ postulacion }: PostulacionCardProps) {
   const isBorrador = postulacion.estado === EstadoPostulacion.BORRADOR;
   const isObservado = postulacion.estado === EstadoPostulacion.OBSERVADO;
   const isGanador = postulacion.estado === EstadoPostulacion.GANADOR;
-  // borrador que quedo sin enviar cuando la convocatoria cerro
-  const sinEnviarACierre = (isBorrador || isObservado) && !puedeEditar;
+  const sinEnviar = isBorrador || isObservado;
+  const sinEnviarACierre = sinEnviar && !puedeEditar;
+  const pct = Math.round(Number(postulacion.porcentajeCompletado));
+  const visual = VISUAL_POR_ESTADO[postulacion.estado];
+  const acentoCat = acentoCategoria(postulacion.categoriaOrden ?? 1);
 
   return (
-    <Card
-      className={`flex flex-col ${
+    <Link
+      href={`/dashboard/convocatorias/${postulacion.convocatoriaId}`}
+      className={`group flex items-start gap-3 rounded-xl border p-4 shadow-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-azul-600 ${
         isObservado
-          ? "border-warning-300 bg-warning-50/30"
+          ? "border-warning-300 bg-warning-50 hover:bg-warning-100/60"
           : isGanador
-            ? "border-success-300 bg-success-50/30"
-            : ""
+            ? "border-success-300 bg-success-50 hover:bg-success-100/60"
+            : "border-secondary-200 bg-card hover:border-azul-300 hover:bg-azul-50/40"
       }`}
     >
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-2">
-          <CardTitle className="text-base leading-tight line-clamp-2">
-            {postulacion.convocatoriaNombre ?? `Convocatoria #${postulacion.convocatoriaId}`}
-          </CardTitle>
-          <StateBadge tipo="postulacion" valor={postulacion.estado} />
-        </div>
-      </CardHeader>
+      {/* marca de estado: color y forma antes que texto */}
+      <span
+        className={`mt-0.5 grid size-10 shrink-0 place-items-center rounded-lg ${visual.fondo}`}
+        aria-hidden="true"
+      >
+        <Icon icon={visual.icono} className={`size-5 ${visual.color}`} />
+      </span>
 
-      <CardContent className="flex-1 space-y-3">
-        {/* ganador: destacado especial */}
-        {isGanador && (
-          <div className="flex items-center gap-2 rounded-md bg-success-100 px-3 py-2">
-            <Icon icon="ph:trophy-duotone" className="size-4 text-success-600" />
-            <span className="text-sm font-semibold text-success-700">
-              Tu empresa fue seleccionada como ganadora
+      <div className="min-w-0 flex-1">
+        <div className="flex items-start justify-between gap-3">
+          <p className={`line-clamp-2 font-semibold ${visual.titulo}`}>
+            {postulacion.convocatoriaNombre ?? `Convocatoria #${postulacion.convocatoriaId}`}
+          </p>
+          {/* 14 px y color propio: es el dato que define la situacion */}
+          <span
+            className={`shrink-0 rounded-full border px-2.5 py-1 text-[13px] font-semibold whitespace-nowrap ${visual.badge}`}
+          >
+            {visual.etiqueta}
+          </span>
+        </div>
+
+        {/* la categoria lleva SU color, el mismo que en el detalle de la
+            convocatoria: asi la persona reconoce "la mia" en cualquier pantalla */}
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm">
+          {postulacion.categoriaNombre && (
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${acentoCat.chip}`}
+            >
+              <Icon
+                icon={iconoCategoria(postulacion.categoriaOrden ?? 1)}
+                className={`size-3.5 ${acentoCat.icono}`}
+              />
+              {postulacion.categoriaNombre}
+            </span>
+          )}
+          <span className="flex items-center gap-1.5 text-secondary-600">
+            <CalendarDays className="size-4 shrink-0 text-azul-500" />
+            {postulacion.fechaEnvio
+              ? `Enviada el ${formatShortDate(postulacion.fechaEnvio)}`
+              : `Creada el ${formatShortDate(postulacion.createdAt)}`}
+          </span>
+        </div>
+
+        {/* progreso: se muestra siempre que quedo sin enviar, aunque el plazo ya
+            haya cerrado. Antes desaparecia justo en ese caso y la persona no
+            llegaba a ver cuanto habia avanzado. */}
+        {sinEnviar && (
+          <div className="mt-2.5 flex items-center gap-2.5">
+            <div className="h-2 flex-1 overflow-hidden rounded-full bg-secondary-100">
+              <div
+                className={`h-full rounded-full ${
+                  !puedeEditar
+                    ? "bg-secondary-300"
+                    : pct >= 100
+                      ? "bg-success-500"
+                      : pct >= 50
+                        ? "bg-primary-500"
+                        : "bg-warning-500"
+                }`}
+                style={{ width: `${Math.min(pct, 100)}%` }}
+              />
+            </div>
+            <span className="shrink-0 text-xs font-semibold tabular-nums text-secondary-700">
+              {formatPercent(postulacion.porcentajeCompletado)}
             </span>
           </div>
         )}
 
-        {/* observacion del responsable */}
+        {/* mensajes que cambian lo que la persona puede hacer */}
+        {isGanador && (
+          <p className="mt-2 flex items-center gap-1.5 text-sm font-semibold text-success-700">
+            <Icon icon="ph:confetti-duotone" className="size-4 shrink-0" />
+            Tu empresa fue seleccionada como ganadora
+          </p>
+        )}
         {isObservado && postulacion.observacion && (
-          <div className="flex items-start gap-2 rounded-md bg-warning-100 px-3 py-2">
-            <Icon icon="ph:warning-duotone" className="mt-0.5 size-4 shrink-0 text-warning-600" />
-            <p className="text-sm text-warning-800 line-clamp-3">
-              {postulacion.observacion}
-            </p>
-          </div>
+          <p className="mt-2 line-clamp-2 rounded-md bg-warning-100 px-2.5 py-1.5 text-sm text-warning-800">
+            <span className="font-semibold">Debes corregir: </span>
+            {postulacion.observacion}
+          </p>
         )}
-
-        {/* la convocatoria cerro y la postulacion nunca se envio */}
         {sinEnviarACierre && (
-          <div className="flex items-start gap-2 rounded-md bg-secondary-100 px-3 py-2">
-            <Icon
-              icon="ph:lock-simple-duotone"
-              className="mt-0.5 size-4 shrink-0 text-secondary-500"
-            />
-            <p className="text-sm text-secondary-600">
-              El plazo cerró y no llegaste a enviarla. Ya no se puede editar.
-            </p>
-          </div>
+          <p className="mt-2 text-sm text-secondary-600">
+            El plazo cerró y no llegaste a enviarla. Ya no se puede editar.
+          </p>
         )}
 
-        {/* progreso del formulario (solo borrador/observado) */}
-        {(isBorrador || isObservado) && (
-          <CompletionBar porcentaje={postulacion.porcentajeCompletado} />
-        )}
-
-        {/* info */}
-        <div className="flex items-center gap-4 text-xs text-secondary-500">
-          {postulacion.fechaEnvio && (
-            <div className="flex items-center gap-1">
-              <Clock className="size-3" />
-              Enviado {formatShortDate(postulacion.fechaEnvio)}
-            </div>
-          )}
-          {!postulacion.fechaEnvio && (
-            <div className="flex items-center gap-1">
-              <Clock className="size-3" />
-              Creado {formatShortDate(postulacion.createdAt)}
-            </div>
-          )}
-        </div>
-      </CardContent>
-
-      {action && (
-        <CardFooter className="pt-3">
-          <Button
-            variant={action.variant}
-            className="w-full gap-2"
-            onClick={() =>
-              router.push(`/dashboard/convocatorias/${postulacion.convocatoriaId}`)
-            }
-          >
-            {action.icon}
-            {action.label}
-          </Button>
-        </CardFooter>
-      )}
-    </Card>
+        <span
+          className={`mt-2 flex items-center gap-1 text-sm font-semibold ${
+            action.destacada ? "text-azul-600" : "text-secondary-600"
+          } group-hover:underline`}
+        >
+          {action.label}
+          <ChevronRight className="size-4" />
+        </span>
+      </div>
+    </Link>
   );
 }

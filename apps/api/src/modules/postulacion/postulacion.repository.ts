@@ -2,7 +2,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { eq, and, count, desc, sql } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/drizzle.provider';
 import type { DrizzleDB } from '../../database/drizzle.provider';
-import { postulacion, empresa, convocatoria, responsableConvocatoria, calificacion } from '@superstars/db';
+import { postulacion, empresa, convocatoria, categoriaConvocatoria, responsableConvocatoria, calificacion } from '@superstars/db';
 import type { EstadoPostulacion } from '@superstars/shared';
 
 @Injectable()
@@ -200,9 +200,16 @@ export class PostulacionRepository {
         updatedAt: postulacion.updatedAt,
         convocatoriaNombre: convocatoria.nombre,
         convocatoriaEstado: convocatoria.estado,
+        // el proponente necesita ver a que categoria postulo: es parte de la
+        // identidad de su postulacion y no aparecia en ningun listado.
+        // El orden define el color con el que se pinta esa categoria en todo
+        // el portal, para que sea la misma en el listado y en el detalle.
+        categoriaNombre: categoriaConvocatoria.nombre,
+        categoriaOrden: categoriaConvocatoria.orden,
       })
       .from(postulacion)
       .innerJoin(convocatoria, eq(postulacion.convocatoriaId, convocatoria.id))
+      .innerJoin(categoriaConvocatoria, eq(postulacion.categoriaId, categoriaConvocatoria.id))
       .where(eq(postulacion.empresaId, empresaId))
       .orderBy(desc(postulacion.updatedAt));
   }

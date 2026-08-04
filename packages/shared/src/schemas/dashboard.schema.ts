@@ -159,6 +159,20 @@ export interface ProponenteDashboardStats {
 
   // Resumen de las convocatorias abiertas mas relevantes (top N por cierre)
   convocatoriasAbiertasResumen: ProponenteConvocatoriaAbiertaItem[];
+
+  // Borradores y observadas cuya convocatoria sigue abierta, o sea las unicas
+  // que la persona realmente puede seguir editando.
+  pendientesEditables: { borradores: number; observadas: number };
+
+  // Postulacion que esta esperando resultado, si la hay. Permite decirle al
+  // proponente en que anda y cuando se anuncian los ganadores.
+  postulacionEnCurso: {
+    convocatoriaId: number;
+    convocatoriaNombre: string;
+    categoriaNombre: string;
+    estado: EstadoPostulacion;
+    fechaAnuncioGanadores: string | null;
+  } | null;
 }
 
 // ====== EVALUADOR ======

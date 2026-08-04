@@ -1,20 +1,12 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { Calendar, MapPin, Clock, ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { Clock, ArrowRight, CheckCircle2 } from "lucide-react";
 import { isConvocatoriaAbierta } from "@superstars/shared";
 import type { ConvocatoriaResponse } from "@superstars/shared";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { StateBadge } from "@/components/shared/state-badge";
-import { formatDate, getDiasRestantes } from "@/lib/format";
+import { formatDate, formatMoney, getDiasRestantes } from "@/lib/format";
 
 interface ConvocatoriaCardProps {
   convocatoria: ConvocatoriaResponse;
@@ -28,81 +20,102 @@ function HeaderBadge({ convocatoria }: { convocatoria: ConvocatoriaResponse }) {
     return <StateBadge tipo="convocatoria" valor={convocatoria.estado} />;
   }
 
-  // abierta: countdown coloreado por urgencia (la fecha vigente puede ser la efectiva)
   const cierre = convocatoria.fechaCierreEfectiva ?? convocatoria.fechaCierrePostulacion;
   const dias = getDiasRestantes(cierre);
 
-  let className = "gap-1 text-xs ";
+  let className = "gap-1 shrink-0 ";
   if (dias <= 3) {
-    className += "bg-red-100 text-red-700 border-red-200";
+    className += "bg-error-50 text-error-700 border-error-200";
   } else if (dias <= 7) {
-    className += "bg-amber-100 text-amber-700 border-amber-200";
+    className += "bg-warning-50 text-warning-700 border-warning-200";
   } else {
-    className += "bg-emerald-100 text-emerald-700 border-emerald-200";
+    className += "bg-success-50 text-success-700 border-success-200";
   }
 
   return (
     <Badge variant="outline" className={className}>
       <Clock className="size-3" />
-      {dias === 0
-        ? "Cierra hoy"
-        : dias === 1
-          ? "Queda 1 dia"
-          : `Quedan ${dias} dias`}
+      {dias === 0 ? "Cierra hoy" : dias === 1 ? "Cierra mañana" : `Cierra en ${dias} días`}
     </Badge>
   );
 }
 
 export function ConvocatoriaCard({ convocatoria }: ConvocatoriaCardProps) {
-  const router = useRouter();
+  const categorias = convocatoria.categorias ?? [];
+  const montos = categorias
+    .map((c) => Number(c.monto))
+    .filter((n) => !Number.isNaN(n));
+  const premioMayor = montos.length > 0 ? Math.max(...montos) : null;
+  // con varias categorias el monto que se destaca es el mayor, y se aclara;
+  // con una sola no hace falta aclarar nada
+  const hayVariosMontos = new Set(montos).size > 1;
+  const yaPostulo = Boolean(convocatoria.miCategoria);
 
+  // La tarjeta entera es el enlace: da un area de toque grande y evita el boton
+  // pesado que competia con el contenido.
   return (
-    <Card className="flex flex-col transition-shadow hover:shadow-md">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-2">
-          <CardTitle className="text-lg leading-tight line-clamp-2">
-            {convocatoria.nombre}
-          </CardTitle>
-          <HeaderBadge convocatoria={convocatoria} />
-        </div>
-        {convocatoria.descripcion && (
-          <p className="mt-1 text-sm text-secondary-500 line-clamp-2">
-            {convocatoria.descripcion}
-          </p>
-        )}
-      </CardHeader>
+    <Link
+      href={`/dashboard/convocatorias/${convocatoria.id}`}
+      className="group flex flex-col rounded-xl border border-secondary-200 bg-card p-5 transition-colors hover:border-primary-300 hover:bg-secondary-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-azul-600"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="line-clamp-2 font-display text-base leading-snug font-semibold text-primary-800">
+          {convocatoria.nombre}
+        </h3>
+        <HeaderBadge convocatoria={convocatoria} />
+      </div>
 
-      <CardContent className="flex-1 space-y-3">
-        {/* fechas */}
-        <div className="flex items-center gap-2 text-sm text-secondary-600">
-          <Calendar className="size-4 shrink-0 text-secondary-400" />
-          <span>
-            {formatDate(convocatoria.fechaInicioPostulacion)} — {formatDate(convocatoria.fechaCierrePostulacion)}
+      {/* el premio es el gancho: va destacado y no escondido en texto gris */}
+      {premioMayor !== null && (
+        <p className="mt-3">
+          <span className="font-display text-2xl font-bold tracking-tight text-primary-700">
+            {formatMoney(String(premioMayor))}
           </span>
+          {hayVariosMontos && (
+            <span className="ml-1.5 text-sm text-secondary-600">el premio mayor</span>
+          )}
+        </p>
+      )}
+
+      {/* una categoria por chip, con su monto */}
+      {categorias.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {categorias.map((c) => (
+            <span
+              key={c.nombre}
+              className="inline-flex items-center gap-1.5 rounded-full border border-secondary-200 bg-secondary-50 px-2.5 py-1 text-xs text-secondary-700"
+            >
+              {c.nombre}
+              <b className="font-semibold text-primary-700 tabular-nums">
+                {formatMoney(c.monto)}
+              </b>
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div className="mt-4 flex items-end justify-between gap-3 border-t border-secondary-100 pt-3">
+        <div className="min-w-0 text-sm">
+          {yaPostulo ? (
+            <p className="flex items-start gap-1.5 font-medium text-success-700">
+              <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
+              <span>Ya postulaste a {convocatoria.miCategoria}</span>
+            </p>
+          ) : (
+            <p className="text-secondary-600">
+              Cierra el {formatDate(convocatoria.fechaCierreEfectiva ?? convocatoria.fechaCierrePostulacion)}
+            </p>
+          )}
+          <p className="mt-0.5 truncate text-xs text-secondary-500">
+            {convocatoria.departamentos.join(" · ")}
+          </p>
         </div>
 
-        {/* departamentos */}
-        <div className="flex items-start gap-2">
-          <MapPin className="mt-0.5 size-4 shrink-0 text-secondary-400" />
-          <div className="flex flex-wrap gap-1">
-            {convocatoria.departamentos.map((dep) => (
-              <Badge key={dep} variant="outline" className="text-xs">
-                {dep}
-              </Badge>
-            ))}
-          </div>
-        </div>
-      </CardContent>
-
-      <CardFooter className="pt-3">
-        <Button
-          className="w-full gap-2"
-          onClick={() => router.push(`/dashboard/convocatorias/${convocatoria.id}`)}
-        >
+        <span className="flex shrink-0 items-center gap-1 text-sm font-semibold text-azul-600 group-hover:underline">
           Ver detalles
           <ArrowRight className="size-4" />
-        </Button>
-      </CardFooter>
-    </Card>
+        </span>
+      </div>
+    </Link>
   );
 }

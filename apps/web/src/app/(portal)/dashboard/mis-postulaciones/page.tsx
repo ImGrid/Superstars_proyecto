@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { postulacionQueries } from "@/lib/api/query-keys";
+import { LienzoProponente } from "@/components/portal/lienzo-proponente";
 import { PostulacionCard } from "./_components/postulacion-card";
 
 // skeleton de carga
@@ -74,6 +75,7 @@ function MisPostulacionesContent() {
   const postulaciones = data ?? [];
 
   return (
+    <LienzoProponente>
     <div className="space-y-6">
       <PageHeader
         title="Mis Postulaciones"
@@ -104,14 +106,17 @@ function MisPostulacionesContent() {
         />
       )}
 
-      {/* grid de postulaciones */}
+      {/* items-start es la clave: sin el, la rejilla estira todas las tarjetas
+          al alto de la mas alta y aparece el hueco muerto. Con el, cada una
+          mide lo que necesita y ademas se aprovecha el ancho. */}
       {postulaciones.length > 0 && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid items-start gap-3 xl:grid-cols-2">
           {postulaciones.map((p) => (
             <PostulacionCard key={p.id} postulacion={p} />
           ))}
         </div>
       )}
     </div>
+    </LienzoProponente>
   );
 }

@@ -63,6 +63,10 @@ export interface PostulacionListItem {
   // campos extra del JOIN con convocatoria (solo en /mis-postulaciones)
   convocatoriaNombre?: string;
   convocatoriaEstado?: string;
+  // nombre y orden de la categoria a la que postulo (solo en /mis-postulaciones).
+  // El orden define el color de esa categoria en todo el portal.
+  categoriaNombre?: string;
+  categoriaOrden?: number;
 }
 
 // GET /postulaciones (cross-convocatoria, admin/responsable)

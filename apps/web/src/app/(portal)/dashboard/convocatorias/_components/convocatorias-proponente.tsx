@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { convocatoriaQueries } from "@/lib/api/query-keys";
 import { useDebounce } from "@/hooks/use-debounce";
+import { LienzoProponente } from "@/components/portal/lienzo-proponente";
 import { ConvocatoriaCard } from "./convocatoria-card";
 
 // skeleton de carga para las cards
@@ -76,6 +77,7 @@ function ConvocatoriasProponenteContent() {
   const esAbiertas = filters.tipo === "abiertas";
 
   return (
+    <LienzoProponente>
     <div className="space-y-6">
       <PageHeader
         title="Convocatorias"
@@ -132,7 +134,11 @@ function ConvocatoriasProponenteContent() {
       {/* grid de cards */}
       {!isLoading && convocatorias.length > 0 && (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {/* auto-fit (no auto-fill) en vez de 3 columnas fijas: auto-fill deja
+              las pistas vacias reservadas y con una sola convocatoria quedaban
+              dos huecos; auto-fit las colapsa y la tarjeta ocupa el ancho.
+              El maximo de 560px evita que una sola tarjeta se estire de mas. */}
+          <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(300px,560px))]">
             {convocatorias.map((c) => (
               <ConvocatoriaCard key={c.id} convocatoria={c} />
             ))}
@@ -168,5 +174,6 @@ function ConvocatoriasProponenteContent() {
         </>
       )}
     </div>
+    </LienzoProponente>
   );
 }
