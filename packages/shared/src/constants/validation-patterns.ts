@@ -20,10 +20,12 @@ export const NIT_REGEX = /^\d{7,13}$/;
 // reales en BD van de 7 a 14 caracteres).
 export const TELEFONO_REGEX = /^\+?[\d\s()-]{6,20}$/;
 
-// Registro SEPREC: código alfanumérico con guiones, entre 4 y 20 caracteres.
-// El cliente confirmó que es opcional y el formato no está estandarizado;
-// dejamos un regex permisivo solo para evitar texto libre con símbolos raros.
-export const SEPREC_REGEX = /^[A-Za-z0-9-]{4,20}$/;
+// Registro SEPREC: código alfanumérico, entre 4 y 30 caracteres. Además de
+// guiones aceptamos barras y espacios porque en la BD de producción hay
+// registros reales con ese formato (ej. "198/24"): con el regex anterior esa
+// empresa no podía volver a guardar su perfil, y como el campo es opcional un
+// dato así frenaba todo el registro.
+export const SEPREC_REGEX = /^[A-Za-z0-9/\s-]{4,30}$/;
 
 // Año de fundación: rango razonable. La empresa más vieja en datos reales
 // declara 1972. Bajamos el piso a 1900 por margen y subimos el techo al año

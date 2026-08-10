@@ -79,8 +79,9 @@ export default function PostularPage({ params }: PostularPageProps) {
     },
   });
 
-  // cargar empresa para auto-relleno
-  const { data: empresa } = useQuery({
+  // cargar empresa: sirve para auto-rellenar y, sobre todo, para no dejar
+  // escribir un formulario que el backend rechazara en cada guardado
+  const { data: empresa, isPending: isLoadingEmpresa } = useQuery({
     ...empresaQueries.me(),
     retry: (failureCount, err) => {
       if (isAxiosError(err) && err.response?.status === 404) return false;
@@ -95,7 +96,10 @@ export default function PostularPage({ params }: PostularPageProps) {
   );
 
   const isLoading =
-    isLoadingPost || isLoadingConv || (categoriaId != null && isLoadingForm);
+    isLoadingPost ||
+    isLoadingConv ||
+    isLoadingEmpresa ||
+    (categoriaId != null && isLoadingForm);
 
   // cargando
   if (isLoading) {
@@ -104,6 +108,45 @@ export default function PostularPage({ params }: PostularPageProps) {
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-12 w-full" />
         <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
+
+  // sin empresa registrada el backend rechaza cada guardado, asi que no se
+  // abre el formulario: se explica el paso que falta y se lleva hasta el.
+  // Antes se podia llenar entero y todo el trabajo se perdia.
+  if (!empresa) {
+    return (
+      <div className="mx-auto max-w-xl space-y-5 py-4">
+        <div className="grid size-14 place-items-center rounded-2xl bg-primary-50">
+          <Icon icon="ph:building-office-duotone" className="size-7 text-primary-600" />
+        </div>
+        <div className="space-y-2">
+          <h1 className="font-heading text-2xl font-bold text-primary-800">
+            Antes de postular es necesario registrar la empresa
+          </h1>
+          <p className="text-secondary-700">
+            La postulación se registra a nombre de la empresa, por lo que primero
+            debe crearse su perfil. Solo se requiere la razón social; los demás
+            datos pueden completarse más adelante.
+          </p>
+        </div>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Button
+            className="gap-2"
+            onClick={() => router.push("/dashboard/mi-empresa")}
+          >
+            <Icon icon="ph:building-office-duotone" className="size-4" />
+            Registrar mi empresa
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => router.push(`/dashboard/convocatorias/${convocatoriaId}`)}
+          >
+            <ArrowLeft className="size-4" />
+            Volver a la convocatoria
+          </Button>
+        </div>
       </div>
     );
   }

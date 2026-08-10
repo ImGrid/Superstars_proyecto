@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { postulacionQueries } from "@/lib/api/query-keys";
+import { esFaltaEmpresa } from "@/lib/api/reintentos";
 import { LienzoProponente } from "@/components/portal/lienzo-proponente";
 import { PostulacionCard } from "./_components/postulacion-card";
 
@@ -43,7 +44,14 @@ export default function MisPostulacionesPage() {
 function MisPostulacionesContent() {
   const router = useRouter();
 
-  const { data, isLoading, isError } = useQuery(postulacionQueries.myList());
+  const { data, isLoading, isError, error } = useQuery({
+    ...postulacionQueries.myList(),
+    retry: (failureCount, err) => (esFaltaEmpresa(err) ? false : failureCount < 2),
+  });
+
+  // "todavia no registro su empresa" no es un fallo: antes caia en el error
+  // rojo generico que pedia recargar la pagina, y parecia el sistema caido
+  const faltaEmpresa = esFaltaEmpresa(error);
 
   // cargando
   if (isLoading) {
@@ -58,6 +66,29 @@ function MisPostulacionesContent() {
     );
   }
 
+  // todavia no tiene empresa: no es un error, le falta un paso
+  if (faltaEmpresa) {
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          title="Mis Postulaciones"
+          description="Revisa el estado de tus postulaciones a convocatorias."
+        />
+        <EmptyState
+          icon="ph:building-office-duotone"
+          title="Todavía no tienes una empresa registrada"
+          description="Las postulaciones se registran a nombre de la empresa. Para crearla solo se requiere la razón social; los demás datos pueden completarse más adelante."
+          action={
+            <Button onClick={() => router.push("/dashboard/mi-empresa")}>
+              <Icon icon="ph:building-office-duotone" className="size-4" />
+              Registrar mi empresa
+            </Button>
+          }
+        />
+      </div>
+    );
+  }
+
   // error
   if (isError) {
     return (
@@ -65,7 +96,8 @@ function MisPostulacionesContent() {
         <PageHeader title="Mis Postulaciones" />
         <Alert variant="destructive">
           <AlertDescription>
-            Error al cargar tus postulaciones. Intenta recargar la pagina.
+            No fue posible cargar tus postulaciones. Inténtalo nuevamente en unos
+            minutos.
           </AlertDescription>
         </Alert>
       </div>

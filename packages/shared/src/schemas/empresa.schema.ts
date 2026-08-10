@@ -88,8 +88,21 @@ export const createEmpresaSchema = z.object({
     .string()
     .min(RAZON_SOCIAL_MIN, `Debe tener al menos ${RAZON_SOCIAL_MIN} caracteres`)
     .max(RAZON_SOCIAL_MAX, `Máximo ${RAZON_SOCIAL_MAX} caracteres`),
-  nit: optionalText(
-    z.string().regex(NIT_REGEX, 'El NIT debe tener entre 7 y 13 dígitos'),
+  // El NIT se normaliza antes de validar: la gente lo escribe con guiones o
+  // espacios ("1234567-8") y antes eso rechazaba todo el formulario pese a ser
+  // un campo opcional. Guardamos solo los dígitos.
+  nit: z.preprocess(
+    (v) => {
+      // null y '' significan "no informado", igual que en optionalText
+      if (v === null || v === '') return undefined;
+      if (typeof v !== 'string') return v;
+      const soloDigitos = v.replace(/[\s.-]/g, '');
+      return soloDigitos === '' ? undefined : soloDigitos;
+    },
+    z
+      .string()
+      .regex(NIT_REGEX, 'El NIT debe tener entre 7 y 13 dígitos')
+      .optional(),
   ),
   registroSeprec: optionalText(
     z

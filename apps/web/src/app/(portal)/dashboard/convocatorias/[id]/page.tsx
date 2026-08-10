@@ -55,6 +55,7 @@ import {
   postulacionQueries,
   documentoQueries,
   categoriaQueries,
+  empresaQueries,
 } from "@/lib/api/query-keys";
 import {
   formatDate,
@@ -62,6 +63,7 @@ import {
   formatFileSize,
   formatPercent,
 } from "@/lib/format";
+import { esRespuestaDefinitiva } from "@/lib/api/reintentos";
 import { acentoCategoria, iconoCategoria } from "@/lib/acento-categoria";
 import { LienzoProponente } from "@/components/portal/lienzo-proponente";
 import { downloadDocumento } from "@/lib/api/documento.api";
@@ -168,14 +170,28 @@ function ConvocatoriaDetailProponente({
   // categorias de la convocatoria (cada una con su premio, documentos y formulario)
   const { data: categorias } = useQuery(categoriaQueries.list(convocatoriaId));
 
-  // la postulacion del proponente en esta convocatoria (una empresa = una categoria)
+  // la postulacion del proponente en esta convocatoria (una empresa = una categoria).
+  // Sin empresa registrada el backend responde 400 (no 404): tampoco hay que
+  // reintentar, es una respuesta definitiva mientras no registre su empresa.
   const { data: miPostulacion } = useQuery({
     ...postulacionQueries.mine(convocatoriaId),
+    retry: (failureCount, err) => {
+      if (isAxiosError(err) && esRespuestaDefinitiva(err.response?.status)) return false;
+      return failureCount < 2;
+    },
+  });
+
+  // Postular exige una empresa registrada. Se consulta aca para no ofrecer un
+  // boton que lleva a un formulario que no se puede guardar: antes la persona
+  // llenaba secciones enteras y recien fallaba al guardar.
+  const { data: empresa, isPending: cargandoEmpresa } = useQuery({
+    ...empresaQueries.me(),
     retry: (failureCount, err) => {
       if (isAxiosError(err) && err.response?.status === 404) return false;
       return failureCount < 2;
     },
   });
+  const tieneEmpresa = !!empresa;
 
   return (
     <LienzoProponente>
@@ -245,6 +261,8 @@ function ConvocatoriaDetailProponente({
                 miPostulacion={miPostulacion}
                 isAbierto={isAbierto}
                 estadoConvocatoria={data.estado as EstadoConvocatoria}
+                tieneEmpresa={tieneEmpresa}
+                cargandoEmpresa={cargandoEmpresa}
                 router={router}
               />
             ))}
@@ -303,6 +321,8 @@ function CategoriaCardProponente({
   miPostulacion,
   isAbierto,
   estadoConvocatoria,
+  tieneEmpresa,
+  cargandoEmpresa,
   router,
 }: {
   convocatoriaId: number;
@@ -310,6 +330,8 @@ function CategoriaCardProponente({
   miPostulacion: any;
   isAbierto: boolean;
   estadoConvocatoria: EstadoConvocatoria;
+  tieneEmpresa: boolean;
+  cargandoEmpresa: boolean;
   router: ReturnType<typeof useRouter>;
 }) {
   const esMiCategoria = miPostulacion?.categoriaId === categoria.id;
@@ -386,9 +408,27 @@ function CategoriaCardProponente({
           <p className="rounded-md bg-secondary-50 px-4 py-3 text-sm text-secondary-600">
             Ya tienes una postulación en otra categoría de esta convocatoria.
           </p>
+        ) : isAbierto && !tieneEmpresa && !cargandoEmpresa ? (
+          // Sin empresa registrada no se puede guardar nada. En vez de abrir el
+          // formulario y fallar al primer guardado, se lleva al paso que falta.
+          <div className="space-y-2">
+            <Button
+              variant="outline"
+              className="w-full gap-2"
+              onClick={() => router.push("/dashboard/mi-empresa")}
+            >
+              <Icon icon="ph:building-office-duotone" className="size-4" />
+              Registrar mi empresa
+            </Button>
+            <p className="text-xs text-secondary-600">
+              Para postular es necesario registrar la empresa. Solo se requiere su
+              nombre.
+            </p>
+          </div>
         ) : isAbierto ? (
           <Button
             className="w-full gap-2"
+            disabled={cargandoEmpresa}
             onClick={() =>
               router.push(
                 `/dashboard/convocatorias/${convocatoriaId}/postular?categoriaId=${categoria.id}`,

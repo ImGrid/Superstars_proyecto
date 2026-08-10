@@ -71,13 +71,21 @@ function MiEmpresaContent() {
         <EmpresaHero empresa={data} />
       )}
 
+      {/* Al registrar por primera vez, lo unico que hace falta es el nombre.
+          Decirlo explicitamente evita que la persona salga a buscar el NIT o el
+          SEPREC y no vuelva. */}
       {isCreating && (
-        <div className="flex items-center gap-3 rounded-lg border border-primary-200 bg-primary-50 p-4">
-          <Icon icon="ph:building-office-duotone" className="size-5 text-primary-600 shrink-0" />
-          <p className="text-sm text-primary-700">
-            Aun no tienes una empresa registrada. Completa el formulario para crear el perfil de tu empresa.
-            Los campos marcados con * son obligatorios.
-          </p>
+        <div className="flex items-start gap-3 rounded-lg border border-primary-200 bg-primary-50 p-4">
+          <Icon icon="ph:lightbulb-duotone" className="mt-0.5 size-5 shrink-0 text-primary-600" />
+          <div className="text-sm text-primary-700">
+            <p className="font-semibold">
+              Para registrar la empresa es suficiente con su nombre.
+            </p>
+            <p className="mt-0.5">
+              La razón social es el único campo obligatorio. Los demás datos —NIT,
+              registro SEPREC, dirección— pueden completarse más adelante.
+            </p>
+          </div>
         </div>
       )}
 

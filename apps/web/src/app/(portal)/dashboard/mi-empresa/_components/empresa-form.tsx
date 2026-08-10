@@ -95,12 +95,14 @@ function SeccionHeader({
   title,
   subtitle,
   faltan,
+  mostrarEstado,
 }: {
   icon: string;
   color: keyof typeof COLORES_SECCION;
   title: string;
   subtitle: string;
   faltan: number;
+  mostrarEstado: boolean;
 }) {
   return (
     <div className="flex items-center gap-3">
@@ -113,7 +115,11 @@ function SeccionHeader({
         <CardTitle className="text-base">{title}</CardTitle>
         <CardDescription className="mt-0.5">{subtitle}</CardDescription>
       </div>
-      {faltan === 0 ? (
+      {/* El contador de datos faltantes solo tiene sentido cuando la empresa ya
+          existe y se esta completando el perfil. Al registrarla por primera vez
+          leia como "no puedes guardar hasta llenar todo" y la gente abandonaba,
+          cuando en realidad basta la razon social. */}
+      {!mostrarEstado ? null : faltan === 0 ? (
         <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-success-50 px-2.5 py-1 text-xs font-semibold text-success-700">
           <Icon icon="ph:check-circle-duotone" className="size-3.5" />
           Completa
@@ -298,6 +304,7 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
               title="Persona de contacto"
               subtitle="¿Con quién nos comunicamos sobre tus postulaciones?"
               faltan={faltanEn(CAMPOS_CONTACTO)}
+              mostrarEstado={isEditing}
             />
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
@@ -381,6 +388,7 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
               title="Datos legales"
               subtitle="Con estos datos validamos que tu empresa cumple los requisitos."
               faltan={faltanEn(CAMPOS_LEGALES)}
+              mostrarEstado={isEditing}
             />
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
@@ -464,6 +472,7 @@ export function EmpresaForm({ initialData }: EmpresaFormProps) {
               title="Datos generales"
               subtitle="Cuéntanos de tu empresa para que el jurado te conozca mejor."
               faltan={faltanEn(CAMPOS_GENERALES)}
+              mostrarEstado={isEditing}
             />
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
