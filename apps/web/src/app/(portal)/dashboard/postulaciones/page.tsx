@@ -26,7 +26,7 @@ import { RowActions, RowAction } from "@/components/shared/row-actions";
 import { StateBadge } from "@/components/shared/state-badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import { TableSkeleton } from "@/components/shared/loading-skeleton";
-import { postulacionQueries, convocatoriaQueries } from "@/lib/api/query-keys";
+import { postulacionQueries, convocatoriaQueries, categoriaQueries } from "@/lib/api/query-keys";
 import { formatShortDate, formatPercent } from "@/lib/format";
 
 // opciones de filtro por estado
@@ -60,6 +60,13 @@ const columns: Column<PostulacionAdminListItem>[] = [
     header: "Convocatoria",
     cell: (row) => (
       <span className="text-secondary-600 text-sm">{row.convocatoriaNombre}</span>
+    ),
+  },
+  {
+    key: "categoria",
+    header: "Categoría",
+    cell: (row) => (
+      <span className="text-secondary-600 text-sm">{row.categoriaNombre}</span>
     ),
   },
   {
@@ -150,9 +157,12 @@ function PostulacionesContent() {
       limit: parseAsInteger.withDefault(10),
       estado: parseAsString.withDefault(ALL),
       convocatoriaId: parseAsString.withDefault(ALL),
+      categoriaId: parseAsString.withDefault(ALL),
     },
     { history: "push" },
   );
+
+  const hayConvocatoria = filters.convocatoriaId !== ALL;
 
   // construir params para la API
   const apiParams: Record<string, unknown> = {
@@ -160,7 +170,11 @@ function PostulacionesContent() {
     limit: filters.limit,
   };
   if (filters.estado !== ALL) apiParams.estado = filters.estado;
-  if (filters.convocatoriaId !== ALL) apiParams.convocatoriaId = Number(filters.convocatoriaId);
+  if (hayConvocatoria) apiParams.convocatoriaId = Number(filters.convocatoriaId);
+  // el filtro por categoria solo aplica dentro de una convocatoria elegida
+  if (hayConvocatoria && filters.categoriaId !== ALL) {
+    apiParams.categoriaId = Number(filters.categoriaId);
+  }
 
   // cargar postulaciones
   const { data, isLoading } = useQuery(
@@ -170,13 +184,26 @@ function PostulacionesContent() {
   // cargar convocatorias para el filtro (sin paginacion, solo lista)
   const { data: convocatoriasData } = useQuery(convocatoriaQueries.list());
 
+  // categorias de la convocatoria elegida (para el filtro por categoria). Las
+  // categorias pertenecen a una convocatoria, asi que el filtro solo tiene sentido
+  // cuando ya se eligio una.
+  const { data: categorias } = useQuery({
+    ...categoriaQueries.list(Number(filters.convocatoriaId)),
+    enabled: hayConvocatoria,
+  });
+
   const convocatorias = convocatoriasData?.data ?? [];
   const postulaciones = data?.data ?? [];
   const total = data?.total ?? 0;
 
-  // resetear a pagina 1 cuando cambia un filtro
+  // resetear a pagina 1 cuando cambia un filtro. Al cambiar de convocatoria se
+  // limpia tambien la categoria: la de la convocatoria anterior ya no aplica.
   function updateFilter(key: string, value: string) {
-    setFilters({ [key]: value, page: 1 });
+    if (key === "convocatoriaId") {
+      setFilters({ convocatoriaId: value, categoriaId: ALL, page: 1 });
+    } else {
+      setFilters({ [key]: value, page: 1 });
+    }
   }
 
   return (
@@ -201,6 +228,29 @@ function PostulacionesContent() {
             {convocatorias.map((c: ConvocatoriaResponse) => (
               <SelectItem key={c.id} value={String(c.id)}>
                 {c.nombre}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* filtro por categoria: solo habilitado cuando hay una convocatoria elegida */}
+        <Select
+          value={filters.categoriaId}
+          onValueChange={(v) => updateFilter("categoriaId", v)}
+          disabled={!hayConvocatoria}
+        >
+          <SelectTrigger className="w-full sm:w-56">
+            <SelectValue
+              placeholder={
+                hayConvocatoria ? "Todas las categorías" : "Elige una convocatoria"
+              }
+            />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>Todas las categorías</SelectItem>
+            {(categorias ?? []).map((cat) => (
+              <SelectItem key={cat.id} value={String(cat.id)}>
+                {cat.nombre}
               </SelectItem>
             ))}
           </SelectContent>
@@ -238,7 +288,9 @@ function PostulacionesContent() {
             icon="ph:file-text-duotone"
             title="No hay postulaciones"
             description={
-              filters.estado !== ALL || filters.convocatoriaId !== ALL
+              filters.estado !== ALL ||
+              filters.convocatoriaId !== ALL ||
+              filters.categoriaId !== ALL
                 ? "No hay postulaciones con los filtros seleccionados."
                 : "Aun no se han recibido postulaciones."
             }

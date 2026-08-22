@@ -264,6 +264,7 @@ export class PostulacionRepository {
         .select({
           id: postulacion.id,
           convocatoriaId: postulacion.convocatoriaId,
+          categoriaId: postulacion.categoriaId,
           empresaId: postulacion.empresaId,
           estado: postulacion.estado,
           porcentajeCompletado: postulacion.porcentajeCompletado,
@@ -275,11 +276,13 @@ export class PostulacionRepository {
           updatedAt: postulacion.updatedAt,
           empresaRazonSocial: empresa.razonSocial,
           convocatoriaNombre: convocatoria.nombre,
+          categoriaNombre: categoriaConvocatoria.nombre,
           calificacionesPendientes: califPendientes,
         })
         .from(postulacion)
         .innerJoin(empresa, eq(postulacion.empresaId, empresa.id))
         .innerJoin(convocatoria, eq(postulacion.convocatoriaId, convocatoria.id))
+        .innerJoin(categoriaConvocatoria, eq(postulacion.categoriaId, categoriaConvocatoria.id))
         .where(where)
         .orderBy(desc(postulacion.updatedAt))
         .limit(limit)

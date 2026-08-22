@@ -99,6 +99,7 @@ export interface PostulacionAdminListItem {
   updatedAt: string;
   empresaRazonSocial: string;
   convocatoriaNombre: string;
+  categoriaNombre: string;
   calificacionesPendientes: number;
 }
 
