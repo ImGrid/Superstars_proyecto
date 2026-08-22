@@ -29,7 +29,7 @@ export function parseDuration(value: string): number {
 // estan en @superstars/shared/constants (compartidas con el frontend para
 // que el countdown UI use los mismos valores que el enforcement server-side)
 export { VERIFICACION_EXPIRACION_MINUTOS } from '@superstars/shared';
-import { VERIFICACION_EXPIRACION_MINUTOS } from '@superstars/shared';
+import { VERIFICACION_EXPIRACION_MINUTOS, RolUsuario } from '@superstars/shared';
 
 export const VERIFICACION_EXPIRACION_MS = VERIFICACION_EXPIRACION_MINUTOS * 60 * 1000;
 export const VERIFICACION_MAX_INTENTOS = 3;
@@ -70,3 +70,14 @@ export const MENSAJE_GENERICO_RESEND_RESET =
 
 export const MENSAJE_PASSWORD_RESTABLECIDA =
   'Contraseña restablecida correctamente. Ya puedes iniciar sesión con tu nueva contraseña.';
+
+// Algoritmo de firma del JWT. Se fija explicitamente al firmar Y al verificar
+// para que ningun token con otro algoritmo (ej. "none") sea siquiera evaluado.
+export const JWT_ALGORITHM = 'HS256' as const;
+
+// Roles que se revalidan contra la BD en CADA request, no solo al refrescar.
+// El access token dura 15 minutos: sin esto, un usuario desactivado o con el rol
+// cambiado sigue entrando hasta que el token caduque. Para los roles internos ese
+// retraso es aceptable; para un rol externo que mira datos confidenciales de
+// terceros, no. El costo es una consulta por request y solo la pagan estos roles.
+export const ROLES_VERIFICACION_EN_VIVO: readonly RolUsuario[] = [RolUsuario.OBSERVADOR];

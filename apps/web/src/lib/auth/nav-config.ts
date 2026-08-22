@@ -41,6 +41,12 @@ const navByRole: Record<RolUsuario, NavItem[]> = {
     { label: "Dashboard", href: "/dashboard", icon: "ph:squares-four-duotone" },
     { label: "Mis Evaluaciones", href: "/dashboard/mis-evaluaciones", icon: "ph:clipboard-text-duotone" },
   ],
+
+  // Observador (financiador): un solo destino, el portal de seguimiento. No tiene
+  // dashboard propio: cae directo en el listado de convocatorias en modo consulta.
+  [RolUsuario.OBSERVADOR]: [
+    { label: "Convocatorias", href: "/dashboard/seguimiento", icon: "ph:eye-duotone" },
+  ],
 };
 
 // retorna los items de navegacion para un rol

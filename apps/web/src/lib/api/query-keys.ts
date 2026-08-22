@@ -70,6 +70,18 @@ import {
   getEvaluadorDashboard,
   getProponenteDashboard,
 } from "./dashboard.api";
+import {
+  getSeguimientoResumen,
+  listSeguimientoConvocatorias,
+  getSeguimientoConvocatoria,
+  listSeguimientoCategorias,
+  getSeguimientoFormulario,
+  getSeguimientoRubrica,
+  listSeguimientoDocumentos,
+  listSeguimientoPostulaciones,
+  getSeguimientoPostulacion,
+  getSeguimientoRanking,
+} from "./seguimiento.api";
 
 // --- Auth ---
 
@@ -482,5 +494,73 @@ export const dashboardQueries = {
       queryKey: ["dashboard", "proponente"] as const,
       queryFn: getProponenteDashboard,
       staleTime: 30 * 1000,
+    }),
+};
+
+// --- Seguimiento (rol observador / financiador, solo lectura) ---
+// Namespace propio "seguimiento": no comparte cache con las query-keys de admin
+// porque consumen endpoints distintos (/seguimiento/...) con shapes distintos.
+
+export const seguimientoQueries = {
+  all: () => ["seguimiento"] as const,
+
+  resumen: () =>
+    queryOptions({
+      queryKey: ["seguimiento", "resumen"] as const,
+      queryFn: getSeguimientoResumen,
+    }),
+
+  convocatorias: () =>
+    queryOptions({
+      queryKey: ["seguimiento", "convocatorias", "list"] as const,
+      queryFn: listSeguimientoConvocatorias,
+    }),
+
+  convocatoriaDetail: (convocatoriaId: number) =>
+    queryOptions({
+      queryKey: ["seguimiento", "convocatorias", "detail", convocatoriaId] as const,
+      queryFn: () => getSeguimientoConvocatoria(convocatoriaId),
+    }),
+
+  categorias: (convocatoriaId: number) =>
+    queryOptions({
+      queryKey: ["seguimiento", "convocatorias", "detail", convocatoriaId, "categorias"] as const,
+      queryFn: () => listSeguimientoCategorias(convocatoriaId),
+    }),
+
+  formulario: (convocatoriaId: number, categoriaId: number) =>
+    queryOptions({
+      queryKey: ["seguimiento", "convocatorias", "detail", convocatoriaId, "categorias", categoriaId, "formulario"] as const,
+      queryFn: () => getSeguimientoFormulario(convocatoriaId, categoriaId),
+    }),
+
+  rubrica: (convocatoriaId: number, categoriaId: number) =>
+    queryOptions({
+      queryKey: ["seguimiento", "convocatorias", "detail", convocatoriaId, "categorias", categoriaId, "rubrica"] as const,
+      queryFn: () => getSeguimientoRubrica(convocatoriaId, categoriaId),
+    }),
+
+  documentos: (convocatoriaId: number, categoriaId: number) =>
+    queryOptions({
+      queryKey: ["seguimiento", "convocatorias", "detail", convocatoriaId, "categorias", categoriaId, "documentos"] as const,
+      queryFn: () => listSeguimientoDocumentos(convocatoriaId, categoriaId),
+    }),
+
+  postulaciones: (convocatoriaId: number, categoriaId?: number) =>
+    queryOptions({
+      queryKey: ["seguimiento", "convocatorias", "detail", convocatoriaId, "postulaciones", categoriaId ?? "all-cat"] as const,
+      queryFn: () => listSeguimientoPostulaciones(convocatoriaId, categoriaId),
+    }),
+
+  postulacionDetail: (convocatoriaId: number, postulacionId: number) =>
+    queryOptions({
+      queryKey: ["seguimiento", "convocatorias", "detail", convocatoriaId, "postulaciones", "detail", postulacionId] as const,
+      queryFn: () => getSeguimientoPostulacion(convocatoriaId, postulacionId),
+    }),
+
+  ranking: (convocatoriaId: number, categoriaId: number) =>
+    queryOptions({
+      queryKey: ["seguimiento", "convocatorias", "detail", convocatoriaId, "categorias", categoriaId, "ranking"] as const,
+      queryFn: () => getSeguimientoRanking(convocatoriaId, categoriaId),
     }),
 };

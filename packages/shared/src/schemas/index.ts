@@ -257,3 +257,19 @@ export {
   type ProponenteConvocatoriaAbiertaItem,
   type ProponenteDashboardStats,
 } from './dashboard.schema';
+
+export type {
+  SeguimientoConvocatoriaListItem,
+  SeguimientoConvocatoriaDetalle,
+  SeguimientoCategoria,
+  SeguimientoFormulario,
+  SeguimientoNivel,
+  SeguimientoSubCriterio,
+  SeguimientoCriterio,
+  SeguimientoRubrica,
+  SeguimientoDocumento,
+  SeguimientoPostulacionListItem,
+  SeguimientoPostulacionDetalle,
+  SeguimientoRankingItem,
+  SeguimientoResumen,
+} from './seguimiento.schema';

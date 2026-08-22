@@ -21,6 +21,10 @@ interface FormularioPreviewDialogProps {
   schema: SchemaDefinition;
   // hay cambios en el editor que todavia no se guardaron
   isDirty: boolean;
+  // texto del boton de cierre. El builder del admin viene de un editor ("Volver
+  // al editor"); otros contextos (ej. el portal de seguimiento) solo consultan,
+  // asi que pueden pasar "Volver".
+  textoCerrar?: string;
 }
 
 // Ventana que muestra el formulario tal como lo vera el proponente. El wizard se
@@ -31,6 +35,7 @@ export function FormularioPreviewDialog({
   onOpenChange,
   schema,
   isDirty,
+  textoCerrar = "Volver al editor",
 }: FormularioPreviewDialogProps) {
   const schemaLimpio = useMemo(() => sanitizarSchemaPreview(schema), [schema]);
 
@@ -60,7 +65,7 @@ export function FormularioPreviewDialog({
             onClick={() => onOpenChange(false)}
           >
             <ArrowLeft className="size-4" />
-            Volver al editor
+            {textoCerrar}
           </Button>
         </DialogHeader>
 

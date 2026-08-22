@@ -182,6 +182,13 @@ export const rolConfig: Record<RolUsuario, EstadoConfig> = {
     variant: "outline",
     className: soft.morado,
   },
+  // Financiador externo de solo lectura: gris neutro, no compite con los colores
+  // de accion de los roles internos.
+  [RolUsuario.OBSERVADOR]: {
+    label: "Observador",
+    variant: "outline",
+    className: soft.neutral,
+  },
 };
 
 // helper para obtener config de cualquier estado

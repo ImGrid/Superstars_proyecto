@@ -69,6 +69,7 @@ export class DashboardRepository {
         responsable_convocatoria: sql<number>`count(*) filter (where ${usuario.rol} = 'responsable_convocatoria')`.mapWith(Number),
         evaluador: sql<number>`count(*) filter (where ${usuario.rol} = 'evaluador')`.mapWith(Number),
         proponente: sql<number>`count(*) filter (where ${usuario.rol} = 'proponente')`.mapWith(Number),
+        observador: sql<number>`count(*) filter (where ${usuario.rol} = 'observador')`.mapWith(Number),
       })
       .from(usuario)
       .where(eq(usuario.activo, true));

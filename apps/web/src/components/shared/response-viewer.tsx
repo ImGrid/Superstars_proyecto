@@ -18,6 +18,11 @@ interface ResponseViewerProps {
   archivos: ArchivoResponse[];
   convocatoriaId: number;
   postulacionId: number;
+  // Cuando true, los campos de tipo archivo NO ofrecen descarga y se muestran
+  // como "adjunto no visible": lo usa el portal de seguimiento (observador), que
+  // ve las respuestas de la postulacion pero no los archivos que suben las
+  // empresas. Por defecto false: admin y evaluador ven y descargan los archivos.
+  adjuntosOcultos?: boolean;
 }
 
 // tipos que ocupan ancho completo (contenido largo o complejo)
@@ -35,6 +40,7 @@ export function ResponseViewer({
   archivos,
   convocatoriaId,
   postulacionId,
+  adjuntosOcultos = false,
 }: ResponseViewerProps) {
   if (!schema.secciones.length) {
     return <p className="text-sm text-secondary-400">No hay secciones en el formulario.</p>;
@@ -77,6 +83,7 @@ export function ResponseViewer({
                     archivos={archivos.filter((a) => a.fieldId === campo.id)}
                     convocatoriaId={convocatoriaId}
                     postulacionId={postulacionId}
+                    adjuntosOcultos={adjuntosOcultos}
                     wide={isWideCampo(campo)}
                   />
                 ))}
@@ -97,6 +104,7 @@ const CampoReadonly = memo(function CampoReadonly({
   archivos,
   convocatoriaId,
   postulacionId,
+  adjuntosOcultos,
   wide,
 }: {
   campo: FormField;
@@ -105,6 +113,7 @@ const CampoReadonly = memo(function CampoReadonly({
   archivos: ArchivoResponse[];
   convocatoriaId: number;
   postulacionId: number;
+  adjuntosOcultos: boolean;
   wide: boolean;
 }) {
   const isEmpty = value === undefined || value === null || value === ""
@@ -124,6 +133,7 @@ const CampoReadonly = memo(function CampoReadonly({
           archivos={archivos}
           convocatoriaId={convocatoriaId}
           postulacionId={postulacionId}
+          adjuntosOcultos={adjuntosOcultos}
         />
       </dd>
     </div>
@@ -138,6 +148,7 @@ function FieldValue({
   archivos,
   convocatoriaId,
   postulacionId,
+  adjuntosOcultos,
 }: {
   campo: FormField;
   value: unknown;
@@ -145,6 +156,7 @@ function FieldValue({
   archivos: ArchivoResponse[];
   convocatoriaId: number;
   postulacionId: number;
+  adjuntosOcultos: boolean;
 }) {
   if (value === undefined || value === null || value === "") {
     return <>Sin respuesta</>;
@@ -244,6 +256,20 @@ function FieldValue({
     }
 
     case "archivo": {
+      // En el portal de seguimiento no se exponen los archivos. Se distingue el
+      // caso "la empresa no adjuntó" (value vacío) del caso "adjuntó pero el
+      // financiador no puede verlo", para no dar a entender que faltó un adjunto.
+      if (adjuntosOcultos) {
+        const cantidad = Array.isArray(value) ? value.length : 0;
+        if (cantidad === 0) return <>Sin archivos</>;
+        return (
+          <span className="italic text-secondary-500">
+            {cantidad === 1
+              ? "1 archivo adjunto (no visible en seguimiento)"
+              : `${cantidad} archivos adjuntos (no visibles en seguimiento)`}
+          </span>
+        );
+      }
       if (archivos.length === 0) return <>Sin archivos</>;
       return (
         <div className="space-y-1.5">

@@ -30,7 +30,13 @@ const portalRoutes: RouteRule[] = [
   // evaluador: evaluaciones asignadas
   { path: "/dashboard/mis-evaluaciones", roles: [RolUsuario.EVALUADOR] },
 
-  // dashboard principal: todos los autenticados
+  // observador: portal de seguimiento (solo lectura). El administrador tambien
+  // entra por URL para revisar lo que ve el financiador, aunque no lleva enlace
+  // en su menu. Debe ir ANTES de la regla general /dashboard.
+  { path: "/dashboard/seguimiento", roles: [RolUsuario.OBSERVADOR, RolUsuario.ADMINISTRADOR] },
+
+  // dashboard principal: todos los autenticados MENOS el observador, que no tiene
+  // dashboard propio (cae directo en seguimiento).
   { path: "/dashboard", roles: [RolUsuario.ADMINISTRADOR, RolUsuario.RESPONSABLE_CONVOCATORIA, RolUsuario.PROPONENTE, RolUsuario.EVALUADOR] },
 ];
 
@@ -58,6 +64,9 @@ export function getDefaultRoute(rol: RolUsuario): string {
       return "/dashboard/mis-postulaciones";
     case RolUsuario.EVALUADOR:
       return "/dashboard/mis-evaluaciones";
+    // el observador no tiene dashboard: cae directo en el portal de seguimiento
+    case RolUsuario.OBSERVADOR:
+      return "/dashboard/seguimiento";
     default:
       return "/dashboard";
   }

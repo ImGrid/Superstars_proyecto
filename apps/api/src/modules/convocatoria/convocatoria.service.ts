@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
+  ForbiddenException,
   Inject,
   forwardRef,
 } from '@nestjs/common';
@@ -108,9 +109,14 @@ export class ConvocatoriaService {
       );
     } else if (user.rol === RolUsuario.ADMINISTRADOR) {
       result = await this.convocatoriaRepo.findAll(query);
-    } else {
+    } else if (user.rol === RolUsuario.RESPONSABLE_CONVOCATORIA) {
       // Responsable solo ve las asignadas
       result = await this.convocatoriaRepo.findAllByResponsable(user.id, query);
+    } else {
+      // Lista blanca explicita: un rol no contemplado NO cae en la rama del
+      // responsable ni en una consulta sin filtro. Si aparece un rol nuevo que
+      // deba listar convocatorias, hay que darle su rama a proposito.
+      throw new ForbiddenException('No tienes acceso a las convocatorias');
     }
 
     const totalPages = Math.ceil(result.total / limit);
@@ -432,7 +438,18 @@ export class ConvocatoriaService {
 
   // resumen estadistico de convocatorias en evaluacion/resultados_listos/finalizado
   async getResumenResultados(user: AuthUser) {
-    const usuarioId = user.rol === RolUsuario.RESPONSABLE_CONVOCATORIA ? user.id : undefined;
+    // OJO: usuarioId undefined significa SIN FILTRO (ve todas las convocatorias).
+    // Por eso la decision es lista blanca explicita y no "si no es responsable,
+    // undefined": un rol nuevo no debe heredar la vista completa por descuido.
+    let usuarioId: number | undefined;
+    if (user.rol === RolUsuario.ADMINISTRADOR) {
+      usuarioId = undefined;
+    } else if (user.rol === RolUsuario.RESPONSABLE_CONVOCATORIA) {
+      usuarioId = user.id;
+    } else {
+      throw new ForbiddenException('No tienes acceso al resumen de resultados');
+    }
+
     const rows = await this.convocatoriaRepo.findResumenResultados(usuarioId);
 
     return rows.map(row => ({

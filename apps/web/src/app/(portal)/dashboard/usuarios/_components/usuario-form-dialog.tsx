@@ -47,6 +47,7 @@ const rolLabels: Record<RolUsuario, string> = {
   [RolUsuario.RESPONSABLE_CONVOCATORIA]: "Responsable de convocatoria",
   [RolUsuario.PROPONENTE]: "Proponente",
   [RolUsuario.EVALUADOR]: "Evaluador",
+  [RolUsuario.OBSERVADOR]: "Observador (financiador)",
 };
 
 // schema para el formulario de crear (igual al del backend)

@@ -1,0 +1,22 @@
+-- Rol observador (financiador / veedor externo)
+--
+-- Agrega el valor 'observador' al enum rol_usuario. Es un rol de SOLO LECTURA:
+-- ve el ciclo completo de una convocatoria pero no puede modificar nada.
+-- Lo que NO ve (se resuelve en la capa de aplicacion, no aqui):
+--   * calificaciones individuales de cada jurado (solo el puntaje final)
+--   * archivos subidos por las empresas en sus postulaciones
+--   * documentos de la convocatoria con proposito 'jurado'
+--   * datos de empresa mas alla de la razon social
+--
+-- Se agrega al final del enum: el orden no tiene significado logico para los
+-- roles (no hay jerarquia ni comparaciones por orden en el codigo).
+--
+-- Aditivo y no destructivo. Idempotente: se puede correr dos veces sin error.
+-- Rollback en sql/23_rollback_rol_observador.sql
+-- Verificacion en sql/23_verify_rol_observador.sql
+--
+-- Nota para el despliegue en el VPS: esta migracion no crea tablas ni
+-- secuencias, asi que NO hace falta GRANT para superstars_user. El enum es
+-- un tipo, y los tipos son legibles por cualquier rol de la base.
+
+ALTER TYPE rol_usuario ADD VALUE IF NOT EXISTS 'observador';

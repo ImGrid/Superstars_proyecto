@@ -25,6 +25,7 @@ import { FaqModule } from './modules/faq/faq.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { NotificacionModule } from './modules/notificacion/notificacion.module';
 import { HistoriaExitoModule } from './modules/historia-exito/historia-exito.module';
+import { ObservadorModule } from './modules/observador/observador.module';
 
 @Module({
   imports: [
@@ -99,6 +100,9 @@ import { HistoriaExitoModule } from './modules/historia-exito/historia-exito.mod
 
     // Historias de exito (seccion landing publica)
     HistoriaExitoModule,
+
+    // Portal de seguimiento del financiador (rol observador, solo lectura)
+    ObservadorModule,
 
     // Evaluacion (calificacion de postulaciones por jurados)
     EvaluacionModule,

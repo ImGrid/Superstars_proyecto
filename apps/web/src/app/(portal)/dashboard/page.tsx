@@ -1,5 +1,6 @@
 "use client";
 
+import { redirect } from "next/navigation";
 import { RolUsuario } from "@superstars/shared";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/use-auth";
@@ -33,6 +34,12 @@ export default function DashboardPage() {
   }
   if (user.rol === RolUsuario.EVALUADOR) {
     return <EvaluadorDashboard nombre={user.nombre} />;
+  }
+  // El observador no tiene dashboard: su lugar es el portal de seguimiento. El
+  // proxy ya lo redirige antes de llegar aca; esto es defensa en profundidad para
+  // que nunca vea por error el dashboard del proponente (que ademas le daria 403).
+  if (user.rol === RolUsuario.OBSERVADOR) {
+    redirect("/dashboard/seguimiento");
   }
   return <ProponenteDashboard nombre={user.nombre} />;
 }

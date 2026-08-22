@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   ConflictException,
+  ForbiddenException,
 } from '@nestjs/common';
 import type {
   SavePostulacionDraftDto,
@@ -143,9 +144,19 @@ export class PostulacionService {
   ): Promise<PaginatedResponse<unknown>> {
     const { page, limit, convocatoriaId, categoriaId, empresaId, estado } = query;
 
-    // responsable solo ve postulaciones de sus convocatorias asignadas
-    const responsableUsuarioId =
-      user.rol === RolUsuario.RESPONSABLE_CONVOCATORIA ? user.id : undefined;
+    // OJO: responsableUsuarioId undefined significa SIN FILTRO, o sea todas las
+    // postulaciones de todas las convocatorias. Por eso va lista blanca explicita
+    // y no "si no es responsable, undefined": un rol nuevo que llegara hasta aca
+    // se llevaria el listado completo sin que nadie lo hubiera decidido.
+    let responsableUsuarioId: number | undefined;
+    if (user.rol === RolUsuario.ADMINISTRADOR) {
+      responsableUsuarioId = undefined;
+    } else if (user.rol === RolUsuario.RESPONSABLE_CONVOCATORIA) {
+      // responsable solo ve postulaciones de sus convocatorias asignadas
+      responsableUsuarioId = user.id;
+    } else {
+      throw new ForbiddenException('No tienes acceso al listado de postulaciones');
+    }
 
     const { data, total } = await this.postulacionRepo.findAllAdmin({
       page,

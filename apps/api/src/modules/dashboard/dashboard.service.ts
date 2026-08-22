@@ -128,6 +128,7 @@ export class DashboardService {
         [RolUsuario.RESPONSABLE_CONVOCATORIA]: usuarioStats.responsable_convocatoria,
         [RolUsuario.EVALUADOR]: usuarioStats.evaluador,
         [RolUsuario.PROPONENTE]: usuarioStats.proponente,
+        [RolUsuario.OBSERVADOR]: usuarioStats.observador,
       },
 
       inclusion,

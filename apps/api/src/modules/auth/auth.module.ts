@@ -7,6 +7,7 @@ import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { NotificacionModule } from '../notificacion/notificacion.module';
+import { JWT_ALGORITHM } from './auth.constants';
 
 @Module({
   imports: [
@@ -17,6 +18,8 @@ import { NotificacionModule } from '../notificacion/notificacion.module';
         secret: config.get<string>('jwt.secret'),
         signOptions: {
           expiresIn: config.get<string>('jwt.expiration', '15m') as `${number}${'s' | 'm' | 'h' | 'd'}`,
+          // algoritmo explicito: el guard verifica con este mismo y rechaza el resto
+          algorithm: JWT_ALGORITHM,
         },
       }),
     }),
