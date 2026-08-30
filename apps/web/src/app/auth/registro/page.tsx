@@ -10,6 +10,7 @@ import { useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useRegister } from "@/hooks/use-register";
@@ -123,9 +124,8 @@ function RegistroForm() {
           <Label htmlFor="password" className="text-secondary-700">
             Contraseña
           </Label>
-          <Input
+          <PasswordInput
             id="password"
-            type="password"
             placeholder="Mínimo 8 caracteres"
             autoComplete="new-password"
             aria-invalid={!!errors.password}

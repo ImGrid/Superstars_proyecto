@@ -15,7 +15,7 @@ import {
 } from "@superstars/shared";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import {
   InputOTP,
@@ -230,9 +230,8 @@ function RestablecerPasswordForm() {
             <Label htmlFor="nuevaPassword" className="text-secondary-700">
               Nueva contraseña
             </Label>
-            <Input
+            <PasswordInput
               id="nuevaPassword"
-              type="password"
               placeholder="Mínimo 8 caracteres"
               autoComplete="new-password"
               aria-invalid={!!errors.nuevaPassword}
@@ -250,9 +249,8 @@ function RestablecerPasswordForm() {
             <Label htmlFor="confirmarPassword" className="text-secondary-700">
               Confirma la nueva contraseña
             </Label>
-            <Input
+            <PasswordInput
               id="confirmarPassword"
-              type="password"
               placeholder="Repite la contraseña"
               autoComplete="new-password"
               aria-invalid={!!errors.confirmarPassword}
