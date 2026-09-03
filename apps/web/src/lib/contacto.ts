@@ -5,10 +5,10 @@
 export const CONTACT_EMAIL = "bolivia@fundes.org";
 
 // numero de WhatsApp con codigo de pais de Bolivia (591), sin espacios ni signos
-export const WHATSAPP_NUMERO = "59160520815";
+export const WHATSAPP_NUMERO = "59169932699";
 
 // como se muestra en pantalla
-export const WHATSAPP_DISPLAY = "+591 60520815";
+export const WHATSAPP_DISPLAY = "+591 69932699";
 
 // mensaje con el que se abre la conversacion, para que la persona no empiece
 // de cero y el equipo sepa de donde viene el contacto
