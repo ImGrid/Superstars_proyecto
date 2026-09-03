@@ -19,6 +19,7 @@ const segmentLabels: Record<string, string> = {
   usuarios: "Usuarios",
   convocatorias: "Convocatorias",
   publicaciones: "Publicaciones",
+  reportes: "Reportes",
   "mi-empresa": "Mi Empresa",
   "mis-postulaciones": "Mis Postulaciones",
   "mis-evaluaciones": "Mis Evaluaciones",

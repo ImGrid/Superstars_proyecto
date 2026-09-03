@@ -9,3 +9,4 @@ export * from './publicacion';
 export * from './faq';
 export * from './historia-exito';
 export * from './observador';
+export * from './reporte';

@@ -65,3 +65,12 @@ export {
   CONTACTO_CARGO_MAX,
   DESCRIPCION_MAX_PALABRAS,
 } from './validation-patterns';
+export {
+  ESTADO_CONVOCATORIA_LABEL,
+  ESTADO_POSTULACION_LABEL,
+  ESTADO_PUBLICACION_LABEL,
+  ESTADO_CALIFICACION_LABEL,
+  ROL_LABEL,
+  etiquetaDeEstado,
+  etiquetaDeOpcion,
+} from './estado-labels';

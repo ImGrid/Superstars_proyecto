@@ -26,6 +26,7 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { NotificacionModule } from './modules/notificacion/notificacion.module';
 import { HistoriaExitoModule } from './modules/historia-exito/historia-exito.module';
 import { ObservadorModule } from './modules/observador/observador.module';
+import { ReporteModule } from './modules/reporte/reporte.module';
 
 @Module({
   imports: [
@@ -103,6 +104,7 @@ import { ObservadorModule } from './modules/observador/observador.module';
 
     // Portal de seguimiento del financiador (rol observador, solo lectura)
     ObservadorModule,
+    ReporteModule,
 
     // Evaluacion (calificacion de postulaciones por jurados)
     EvaluacionModule,

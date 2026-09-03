@@ -32,6 +32,13 @@ export const envSchema = z.object({
   SMTP_USER: z.string().email(),
   SMTP_PASSWORD: z.string().min(1),
   SMTP_FROM: z.string().min(1),
+
+  // Ruta al ejecutable de Chrome que genera los PDF de los reportes.
+  // Opcional: si no esta definida, el resto del sistema funciona igual y solo
+  // fallan las descargas en PDF, con un mensaje que lo explica. Va declarada
+  // aqui porque validate() devuelve result.data y descarta las claves que no
+  // esten en el esquema.
+  PUPPETEER_EXECUTABLE_PATH: z.string().min(1).optional(),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

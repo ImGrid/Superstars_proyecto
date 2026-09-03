@@ -10,6 +10,7 @@ import type {
   ListHistoriasExitoQueryDto,
 } from "@superstars/shared";
 import { getMe } from "./auth.api";
+import { getCatalogoReportes } from "./reporte.api";
 import { listUsuarios, getUsuario } from "./usuario.api";
 import { getMyEmpresa, listEmpresas, getEmpresa } from "./empresa.api";
 import {
@@ -562,5 +563,18 @@ export const seguimientoQueries = {
     queryOptions({
       queryKey: ["seguimiento", "convocatorias", "detail", convocatoriaId, "categorias", categoriaId, "ranking"] as const,
       queryFn: () => getSeguimientoRanking(convocatoriaId, categoriaId),
+    }),
+};
+
+// ============== REPORTES (solo administrador) ==============
+
+export const reporteQueries = {
+  // El catalogo cuenta filas contra la base, asi que se deja un margen de
+  // frescura: la pantalla no necesita recontar en cada vuelta a la pestaña.
+  catalogo: () =>
+    queryOptions({
+      queryKey: ["reportes", "catalogo"] as const,
+      queryFn: getCatalogoReportes,
+      staleTime: 60 * 1000,
     }),
 };

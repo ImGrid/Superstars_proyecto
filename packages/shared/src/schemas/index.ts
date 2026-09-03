@@ -273,3 +273,26 @@ export type {
   SeguimientoRankingItem,
   SeguimientoResumen,
 } from './seguimiento.schema';
+
+export {
+  tipoReporteValues,
+  tipoReporteSchema,
+  formatoReporteValues,
+  formatoReporteSchema,
+  etapaEmbudoValues,
+  etapaEmbudoSchema,
+  ETAPA_EMBUDO_LABEL,
+  filtroReporteValues,
+  filtroReporteSchema,
+  reporteQuerySchema,
+} from './reporte.schema';
+
+export type {
+  TipoReporte,
+  FormatoReporte,
+  EtapaEmbudo,
+  FiltroReporte,
+  ReporteQueryDto,
+  ReporteCatalogoItem,
+  ReporteCatalogoResponse,
+} from './reporte.schema';

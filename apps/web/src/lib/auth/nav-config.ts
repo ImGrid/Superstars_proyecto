@@ -16,6 +16,7 @@ const navByRole: Record<RolUsuario, NavItem[]> = {
     { label: "Convocatorias", href: "/dashboard/convocatorias", icon: "ph:trophy-duotone" },
     { label: "Postulaciones", href: "/dashboard/postulaciones", icon: "ph:file-text-duotone" },
     { label: "Resultados", href: "/dashboard/resultados", icon: "ph:chart-line-up-duotone" },
+    { label: "Reportes", href: "/dashboard/reportes", icon: "ph:file-arrow-down-duotone" },
     { label: "Publicaciones", href: "/dashboard/publicaciones", icon: "ph:newspaper-duotone" },
     { label: "Historias de éxito", href: "/dashboard/historias-exito", icon: "ph:sparkle-duotone" },
     { label: "FAQ", href: "/dashboard/faq", icon: "ph:question-duotone" },
