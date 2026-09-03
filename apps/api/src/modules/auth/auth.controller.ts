@@ -38,6 +38,8 @@ import {
   REFRESH_COOKIE_NAME,
   ACCESS_COOKIE_NAME,
   RATE_LIMIT_REGISTER_IP_LIMIT,
+  RATE_LIMIT_FORGOT_IP_LIMIT,
+  RATE_LIMIT_FORGOT_IP_TTL_MS,
   RATE_LIMIT_REGISTER_IP_TTL_MS,
   RATE_LIMIT_REGISTER_EMAIL_HOUR_LIMIT,
   RATE_LIMIT_REGISTER_EMAIL_HOUR_TTL_MS,
@@ -64,7 +66,7 @@ export class AuthController {
 
   // Registro con verificacion por codigo de email.
   // Rate limit triple capa via AuthRateLimitGuard:
-  //   - IP: 3 / hora (typo-tolerante)
+  //   - IP: 10 / hora (tolera que varias personas compartan la misma IP)
   //   - Email hora: 5 / hora (anti subscription bombing)
   //   - Email dia: 10 / dia (cap absoluto que tambien aplica al reenvio)
   // Las tres capas comparten storage; reenvio (/auth/resend-code) cuenta en
@@ -145,20 +147,31 @@ export class AuthController {
     return this.authService.verifyEmail(dto);
   }
 
-  // Solicitud de reset de password. Reusa los mismos throttlers de register
-  // (IP + email/h + email/d) — el envio de correos comparte cap diario para
-  // que no se pueda usar register + forgot-password como dos vectores de
-  // bombing contra la misma victima
+  // Solicitud de reset de password.
+  //
+  // La capa por IP es PROPIA ('forgot-ip'), no la de register. Compartirla fue
+  // un fallo real en produccion: quien acababa de registrarse ya no podia pedir
+  // el codigo para recuperar su contrasena porque las dos acciones gastaban el
+  // mismo cupo, y con la IP mal resuelta detras del proxy el cupo era ademas
+  // compartido por todos los usuarios.
+  //
+  // Las dos capas por EMAIL si se comparten con register a proposito: son las
+  // que impiden usar register + forgot-password como dos vectores de bombing
+  // contra la misma direccion.
   @Public()
   @UseGuards(AuthRateLimitGuard)
   @AuthRateLimit([
     {
-      prefix: 'register-ip',
+      // Capa por IP PROPIA, no la de registro: quien acaba de registrarse tiene
+      // que poder pedir igual el codigo para recuperar su contrasena.
+      prefix: 'forgot-ip',
       by: 'ip',
-      limit: RATE_LIMIT_REGISTER_IP_LIMIT,
-      ttl: RATE_LIMIT_REGISTER_IP_TTL_MS,
+      limit: RATE_LIMIT_FORGOT_IP_LIMIT,
+      ttl: RATE_LIMIT_FORGOT_IP_TTL_MS,
     },
     {
+      // Las capas por email SI se comparten con /register a proposito: topan
+      // cuantos correos se le pueden mandar a una misma direccion.
       prefix: 'register-email-hour',
       by: 'email',
       limit: RATE_LIMIT_REGISTER_EMAIL_HOUR_LIMIT,

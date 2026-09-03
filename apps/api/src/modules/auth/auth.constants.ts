@@ -35,12 +35,32 @@ export const VERIFICACION_EXPIRACION_MS = VERIFICACION_EXPIRACION_MINUTOS * 60 *
 export const VERIFICACION_MAX_INTENTOS = 3;
 
 // Rate limits por IP y por email (consumidos por @AuthRateLimit en controller)
-export const RATE_LIMIT_REGISTER_IP_LIMIT = 3;
+//
+// El limite por IP se subio de 3 a 10 por hora tras un incidente en produccion:
+// varias personas de una misma oficina o detras del mismo operador movil
+// comparten IP publica, y con 3 por hora la tercera quedaba fuera. El freno
+// real contra el abuso son las capas por email de aqui abajo, que ademas topan
+// cuantos correos se le pueden mandar a una misma direccion.
+export const RATE_LIMIT_REGISTER_IP_LIMIT = 10;
 export const RATE_LIMIT_REGISTER_IP_TTL_MS = 3600000; // 1 hora
 export const RATE_LIMIT_REGISTER_EMAIL_HOUR_LIMIT = 5;
 export const RATE_LIMIT_REGISTER_EMAIL_HOUR_TTL_MS = 3600000;
 export const RATE_LIMIT_REGISTER_EMAIL_DAY_LIMIT = 10;
 export const RATE_LIMIT_REGISTER_EMAIL_DAY_TTL_MS = 86400000; // 24 horas
+
+// Recuperacion de contrasena: capa por IP PROPIA, separada de la de registro.
+//
+// Antes compartia el prefijo 'register-ip' con /register, y eso significaba que
+// quien acababa de registrarse ya no podia pedir el codigo para recuperar su
+// contrasena: las dos acciones gastaban el mismo cupo. Son cosas distintas y
+// tienen que contarse por separado.
+//
+// Las capas por EMAIL si se siguen compartiendo con /register a proposito: eso
+// es lo que impide que a una misma direccion se le manden decenas de correos
+// (subscription bombing). Separar tambien eso abriria ese agujero.
+export const RATE_LIMIT_FORGOT_IP_LIMIT = 10;
+export const RATE_LIMIT_FORGOT_IP_TTL_MS = 3600000; // 1 hora
+
 export const RATE_LIMIT_VERIFY_IP_LIMIT = 5;
 export const RATE_LIMIT_VERIFY_IP_TTL_MS = 60000; // 1 minuto
 

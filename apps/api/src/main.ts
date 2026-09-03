@@ -1,15 +1,33 @@
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const config = app.get(ConfigService);
 
   const port = config.get<number>('app.port', 3000);
   const isProduction = config.get<string>('app.nodeEnv') === 'production';
+
+  // 0. Confiar en el proxy local (nginx) para resolver la IP del cliente.
+  //
+  // En produccion nginx corre en la misma maquina y reenvia a localhost con las
+  // cabeceras X-Real-IP y X-Forwarded-For. Sin esto, Express las ignora y req.ip
+  // vale 127.0.0.1 para TODAS las peticiones, con dos consecuencias reales:
+  //   * la capa por IP del limite de intentos de acceso (AuthRateLimitGuard) y
+  //     el limite global pasan a ser compartidos por todo el mundo: diez
+  //     intentos fallidos de cualquiera bloquean al resto;
+  //   * la auditoria de descargas de reportes guarda la IP de nginx en vez de
+  //     la de quien descargo, y deja de servir para rastrear una filtracion.
+  //
+  // Se confia SOLO en loopback, no en cualquier cliente: con 'trust proxy' en
+  // true, quien alcanzara el puerto del API directamente podria falsear su IP
+  // mandando su propia cabecera X-Forwarded-For. El cortafuegos del VPS solo
+  // expone 22, 80, 443 y 2224, asi que la unica via es el proxy local.
+  app.set('trust proxy', 'loopback');
 
   // 1. Helmet (PRIMERO - headers de seguridad)
   app.use(
