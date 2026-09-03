@@ -48,6 +48,14 @@ async function bootstrap() {
       .map((o) => o.trim()),
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    // El navegador solo deja leer unas pocas cabeceras de una respuesta que
+    // viene de otro origen. Content-Disposition trae el nombre del archivo en
+    // las descargas (documentos, archivos de postulacion, reportes); sin
+    // exponerla, el codigo del frontend no puede leerla y tiene que inventar
+    // un nombre. En produccion el sitio y el API comparten dominio y no se
+    // nota, pero en desarrollo, o si algun dia el API vive en otro dominio,
+    // los archivos se descargarian con un nombre generico.
+    exposedHeaders: ['Content-Disposition'],
     maxAge: 86400,
   });
 
