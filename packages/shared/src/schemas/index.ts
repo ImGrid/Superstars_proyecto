@@ -88,6 +88,7 @@ export {
   variantesInformativo,
   varianteInformativoSchema,
   esCampoDeDato,
+  campoVisible,
   type TipoCampoFormulario,
   type FormField,
   type Seccion,

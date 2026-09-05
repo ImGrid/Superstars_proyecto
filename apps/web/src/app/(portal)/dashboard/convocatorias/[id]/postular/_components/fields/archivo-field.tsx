@@ -225,13 +225,13 @@ export const ArchivoField = memo(function ArchivoField({
               )}
 
               <p className="mt-1 text-xs text-secondary-400">
-                Formatos: {tiposPermitidos.join(", ")} | Max: {maxTamanoMb} MB |
+                Formatos: {tiposPermitidos.join(", ")} | Máx: {maxTamanoMb} MB |
                 {archivosList.length}/{maxArchivos} archivos
               </p>
             </div>
           ) : (
             <p className="text-xs text-secondary-400">
-              Limite de archivos alcanzado ({maxArchivos})
+              Límite de archivos alcanzado ({maxArchivos})
             </p>
           )}
 

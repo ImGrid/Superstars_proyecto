@@ -306,7 +306,8 @@ export class PostulacionService {
     data: Record<string, unknown>,
     mode: 'draft' | 'submit',
   ): Record<string, unknown> {
-    const validator = buildResponseSchema(schema, mode);
+    // se le pasan los datos para que sepa que campos estan escondidos
+    const validator = buildResponseSchema(schema, mode, data);
     const result = validator.safeParse(data);
 
     if (!result.success) {

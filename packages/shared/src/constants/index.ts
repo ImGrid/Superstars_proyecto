@@ -27,6 +27,13 @@ export {
   type CategoriaDefault,
 } from './categorias-default';
 export {
+  ARCHIVO_POSTULACION_MAX_MB,
+  ARCHIVO_POSTULACION_MAX_BYTES,
+  VIDEO_PRESENTACION_FORMATOS,
+  VIDEO_FORMATOS_REPRODUCIBLES,
+  VIDEO_PRESENTACION_MAX_MB,
+} from './archivo-postulacion';
+export {
   OPCIONES_TIPO_EMPRESA,
   OPCIONES_NUMERO_SOCIOS,
   OPCIONES_RUBRO,

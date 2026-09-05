@@ -14,10 +14,16 @@ const apiClient = axios.create({
 // instancia para transferir archivos (subidas y descargas). Es igual a apiClient
 // salvo por el limite de tiempo: mover varios MB por una conexion lenta tarda
 // mucho mas de 15s y cortar ahi cancela transferencias que iban bien.
-// El techo de 120s coincide con el margen que da nginx en el VPS.
+//
+// El limite es absoluto: axios corta a los N ms aunque la transferencia vaya
+// avanzando bien. Con el techo anterior de 120s, subir el maximo permitido
+// exigia unos 7 Mbps sostenidos; por debajo de eso la subida moria siempre al
+// final, que es el peor momento posible. Con 15 minutos entra el caso lento
+// (unos 0,9 Mbps para 100 MB), y la barra de progreso ya le muestra al usuario
+// que la cosa avanza en vez de dejarlo mirando un spinner mudo.
 const apiFileClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
-  timeout: 120_000,
+  timeout: 900_000,
   withCredentials: true,
   headers: {
     "X-Requested-With": "XMLHttpRequest",

@@ -4,12 +4,12 @@ import { memo } from "react";
 import { toast } from "sonner";
 import { Download, FileIcon, ExternalLink } from "lucide-react";
 import type { SchemaDefinition, FormField, ArchivoResponse } from "@superstars/shared";
-import { esCampoDeDato } from "@superstars/shared";
+import { esCampoDeDato, campoVisible, VIDEO_FORMATOS_REPRODUCIBLES } from "@superstars/shared";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatFileSize } from "@/lib/format";
-import { downloadArchivo } from "@/lib/api/archivo.api";
+import { downloadArchivo, verArchivoUrl } from "@/lib/api/archivo.api";
 import { mensajeErrorDescarga } from "@/lib/api/error-archivo";
 
 interface ResponseViewerProps {
@@ -63,8 +63,12 @@ export function ResponseViewer({
       </TabsList>
 
       {schema.secciones.map((sec) => {
-        // los bloques informativos no son respuestas: se omiten del detalle
-        const camposDato = sec.campos.filter(esCampoDeDato);
+        // los bloques informativos no son respuestas: se omiten del detalle.
+        // los campos escondidos por su condicion tampoco se muestran: el
+        // postulante no llego a verlos, asi que no son una respuesta suya.
+        const camposDato = sec.campos.filter(
+          (campo) => esCampoDeDato(campo) && campoVisible(campo, responseData),
+        );
         return (
           <TabsContent key={sec.id} value={sec.id} className="pt-4">
             {sec.descripcion && (
@@ -300,7 +304,15 @@ function FieldValue({
   }
 }
 
-// item de archivo con boton de descarga
+// si el navegador puede reproducir este archivo dentro de la pagina
+function esVideo(nombre: string): boolean {
+  const enMinusculas = nombre.toLowerCase();
+  return VIDEO_FORMATOS_REPRODUCIBLES.some((ext) => enMinusculas.endsWith(ext));
+}
+
+// item de archivo con boton de descarga. Si es un video, ademas se puede ver
+// aqui mismo: el jurado tendria que bajarse 100 MB por postulacion solo para
+// mirarlo. Los controles de pantalla completa y avance los pone el navegador.
 function ArchivoItem({
   archivo,
   convocatoriaId,
@@ -327,13 +339,35 @@ function ArchivoItem({
   };
 
   return (
-    <div className="flex items-center gap-2 rounded-md border bg-secondary-50/50 px-3 py-2">
-      <FileIcon className="size-4 shrink-0 text-secondary-400" />
-      <span className="flex-1 truncate text-sm text-secondary-800">{archivo.nombreOriginal}</span>
-      <span className="text-xs text-secondary-400 shrink-0">{formatFileSize(archivo.tamanoBytes)}</span>
-      <Button variant="ghost" size="sm" className="size-7 shrink-0" onClick={handleDownload}>
-        <Download className="size-3.5" />
-      </Button>
+    <div className="space-y-2">
+      {esVideo(archivo.nombreOriginal) && (
+        <video
+          controls
+          preload="metadata"
+          // en desarrollo el sitio y el API estan en puertos distintos: sin
+          // esto el navegador pide el video sin la cookie de sesion y falla
+          crossOrigin="use-credentials"
+          className="w-full max-w-2xl rounded-md border bg-black"
+          src={verArchivoUrl(convocatoriaId, postulacionId, archivo.id)}
+        >
+          Tu navegador no puede reproducir este video. Descárgalo con el botón
+          de abajo para verlo.
+        </video>
+      )}
+      <div className="flex items-center gap-2 rounded-md border bg-secondary-50/50 px-3 py-2">
+        <FileIcon className="size-4 shrink-0 text-secondary-400" />
+        <span className="flex-1 truncate text-sm text-secondary-800">{archivo.nombreOriginal}</span>
+        <span className="text-xs text-secondary-400 shrink-0">{formatFileSize(archivo.tamanoBytes)}</span>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="size-7 shrink-0"
+          title="Descargar"
+          onClick={handleDownload}
+        >
+          <Download className="size-3.5" />
+        </Button>
+      </div>
     </div>
   );
 }

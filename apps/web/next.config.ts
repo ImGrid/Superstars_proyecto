@@ -47,6 +47,11 @@ const nextConfig: NextConfig = {
               "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
               "style-src 'self' 'unsafe-inline'",
               `img-src 'self' data: blob: ${apiOrigin}`,
+              // El video de la postulacion lo sirve el API. En produccion
+              // comparte dominio con el sitio, pero en desarrollo esta en otro
+              // puerto y sin esto el navegador lo bloquea: "Loading media from
+              // ... violates ... default-src 'self'".
+              `media-src 'self' blob: ${apiOrigin}`,
               "font-src 'self'",
               // Iconify balancea entre sus 3 CDNs oficiales; hay que permitir los 3
               // o algunos iconos fallan por CSP (api.iconify.design solo no alcanza).

@@ -29,7 +29,7 @@ import { submitPostulacion } from "@/lib/api/postulacion.api";
 import { useAuth } from "@/hooks/use-auth";
 import { StepperHeader } from "./_components/stepper-header";
 import { StepperFooter } from "./_components/stepper-footer";
-import { CampoRenderer } from "./_components/campo-renderer";
+import { CampoCondicional } from "./_components/campo-condicional";
 import { ReviewStep } from "./_components/review-step";
 import { useDraftSave } from "./_hooks/use-draft-save";
 import { buildAutoFilledDefaults } from "./_hooks/use-auto-fill";
@@ -449,9 +449,10 @@ function PostularFormContent({
 
                 {/* campos de la seccion actual */}
                 {secciones[currentStep].campos
+                  .slice()
                   .sort((a, b) => a.orden - b.orden)
                   .map((campo) => (
-                    <CampoRenderer
+                    <CampoCondicional
                       key={campo.id}
                       campo={campo}
                       form={form}

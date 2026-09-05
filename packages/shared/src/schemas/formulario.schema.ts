@@ -46,6 +46,18 @@ const autoRellenoSchema = z.object({
   campo: z.string().min(1),
 });
 
+// Visibilidad condicional: el campo solo se muestra si otro campo del mismo
+// formulario tiene cierto valor. Nacio para el video: se preguntaba "¿tiene una
+// presentacion o video?" y el recuadro para subirlo salia igual respondiera que
+// si o que no, con lo que la pregunta no servia para nada.
+// Un campo escondido no se pide, no se valida y no cuenta para el 100%.
+const mostrarSiSchema = z.object({
+  // id del campo del que depende
+  campo: z.string().min(1),
+  // valor que debe tener ese campo para que este se muestre
+  igual: z.union([z.string(), z.number(), z.boolean()]),
+});
+
 // Propiedades comunes a todos los campos
 const campoBase = {
   id: z.string().min(1),
@@ -57,6 +69,8 @@ const campoBase = {
   fijo: z.boolean().default(false),
   // Auto-relleno desde BD
   autoRelleno: autoRellenoSchema.optional(),
+  // Si esta presente, el campo solo se muestra cuando se cumple la condicion
+  mostrarSi: mostrarSiSchema.optional(),
 };
 
 // --- Variantes por tipo (discriminated union) ---
@@ -244,6 +258,20 @@ export type VarianteInformativo = z.infer<typeof varianteInformativoSchema>;
 // genera clave en response_data, no valida y no cuenta para la completitud.
 export function esCampoDeDato(campo: FormField): boolean {
   return campo.tipo !== 'informativo';
+}
+
+// Decide si un campo se muestra, segun las respuestas actuales del formulario.
+// Fuente unica de verdad: la usan el formulario del postulante, el paso de
+// revision, el validador de respuestas, el calculo de % completado y el visor
+// de solo lectura. Si los cuatro no coinciden, el postulante puede quedar
+// atrapado en un campo que no ve.
+// Un campo sin `mostrarSi` se muestra siempre.
+export function campoVisible(
+  campo: FormField,
+  respuestas: Record<string, unknown>,
+): boolean {
+  if (!campo.mostrarSi) return true;
+  return respuestas[campo.mostrarSi.campo] === campo.mostrarSi.igual;
 }
 
 // GET /convocatorias/:convocatoriaId/categorias/:categoriaId/formulario, POST, PUT

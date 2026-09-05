@@ -8,6 +8,8 @@ dist/
 
 # Archivos subidos (storage local)
 uploads/
+# Temporales de una subida en curso
+uploads-tmp/
 
 # Documentacion interna (no es parte del codigo)
 docs/

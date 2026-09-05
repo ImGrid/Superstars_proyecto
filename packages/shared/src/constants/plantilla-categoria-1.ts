@@ -5,6 +5,10 @@
 import type { SchemaDefinition, FormField, Seccion } from '../schemas/formulario.schema';
 import { EDAD_MINIMA_REPRESENTANTE, EDAD_MAXIMA_REPRESENTANTE } from './validation-patterns';
 import {
+  VIDEO_PRESENTACION_FORMATOS,
+  VIDEO_PRESENTACION_MAX_MB,
+} from './archivo-postulacion';
+import {
   OPCIONES_GENERO,
   OPCIONES_TIPO_EMPRESA,
   OPCIONES_NUMERO_SOCIOS,
@@ -162,6 +166,9 @@ const camposEmpresa: FormField[] = [
   { id: 'empresa_red_tiktok', tipo: 'texto_url', etiqueta: 'TikTok (indique la URL)', requerido: false, orden: 32, fijo: true },
   { id: 'empresa_red_instagram', tipo: 'texto_url', etiqueta: 'Instagram (indique la URL)', requerido: false, orden: 33, fijo: true },
   { id: 'empresa_tiene_video', tipo: 'si_no', etiqueta: '¿Tiene una presentación o video que le gustaría compartir?', requerido: false, orden: 34, fijo: true, labelSi: 'Sí', labelNo: 'No' },
+  // La pregunta de arriba existia sin este campo: quien respondia que si no
+  // tenia donde subir nada. Opcional, igual que en la categoria 2.
+  { id: 'empresa_video_archivo', tipo: 'archivo', etiqueta: 'Suba el video o presentación', requerido: false, orden: 35, fijo: true, tiposPermitidos: [...VIDEO_PRESENTACION_FORMATOS], maxTamanoMb: VIDEO_PRESENTACION_MAX_MB, maxArchivos: 1, mostrarSi: { campo: 'empresa_tiene_video', igual: true } },
 ];
 
 // === SECCION D — Propuesta o Proyecto de Triple Impacto (Q30-34) ===

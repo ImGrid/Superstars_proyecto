@@ -1,14 +1,19 @@
 import { z, type ZodTypeAny } from 'zod';
 import type { SchemaDefinition, FormField } from '../schemas/formulario.schema';
-import { esCampoDeDato } from '../schemas/formulario.schema';
+import { esCampoDeDato, campoVisible } from '../schemas/formulario.schema';
 import { countWords } from './word-count';
 
 export type ValidationMode = 'draft' | 'submit';
 
-// Genera un schema Zod dinamico a partir del schema_definition del formulario
+// Genera un schema Zod dinamico a partir del schema_definition del formulario.
+// `respuestas` son los datos que se estan validando: hacen falta para saber que
+// campos estan escondidos por su condicion. Un campo escondido nunca se exige,
+// aunque este marcado como requerido; si no, el postulante no podria enviar por
+// culpa de un campo que su pantalla ni siquiera muestra.
 export function buildResponseSchema(
   schema: SchemaDefinition,
   mode: ValidationMode,
+  respuestas: Record<string, unknown> = {},
 ): z.ZodObject<Record<string, ZodTypeAny>> {
   const shape: Record<string, ZodTypeAny> = {};
 
@@ -21,8 +26,10 @@ export function buildResponseSchema(
 
     let fieldSchema = buildFieldValidator(campo, mode);
 
-    // Draft: todo opcional (guardar parcial). Submit: solo no-requeridos opcionales
-    if (mode === 'draft' || !campo.requerido) {
+    // Draft: todo opcional (guardar parcial). Submit: solo no-requeridos opcionales.
+    // Un campo escondido por su condicion se trata como no requerido.
+    const exigido = campo.requerido && campoVisible(campo, respuestas);
+    if (mode === 'draft' || !exigido) {
       fieldSchema = fieldSchema.optional().nullable() as unknown as ZodTypeAny;
     }
 

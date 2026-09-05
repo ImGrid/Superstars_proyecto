@@ -8,8 +8,13 @@ import {
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { extname } from 'path';
+import { unlink } from 'fs/promises';
 import type { SchemaDefinition, FormField } from '@superstars/shared';
 import { EstadoPostulacion } from '@superstars/shared';
+import {
+  mimeSeguroDesdeExtension,
+  esReproducible,
+} from '../../common/constants/archivo.constants';
 import { ArchivoRepository } from './archivo.repository';
 import { PostulacionRepository } from '../postulacion/postulacion.repository';
 import { FormularioService } from '../formulario/formulario.service';
@@ -38,60 +43,76 @@ export class ArchivoService {
     @Inject(STORAGE_SERVICE) private readonly storage: StorageService,
   ) {}
 
-  // Subir archivo para un campo del formulario
+  // Subir archivo para un campo del formulario.
+  // `path` es el temporal que dejo multer en disco. Si algo falla despues, ese
+  // temporal hay que borrarlo o se acumula basura de 100 MB por intento fallido.
   async upload(
     postulacionId: number,
     userId: number,
     fieldId: string,
-    file: { originalname: string; mimetype: string; size: number; buffer: Buffer },
+    file: { originalname: string; mimetype: string; size: number; path: string },
   ) {
-    const post = await this.getPostulacionOrFail(postulacionId);
-    await this.verificarPropietario(post.empresaId, userId);
-    this.verificarEditable(post.estado);
+    let temporalMovido = false;
+    try {
+      const post = await this.getPostulacionOrFail(postulacionId);
+      await this.verificarPropietario(post.empresaId, userId);
+      this.verificarEditable(post.estado);
 
-    // Buscar campo en el schema del formulario de la categoria de la postulacion
-    const formulario = await this.formularioService.getByCategoriaId(post.categoriaId);
-    const schemaDef = formulario.schemaDefinition as SchemaDefinition;
-    const campo = this.findArchivoCampo(schemaDef, fieldId);
+      // Buscar campo en el schema del formulario de la categoria de la postulacion
+      const formulario = await this.formularioService.getByCategoriaId(post.categoriaId);
+      const schemaDef = formulario.schemaDefinition as SchemaDefinition;
+      const campo = this.findArchivoCampo(schemaDef, fieldId);
 
-    // Validar tipo MIME contra tiposPermitidos del campo
-    const ext = extname(file.originalname).toLowerCase();
-    if (!campo.tiposPermitidos.some(t => t.toLowerCase() === ext)) {
-      throw new BadRequestException(
-        `Tipo de archivo "${ext}" no permitido. Permitidos: ${campo.tiposPermitidos.join(', ')}`,
-      );
+      // Validar tipo MIME contra tiposPermitidos del campo
+      const ext = extname(file.originalname).toLowerCase();
+      if (!campo.tiposPermitidos.some(t => t.toLowerCase() === ext)) {
+        throw new BadRequestException(
+          `Tipo de archivo "${ext}" no permitido. Permitidos: ${campo.tiposPermitidos.join(', ')}`,
+        );
+      }
+
+      // Validar tamaño
+      const maxBytes = campo.maxTamanoMb * 1024 * 1024;
+      if (file.size > maxBytes) {
+        throw new BadRequestException(
+          `El archivo excede el tamaño máximo de ${campo.maxTamanoMb} MB`,
+        );
+      }
+
+      // Validar cantidad máxima de archivos para este campo
+      const currentCount = await this.archivoRepo.countByPostulacionAndField(postulacionId, fieldId);
+      if (currentCount >= campo.maxArchivos) {
+        throw new ConflictException(
+          `Ya se alcanzó el máximo de ${campo.maxArchivos} archivo(s) para este campo`,
+        );
+      }
+
+      // Mover el temporal a su sitio definitivo (rename, no copia el contenido)
+      const uuid = randomUUID();
+      const storageKey = `postulaciones/${postulacionId}/${uuid}${ext}`;
+      await this.storage.uploadFromPath(storageKey, file.path);
+      temporalMovido = true;
+
+      try {
+        // Crear registro en BD
+        return await this.archivoRepo.create({
+          postulacionId,
+          fieldId,
+          nombreOriginal: file.originalname,
+          storageKey,
+          mimeType: file.mimetype,
+          tamanoBytes: file.size,
+        });
+      } catch (err) {
+        // Sin fila en la BD el archivo es inalcanzable: no dejarlo ocupando disco
+        await this.storage.delete(storageKey).catch(() => undefined);
+        throw err;
+      }
+    } finally {
+      if (!temporalMovido) {
+        await unlink(file.path).catch(() => undefined);
+      }
     }
-
-    // Validar tamaño
-    const maxBytes = campo.maxTamanoMb * 1024 * 1024;
-    if (file.size > maxBytes) {
-      throw new BadRequestException(
-        `El archivo excede el tamaño máximo de ${campo.maxTamanoMb} MB`,
-      );
-    }
-
-    // Validar cantidad máxima de archivos para este campo
-    const currentCount = await this.archivoRepo.countByPostulacionAndField(postulacionId, fieldId);
-    if (currentCount >= campo.maxArchivos) {
-      throw new ConflictException(
-        `Ya se alcanzó el máximo de ${campo.maxArchivos} archivo(s) para este campo`,
-      );
-    }
-
-    // Generar storage key y guardar archivo
-    const uuid = randomUUID();
-    const storageKey = `postulaciones/${postulacionId}/${uuid}${ext}`;
-    await this.storage.upload(storageKey, file.buffer);
-
-    // Crear registro en BD
-    return this.archivoRepo.create({
-      postulacionId,
-      fieldId,
-      nombreOriginal: file.originalname,
-      storageKey,
-      mimeType: file.mimetype,
-      tamanoBytes: file.size,
-    });
   }
 
   // Listar archivos de una postulacion
@@ -112,8 +133,13 @@ export class ArchivoService {
     return this.archivoRepo.findAllByPostulacionId(postulacionId);
   }
 
-  // Descargar archivo
-  async download(
+  // Autoriza el acceso a un archivo y devuelve lo necesario para enviarlo.
+  // Lo usan la descarga y la reproduccion en pantalla: las dos comprueban lo
+  // mismo, solo cambia como se entrega despues.
+  //
+  // No devuelve el contenido: un video de 100 MB no cabe comodo en memoria y
+  // ademas hay que poder mandar solo el trozo que pide el navegador.
+  async obtenerParaEnvio(
     convocatoriaId: number,
     postulacionId: number,
     archivoId: number,
@@ -137,8 +163,30 @@ export class ArchivoService {
       await this.verificarAccesoEvaluador(postulacionId, userId);
     }
 
-    const buffer = await this.storage.download(archivo.storageKey);
-    return { buffer, mimeType: archivo.mimeType, nombreOriginal: archivo.nombreOriginal };
+    let size: number;
+    try {
+      ({ size } = await this.storage.stat(archivo.storageKey));
+    } catch {
+      // fila en la BD sin archivo en disco
+      throw new NotFoundException('Archivo no encontrado');
+    }
+
+    const ext = extname(archivo.storageKey).toLowerCase();
+    return {
+      storageKey: archivo.storageKey,
+      nombreOriginal: archivo.nombreOriginal,
+      // el tipo se decide por la extension ya validada, NUNCA con el valor que
+      // declaro el navegador de quien subio (ver archivo.constants)
+      mimeType: mimeSeguroDesdeExtension(ext),
+      reproducible: esReproducible(ext),
+      size,
+    };
+  }
+
+  // Abre el archivo para enviarlo por partes. El controlador ya autorizo el
+  // acceso con obtenerParaEnvio; esto es solo el acceso al disco.
+  abrirFlujo(storageKey: string, rango?: { inicio: number; fin: number }) {
+    return this.storage.abrirFlujo(storageKey, rango);
   }
 
   // Eliminar archivo
